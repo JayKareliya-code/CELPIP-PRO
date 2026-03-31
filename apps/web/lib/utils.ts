@@ -1,0 +1,53 @@
+import { type ClassValue, clsx } from "clsx";
+import { twMerge } from "tailwind-merge";
+
+/**
+ * Merges Tailwind class names, resolving conflicts correctly.
+ * Use this everywhere instead of string concatenation.
+ */
+export function cn(...inputs: ClassValue[]): string {
+  return twMerge(clsx(inputs));
+}
+
+/**
+ * Formats seconds into MM:SS display string.
+ * e.g. 90 → "1:30"
+ */
+export function formatTime(totalSeconds: number): string {
+  const mins = Math.floor(totalSeconds / 60);
+  const secs = totalSeconds % 60;
+  return `${mins}:${String(secs).padStart(2, "0")}`;
+}
+
+/**
+ * Counts words in a string. Returns 0 for empty or whitespace-only input.
+ */
+export function countWords(text: string): number {
+  const trimmed = text.trim();
+  if (!trimmed) return 0;
+  return trimmed.split(/\s+/).length;
+}
+
+/**
+ * Returns the band colour class based on score (1–12 CELPIP scale).
+ */
+export function getBandColourClass(band: number): string {
+  if (band >= 9) return "band-high";
+  if (band >= 6) return "band-mid";
+  return "band-low";
+}
+
+/**
+ * Returns a friendly time-ago string.
+ * e.g. "2 hours ago", "Yesterday"
+ */
+export function timeAgo(dateString: string): string {
+  const date = new Date(dateString);
+  const now  = new Date();
+  const diff = Math.floor((now.getTime() - date.getTime()) / 1000);
+  if (diff < 60)     return "Just now";
+  if (diff < 3600)   return `${Math.floor(diff / 60)}m ago`;
+  if (diff < 86400)  return `${Math.floor(diff / 3600)}h ago`;
+  if (diff < 172800) return "Yesterday";
+  return date.toLocaleDateString("en-CA", { month: "short", day: "numeric" });
+}

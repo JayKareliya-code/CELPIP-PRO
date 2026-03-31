@@ -1,0 +1,556 @@
+# CELPIP Platform — Production-Grade Implementation Plan
+
+A full-stack, scalable, AI-powered CELPIP exam practice platform built for production from day one.  
+Stack: **Next.js 14 · FastAPI · PostgreSQL · Redis · Celery · S3 · Stripe · Clerk**
+
+---
+
+## Architecture Overview
+
+```
+┌─────────────────────────────────────────────────────────────────────┐
+│                        CELPIP Platform                              │
+│                                                                     │
+│   Next.js 14 (Vercel)                                               │
+│   ├── App Router + TypeScript                                       │
+│   ├── Tailwind + shadcn/ui                                          │
+│   └── React Query (SWR for polling)                                 │
+│              │  HTTPS / REST                                        │
+│   FastAPI (API Service)                                             │
+│   ├── Auth middleware (Clerk JWT)                                   │
+│   ├── Pydantic v2 schemas                                           │
+│   ├── SQLAlchemy 2.0 async (asyncpg)                                │
+│   └── Publishes jobs → Redis                                        │
+│              │                                                      │
+│   PostgreSQL (Managed)   Redis (Managed)                            │
+│              │                │                                     │
+│   Celery Workers                                                    │
+│   ├── speaking_worker: STT → Rubric LLM → Write results            │
+│   ├── writing_worker:  Rubric LLM → Write results                  │
+│   └── report_worker:   Builds user-facing feedback HTML             │
+│              │                                                      │
+│   AI Providers (APIs)                                               │
+│   ├── OpenAI Whisper (STT)                                          │
+│   └── GPT-4o / Gemini 1.5 (Rubric Scoring + Feedback)              │
+│              │                                                      │
+│   S3-Compatible Storage                                             │
+│   └── Speaking audio files (pre-signed URL upload)                 │
+│                                                                     │
+│   Stripe → Webhook Handler (FastAPI route)                          │
+└─────────────────────────────────────────────────────────────────────┘
+```
+
+---
+
+## Repository Monorepo Structure
+
+```
+celpip-platform/
+├── apps/
+│   ├── web/                    # Next.js 14 App Router
+│   │   ├── app/
+│   │   │   ├── (auth)/         # Clerk auth pages
+│   │   │   ├── dashboard/
+│   │   │   ├── speaking/[task]/
+│   │   │   ├── writing/[task]/
+│   │   │   ├── history/
+│   │   │   ├── billing/
+│   │   │   └── admin/          # Lightweight CMS (prompt management)
+│   │   ├── components/
+│   │   ├── lib/                # API client, types, hooks
+│   │   └── public/
+│   └── api/                    # FastAPI monolith
+│       ├── alembic/            # DB migrations
+│       ├── app/
+│       │   ├── api/            # Route modules
+│       │   ├── core/           # Config, security, deps
+│       │   ├── models/         # SQLAlchemy ORM models
+│       │   ├── schemas/        # Pydantic v2 schemas
+│       │   ├── services/       # Business logic
+│       │   ├── workers/        # Celery task definitions
+│       │   └── main.py
+│       ├── tests/
+│       ├── Dockerfile
+│       └── requirements.txt
+├── infra/                      # Terraform / Docker Compose
+├── .github/                    # CI/CD workflows
+└── docs/                       # Architecture docs
+```
+
+---
+
+## Database Schema (Core Entities)
+
+```sql
+users                    -- Clerk user_id as PK, plan, streak
+subscriptions            -- stripe_sub_id, plan, status, current_period_end
+target_scores            -- user_id, skill (speaking/writing), target_band
+speaking_prompts         -- task_number, prompt_text, sample_response, prep_secs, response_secs
+writing_prompts          -- task_number, prompt_text, sample_response, min_words, time_limit_secs
+attempts                 -- id, user_id, type (speaking/writing), prompt_id, status, created_at
+speaking_attempts        -- attempt_id, audio_s3_key, duration_secs
+writing_attempts         -- attempt_id, essay_text, word_count
+transcripts              -- attempt_id, text, provider, confidence_score
+score_reports            -- attempt_id, estimated_band, scoring_model, raw_rubric_json
+score_dimensions         -- report_id, dimension (task_completion/coherence/..), score, max_score
+feedback_reports         -- attempt_id, strengths[], weaknesses[], sample_response, improvement_tips
+progress_snapshots       -- user_id, skill, band_estimate, snapshot_date
+```
+
+---
+
+## Phase-by-Phase Implementation Plan
+
+---
+
+## 🏗 Phase 1 — Foundation & Core Loop *(Weeks 1–3)*
+
+**Goal:** A working, deployable skeleton where a user can sign up, read a prompt, record/write, and see a "processing" state. The full AI pipeline does **not** need to be live — just the structure.
+
+### What Gets Built
+
+#### Infrastructure & DevOps
+- Docker Compose for **local dev** (FastAPI + PostgreSQL + Redis + Celery worker + flower)
+- `Makefile` targets: `make dev`, `make migrate`, `make test`, `make lint`
+- GitHub Actions CI: lint (ruff, mypy, eslint), test (pytest), build check
+- Environment config: `.env.local` (dev) → Vercel/Render env vars (prod)
+- `pre-commit` hooks: black, ruff, mypy, eslint
+
+#### Backend — FastAPI
+- Project scaffold: `app/core/config.py` (pydantic-settings), `app/core/deps.py` (DB session, current user)
+- SQLAlchemy 2.0 async models + Alembic migrations for ALL core tables
+- Clerk JWT middleware (`app/core/security.py`) — validate token on every protected route
+- Health check endpoint: `GET /health` → returns DB + Redis status
+- API routes:
+  - `GET /speaking/tasks` — list all 8 tasks with metadata
+  - `POST /speaking/attempts/start` — create attempt record, return `attempt_id`
+  - `POST /speaking/attempts/{id}/upload-audio` — return pre-signed S3 URL
+  - `GET /writing/tasks` — list tasks
+  - `POST /writing/attempts/start` — create attempt record
+  - `POST /writing/attempts/{id}/submit` — save essay text, enqueue job
+  - `GET /attempts/{id}/status` — polling endpoint (`pending|processing|complete|failed`)
+- **Usage quota check** at attempt creation: reject free users over daily limit
+
+#### Background Workers (Celery)
+- Celery app wired to Redis broker
+- `speaking_worker` task stub: receives `attempt_id`, logs receipt, updates status to `processing` (real AI later)
+- `writing_worker` task stub: same pattern
+- Flower monitoring dashboard on port 5555 (dev only)
+
+#### Frontend — Next.js
+- Initial layout: global nav, auth guards via Clerk `<SignedIn>/<SignedOut>`
+- Route scaffolding: all routes exist with placeholder content
+- **Speaking practice flow** (full UX, no AI yet):
+  - Task selection grid
+  - Instruction screen with task description
+  - Countdown: 3 → 2 → 1 → GO
+  - Preparation timer (countdown bar)
+  - Auto-start recording via `MediaRecorder API`
+  - Response timer (countdown bar, progresses to 0)
+  - Auto-stop + upload audio to S3 pre-signed URL
+  - Immediately POST to `/speaking/attempts/{id}/submit-audio` to trigger worker
+  - Show "Analyzing your response..." skeleton with polled status
+- **Writing practice flow:**
+  - Instruction screen + countdown
+  - Rich textarea with live word/char count
+  - Auto-submit at timer end
+  - "Analyzing..." skeleton state
+- Shared components: `CountdownTimer`, `ProgressBar`, `AttemptCard`, `StatusBadge`
+
+#### Admin (Lightweight CMS)
+- Clerk-role gated `/admin` route
+- CRUD UI for `speaking_prompts` and `writing_prompts`
+- Seed script: 8 speaking prompts + 2 writing prompts on migration
+
+### Phase 1 Deliverable
+> A user can sign up, attempt a speaking or writing task, upload their response, and see a persistent "processing" state — the full UX loop minus AI feedback. CI passes. All infra runs in Docker locally.
+
+---
+
+## 🤖 Phase 2 — AI Scoring Pipeline & Reports *(Weeks 4–6)*
+
+**Goal:** Real AI feedback is returned for every attempt. Users see their estimated band score, dimension scores, and human-readable feedback.
+
+### What Gets Built
+
+#### AI Pipeline (Workers)
+
+**Speaking Pipeline:**
+```
+1. Download audio from S3
+2. Send to OpenAI Whisper → transcript text
+3. Save transcript to `transcripts` table
+4. Call LLM with rubric prompt → structured JSON:
+   {
+     "task_completion": 9, "coherence": 8, "vocabulary": 7,
+     "fluency": 8, "grammar": 7, "estimated_band": 7.5,
+     "strengths": [...], "weaknesses": [...],
+     "improvement_tips": [...], "sample_response": "..."
+   }
+5. Save to `score_reports` + `score_dimensions`
+6. Call LLM (second pass, cheaper model) → formatted feedback HTML
+7. Save to `feedback_reports`
+8. Update attempt status → 'complete'
+```
+
+**Writing Pipeline:**
+```
+1. Take essay text from `writing_attempts`
+2. Call LLM with rubric prompt → structured JSON
+3. Save score_report + dimensions
+4. Second pass → formatted feedback + improved sample
+5. Update attempt status → 'complete'
+```
+
+**Rubric Design (CELPIP-aligned):**
+- Speaking dimensions: Task Completion, Coherence & Cohesion, Vocabulary Range, Fluency & Pronunciation, Grammatical Accuracy
+- Writing dimensions: Task Fulfillment, Organization, Vocabulary Range, Grammatical Accuracy, Tone & Register
+- Band mapping: 1–12 (CELPIP scale)
+- Prompt engineering: system prompt enforces JSON schema, includes CELPIP band descriptors for calibration
+
+**LLM Provider Abstraction (`app/services/ai/`):**
+```python
+class LLMProvider(Protocol):
+    async def score(self, prompt: str, schema: dict) -> dict: ...
+
+class OpenAIProvider: ...      # uses structured outputs / function calling
+class AnthropicProvider: ...   # fallback
+```
+- Config-driven: `ai.scoring_provider: openai` in config
+- Retry logic: 3 attempts with exponential backoff
+- Cost tracking: log token usage per attempt
+
+#### Frontend — Report Views
+- `GET /attempts/{id}/report` API endpoint returns complete report
+- Report page (`/attempts/[id]/report`):
+  - **Score Summary Card**: estimated band, visual gauge/meter
+  - **Dimension Breakdown**: radar chart or progress bars per dimension
+  - **Strengths** (green pills)
+  - **Weaknesses** (orange pills)
+  - **Improvement Tips** (accordion)
+  - **Sample High-Band Response** (collapsible)
+  - **Transcript** (speaking only, highlighted by quality)
+- Status polling: React Query `refetchInterval` until status = `complete`
+- Skeleton loading states for all report sections
+
+#### History Page
+- `GET /history?skill=speaking&page=1&limit=10`
+- Paginated list of attempts: date, task, band score, status badge
+- Click-through to report page
+- Filter by skill, date range
+
+### Phase 2 Deliverable
+> Users receive real AI feedback with band scores, dimension breakdowns, and improvement suggestions. History is persisted and browsable.
+
+---
+
+## 📈 Phase 3 — Dashboard, Progress & Subscriptions *(Weeks 7–9)*
+
+**Goal:** Users have a personalized home with progress intelligence. Stripe subscriptions gate premium features.
+
+### What Gets Built
+
+#### Dashboard (`/dashboard`)
+- `GET /dashboard/summary` endpoint returning:
+  ```json
+  {
+    "current_speaking_band": 7.2,
+    "current_writing_band": 6.8,
+    "target_band": 9,
+    "streak_days": 5,
+    "recent_attempts": [...],
+    "weak_dimensions": ["Vocabulary Range", "Fluency"],
+    "suggested_next": { "skill": "speaking", "task": 3 }
+  }
+  ```
+- Dashboard UI components:
+  - **Target vs Current Band widget** (gap visualization)
+  - **Streak tracker** with calendar heatmap
+  - **Score trend chart** (line chart, last 30 days, per skill)
+  - **Weak areas panel** (top 3 dimensions below target)
+  - **Recent Attempts feed** (last 5, with mini score badges)
+  - **"Start Practice" CTA** (smart-suggested task)
+
+#### Progress Service
+- `progress_snapshots` table: daily cron job snapshots user's rolling average band per skill
+- `GET /progress?skill=speaking&period=30d` → time-series data for charts
+- Identify weak dimensions by averaging `score_dimensions` over last N attempts
+
+#### Stripe Subscription System
+- Stripe Products + Prices created in Stripe dashboard:
+  - Free: 0/month, 3 attempts/day
+  - Premium: $X/month, unlimited, full reports
+  - Premium Plus: $X/month, + mock tests, analytics
+- `POST /billing/create-checkout-session` → Stripe checkout
+- `POST /billing/webhooks/stripe` → handles `checkout.session.completed`, `customer.subscription.updated`, `customer.subscription.deleted`
+- Webhook syncs `subscriptions` table, updates user plan in DB
+- **Quota enforcement middleware**: `app/core/quota.py` — checks plan + daily attempt count before creating attempt
+- `GET /billing/portal` → Stripe customer portal (manage/cancel)
+
+#### Frontend — Billing
+- `/billing` page: current plan, usage stats, upgrade CTA
+- Pricing page with feature comparison table
+- Redirect to Stripe checkout on upgrade
+- Plan badge in global nav (Free / Premium / Premium+)
+- Paywall modal when free user hits limit
+
+### Phase 3 Deliverable
+> Full subscription system. Dashboard shows personalized progress. Free users are limited; premium users get unlimited access.
+
+---
+
+## 🧪 Phase 4 — Mock Tests, Analytics & Hardening *(Weeks 10–12)*
+
+**Goal:** Full CELPIP-style mock tests, advanced analytics, admin tooling, and production hardening.
+
+### What Gets Built
+
+#### Mock Test System
+- `mock_tests` table: test session with ordered prompt sequence
+- **Speaking Mock Test**: Tasks 1–8, sequential, strict timer, no ability to skip/go back
+- **Writing Mock Test**: Task 1 + Task 2, sequential
+- `POST /mock-tests/start` → creates session
+- `GET /mock-tests/{id}/next-task` → returns next prompt in sequence
+- Final report aggregates all task scores into overall session estimate
+- Mock test UI: full-screen, distraction-free mode; no nav; progress indicator (Task X of 8)
+
+#### Timed Section Practice
+- New mode, similar to mock test but scoped to individual module
+- Speaking section (Tasks 1–8), Writing section (Task 1 + 2)
+- Same strict flow as real exam
+
+#### Analytics (Admin + User-facing)
+- Admin analytics endpoint: cohort data, average bands by signup date, retention
+- User analytics: `/progress/analytics` — band velocity (slope), consistency score, projected target date
+- Admin dashboard CMS enhancements:
+  - Prompt quality metrics (average scores per prompt)
+  - Failed jobs monitor (link to Flower)
+  - User lookup (search by email, view plan + history)
+
+#### Performance & Reliability Hardening
+- **Rate limiting**: `slowapi` on FastAPI — per-user and per-IP
+- **Request timeout**: `asyncio.wait_for` on AI calls, fall back to `failed` status
+- **Dead-letter queue**: failed Celery tasks → DLQ, retry 3x, then alert
+- **Structured logging**: `structlog` → JSON logs → log aggregator (e.g., Datadog, Grafana Loki)
+- **Metrics**: Prometheus metrics endpoint (`/metrics`) — attempt latency, queue depth, AI cost/attempt
+- **DB connection pooling**: asyncpg pool tuned for concurrent load
+- **S3 lifecycle rules**: delete audio files after 30 days (configurable)
+- **Full test suite**: pytest-asyncio for all API routes, mock AI provider, 80%+ coverage target
+
+#### Security Hardening
+- OWASP checklist per route
+- Signed S3 URLs (15-min expiry for upload, 1-hour for download)
+- `Content-Security-Policy` header on Next.js
+- Row-level security: users can only access own attempts (enforced in SQL, not just app layer)
+- Clerk webhook signature verification
+
+### Phase 4 Deliverable
+> Full feature mock tests, advanced analytics, hardened for production traffic with observability and security controls in place.
+
+---
+
+## Tech Stack Decisions — Production Rationale
+
+| Layer | Choice | Rationale |
+|---|---|---|
+| Frontend | Next.js 14 App Router + TypeScript | SSR for SEO on marketing pages; RSC for dashboard performance |
+| Styling | Tailwind CSS + shadcn/ui | Consistency + speed; shadcn = unstyled accessible components |
+| State | React Query (TanStack) | Caching, polling, background refetch built-in |
+| API | FastAPI + Pydantic v2 | Async-first, auto OpenAPI docs, strict typing |
+| ORM | SQLAlchemy 2.0 (async) | Mature, type-safe, works with Alembic migrations |
+| DB | PostgreSQL (managed) | ACID compliance, JSONB for rubric data, full-text search later |
+| Queue | Redis + Celery | Battle-tested, supports priorities, retries, ETA |
+| Auth | Clerk | Fastest to ship social + email auth; JWT tokens FastAPI can verify |
+| Payments | Stripe | Industry standard; webhook-driven plan sync |
+| STT | OpenAI Whisper API | Best-in-class accuracy, fast, no infra to manage for MVP |
+| LLM Scoring | Multi-model abstraction (GPT-4o-mini default, hot-swappable) | Provider protocol pattern — switch model via config with zero code change |
+| Storage | AWS S3 / Cloudflare R2 | Cheap, durable, pre-signed URL pattern |
+| AI Calibration | Calibration store (DB table + admin UI) | Band-level sample responses injectable into system prompt, extensible per task |
+| Deploy (FE) | Vercel | Zero-config Next.js, preview deployments per PR |
+| Deploy (API) | Render / Railway / Fly.io | Simple Docker-based deploys, managed scaling |
+| Observability | Prometheus + Grafana / Datadog | Production visibility into AI pipeline latency and cost |
+
+---
+
+## CI/CD Pipeline
+
+```
+PR Opened
+  └── GitHub Actions
+      ├── Backend: ruff lint → mypy type check → pytest (mocked AI) → Docker build
+      └── Frontend: eslint → tsc --noEmit → build check
+
+Merge to main
+  ├── Backend: Docker build → push to registry → Render/Railway auto-deploy
+  └── Frontend: Vercel auto-deploy from main → run Playwright E2E smoke tests
+
+Production deploy
+  ├── Alembic migration runs (via deploy script, not on app startup)
+  └── Smoke health check: GET /health → must return 200 before traffic cut-over
+```
+
+---
+
+## ✅ Resolved Design Decisions
+
+All open questions have been answered. These are now hard requirements, not options.
+
+---
+
+### 1. AI Provider — Multi-Model Abstraction with Hot-Swap ✅
+
+**Decision:** Use free/lower-cost model tiers by default (e.g., `gpt-4o-mini`). Implement a **provider protocol** so any model or provider can be swapped via config with zero code changes.
+
+**Implementation:**
+```python
+# app/services/ai/base.py
+class ScoringProvider(Protocol):
+    async def score(self, prompt: str, schema: type[BaseModel]) -> dict: ...
+    async def transcribe(self, audio_bytes: bytes) -> str: ...
+
+# app/services/ai/providers/openai_provider.py
+class OpenAIProvider:
+    def __init__(self, model: str = "gpt-4o-mini"): ...
+
+# app/services/ai/providers/anthropic_provider.py  
+class AnthropicProvider:
+    def __init__(self, model: str = "claude-haiku-20240307"): ...
+
+# app/services/ai/providers/gemini_provider.py
+class GeminiProvider:
+    def __init__(self, model: str = "gemini-1.5-flash"): ...
+```
+
+**Config-driven (config.yaml):**
+```yaml
+ai:
+  scoring_provider: openai          # switch to: anthropic | gemini
+  scoring_model: gpt-4o-mini        # switch to any model string
+  stt_provider: openai
+  stt_model: whisper-1
+  feedback_provider: openai
+  feedback_model: gpt-4o-mini
+  max_retries: 3
+  timeout_secs: 60
+```
+
+> [!TIP]
+> To switch to Gemini Flash for lower cost: change `scoring_provider: gemini` + `scoring_model: gemini-1.5-flash` — no code changes required. This is enforced at the architecture level.
+
+---
+
+### 2. Authentication — Clerk with Hardened Security ✅
+
+**Decision:** Use **Clerk** for speed, but harden every layer independently.
+
+**Security hardening plan (non-negotiable):**
+- FastAPI validates Clerk JWT **on every protected route** via `python-jose` — backend never trusts frontend state
+- **Row-level data isolation**: all SQL queries filter by `user_id` extracted from JWT, never from request body
+- Clerk webhook signature verified via `svix` library before processing any user events
+- Admin routes double-gated: Clerk `is_admin` role check + server-side role check in DB
+- All tokens expire in 1 hour; Clerk handles rotation
+- `Content-Security-Policy` + `Strict-Transport-Security` headers set on all API responses
+- No sensitive data (plan, quota, scores) returned in JWT claims — always fetched server-side
+
+---
+
+### 3. Free Tier — Hard 2-Attempt Limit, AI Features Locked ✅
+
+**Decision:** Free users get exactly **2 total AI-graded attempts** (across speaking + writing combined). After that, all practice features requiring AI are locked — no fallback model, no degraded mode.
+
+**Enforcement strategy:**
+```
+Free tier:
+  - 2 AI-graded attempts (lifetime, not daily)
+  - After limit: attempt creation returns HTTP 402 Payment Required
+  - Frontend shows upgrade paywall modal — cannot dismiss to attempt
+  - No degraded mode, no fallback model
+  - Users CAN still browse prompts and see sample responses (read-only)
+
+Premium tier:
+  - Unlimited AI-graded attempts
+  - Full reports, history, progress charts
+
+Premium Plus tier:
+  - All Premium features
+  - Full mock tests, advanced analytics
+```
+
+**Quota table:**
+```sql
+-- Enforced atomically at attempt creation with SELECT FOR UPDATE
+SELECT COUNT(*) FROM attempts 
+WHERE user_id = $1 AND status != 'cancelled'
+-- If count >= plan_limit → raise QuotaExceededError → HTTP 402
+```
+
+---
+
+### 4. Calibration System — Extensible from Day One ✅
+
+**Decision:** Bootstrap with your Band 12 speaking samples. Design the calibration store so any task, band level, or skill can have samples added via admin UI without touching code.
+
+**Calibration DB table:**
+```sql
+CREATE TABLE calibration_samples (
+    id          UUID PRIMARY KEY,
+    skill       TEXT NOT NULL,          -- 'speaking' | 'writing'
+    task_number INT,                    -- NULL = applies to all tasks
+    band_level  NUMERIC(3,1) NOT NULL,  -- 12.0, 10.0, 7.0, 5.0, etc.
+    sample_text TEXT NOT NULL,          -- transcript or essay
+    source      TEXT,                   -- 'official' | 'user_submitted'
+    is_active   BOOLEAN DEFAULT TRUE,
+    created_at  TIMESTAMPTZ DEFAULT NOW()
+);
+```
+
+**How it plugs into the scoring prompt:**
+```python
+# app/services/ai/calibration.py
+async def build_calibration_context(skill: str, task: int) -> str:
+    samples = await repo.get_active_samples(skill=skill, task=task)
+    # Formats samples as: "Band 12 example: {text}\nBand 7 example: {text}\n..."
+    return format_calibration_block(samples)
+
+# Injected into system prompt at runtime — no code change needed to add new samples
+system_prompt = BASE_RUBRIC_PROMPT + await build_calibration_context(skill, task)
+```
+
+**Admin UI for calibration (Phase 1 admin CMS):**
+- Add / edit / deactivate sample responses per task and band
+- Mark samples as active/inactive to A/B test prompts
+- View which samples are currently injected into the live scoring prompt
+
+> [!NOTE]
+> **Deployment Target**: The plan assumes Vercel (FE) + Render/Railway (API). If you have a preferred cloud (AWS, GCP, Azure), the app layer is cloud-agnostic — just adjust the infra config.
+
+---
+
+## Verification Plan
+
+### Per-Phase Verification
+
+| Phase | Pass Criteria |
+|---|---|
+| Phase 1 | CI green; Docker Compose `make dev` boots all services; full speaking + writing UX flow works end-to-end (without AI); Clerk login/logout works; admin can CRUD prompts |
+| Phase 2 | Submit speaking audio → worker transcribes → LLM scores → report renders in < 60 seconds; all 5 speaking dimensions + 5 writing dimensions persisted correctly |
+| Phase 3 | Stripe checkout → subscription created → quota enforced (free user blocked at 4th attempt); dashboard summary loads in < 500ms (with DB indexes) |
+| Phase 4 | Full speaking mock test (Tasks 1–8) completes; 80% test coverage; rate limiter blocks abuse at threshold; Prometheus `/metrics` reachable |
+
+### Automated Tests
+- `pytest tests/ -v --cov=app --cov-report=html` — backend unit + integration
+- `playwright test` — E2E: auth flow, attempt creation, report viewing
+- Load test: `locust` — 50 concurrent users, verify queue depth stays stable
+
+---
+
+## Phase Summary
+
+| Phase | Focus | Duration | Key Output |
+|---|---|---|---|
+| **1** | Foundation: infra, auth, data model, full UX loop (no AI) | 3 weeks | Deployable skeleton; complete practice UX |
+| **2** | AI pipeline: STT, rubric scoring, feedback reports, history | 3 weeks | Real AI feedback; attempt history |
+| **3** | Dashboard, progress charts, Stripe subscriptions, quotas | 3 weeks | Monetized product; personalized progress |
+| **4** | Mock tests, analytics, observability, security hardening | 3 weeks | Production-ready; full feature set |
+
+**Total estimated timeline: 12 weeks** to a production-hardened, fully-featured CELPIP platform.

@@ -1,0 +1,61 @@
+// ─────────────────────────────────────────────────────────────────────────────
+// UploadProgressBar.tsx — S3 upload progress indicator
+//
+// Shown during the UPLOADING session phase.
+// Progress is driven by useSpeakingAttempt (simulated in Phase 1, real in Phase 2).
+// ─────────────────────────────────────────────────────────────────────────────
+
+import { Upload } from "lucide-react";
+import { cn }     from "@/lib/utils";
+
+// ── Props ─────────────────────────────────────────────────────────────────────
+
+interface UploadProgressBarProps {
+  /** Upload progress 0–100 */
+  progress: number;
+  className?: string;
+}
+
+/**
+ * Full-canvas upload progress screen.
+ * Progress value is passed in from the parent — no async logic here.
+ */
+export function UploadProgressBar({ progress, className }: UploadProgressBarProps) {
+  const clamped = Math.min(100, Math.max(0, progress));
+
+  return (
+    <div
+      className={cn(
+        "flex flex-col items-center justify-center gap-8 min-h-screen bg-canvas px-6",
+        className
+      )}
+    >
+      {/* Icon */}
+      <div className="flex h-20 w-20 items-center justify-center rounded-full bg-primary/10 border border-primary/30">
+        <Upload className="w-9 h-9 text-primary" />
+      </div>
+
+      {/* Heading */}
+      <div className="text-center space-y-2">
+        <h2 className="text-2xl font-bold text-canvas-text">Uploading Your Response</h2>
+        <p className="text-sm text-canvas-subtle">
+          Please stay on this page while we securely upload your recording.
+        </p>
+      </div>
+
+      {/* Progress bar — plain div to avoid base-ui double-track render */}
+      <div className="w-full max-w-sm space-y-3">
+        <div className="w-full h-3 rounded-full bg-white/10 overflow-hidden">
+          <div
+            className="h-full rounded-full bg-primary transition-all duration-200"
+            style={{ width: `${clamped}%` }}
+          />
+        </div>
+        <div className="flex justify-between text-xs text-canvas-subtle">
+          <span>Uploading…</span>
+          <span>{clamped}%</span>
+        </div>
+      </div>
+    </div>
+  );
+}

@@ -1,0 +1,101 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ── shadcn/ui CSS variables — Dark Theme Default ─────────────────────────── */
+@layer base {
+  :root {
+    /* page bg  — #0D0F17 */
+    --background:         225 25% 7%;
+    /* primary text — #E2E6F0 */
+    --foreground:         220 20% 92%;
+    /* card bg — #151824 */
+    --card:               228 22% 11%;
+    --card-foreground:    220 20% 92%;
+    /* popover — same as card */
+    --popover:            228 22% 11%;
+    --popover-foreground: 220 20% 92%;
+    /* indigo primary */
+    --primary:            239 84% 67%;
+    --primary-foreground: 0   0%  100%;
+    /* secondary surfaces — slightly lighter than card */
+    --secondary:          228 20% 16%;
+    --secondary-foreground: 220 15% 75%;
+    /* muted — same layer as secondary */
+    --muted:              228 20% 16%;
+    --muted-foreground:   220 10% 55%;
+    /* accent — same as secondary */
+    --accent:             228 20% 16%;
+    --accent-foreground:  220 20% 92%;
+    /* destructive */
+    --destructive:        0   72% 70%;
+    --destructive-foreground: 0 0% 100%;
+    /* borders and inputs */
+    --border:             228 18% 18%;
+    --input:              228 18% 18%;
+    --ring:               239 84% 67%;
+    --radius:             0.5rem;
+  }
+}
+
+/* ── Base element styles ──────────────────────────────────────────────────── */
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-muted text-foreground font-sans antialiased;
+  }
+
+  h1 { @apply text-3xl font-bold tracking-tight; }
+  h2 { @apply text-2xl font-bold tracking-tight; }
+  h3 { @apply text-xl font-semibold tracking-tight; }
+  h4 { @apply text-lg font-semibold; }
+}
+
+/* ── Band score colour utilities ─────────────────────────────────────────── */
+@layer utilities {
+  .band-high { @apply text-success font-bold; }   /* Band 9–12 */
+  .band-mid  { @apply text-warning font-bold; }   /* Band 6–8  */
+  .band-low  { @apply text-danger  font-bold; }   /* Band 1–5  */
+
+  /* Practice screens – deep dark canvas */
+  .practice-screen {
+    @apply bg-canvas text-canvas-text min-h-screen;
+  }
+
+  /* Card with standard shadow + border */
+  .celpip-card {
+    @apply bg-surface rounded-xl border border-border shadow-card p-5;
+  }
+
+  /* Smooth hover lift for interactive cards */
+  .card-interactive {
+    @apply transition-all duration-200 hover:shadow-card-hover hover:border-primary/40 cursor-pointer;
+  }
+
+  /* Glowing primary button effect */
+  .btn-glow {
+    @apply shadow-[0_0_20px_rgba(99,102,241,0.35)] hover:shadow-[0_0_30px_rgba(99,102,241,0.55)] transition-shadow duration-300;
+  }
+
+  /* Animation delay helpers — use instead of inline style={{ animationDelay }} */
+  .animation-delay-150 { animation-delay: 150ms; }
+  .animation-delay-300 { animation-delay: 300ms; }
+  .animation-delay-500 { animation-delay: 500ms; }
+}
+
+/* ── Writing editor — contenteditable placeholder ─────────────────────────── */
+/* Tailwind's empty:before: variant doesn't work reliably on contenteditable   */
+/* in all browsers, so we add an explicit rule here.                           */
+#writing-editor:empty::before {
+  content: attr(data-placeholder);
+  color: hsl(var(--muted-foreground) / 0.5);
+  pointer-events: none;
+  position: absolute;
+  font-style: italic;
+}
+#writing-editor {
+  position: relative; /* needed for the absolute ::before placeholder */
+}

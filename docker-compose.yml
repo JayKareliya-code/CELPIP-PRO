@@ -1,0 +1,98 @@
+# ─── CELPIP Platform — Local Development Services ──────────────────────────────
+# Usage:
+#   docker compose up --build          — Start all services
+#   docker compose up db redis         — Start only infrastructure
+#   docker compose logs -f api worker  — Tail app logs
+
+services:
+
+  # ── PostgreSQL 16 ─────────────────────────────────────────────────────────────
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER:     celpip
+      POSTGRES_PASSWORD: celpip
+      POSTGRES_DB:       celpip_dev
+    ports:
+      - "5432:5432"
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    healthcheck:
+      test:     ["CMD-SHELL", "pg_isready -U celpip -d celpip_dev"]
+      interval: 5s
+      timeout:  5s
+      retries:  10
+
+  # ── Redis 7 ───────────────────────────────────────────────────────────────────
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test:     ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout:  3s
+      retries:  10
+
+  # ── FastAPI App ───────────────────────────────────────────────────────────────
+  api:
+    build:
+      context:    ./apps/api
+      dockerfile: Dockerfile
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+    ports:
+      - "8000:8000"
+    env_file: ./apps/api/.env
+    environment:
+      DATABASE_URL: postgresql+asyncpg://celpip:celpip@db:5432/celpip_dev
+      REDIS_URL:    redis://redis:6379/0
+    volumes:
+      - ./apps/api:/app
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test:     ["CMD-SHELL", "python -c \"import urllib.request; urllib.request.urlopen('http://localhost:8000/api/v1/health')\" || exit 1"]
+      interval: 10s
+      timeout:  5s
+      retries:  5
+      start_period: 15s
+
+  # ── Celery Worker ─────────────────────────────────────────────────────────────
+  worker:
+    build:
+      context:    ./apps/api
+      dockerfile: Dockerfile
+    command: >
+      celery -A app.workers.celery_app worker
+      --loglevel=info
+      -Q speaking,writing
+      --concurrency=2
+    env_file: ./apps/api/.env
+    environment:
+      DATABASE_URL: postgresql+asyncpg://celpip:celpip@db:5432/celpip_dev
+      REDIS_URL:    redis://redis:6379/0
+    volumes:
+      - ./apps/api:/app
+    depends_on:
+      - api
+
+  # ── Flower (Celery Monitor) ───────────────────────────────────────────────────
+  flower:
+    build:
+      context:    ./apps/api
+      dockerfile: Dockerfile
+    command: celery -A app.workers.celery_app flower --port=5555
+    ports:
+      - "5555:5555"
+    environment:
+      REDIS_URL: redis://redis:6379/0
+    depends_on:
+      - redis
+
+volumes:
+  db_data:
