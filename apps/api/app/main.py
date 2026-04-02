@@ -4,6 +4,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.core.config import settings
 from app.core.deps import engine
 from app.api.router import api_router
+from app.workers.celery_app import celery_app as _celery_app  # noqa: F401 — ensures shared_task binds to the configured broker
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):

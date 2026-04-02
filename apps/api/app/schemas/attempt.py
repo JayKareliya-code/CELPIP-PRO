@@ -37,7 +37,8 @@ class AttemptStatusResponse(BaseModel):
     skill:            str
     celery_task_id:   str | None
     error_message:    str | None
-    report_available: bool   # True when status == 'complete'
+    report_available: bool        # True when status == 'complete'
+    estimated_band:   float | None = None  # Populated when status == 'complete'
     created_at:       datetime
     updated_at:       datetime
 

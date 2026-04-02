@@ -11,6 +11,7 @@
 .env.production
 .env.development
 *.secret
+.claude
 
 # ---------------------------------------------------------------------------
 # Python / FastAPI (apps/api)

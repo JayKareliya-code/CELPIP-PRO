@@ -1,5 +1,6 @@
 from typing import Annotated
 from fastapi import APIRouter, Depends
+from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.deps import get_db
@@ -8,7 +9,7 @@ from app.core.quota import get_plan_limits
 from app.models.user import User
 from app.repositories.attempt_repo import AttemptRepository
 from app.repositories.user_repo import UserRepository
-from app.schemas.user import UserMeResponse, SetTargetScoreRequest
+from app.schemas.user import UserMeResponse, SetTargetScoreRequest, WeakAreaItem
 from app.schemas.attempt import QuotaStatusResponse
 
 router = APIRouter()
@@ -46,6 +47,62 @@ async def set_target_score(
     await repo.update(user, target_band=body.target_band)
     # session.commit() is handled by get_db's context manager
     return _build_user_response(user)
+
+
+_DIMENSION_LABELS: dict[str, str] = {
+    "task_completion":  "Task Completion",
+    "coherence":        "Coherence & Cohesion",
+    "vocabulary":       "Vocabulary Range",
+    "fluency":          "Fluency & Pronunciation",
+    "grammar":          "Grammatical Accuracy",
+    "task_fulfillment": "Task Fulfillment",
+    "organization":     "Organization",
+    "tone_register":    "Tone & Register",
+}
+
+
+@router.get("/me/weak-areas", response_model=list[WeakAreaItem])
+async def get_weak_areas(
+    user: Annotated[User, Depends(get_current_user)],
+    db:   Annotated[AsyncSession, Depends(get_db)],
+) -> list[WeakAreaItem]:
+    """Return the user's weakest rubric dimensions across all scored attempts.
+
+    Aggregates avg score per dimension (last 20 complete attempts) and returns
+    the lowest-scoring ones first so the dashboard can highlight focus areas.
+    """
+    rows = (await db.execute(
+        text("""
+            SELECT sd.dimension,
+                   ROUND(AVG(sd.score)::numeric, 1) AS avg_score,
+                   COUNT(*)                          AS attempt_count
+            FROM   score_dimensions sd
+            JOIN   score_reports    sr ON sr.id         = sd.report_id
+            JOIN   attempts          a  ON a.id          = sr.attempt_id
+            WHERE  a.user_id = :uid
+              AND  a.status  = 'complete'
+              AND  a.id IN (
+                       SELECT id FROM attempts
+                       WHERE  user_id = :uid AND status = 'complete'
+                       ORDER  BY created_at DESC
+                       LIMIT  20
+                   )
+            GROUP  BY sd.dimension
+            ORDER  BY avg_score ASC
+        """),
+        {"uid": user.id},
+    )).mappings().all()
+
+    return [
+        WeakAreaItem(
+            dimension=r["dimension"],
+            label=_DIMENSION_LABELS.get(r["dimension"],
+                                        r["dimension"].replace("_", " ").title()),
+            avg_score=float(r["avg_score"]),
+            attempt_count=int(r["attempt_count"]),
+        )
+        for r in rows
+    ]
 
 
 @router.get("/me/quota", response_model=QuotaStatusResponse)

@@ -16,3 +16,11 @@ class UserMeResponse(BaseModel):
 
 class SetTargetScoreRequest(BaseModel):
     target_band: float = Field(ge=1, le=12)
+
+
+class WeakAreaItem(BaseModel):
+    """One aggregated dimension row returned by GET /users/me/weak-areas."""
+    dimension:     str    # snake_case key, e.g. "fluency"
+    label:         str    # human-readable, e.g. "Fluency & Pronunciation"
+    avg_score:     float  # 1.0–12.0
+    attempt_count: int    # how many scored attempts contributed
