@@ -1,4 +1,5 @@
 from typing import Annotated
+import asyncio
 import time
 import httpx
 from jose import jwt, jwk, JWTError
@@ -21,6 +22,7 @@ _DEV_TOKEN_PREFIX = "test_token_"
 _jwks_cache: dict = {}
 _jwks_fetched_at: float = 0.0
 _JWKS_TTL_SECONDS: float = 3600.0  # re-fetch after 1 hour
+_jwks_lock = asyncio.Lock()
 
 
 async def _get_jwks() -> dict:
@@ -28,11 +30,15 @@ async def _get_jwks() -> dict:
     global _jwks_cache, _jwks_fetched_at
     if _jwks_cache and (time.monotonic() - _jwks_fetched_at) < _JWKS_TTL_SECONDS:
         return _jwks_cache
-    async with httpx.AsyncClient(timeout=10.0) as client:
-        response = await client.get(settings.CLERK_JWKS_URL)
-        response.raise_for_status()
-    _jwks_cache = response.json()
-    _jwks_fetched_at = time.monotonic()
+    async with _jwks_lock:
+        # Re-check after acquiring lock — another coroutine may have already fetched
+        if _jwks_cache and (time.monotonic() - _jwks_fetched_at) < _JWKS_TTL_SECONDS:
+            return _jwks_cache
+        async with httpx.AsyncClient(timeout=10.0) as client:
+            response = await client.get(settings.CLERK_JWKS_URL)
+            response.raise_for_status()
+        _jwks_cache = response.json()
+        _jwks_fetched_at = time.monotonic()
     return _jwks_cache
 
 
@@ -49,9 +55,9 @@ async def get_current_user(
     try:
         token = credentials.credentials
 
-        # Development bypass: accept test_token_<clerk_id> when CLERK_SECRET_KEY is unset
-        # Remove this block entirely before production deployment.
-        if token.startswith(_DEV_TOKEN_PREFIX):
+        # Development-only bypass: accept test_token_<clerk_id> in local dev.
+        # Gated behind APP_ENV so this can never run in production.
+        if settings.APP_ENV == "development" and token.startswith(_DEV_TOKEN_PREFIX):
             clerk_user_id = token[len(_DEV_TOKEN_PREFIX):]
             if not clerk_user_id:
                 raise exc

@@ -78,13 +78,18 @@ async def start_speaking_attempt(
 async def get_upload_url(
     attempt_id: uuid.UUID,
     user: Annotated[User, Depends(get_current_user)],
-    _db: Annotated[AsyncSession, Depends(get_db)],
+    db: Annotated[AsyncSession, Depends(get_db)],
 ) -> UploadUrlResponse:
     """Return a pre-signed S3 PUT URL valid for 15 minutes.
 
     The frontend should PUT the recorded audio blob directly to this URL,
     then call /confirm-upload with the s3_key returned here.
     """
+    from app.repositories.attempt_repo import AttemptRepository
+    attempt = await AttemptRepository(db).get_status(attempt_id, user.id)
+    if not attempt:
+        raise HTTPException(status_code=404, detail="Attempt not found")
+
     upload_url, s3_key = generate_upload_url(str(user.id), str(attempt_id))
     return UploadUrlResponse(
         upload_url=upload_url,

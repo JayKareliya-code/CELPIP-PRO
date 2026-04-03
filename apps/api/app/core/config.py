@@ -1,3 +1,4 @@
+from pydantic import model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 from functools import lru_cache
 
@@ -11,6 +12,17 @@ class Settings(BaseSettings):
     API_V1_PREFIX: str  = "/api/v1"
     DEBUG:         bool = False
     CORS_ORIGINS:  list[str] = ["http://localhost:3000"]
+
+    @model_validator(mode="after")
+    def _validate_prod_settings(self) -> "Settings":
+        if self.APP_ENV == "production":
+            localhost_origins = [o for o in self.CORS_ORIGINS if "localhost" in o]
+            if localhost_origins:
+                raise ValueError(
+                    f"CORS_ORIGINS contains localhost in production: {localhost_origins}. "
+                    "Set CORS_ORIGINS to your deployed frontend URL."
+                )
+        return self
 
     # ── Database ──────────────────────────────────────────────────────────────
     DATABASE_URL: str = "postgresql+asyncpg://celpip:celpip@localhost:5432/celpip_dev"

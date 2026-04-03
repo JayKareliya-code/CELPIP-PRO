@@ -1,18 +1,21 @@
 """S3 / Cloudflare R2 pre-signed URL generation for audio uploads and playback."""
-from functools import lru_cache
 import boto3
 from botocore.config import Config as BotoCoreConfig
 from app.core.config import settings
 
 
-@lru_cache(maxsize=1)
 def _get_s3_client():
-    """Return a cached boto3 S3 client.
+    """Return a boto3 S3 client built from current settings.
 
     Supports both AWS S3 and Cloudflare R2 via S3_ENDPOINT_URL config override.
     Always uses the region-specific endpoint for AWS S3 so presigned PUT URLs
     go directly to the correct datacenter — avoiding 307 redirects that strip
     CORS headers in browsers.
+
+    Not cached: presigned URL generation is a local HMAC signing operation with no
+    network call, so the client construction cost is negligible. Caching with
+    lru_cache bakes in credentials at startup and silently breaks when AWS credentials
+    are rotated (e.g., IAM role refresh, secret rotation).
     """
     # Default to regional endpoint to prevent browser CORS issues on redirects
     endpoint = settings.S3_ENDPOINT_URL or f"https://s3.{settings.S3_REGION}.amazonaws.com"

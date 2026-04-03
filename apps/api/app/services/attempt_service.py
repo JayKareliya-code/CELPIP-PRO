@@ -95,7 +95,9 @@ async def confirm_speaking_upload(
     db.add(attempt)
     await db.flush()
 
-    # Dispatch Celery task (import here to avoid circular on startup)
+    # Dispatch Celery task (import here to avoid circular on startup).
+    # If the broker is unreachable, revert status to "pending" and surface a 503
+    # so the client knows to retry — avoids orphaned "processing" records.
     try:
         from app.workers.speaking_tasks import score_speaking_attempt
         task = score_speaking_attempt.delay(str(attempt_id))
@@ -103,7 +105,14 @@ async def confirm_speaking_upload(
         db.add(attempt)
         await db.flush()
     except Exception:
-        logger.warning("Failed to enqueue speaking task for %s", attempt_id, exc_info=True)
+        logger.exception("Failed to enqueue speaking task for %s", attempt_id)
+        attempt.status = "pending"
+        db.add(attempt)
+        await db.flush()
+        raise HTTPException(
+            status_code=503,
+            detail="Scoring service unavailable. Please try again in a moment.",
+        )
 
     return StartAttemptResponse(
         attempt_id=attempt.id,
@@ -190,7 +199,14 @@ async def submit_writing(
         db.add(attempt)
         await db.flush()
     except Exception:
-        logger.warning("Failed to enqueue writing task for %s", attempt_id, exc_info=True)
+        logger.exception("Failed to enqueue writing task for %s", attempt_id)
+        attempt.status = "pending"
+        db.add(attempt)
+        await db.flush()
+        raise HTTPException(
+            status_code=503,
+            detail="Scoring service unavailable. Please try again in a moment.",
+        )
 
     return StartAttemptResponse(
         attempt_id=attempt.id,
