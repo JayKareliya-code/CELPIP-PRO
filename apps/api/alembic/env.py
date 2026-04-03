@@ -1,5 +1,10 @@
 import asyncio
 from logging.config import fileConfig
+import sys
+
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 from sqlalchemy import pool
 from sqlalchemy.engine import Connection
@@ -10,6 +15,7 @@ from alembic import context
 # Import settings and models for autogenerate support
 from app.core.config import settings
 from app.models import Base
+
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.

@@ -1,41 +1,22 @@
-// ─────────────────────────────────────────────────────────────────────────────
 // app/admin/page.tsx — Admin home overview
-//
-// Shows a quick stats grid (total prompts, calibration samples, active prompts)
-// and quick-link cards to sub-pages.
 // Auth guard is in app/admin/layout.tsx — no redirect needed here.
-// ─────────────────────────────────────────────────────────────────────────────
 
-import type { Metadata }          from "next";
-import Link                       from "next/link";
-import { BookCopy, Sliders, Mic, PenLine, ArrowRight } from "lucide-react";
-import { Navbar }                 from "@/components/layout/Navbar";
-import { Footer }                 from "@/components/layout/Footer";
-import { AdminSidebar }           from "@/components/admin/AdminSidebar";
-import { ROUTES }                 from "@/lib/constants";
-import {
-  MOCK_CALIBRATION_SAMPLES,
-} from "@/lib/mockData";
+import type { Metadata } from "next";
+import Link from "next/link";
+import { BookCopy, Sliders, Mic, PenLine, ArrowRight, BookOpen, Image, Tag, ClipboardList } from "lucide-react";
+import { Navbar }       from "@/components/layout/Navbar";
+import { Footer }       from "@/components/layout/Footer";
+import { AdminSidebar } from "@/components/admin/AdminSidebar";
+import { ROUTES }       from "@/lib/constants";
+import { MOCK_CALIBRATION_SAMPLES } from "@/lib/mockData";
 import { MOCK_SPEAKING_PROMPTS, MOCK_WRITING_PROMPTS } from "@/lib/mockAdminData";
 
-// ── Metadata ──────────────────────────────────────────────────────────────────
-
 export const metadata: Metadata = {
-  title:       "Admin — CELPIP Prep",
-  description: "Platform administration: manage speaking and writing prompts, calibration samples, and review overall stats.",
+  title: "Admin — CELPIP PRO",
+  description: "Platform administration dashboard.",
 };
 
-// ── Stat card ─────────────────────────────────────────────────────────────────
-
-function StatCard({
-  label,
-  value,
-  icon: Icon,
-}: {
-  label: string;
-  value: number;
-  icon:  React.ElementType;
-}) {
+function StatCard({ label, value, icon: Icon }: { label: string; value: number; icon: React.ElementType }) {
   return (
     <div className="bg-surface rounded-xl border border-border shadow-card p-5 flex items-center gap-4">
       <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
@@ -49,18 +30,8 @@ function StatCard({
   );
 }
 
-// ── Quick link card ────────────────────────────────────────────────────────────
-
-function QuickLink({
-  href,
-  title,
-  description,
-  icon: Icon,
-}: {
-  href:        string;
-  title:       string;
-  description: string;
-  icon:        React.ElementType;
+function QuickLink({ href, title, description, icon: Icon }: {
+  href: string; title: string; description: string; icon: React.ElementType;
 }) {
   return (
     <Link
@@ -70,8 +41,7 @@ function QuickLink({
                  hover:shadow-focus transition-all duration-150"
     >
       <div className="flex items-start gap-3">
-        <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-muted
-                        group-hover:bg-primary/10 transition-colors">
+        <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-muted group-hover:bg-primary/10 transition-colors">
           <Icon className="w-4 h-4 text-subtle group-hover:text-primary transition-colors" />
         </div>
         <div>
@@ -84,70 +54,48 @@ function QuickLink({
   );
 }
 
-// ── Page ──────────────────────────────────────────────────────────────────────
-
-/**
- * Admin home page — /admin
- * Overview stats + quick navigation to admin sub-pages.
- */
 export default function AdminHomePage() {
-  const totalSpeaking = MOCK_SPEAKING_PROMPTS.length;
-  const totalWriting  = MOCK_WRITING_PROMPTS.length;
-  const totalCal      = MOCK_CALIBRATION_SAMPLES.length;
+  const totalSpeaking  = MOCK_SPEAKING_PROMPTS.length;
+  const totalWriting   = MOCK_WRITING_PROMPTS.length;
+  const totalCal       = MOCK_CALIBRATION_SAMPLES.length;
   const activeSpeaking = MOCK_SPEAKING_PROMPTS.filter((p) => p.is_active).length;
 
   return (
     <div className="flex flex-col min-h-screen">
       <Navbar />
-
       <div className="flex flex-1 overflow-hidden">
         <AdminSidebar />
-
         <main className="flex-1 overflow-auto bg-muted px-6 py-8 space-y-8 max-w-5xl mx-auto w-full">
-          {/* Heading */}
           <div>
             <h1 className="text-xl font-bold text-foreground">Admin Overview</h1>
-            <p className="text-sm text-subtle mt-1">
-              Platform statistics and quick access to management tools.
-            </p>
+            <p className="text-sm text-subtle mt-1">Platform statistics and quick access to management tools.</p>
           </div>
 
-          {/* Stats grid */}
+          {/* Stats */}
           <section aria-label="Platform statistics">
-            <h2 className="text-xs font-semibold uppercase tracking-widest text-subtle mb-3">
-              Statistics
-            </h2>
+            <h2 className="text-xs font-semibold uppercase tracking-widest text-subtle mb-3">Statistics</h2>
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-              <StatCard label="Speaking Prompts"       value={totalSpeaking}  icon={Mic}     />
-              <StatCard label="Writing Prompts"        value={totalWriting}   icon={PenLine}  />
-              <StatCard label="Calibration Samples"    value={totalCal}       icon={Sliders} />
-              <StatCard label="Active Speaking Prompts" value={activeSpeaking} icon={BookCopy}/>
+              <StatCard label="Speaking Prompts"        value={totalSpeaking}  icon={Mic}      />
+              <StatCard label="Writing Prompts"         value={totalWriting}   icon={PenLine}  />
+              <StatCard label="Calibration Samples"     value={totalCal}       icon={Sliders}  />
+              <StatCard label="Active Speaking Prompts" value={activeSpeaking} icon={BookCopy} />
             </div>
           </section>
 
           {/* Quick links */}
           <section aria-label="Admin navigation">
-            <h2 className="text-xs font-semibold uppercase tracking-widest text-subtle mb-3">
-              Management
-            </h2>
+            <h2 className="text-xs font-semibold uppercase tracking-widest text-subtle mb-3">Management</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <QuickLink
-                href={ROUTES.adminPrompts}
-                icon={BookCopy}
-                title="Prompt Management"
-                description="Add, edit, and activate speaking and writing prompts for all CELPIP tasks."
-              />
-              <QuickLink
-                href={ROUTES.adminCalibration}
-                icon={Sliders}
-                title="Calibration Samples"
-                description="Manage reference audio and writing samples used to calibrate AI scoring."
-              />
+              <QuickLink href={ROUTES.adminPrompts}     icon={BookCopy}    title="Prompts"            description="Create and manage speaking & writing prompts with draft/publish/archive workflow." />
+              <QuickLink href={ROUTES.adminMaterials}   icon={BookOpen}    title="Learning Materials" description="Add articles, tip sheets, sample responses, templates, and vocabulary sets." />
+              <QuickLink href={ROUTES.adminAssets}      icon={Image}       title="Assets"             description="Upload and manage images, PDFs, audio, and other media files." />
+              <QuickLink href={ROUTES.adminTags}        icon={Tag}         title="Tags"               description="Create and manage reusable content tags by topic, grammar, vocabulary, etc." />
+              <QuickLink href={ROUTES.adminCalibration} icon={Sliders}     title="Calibration"        description="Manage reference samples used to calibrate AI scoring models." />
+              <QuickLink href={ROUTES.adminAudit}       icon={ClipboardList} title="Audit Log"        description="Track every admin content change with timestamps and before/after snapshots." />
             </div>
           </section>
         </main>
       </div>
-
       <Footer />
     </div>
   );

@@ -17,6 +17,10 @@ export const ROUTES = {
   admin:            "/admin",
   adminPrompts:     "/admin/prompts",
   adminCalibration: "/admin/calibration",
+  adminMaterials:   "/admin/materials",
+  adminAssets:      "/admin/assets",
+  adminTags:        "/admin/tags",
+  adminAudit:       "/admin/audit",
 } as const;
 
 // ── Speaking Task Timings (seconds) ───────────────────────────────────────────

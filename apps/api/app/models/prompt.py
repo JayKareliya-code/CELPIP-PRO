@@ -1,8 +1,13 @@
 import uuid
-from sqlalchemy import Integer, String, Boolean, Text, ARRAY, CheckConstraint
+from datetime import datetime
+from sqlalchemy import Integer, String, Boolean, Text, ARRAY, CheckConstraint, DateTime, ForeignKey
+from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.models.base import Base, TimestampMixin
+
+_CMS_STATUS_CHECK = "status IN ('draft','published','archived')"
+
 
 class SpeakingPrompt(Base, TimestampMixin):
     __tablename__ = "speaking_prompts"
@@ -18,16 +23,33 @@ class SpeakingPrompt(Base, TimestampMixin):
     has_parts: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
     part_count: Mapped[int] = mapped_column(Integer, default=1, nullable=False)
     is_active: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
-    
     sample_response_text: Mapped[str | None] = mapped_column(Text)
     vocabulary_tips: Mapped[list[str]] = mapped_column(ARRAY(Text), default=list, nullable=False)
     connector_phrases: Mapped[list[str]] = mapped_column(ARRAY(Text), default=list, nullable=False)
     template_hint: Mapped[str | None] = mapped_column(Text)
 
+    # CMS fields (migration 0003)
+    slug: Mapped[str | None] = mapped_column(Text, unique=True)
+    topic: Mapped[str | None] = mapped_column(Text)
+    instructions_text: Mapped[str | None] = mapped_column(Text)
+    status: Mapped[str] = mapped_column(String(16), nullable=False, server_default="draft")
+    sort_order: Mapped[int] = mapped_column(Integer, nullable=False, server_default="0")
+    version_no: Mapped[int] = mapped_column(Integer, nullable=False, server_default="1")
+    created_by: Mapped[uuid.UUID | None] = mapped_column(
+        UUID(as_uuid=True), ForeignKey("users.id", ondelete="SET NULL")
+    )
+    updated_by: Mapped[uuid.UUID | None] = mapped_column(
+        UUID(as_uuid=True), ForeignKey("users.id", ondelete="SET NULL")
+    )
+    published_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    archived_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+
     __table_args__ = (
         CheckConstraint("task_number BETWEEN 0 AND 8", name="check_speaking_task_number"),
         CheckConstraint("difficulty IN ('easy', 'medium', 'hard')", name="check_speaking_difficulty"),
+        CheckConstraint(_CMS_STATUS_CHECK, name="check_speaking_status"),
     )
+
 
 class WritingPrompt(Base, TimestampMixin):
     __tablename__ = "writing_prompts"
@@ -42,13 +64,29 @@ class WritingPrompt(Base, TimestampMixin):
     time_limit_seconds: Mapped[int] = mapped_column(Integer, nullable=False)
     difficulty: Mapped[str] = mapped_column(String, default="medium", nullable=False)
     is_active: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
-    
     sample_response_text: Mapped[str | None] = mapped_column(Text)
     idea_hints: Mapped[list[str]] = mapped_column(ARRAY(Text), default=list, nullable=False)
     intro_template: Mapped[str | None] = mapped_column(Text)
     conclusion_template: Mapped[str | None] = mapped_column(Text)
 
+    # CMS fields (migration 0003)
+    slug: Mapped[str | None] = mapped_column(Text, unique=True)
+    topic: Mapped[str | None] = mapped_column(Text)
+    instructions_text: Mapped[str | None] = mapped_column(Text)
+    status: Mapped[str] = mapped_column(String(16), nullable=False, server_default="draft")
+    sort_order: Mapped[int] = mapped_column(Integer, nullable=False, server_default="0")
+    version_no: Mapped[int] = mapped_column(Integer, nullable=False, server_default="1")
+    created_by: Mapped[uuid.UUID | None] = mapped_column(
+        UUID(as_uuid=True), ForeignKey("users.id", ondelete="SET NULL")
+    )
+    updated_by: Mapped[uuid.UUID | None] = mapped_column(
+        UUID(as_uuid=True), ForeignKey("users.id", ondelete="SET NULL")
+    )
+    published_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    archived_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+
     __table_args__ = (
         CheckConstraint("task_number IN (1, 2)", name="check_writing_task_number"),
         CheckConstraint("difficulty IN ('easy', 'medium', 'hard')", name="check_writing_difficulty"),
+        CheckConstraint(_CMS_STATUS_CHECK, name="check_writing_status"),
     )

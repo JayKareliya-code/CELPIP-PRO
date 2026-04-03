@@ -1,6 +1,13 @@
 from fastapi import APIRouter
 from app.api.v1 import health, users, speaking, writing, attempts, admin
-from app.api.v1 import reports, history   # Phase 2
+from app.api.v1 import reports, history          # Phase 2
+from app.api.v1 import (                         # Phase CMS
+    admin_prompts,
+    admin_materials,
+    admin_assets,
+    admin_tags,
+    admin_audit,
+)
 
 api_router = APIRouter()
 
@@ -14,3 +21,10 @@ api_router.include_router(admin.router,    prefix="/admin",    tags=["Admin"])
 # Phase 2 — AI scoring reports + history
 api_router.include_router(reports.router,  tags=["Reports"])   # GET /attempts/{id}/report
 api_router.include_router(history.router,  tags=["History"])   # GET /history
+
+# Phase CMS — admin content management
+api_router.include_router(admin_prompts.router,   prefix="/admin", tags=["Admin CMS — Prompts"])
+api_router.include_router(admin_materials.router, prefix="/admin", tags=["Admin CMS — Materials"])
+api_router.include_router(admin_assets.router,    prefix="/admin", tags=["Admin CMS — Assets"])
+api_router.include_router(admin_tags.router,      prefix="/admin", tags=["Admin CMS — Tags"])
+api_router.include_router(admin_audit.router,     prefix="/admin", tags=["Admin CMS — Audit"])

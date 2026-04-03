@@ -1,24 +1,29 @@
-import { auth } from "@clerk/nextjs/server";
+import { auth, currentUser } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 
 /**
  * Admin route group layout.
- * Checks for the admin role stored in Clerk's publicMetadata.
- * Non-admin users are redirected to /dashboard.
+ *
+ * Uses currentUser() to read publicMetadata — sessionClaims alone does NOT
+ * include publicMetadata in Clerk's default JWT template.
+ *
+ * To grant admin access: set publicMetadata.role = "admin" in Clerk dashboard
+ * → Users → [user] → Metadata → Public metadata: { "role": "admin" }
  */
 export default async function AdminLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const { userId, sessionClaims } = await auth();
+  const { userId } = await auth();
 
   if (!userId) {
     redirect("/sign-in");
   }
 
-  // Role check: set publicMetadata.role = "admin" in Clerk dashboard
-  const role = (sessionClaims?.metadata as Record<string, string> | undefined)?.role;
+  const user = await currentUser();
+  const role = user?.publicMetadata?.role as string | undefined;
+
   if (role !== "admin") {
     redirect("/dashboard");
   }
