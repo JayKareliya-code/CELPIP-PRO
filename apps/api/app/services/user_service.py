@@ -1,8 +1,36 @@
-from datetime import date
+from datetime import date, timedelta
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.exc import IntegrityError
 from app.models.user import User
 from app.repositories.user_repo import UserRepository
+
+
+def _update_streak(user: User) -> None:
+    """Increment, maintain, or reset the user's practice streak.
+
+    Rules:
+      - First active day ever          → streak = 1
+      - Active again today (same day)  → no change (already counted)
+      - Active yesterday               → streak += 1
+      - Gap of 2+ days                 → streak resets to 1
+    """
+    today = date.today()
+    last = user.last_active_date
+
+    if last is None:
+        # Brand new first session
+        user.streak_days = 1
+    elif last == today:
+        # Already counted today — nothing to do
+        pass
+    elif last == today - timedelta(days=1):
+        # Consecutive day — keep the chain going
+        user.streak_days = (user.streak_days or 0) + 1
+    else:
+        # Missed one or more days — reset
+        user.streak_days = 1
+
+    user.last_active_date = today
 
 
 async def get_or_create_user(
@@ -18,13 +46,15 @@ async def get_or_create_user(
                 email=email,
                 full_name=full_name,
                 plan="starter",
+                streak_days=1,
+                last_active_date=date.today(),
             )
         except IntegrityError:
             # Concurrent first-login race: another request inserted the row first.
             await db.rollback()
             user = await repo.get_by_clerk_id(clerk_user_id)
     else:
-        user.last_active_date = date.today()
+        _update_streak(user)
         await db.flush()
 
     return user

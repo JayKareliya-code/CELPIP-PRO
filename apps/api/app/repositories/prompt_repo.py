@@ -14,11 +14,16 @@ class SpeakingPromptRepository(BaseRepository[SpeakingPrompt]):
         super().__init__(SpeakingPrompt, session)
 
     async def list_active(self) -> list[SpeakingPrompt]:
-        """Return all active speaking prompts ordered by task number."""
+        """Return all published+active speaking prompts ordered by task number.
+
+        Guards on BOTH is_active and status='published' to prevent draft or
+        archived prompts leaking when an admin sets is_active=True prematurely.
+        """
         result = await self.session.execute(
             select(SpeakingPrompt)
-            .where(SpeakingPrompt.is_active == True)  # noqa: E712
-            .order_by(SpeakingPrompt.task_number)
+            .where(SpeakingPrompt.is_active == True)   # noqa: E712
+            .where(SpeakingPrompt.status == "published")
+            .order_by(SpeakingPrompt.task_number, SpeakingPrompt.sort_order)
         )
         return list(result.scalars().all())
 
@@ -30,13 +35,28 @@ class SpeakingPromptRepository(BaseRepository[SpeakingPrompt]):
         return list(result.scalars().all())
 
     async def get_active_by_task(self, task_number: int) -> SpeakingPrompt | None:
-        """Return a random active prompt for the given task number."""
+        """Return the highest-sort-order published prompt for the given task number."""
         result = await self.session.execute(
             select(SpeakingPrompt)
-            .where(SpeakingPrompt.is_active == True)  # noqa: E712
+            .where(SpeakingPrompt.is_active == True)   # noqa: E712
+            .where(SpeakingPrompt.status == "published")
             .where(SpeakingPrompt.task_number == task_number)
-            .order_by(SpeakingPrompt.created_at.desc())
+            .order_by(SpeakingPrompt.sort_order, SpeakingPrompt.created_at.desc())
             .limit(1)
+        )
+        return result.scalar_one_or_none()
+
+    async def get_active_by_id(self, prompt_id: uuid.UUID) -> SpeakingPrompt | None:
+        """Return a prompt by UUID only if it is published and active.
+
+        Used by the practice-page server fetch — prevents a candidate from
+        accessing a prompt after it has been archived by an admin.
+        """
+        result = await self.session.execute(
+            select(SpeakingPrompt)
+            .where(SpeakingPrompt.id == prompt_id)
+            .where(SpeakingPrompt.is_active == True)   # noqa: E712
+            .where(SpeakingPrompt.status == "published")
         )
         return result.scalar_one_or_none()
 

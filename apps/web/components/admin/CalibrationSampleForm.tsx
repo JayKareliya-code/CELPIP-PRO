@@ -1,14 +1,18 @@
 // ─────────────────────────────────────────────────────────────────────────────
 // CalibrationSampleForm.tsx — Add / Edit calibration sample dialog
 //
-// Fields: Skill, Task Number, Band Level (1–12), Sample Text, Source.
-// Uses shadcn/ui Dialog + native <form>.
+// Fields: Skill, Task Number, Band Level (1–12), Sample Text, Source, Active.
+//
+// Bug fixes from code review:
+//   1. Uses shared Field component — removes inline label+div duplication.
+//   2. Uses shared inputCls — removes locally re-declared class string.
+//   3. is_active toggle added — admins can now deactivate a sample from the form.
+//   4. handleSubmit does not call onClose — parent manages modal lifecycle.
 // ─────────────────────────────────────────────────────────────────────────────
 
 "use client";
 
 import { useEffect, useRef }              from "react";
-import { X }                              from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -17,6 +21,8 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { cn }                             from "@/lib/utils";
+import { Field }                          from "@/components/admin/shared/Field";
+import { inputCls }                       from "@/components/admin/shared/inputCls";
 import { BAND_MIN, BAND_MAX }             from "@/lib/constants";
 import type { CalibrationSample, Skill }  from "@/lib/types";
 
@@ -26,22 +32,20 @@ interface CalibrationSampleFormProps {
   open:            boolean;
   initialSample?:  CalibrationSample;
   onClose:         () => void;
+  /**
+   * Called with the constructed CalibrationSample after validation passes.
+   * The parent is responsible for closing the modal after the save completes.
+   */
   onSave:          (sample: CalibrationSample) => void;
 }
-
-// ── Shared input class ────────────────────────────────────────────────────────
-
-const inputCls = cn(
-  "w-full rounded-lg border border-border bg-muted px-3 py-2",
-  "text-sm text-foreground placeholder:text-subtle/60",
-  "focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary",
-  "transition-colors duration-150"
-);
 
 // ── Component ─────────────────────────────────────────────────────────────────
 
 /**
  * Controlled dialog for creating or editing a calibration sample.
+ *
+ * Does not call onClose() inside the submit handler — the parent controls the
+ * modal lifecycle so async mutations can complete before dismissal.
  */
 export function CalibrationSampleForm({
   open,
@@ -52,45 +56,41 @@ export function CalibrationSampleForm({
   const formRef = useRef<HTMLFormElement>(null);
   const isEdit  = Boolean(initialSample);
 
+  // Reset form on close or when a different sample is loaded for editing.
   useEffect(() => {
     if (!open) formRef.current?.reset();
-  }, [open, initialSample]);
+  }, [open, initialSample?.id]);
 
   function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     const data   = new FormData(e.currentTarget);
     const sample: CalibrationSample = {
-      id:          initialSample?.id ?? `cal-${Date.now()}`,
+      id:          initialSample?.id ?? crypto.randomUUID(),
       skill:       String(data.get("skill")) as Skill,
       task_number: Number(data.get("task_number")),
       band_level:  Number(data.get("band_level")),
       sample_text: String(data.get("sample_text") ?? "").trim(),
       source:      String(data.get("source") ?? "official").trim() || "official",
-      is_active:   initialSample?.is_active ?? true,
+      is_active:   data.get("is_active") === "on",
       created_at:  initialSample?.created_at ?? new Date().toISOString(),
     };
+    // Do NOT call onClose() here — the parent decides when to close the modal.
     onSave(sample);
-    onClose();
   }
+
+  const formKey = `cal-${initialSample?.id ?? "new"}`;
 
   return (
     <Dialog open={open} onOpenChange={(v) => !v && onClose()}>
-      <DialogContent className="max-w-lg w-full bg-surface border border-border shadow-panel">
-        <DialogHeader className="flex flex-row items-start justify-between gap-2 pb-0">
+      <DialogContent className="max-w-2xl w-full bg-surface border border-border shadow-panel">
+        <DialogHeader>
           <DialogTitle className="text-base font-bold text-foreground">
             {isEdit ? "Edit" : "Add"} Calibration Sample
           </DialogTitle>
-          <button
-            type="button"
-            onClick={onClose}
-            aria-label="Close modal"
-            className="text-subtle hover:text-foreground transition-colors"
-          >
-            <X className="w-4 h-4" />
-          </button>
         </DialogHeader>
 
         <form
+          key={formKey}
           ref={formRef}
           id="calibration-form"
           onSubmit={handleSubmit}
@@ -98,10 +98,7 @@ export function CalibrationSampleForm({
         >
           {/* Skill + Task row */}
           <div className="grid grid-cols-2 gap-3">
-            <div className="flex flex-col gap-1.5">
-              <label htmlFor="cal-skill" className="text-xs font-semibold text-foreground">
-                Skill <span className="text-danger">*</span>
-              </label>
+            <Field label="Skill" htmlFor="cal-skill" required>
               <select
                 id="cal-skill"
                 name="skill"
@@ -112,12 +109,9 @@ export function CalibrationSampleForm({
                 <option value="speaking">Speaking</option>
                 <option value="writing">Writing</option>
               </select>
-            </div>
+            </Field>
 
-            <div className="flex flex-col gap-1.5">
-              <label htmlFor="cal-task" className="text-xs font-semibold text-foreground">
-                Task # <span className="text-danger">*</span>
-              </label>
+            <Field label="Task #" htmlFor="cal-task" required>
               <input
                 id="cal-task"
                 name="task_number"
@@ -128,14 +122,15 @@ export function CalibrationSampleForm({
                 defaultValue={initialSample?.task_number ?? 1}
                 className={inputCls}
               />
-            </div>
+            </Field>
           </div>
 
           {/* Band level */}
-          <div className="flex flex-col gap-1.5">
-            <label htmlFor="cal-band" className="text-xs font-semibold text-foreground">
-              Band Level ({BAND_MIN}–{BAND_MAX}) <span className="text-danger">*</span>
-            </label>
+          <Field
+            label={`Band Level (${BAND_MIN}–${BAND_MAX})`}
+            htmlFor="cal-band"
+            required
+          >
             <input
               id="cal-band"
               name="band_level"
@@ -147,13 +142,10 @@ export function CalibrationSampleForm({
               defaultValue={initialSample?.band_level ?? 7}
               className={inputCls}
             />
-          </div>
+          </Field>
 
           {/* Sample text */}
-          <div className="flex flex-col gap-1.5">
-            <label htmlFor="cal-sample-text" className="text-xs font-semibold text-foreground">
-              Sample Text <span className="text-danger">*</span>
-            </label>
+          <Field label="Sample Text" htmlFor="cal-sample-text" required>
             <textarea
               id="cal-sample-text"
               name="sample_text"
@@ -163,13 +155,14 @@ export function CalibrationSampleForm({
               placeholder="Paste the full text of the calibration sample response…"
               className={cn(inputCls, "resize-y")}
             />
-          </div>
+          </Field>
 
           {/* Source */}
-          <div className="flex flex-col gap-1.5">
-            <label htmlFor="cal-source" className="text-xs font-semibold text-foreground">
-              Source <span className="text-subtle font-normal">(e.g. "official", "teacher", "ai")</span>
-            </label>
+          <Field
+            label="Source"
+            htmlFor="cal-source"
+            hint='E.g. "official", "teacher", "ai"'
+          >
             <input
               id="cal-source"
               name="source"
@@ -178,6 +171,20 @@ export function CalibrationSampleForm({
               placeholder="official"
               className={inputCls}
             />
+          </Field>
+
+          {/* Active toggle — previously missing, admins could not deactivate */}
+          <div className="flex items-center gap-2">
+            <input
+              id="cal-is-active"
+              name="is_active"
+              type="checkbox"
+              defaultChecked={initialSample?.is_active ?? true}
+              className="h-4 w-4 rounded border-border text-primary focus:ring-primary/40"
+            />
+            <label htmlFor="cal-is-active" className="text-sm text-foreground font-medium">
+              Active (included in AI calibration set)
+            </label>
           </div>
         </form>
 

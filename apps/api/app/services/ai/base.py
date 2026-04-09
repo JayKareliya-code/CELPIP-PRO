@@ -81,15 +81,20 @@ class ScoringProvider(Protocol):
         transcript: str,
         prompt_text: str,
         system_prompt: str,
+        context_image_url: str | None = None,
     ) -> ScoringResult:
         """
         Score a speaking transcript against the CELPIP rubric.
 
         Args:
-            transcript:    STT output text.
-            prompt_text:   The original speaking prompt shown to the candidate.
-            system_prompt: Fully assembled rubric system prompt (with band
-                           descriptors + calibration examples injected).
+            transcript:         STT output text.
+            prompt_text:        The original speaking prompt shown to the candidate.
+            system_prompt:      Fully assembled rubric system prompt (with band
+                                descriptors + calibration examples injected).
+            context_image_url:  Public URL of the scene image shown to the candidate
+                                during the task (Tasks 3, 4, 8).  None for text-only
+                                tasks.  Providers that support vision will include
+                                the image in the scoring request for better accuracy.
 
         Returns:
             ScoringResult with all 5 speaking dimensions populated.

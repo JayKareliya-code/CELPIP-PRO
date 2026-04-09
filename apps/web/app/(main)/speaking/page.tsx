@@ -5,16 +5,18 @@ import { SpeakingModuleHome } from "@/components/speaking/SpeakingModuleHome";
 import type { SpeakingTask }  from "@/lib/types";
 
 export const metadata: Metadata = {
-  title: "Speaking Module",
+  title: "Speaking Module — CELPIP PRO",
   description:
-    "Practice all 9 CELPIP speaking tasks with timed prep and response sessions. Improve your band score with structured feedback.",
+    "Practice all 9 CELPIP speaking tasks. Each task has multiple prompts — earn a new prompt with every attempt up to your plan limit. Unlimited free retries after.",
 };
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
 
 /**
  * Speaking module home — server component.
- * Fetches real tasks from the API using the Clerk session token.
+ *
+ * Fetches ALL active speaking prompts (may be many per task_number).
+ * SpeakingModuleHome groups them by task_number to display per-task prompt counts.
  */
 export default async function SpeakingPage() {
   const { getToken } = await auth();
@@ -28,7 +30,7 @@ export default async function SpeakingPage() {
     });
     if (res.ok) tasks = await res.json();
   } catch {
-    // Fall through — show empty state; client will show error
+    // Fall through — empty state rendered by SpeakingModuleHome
   }
 
   return (

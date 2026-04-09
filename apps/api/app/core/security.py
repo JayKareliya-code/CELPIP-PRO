@@ -77,8 +77,19 @@ async def get_current_user(
             options={"verify_aud": False},
         )
         clerk_user_id: str = payload["sub"]
-        email:         str = payload.get("email", "")
-        full_name:     str = payload.get("name", "")
+
+        # Clerk JWT templates vary — try common claim locations in order.
+        email: str = (
+            payload.get("email")
+            or payload.get("email_address")
+            # Some Clerk templates nest it: email_addresses[0].email_address
+            or (
+                (payload.get("email_addresses") or [{}])[0].get("email_address")
+            )
+            # Fallback — ensures the NOT NULL column is always populated.
+            or f"{clerk_user_id}@clerk.local"
+        )
+        full_name: str = payload.get("name") or payload.get("full_name") or ""
     except (JWTError, KeyError):
         logger.warning("JWT validation failed", exc_info=True)
         raise exc

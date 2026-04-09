@@ -1,60 +1,79 @@
 // ─────────────────────────────────────────────────────────────────────────────
-// AdminPromptTabs.tsx — shadcn/ui Tabs: Speaking | Writing prompt tables
+// AdminPromptTabs.tsx — Speaking | Writing prompt tab switcher
 //
-// Client component — needs "use client" because Tabs state is interactive.
-// Receives prompt arrays as props (fed from server component page.tsx).
+// Each table is now self-fetching via React Query hooks — no props needed.
 // ─────────────────────────────────────────────────────────────────────────────
 
 "use client";
 
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { SpeakingPromptTable }                      from "@/components/admin/SpeakingPromptTable";
-import { WritingPromptTable }                       from "@/components/admin/WritingPromptTable";
-import type { SpeakingPrompt, WritingPrompt }       from "@/lib/types";
+import { useState }            from "react";
+import { Mic, PenLine }        from "lucide-react";
+import { SpeakingTaskGrid }    from "@/components/admin/SpeakingTaskGrid";
+import { WritingPromptTable }  from "@/components/admin/WritingPromptTable";
+import { cn }                  from "@/lib/utils";
 
-// ── Props ─────────────────────────────────────────────────────────────────────
+type ActiveTab = "speaking" | "writing";
 
-interface AdminPromptTabsProps {
-  speakingPrompts: SpeakingPrompt[];
-  writingPrompts:  WritingPrompt[];
-}
+const TABS = [
+  { id: "speaking" as const, label: "Speaking", icon: Mic     },
+  { id: "writing"  as const, label: "Writing",  icon: PenLine },
+] as const;
 
-// ── Component ─────────────────────────────────────────────────────────────────
+/** Tabbed view for Speaking / Writing prompt management. No props needed. */
+export function AdminPromptTabs() {
+  const [active, setActive] = useState<ActiveTab>("speaking");
 
-/**
- * Tabbed view for Speaking / Writing prompt management.
- * Each tab renders the corresponding data table with add/edit/delete actions.
- */
-export function AdminPromptTabs({
-  speakingPrompts,
-  writingPrompts,
-}: AdminPromptTabsProps) {
   return (
-    <Tabs defaultValue="speaking" className="w-full">
-      <TabsList className="mb-6 bg-surface border border-border shadow-card">
-        <TabsTrigger
-          id="prompts-tab-speaking"
-          value="speaking"
-          className="data-[state=active]:bg-primary data-[state=active]:text-white"
-        >
-          Speaking
-        </TabsTrigger>
-        <TabsTrigger
-          id="prompts-tab-writing"
-          value="writing"
-          className="data-[state=active]:bg-primary data-[state=active]:text-white"
-        >
-          Writing
-        </TabsTrigger>
-      </TabsList>
+    <div className="w-full space-y-6">
+      {/* Tab bar */}
+      <div
+        role="tablist"
+        aria-label="Prompt type"
+        className="flex items-center gap-1 bg-surface border border-border rounded-xl p-1 w-fit shadow-card"
+      >
+        {TABS.map(({ id, label, icon: Icon }) => {
+          const isActive = active === id;
+          return (
+            <button
+              key={id}
+              id={`prompts-tab-${id}`}
+              role="tab"
+              aria-selected={isActive}
+              aria-controls={`prompts-panel-${id}`}
+              onClick={() => setActive(id)}
+              className={cn(
+                "flex items-center gap-2 px-5 py-2 rounded-lg text-sm font-semibold",
+                "transition-all duration-150 select-none",
+                isActive
+                  ? "bg-primary text-white shadow-sm"
+                  : "text-subtle hover:text-foreground hover:bg-muted",
+              )}
+            >
+              <Icon className="w-4 h-4 shrink-0" aria-hidden="true" />
+              {label}
+            </button>
+          );
+        })}
+      </div>
 
-      <TabsContent value="speaking">
-        <SpeakingPromptTable prompts={speakingPrompts} />
-      </TabsContent>
+      {/* Tab panels — tables are self-contained, fetch their own data */}
+      <div
+        id="prompts-panel-speaking"
+        role="tabpanel"
+        aria-labelledby="prompts-tab-speaking"
+        hidden={active !== "speaking"}
+      >
+        {active === "speaking" && <SpeakingTaskGrid />}
+      </div>
 
-      <TabsContent value="writing">
-        <WritingPromptTable prompts={writingPrompts} />
-      </TabsContent>
-    </Tabs>
+      <div
+        id="prompts-panel-writing"
+        role="tabpanel"
+        aria-labelledby="prompts-tab-writing"
+        hidden={active !== "writing"}
+      >
+        {active === "writing" && <WritingPromptTable />}
+      </div>
+    </div>
   );
 }

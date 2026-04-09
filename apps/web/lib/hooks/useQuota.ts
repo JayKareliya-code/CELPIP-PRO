@@ -6,8 +6,8 @@
 //          maps so the UI knows exactly which tasks are still available.
 //
 // Usage:
-//   const { canAttempt, remaining, showPaywall } = useQuota("speaking");
-//   const { canAttemptTask }                     = useQuota("speaking");
+//   const { canAttempt, remaining, showPaywall }       = useQuota("speaking");
+//   const { canAttemptTask, speaking_used_per_task }   = useQuota("speaking");
 // ─────────────────────────────────────────────────────────────────────────────
 
 "use client";
@@ -39,6 +39,13 @@ export interface QuotaStatus {
    * undefined in mock mode.
    */
   canAttemptTask?: Record<number, boolean>;
+  /**
+   * Per-task USED count — raw from backend.
+   * e.g. { 0: 1, 1: 3, 2: 0, ... }
+   * Used by TaskAttemptRing and AttemptStatusBar.
+   */
+  speaking_used_per_task?: Record<number, number>;
+  writing_used_per_task?: Record<number, number>;
 }
 
 // ── Mock quota resolver ────────────────────────────────────────────────────────
@@ -110,6 +117,11 @@ export function useQuota(skill: Skill): QuotaStatus & { isLoading: boolean } {
         canAttempt,
         showPaywall:    !canAttempt,
         canAttemptTask: canAttemptMap,
+        // Expose per-task usage counts for attempt rings and bars
+        speaking_used_per_task:
+          skill === "speaking" ? resp.speaking_used_per_task : undefined,
+        writing_used_per_task:
+          skill === "writing"  ? resp.writing_used_per_task  : undefined,
       };
     },
 

@@ -1,6 +1,7 @@
 import uuid
 from datetime import datetime
 from sqlalchemy import Integer, String, Boolean, Text, ARRAY, CheckConstraint, DateTime, ForeignKey
+from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column
 
@@ -27,6 +28,19 @@ class SpeakingPrompt(Base, TimestampMixin):
     vocabulary_tips: Mapped[list[str]] = mapped_column(ARRAY(Text), default=list, nullable=False)
     connector_phrases: Mapped[list[str]] = mapped_column(ARRAY(Text), default=list, nullable=False)
     template_hint: Mapped[str | None] = mapped_column(Text)
+
+    # Task 5 — Comparing & Persuading fields (migration 0006)
+    # choice_options: list of two option cards shown during the PREP (selection) phase
+    # Shape: [{"name": "Hairdressing", "details": [{"label": "Schedule", "value": "Morning classes"}, ...]}, ...]
+    choice_options: Mapped[list | None] = mapped_column(JSONB, nullable=True)
+    # curveball_option: the surprise third option revealed at the RECORDING (prep) phase
+    # Shape: {"name": "Photography", "details": [{"label": "Study mode", "value": "Online"}, ...]}
+    curveball_option: Mapped[dict | None] = mapped_column(JSONB, nullable=True)
+    # curveball_instruction_text: instruction banner shown at top of the curveball screen
+    # e.g. "She has suddenly taken an interest in Photography. Convince her that your choice is better."
+    curveball_instruction_text: Mapped[str | None] = mapped_column(Text, nullable=True)
+    # default_choice_index: 0 or 1 — which choice is pre-selected for admin preview / scoring reference
+    default_choice_index: Mapped[int | None] = mapped_column(Integer, nullable=True)
 
     # CMS fields (migration 0003)
     slug: Mapped[str | None] = mapped_column(Text, unique=True)

@@ -10,7 +10,7 @@
 // ─────────────────────────────────────────────────────────────────────────────
 
 import { create } from "zustand";
-import type { SpeakingTask } from "@/lib/types";
+import type { SpeakingTask, ChoiceOption } from "@/lib/types";
 
 // ── Phase type ────────────────────────────────────────────────────────────────
 
@@ -45,6 +45,12 @@ export interface PracticeSessionState {
   /** Raw audio blob captured by MediaRecorder during RECORDING phase. */
   recordingBlob: Blob | null;
 
+  /**
+   * Task 5 only: the option the user tapped during the PREP (selection) phase.
+   * Used by Task5CurveballScreen to show "Your choice" during RECORDING / RECORDING_PART2.
+   */
+  selectedChoice: ChoiceOption | null;
+
   // ── Actions ──────────────────────────────────────────────────────────────
 
   /** Initialise a fresh session for a task and enter COUNTDOWN. */
@@ -65,6 +71,9 @@ export interface PracticeSessionState {
   /** Store the raw audio blob captured during recording. */
   setRecordingBlob: (blob: Blob | null) => void;
 
+  /** Task 5: store the option the user selected during the PREP phase. */
+  setSelectedChoice: (choice: ChoiceOption) => void;
+
   /** Hard reset — use when navigating away or on error. */
   reset: () => void;
 }
@@ -73,7 +82,7 @@ export interface PracticeSessionState {
 
 const INITIAL_STATE: Pick<
   PracticeSessionState,
-  "task" | "phase" | "secondsLeft" | "uploadProgress" | "attemptId" | "recordingBlob"
+  "task" | "phase" | "secondsLeft" | "uploadProgress" | "attemptId" | "recordingBlob" | "selectedChoice"
 > = {
   task:           null,
   phase:          "IDLE",
@@ -81,6 +90,7 @@ const INITIAL_STATE: Pick<
   uploadProgress: 0,
   attemptId:      null,
   recordingBlob:  null,
+  selectedChoice: null,
 };
 
 // ── Helper — seconds for a given phase ────────────────────────────────────────
@@ -123,6 +133,7 @@ export const usePracticeSessionStore = create<PracticeSessionState>((set, get) =
       secondsLeft:    0,
       uploadProgress: 0,
       attemptId:      null,
+      selectedChoice: null,   // always clear any previous Task 5 selection
     });
   },
 
@@ -150,6 +161,10 @@ export const usePracticeSessionStore = create<PracticeSessionState>((set, get) =
 
   setRecordingBlob: (blob) => {
     set({ recordingBlob: blob });
+  },
+
+  setSelectedChoice: (choice) => {
+    set({ selectedChoice: choice });
   },
 
   reset: () => {

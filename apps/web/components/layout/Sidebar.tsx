@@ -12,17 +12,19 @@ import {
   Settings,
   ChevronLeft,
   ChevronRight,
+  PlayCircle,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useState } from "react";
 
 const SIDEBAR_LINKS = [
-  { href: "/dashboard",  label: "Dashboard",  icon: LayoutDashboard },
-  { href: "/speaking",   label: "Speaking",   icon: Mic             },
-  { href: "/writing",    label: "Writing",    icon: PenLine         },
-  { href: "/history",    label: "History",    icon: History         },
-  { href: "/progress",   label: "Progress",   icon: TrendingUp      },
-  { href: "/billing",    label: "Billing",    icon: CreditCard      },
+  { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
+  { href: "/speaking",  label: "Speaking",  icon: Mic            },
+  { href: "/writing",   label: "Writing",   icon: PenLine        },
+  { href: "/practice",  label: "Practice",  icon: PlayCircle     },
+  { href: "/history",   label: "History",   icon: History        },
+  { href: "/progress",  label: "Progress",  icon: TrendingUp     },
+  { href: "/billing",   label: "Billing",   icon: CreditCard     },
 ];
 
 const BOTTOM_LINKS = [

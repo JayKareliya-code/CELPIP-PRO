@@ -1,0 +1,285 @@
+# Admin User Management — Implementation Plan
+
+## Goal
+
+Add a `/admin/users` section to the admin panel that gives authorized staff full
+visibility into every registered user and the ability to promote plans and adjust
+attempt quotas without touching the database directly.
+
+---
+
+## What Will Be Built
+
+### Admin can see (read)
+| Column | Source |
+|---|---|
+| Full name + email | `users` table |
+| Plan (starter / pro / ultra) | `users.plan` |
+| Member since | `users.created_at` |
+| Last active | `users.last_active_date` |
+| Speaking attempts used (total) | `COUNT(attempts)` where skill=speaking |
+| Writing attempts used (total) | `COUNT(attempts)` where skill=writing |
+| Attempts remaining (per plan limits) | computed from plan limits |
+| Role (user / admin) | `users.is_admin` |
+| Streak | `users.streak_days` |
+
+### Admin can do (write)
+| Action | Effect |
+|---|---|
+| **Change plan** | Updates `users.plan`, writes audit log |
+| **Grant bonus attempts** | Inserts rows into a new `attempt_overrides` table OR updates a bonus column on `users`. Plan below. |
+| **Toggle admin role** | Flips `users.is_admin` |
+| **Reset streak** | Sets `users.streak_days = 0` |
+
+---
+
+## Design Decisions
+
+### Bonus attempt approach — `attempt_overrides` table (recommended)
+
+Instead of storing `bonus_speaking_attempts INT` on `users` (which bloats the
+users table and obscures intent), introduce a dedicated table:
+
+```sql
+CREATE TABLE attempt_overrides (
+    id            UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id       UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    skill         TEXT NOT NULL CHECK (skill IN ('speaking', 'writing')),
+    bonus_count   INT  NOT NULL DEFAULT 0,
+    granted_by    UUID REFERENCES users(id),
+    note          TEXT,
+    created_at    TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    UNIQUE(user_id, skill)   -- one override row per user per skill
+);
+```
+
+The quota engine (`app/core/quota.py`) already computes `per_task` limits from the
+plan. It will read the bonus and add it on top:
+
+```
+effective_limit = plan_limit + bonus_count
+```
+
+This keeps the quota logic clean, auditable, and reversible.
+
+> [!IMPORTANT]
+> This requires a new Alembic migration. No existing tables are modified.
+
+---
+
+## Proposed Changes
+
+### Backend
+
+---
+
+#### [NEW] `app/models/attempt_override.py`
+
+New SQLAlchemy model for `attempt_overrides` table.
+
+#### [NEW] `alembic/versions/xxx_add_attempt_overrides.py`
+
+Migration that creates the `attempt_overrides` table.
+
+#### [NEW] `app/repositories/admin_user_repo.py`
+
+```python
+class AdminUserRepository:
+    async def list_users(search, plan_filter, page, per_page) -> list[User]
+    async def count_users(search, plan_filter) -> int
+    async def get_user_with_stats(user_id) -> UserWithStats
+    async def update_plan(user, new_plan) -> User
+    async def toggle_admin(user) -> User
+    async def set_bonus_attempts(user_id, skill, bonus_count, granted_by) -> AttemptOverride
+    async def reset_streak(user) -> User
+```
+
+All queries are single efficient SQL calls — no N+1.
+
+#### [NEW] `app/api/v1/admin_users.py`
+
+New FastAPI router, all behind `require_admin`:
+
+```
+GET  /admin/users                     — paginated user list with stats
+GET  /admin/users/{user_id}           — single user detail + full quota
+PATCH /admin/users/{user_id}/plan     — change plan { plan: "pro" }
+PATCH /admin/users/{user_id}/attempts — set bonus attempts { skill, bonus_count, note }
+PATCH /admin/users/{user_id}/role     — toggle is_admin { is_admin: bool }
+PATCH /admin/users/{user_id}/streak   — reset streak { streak_days: 0 }
+```
+
+Every PATCH writes an `admin_audit_logs` entry (entity_type="user", action_type="update").
+
+#### [MODIFY] `app/api/router.py`
+
+Register the new `admin_users` router:
+```python
+api_router.include_router(admin_users.router, prefix="/admin", tags=["Admin — Users"])
+```
+
+#### [MODIFY] `app/core/quota.py`
+
+Update `get_plan_limits()` to accept and add `bonus_count` from `attempt_overrides`
+when computing `effective_limit`.
+
+---
+
+### Frontend
+
+---
+
+#### [NEW] `apps/web/app/admin/users/page.tsx`
+
+Server component. Renders the `<UserTable>` client component.
+Exports correct `metadata` title.
+
+#### [NEW] `apps/web/components/admin/UserTable.tsx`
+
+Client component — paginated data table powered by React Query.
+
+Columns:
+```
+Name + Email | Plan (badge) | Role | Joined | Last Active | Spk Used | Wrt Used | Streak | Actions
+```
+
+Features:
+- Search by name/email (debounced 300ms)
+- Filter by plan (All / Starter / Pro / Ultra)
+- Pagination (25 per page)
+- Edit button → opens `UserEditModal`
+
+#### [NEW] `apps/web/components/admin/UserEditModal.tsx`
+
+Modal for updating a single user. Sections:
+
+1. **Plan** — select dropdown (starter / pro / ultra) + "Promote" button
+2. **Bonus Attempts** — number inputs for speaking and writing bonus counts
+3. **Role** — toggle admin checkbox
+4. **Streak** — "Reset streak to 0" button with confirm step
+
+Every action shows a toast on success/error and invalidates the React Query cache.
+
+#### [NEW] `apps/web/lib/hooks/useAdminUsers.ts`
+
+React Query hooks:
+```ts
+useAdminUsers(filters)          — paginated list + stats
+useAdminUser(userId)            — single user detail
+useUpdateUserPlan()             — mutation
+useUpdateUserAttempts()         — mutation
+useToggleUserRole()             — mutation
+useResetUserStreak()            — mutation
+```
+
+#### [MODIFY] `apps/web/components/admin/AdminSidebar.tsx`
+
+Add **Users** nav item:
+```ts
+{ href: ROUTES.adminUsers, label: "Users", icon: Users }
+```
+
+#### [MODIFY] `apps/web/lib/constants.ts`
+
+Add route:
+```ts
+adminUsers: "/admin/users"
+```
+
+#### [MODIFY] `apps/web/lib/types.ts`
+
+Add new types:
+```ts
+export interface AdminUserRow { ... }     // list view (lightweight)
+export interface AdminUserDetail { ... }  // detail view (full quota)
+export interface AttemptOverride { ... }  // bonus attempt record
+```
+
+#### [MODIFY] `apps/web/app/admin/page.tsx`
+
+Add **Total Users** stat card to the admin dashboard overview using the
+user list count endpoint.
+
+---
+
+## API Response Shape
+
+### `GET /admin/users` response item
+
+```json
+{
+  "id": "uuid",
+  "full_name": "Jane Doe",
+  "email": "jane@example.com",
+  "plan": "pro",
+  "is_admin": false,
+  "streak_days": 5,
+  "last_active_date": "2026-04-05",
+  "joined_at": "2026-01-15T10:00:00Z",
+  "speaking_attempts_used": 12,
+  "writing_attempts_used": 4,
+  "speaking_bonus": 0,
+  "writing_bonus": 0
+}
+```
+
+### `GET /admin/users/{id}` (detail) adds:
+
+```json
+{
+  "speaking_limit_per_task": 5,
+  "writing_limit_per_task": 5,
+  "speaking_used_per_task": { "0": 0, "1": 3, ... },
+  "writing_used_per_task": { "1": 2, "2": 2 }
+}
+```
+
+---
+
+## Security
+
+- All endpoints: `require_admin` dependency (existing pattern)
+- Plan change: only valid enum values accepted (Pydantic `Literal["starter","pro","ultra"]`)
+- Bonus attempts: max cap of 100 per skill (prevent abuse)
+- Role toggle: cannot demote yourself (admin cannot remove own admin flag)
+- Every mutation: writes `admin_audit_logs` row with `old_value_json` / `new_value_json`
+
+---
+
+## Build Order
+
+| Step | Work |
+|---|---|
+| 1 | Write `attempt_override.py` model + Alembic migration |
+| 2 | Write `admin_user_repo.py` with all queries |
+| 3 | Write `admin_users.py` FastAPI router + Pydantic schemas |
+| 4 | Register router, update `quota.py` to read bonus |
+| 5 | Add types to `lib/types.ts`, add route to `constants.ts` |
+| 6 | Write `useAdminUsers.ts` hooks |
+| 7 | Build `UserTable.tsx` (read-only first) |
+| 8 | Build `UserEditModal.tsx` (plan + attempts + role + streak) |
+| 9 | Create `app/admin/users/page.tsx` |
+| 10 | Update sidebar + dashboard stat card |
+
+---
+
+## Open Questions
+
+> [!IMPORTANT]
+> **Bonus attempts — per-task or global?**
+> The current quota system is per-task (e.g., 5 attempts on Task 1, 5 on Task 2).
+> Should the bonus be per-task too (admin sets `+3` for Task 1 specifically) or a
+> flat global bonus added on top of the total speaking/writing pool?
+>
+> **Recommendation:** Keep it simple — global bonus per skill for now.
+> A per-task override would require a much more complex grid UI.
+
+> [!NOTE]
+> **No email/name editing.** Names and emails come from Clerk (the auth provider).
+> Editing them here would create a sync mismatch. If you want to support this,
+> it requires calling Clerk's Management API separately. Not in scope for this plan.
+
+> [!NOTE]
+> **Deleting users is not included.** Deleting is dangerous (cascades attempts,
+> reports, purchases) and should go through Clerk's user management with a
+> deliberate off-boarding process. Admin can deactivate instead via role removal.

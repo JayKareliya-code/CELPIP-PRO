@@ -39,6 +39,7 @@ export interface UseSpeakingAttemptReturn {
   uploadProgress: number;
   attemptId:      string | null;
   uploadError:    string | null;
+  selectedChoice: import("@/lib/types").ChoiceOption | null;
   start:          (task: SpeakingTask) => void;
   exit:           () => void;
 }
@@ -52,6 +53,7 @@ export function useSpeakingAttempt(): UseSpeakingAttemptReturn {
     phase, secondsLeft, uploadProgress, attemptId, task,
     startSession, advancePhase, tick,
     setUploadProgress, setRecordingBlob,
+    selectedChoice,
     reset,
   } = usePracticeSessionStore();
 
@@ -95,8 +97,24 @@ export function useSpeakingAttempt(): UseSpeakingAttemptReturn {
       // Tick down every second; advance phase when timer reaches zero
       case "PREP": {
         tickIntervalRef.current = setInterval(() => {
-          if (secsRef.current <= 1) { clearTick(); advancePhase(); }
-          else tick();
+          if (secsRef.current <= 1) {
+            clearTick();
+            // Task 5: if the user never tapped an option, auto-select Option A
+            // before advancing so Task5CurveballScreen always has a selectedChoice.
+            // Must happen synchronously here — the component unmounts on advancePhase()
+            // so its own useEffect never sees secondsLeft===0.
+            const state = usePracticeSessionStore.getState();
+            if (
+              taskRef.current?.task_number === 5 &&
+              !state.selectedChoice &&
+              state.task?.choice_options?.[0]
+            ) {
+              state.setSelectedChoice(state.task.choice_options[0]);
+            }
+            advancePhase();
+          } else {
+            tick();
+          }
         }, TICK_INTERVAL_MS);
         break;
       }
@@ -104,7 +122,12 @@ export function useSpeakingAttempt(): UseSpeakingAttemptReturn {
       // Start recorder on the first recording phase; tick for both parts
       case "RECORDING":
       case "RECORDING_PART2": {
-        if (phase === "RECORDING") startRecording();
+        // Task 5: the RECORDING phase is a silent curveball-prep phase (no mic).
+        // The mic starts only at RECORDING_PART2 for Task 5.
+        // For all other tasks: mic starts at RECORDING as usual.
+        const isTask5 = taskRef.current?.task_number === 5;
+        if (phase === "RECORDING" && !isTask5) startRecording();
+        if (phase === "RECORDING_PART2" && isTask5) startRecording();
         tickIntervalRef.current = setInterval(() => {
           if (secsRef.current <= 1) { clearTick(); advancePhase(); }
           else tick();
@@ -177,5 +200,5 @@ export function useSpeakingAttempt(): UseSpeakingAttemptReturn {
     }
   }, [reset, router, forceStop]);
 
-  return { phase, secondsLeft, uploadProgress, attemptId, uploadError, start, exit };
+  return { phase, secondsLeft, uploadProgress, attemptId, uploadError, selectedChoice, start, exit };
 }

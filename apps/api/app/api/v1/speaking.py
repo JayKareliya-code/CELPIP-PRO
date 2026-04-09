@@ -1,12 +1,15 @@
 """Speaking routes — tasks listing and attempt lifecycle."""
 import uuid
+import logging
 from typing import Annotated
 from fastapi import APIRouter, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.core.config import settings
 from app.core.deps import get_db
 from app.core.security import get_current_user
 from app.models.user import User
+from app.models.prompt import SpeakingPrompt
 from app.schemas.prompt import SpeakingTaskResponse
 from app.schemas.attempt import (
     StartSpeakingAttemptRequest,
@@ -16,18 +19,100 @@ from app.schemas.attempt import (
 )
 from app.services import prompt_service, attempt_service
 from app.services.storage_service import generate_upload_url
+from app.services.storage.presigner import generate_presigned_get
 
+logger = logging.getLogger(__name__)
 router = APIRouter()
 
+# ── S3 key extraction ─────────────────────────────────────────────────────────
+
+def _extract_s3_key(stored_url: str) -> str:
+    """Extract the raw S3 key from a stored context_image_url.
+
+    Handles three formats:
+      1. Raw key:         'speaking-task-3/uuid-file.jpg'
+      2. Clean path URL:  'https://endpoint/bucket/speaking-task-3/uuid-file.jpg'
+      3. Presigned URL:   'https://endpoint/bucket/key?X-Amz-Algorithm=...'
+         (stored before the frontend stripPresign() guard was added)
+
+    Always strips query params so the returned value is a plain S3 key.
+    """
+    if not stored_url.startswith("http"):
+        return stored_url.split("?")[0]
+    marker = f"/{settings.S3_BUCKET_NAME}/"
+    raw_key = stored_url.split(marker, 1)[-1] if marker in stored_url else stored_url
+    return raw_key.split("?")[0]  # strip X-Amz-* query params
+
+
+def _sign_option_image(image_url: str, prompt_id: str) -> str:
+    """Return a presigned GET URL for an option card image, or the original on failure."""
+    try:
+        s3_key = _extract_s3_key(image_url)
+        return generate_presigned_get(key=s3_key, expires_in=7200)
+    except Exception:
+        logger.warning(
+            "Could not presign option image for prompt %s — serving raw URL.", prompt_id
+        )
+        return image_url
+
+
+def _sign_prompt(prompt: SpeakingPrompt) -> SpeakingTaskResponse:
+    """
+    Build a SpeakingTaskResponse, replacing every stored S3 URL with a
+    2-hour presigned GET URL so the browser can display images without needing
+    a public-read bucket policy.
+
+    Presigns:
+      • context_image_url            — scene image for Tasks 3, 4, 8
+      • choice_options[*].image_url  — option card images for Task 5
+      • curveball_option.image_url   — curveball card image for Task 5
+
+    Falls back to the raw stored URL if S3 credentials are not configured.
+    """
+    data = SpeakingTaskResponse.model_validate(prompt)
+
+    # ── Scene image (Tasks 3, 4, 8) ───────────────────────────────────────────
+    if data.context_image_url:
+        try:
+            s3_key = _extract_s3_key(data.context_image_url)
+            data.context_image_url = generate_presigned_get(key=s3_key, expires_in=7200)
+        except Exception:
+            logger.warning(
+                "Could not generate presigned URL for prompt %s — serving raw URL. "
+                "Check S3 credentials.",
+                prompt.id,
+            )
+
+    # ── Task 5 option card images ─────────────────────────────────────────────
+    pid = str(prompt.id)
+
+    if data.choice_options:
+        signed_options = []
+        for opt in data.choice_options:
+            # After model_validate, opt is a ChoiceOption Pydantic object (not a dict)
+            if opt.image_url:
+                opt = opt.model_copy(update={"image_url": _sign_option_image(opt.image_url, pid)})
+            signed_options.append(opt)
+        data.choice_options = signed_options
+
+    if data.curveball_option and data.curveball_option.image_url:
+        data.curveball_option = data.curveball_option.model_copy(
+            update={"image_url": _sign_option_image(data.curveball_option.image_url, pid)}
+        )
+
+    return data
+
+
+# ── Endpoints ─────────────────────────────────────────────────────────────────
 
 @router.get("/tasks", response_model=list[SpeakingTaskResponse])
 async def list_speaking_tasks(
     db: Annotated[AsyncSession, Depends(get_db)],
     _user: Annotated[User, Depends(get_current_user)],
 ) -> list[SpeakingTaskResponse]:
-    """Return all active speaking prompts ordered by task number."""
+    """Return all active speaking prompts with presigned image URLs."""
     prompts = await prompt_service.get_speaking_tasks(db)
-    return [SpeakingTaskResponse.model_validate(p) for p in prompts]
+    return [_sign_prompt(p) for p in prompts]
 
 
 @router.get("/tasks/by-id/{prompt_id}", response_model=SpeakingTaskResponse)
@@ -36,12 +121,9 @@ async def get_speaking_task_by_id(
     db: Annotated[AsyncSession, Depends(get_db)],
     _user: Annotated[User, Depends(get_current_user)],
 ) -> SpeakingTaskResponse:
-    """Return a single active speaking prompt by its UUID.
-
-    Used by the frontend server-side pages where the URL contains the task UUID.
-    """
+    """Return a single active speaking prompt by UUID with a presigned image URL."""
     prompt = await prompt_service.get_speaking_prompt_by_id(db, prompt_id)
-    return SpeakingTaskResponse.model_validate(prompt)
+    return _sign_prompt(prompt)
 
 
 @router.get("/tasks/{task_number}", response_model=SpeakingTaskResponse)
@@ -50,9 +132,10 @@ async def get_speaking_task(
     db: Annotated[AsyncSession, Depends(get_db)],
     _user: Annotated[User, Depends(get_current_user)],
 ) -> SpeakingTaskResponse:
-    """Return a single active speaking prompt by task number."""
+    """Return a single active speaking prompt by task number with a presigned image URL."""
     prompt = await prompt_service.get_speaking_task(db, task_number)
-    return SpeakingTaskResponse.model_validate(prompt)
+    return _sign_prompt(prompt)
+
 
 
 @router.post("/attempts/start", response_model=StartAttemptResponse, status_code=201)

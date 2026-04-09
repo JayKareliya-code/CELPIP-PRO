@@ -58,7 +58,7 @@ def _mark_attempt_status(attempt_id: str, status: str, error_msg: str | None = N
                 "UPDATE attempts SET status=:status, error_message=:msg, updated_at=NOW() "
                 "WHERE id=:id"
             ),
-            {"status": status, "msg": error_msg, "id": UUID(attempt_id)},
+            {"status": status, "msg": error_msg[:2000] if error_msg else None, "id": UUID(attempt_id)},
         )
 
 

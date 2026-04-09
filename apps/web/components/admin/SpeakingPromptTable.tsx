@@ -1,243 +1,153 @@
-// ─────────────────────────────────────────────────────────────────────────────
-// SpeakingPromptTable.tsx — Admin table for all speaking prompts
-//
-// Columns: Task # | Title | Prep | Response | Difficulty | Active | Actions
-// Actions: Edit (opens PromptFormModal) | Toggle active | Delete (ConfirmModal)
-//
-// Phase 1: fully client-side with mock data fed via props.
-// Phase 2: swap props for a React Query paginated fetch.
-// ─────────────────────────────────────────────────────────────────────────────
-
 "use client";
 
-import { useState }          from "react";
-import { Pencil, Trash2, CheckCircle, XCircle, Plus } from "lucide-react";
+// ─────────────────────────────────────────────────────────────────────────────
+// SpeakingPromptTable.tsx — Flat admin table for ALL speaking prompts.
+// (Used as a fallback/utility view; main flow uses the per-task grid/detail.)
+// ─────────────────────────────────────────────────────────────────────────────
+
+import { useState, useCallback } from "react";
+import { Loader2 } from "lucide-react";
+import { toast } from "sonner";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Badge } from "@/components/ui/badge";
+import { PromptFormModal } from "@/components/admin/PromptFormModal";
+import { ConfirmModal } from "@/components/common/ConfirmModal";
+import { EmptyState } from "@/components/common/EmptyState";
+import { AddButton } from "@/components/admin/shared/AddButton";
+import { PromptActionButtons } from "@/components/admin/shared/PromptActionButtons";
+import { cn } from "@/lib/utils";
+import { DIFFICULTY_STYLES, STATUS_STYLES } from "@/lib/admin/promptBadges";
 import {
-  Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
-} from "@/components/ui/table";
-import { Badge }             from "@/components/ui/badge";
-import { PromptFormModal }   from "@/components/admin/PromptFormModal";
-import { ConfirmModal }      from "@/components/common/ConfirmModal";
-import { EmptyState }        from "@/components/common/EmptyState";
-import { cn }                from "@/lib/utils";
+  useAdminSpeakingPrompts, useCreateSpeakingPrompt, useUpdateSpeakingPrompt,
+  useDeleteSpeakingPrompt, usePublishSpeakingPrompt, useArchiveSpeakingPrompt,
+  useToggleActiveSpeakingPrompt,
+  type SpeakingPromptPayload,
+} from "@/lib/hooks/useAdminPrompts";
 import type { SpeakingPrompt } from "@/lib/types";
 
-// ── Props ─────────────────────────────────────────────────────────────────────
-
-interface SpeakingPromptTableProps {
-  prompts: SpeakingPrompt[];
+function toPayload(data: FormData): SpeakingPromptPayload {
+  return {
+    task_number: Number(data.get("task_number")), title: String(data.get("title")),
+    prompt_text: String(data.get("prompt_text")),
+    prep_time_seconds: Number(data.get("prep_time_seconds")),
+    response_time_seconds: Number(data.get("response_time_seconds")),
+    difficulty: String(data.get("difficulty")) as SpeakingPromptPayload["difficulty"],
+    is_active: data.get("is_active") === "on",
+    status: String(data.get("status") || "draft") as SpeakingPromptPayload["status"],
+    slug: String(data.get("slug") || "").trim() || null,
+    topic: String(data.get("topic") || "").trim() || null,
+    sort_order: Number(data.get("sort_order") || 0),
+    sample_response_band12: String(data.get("sample_response_band12") || "").trim() || null,
+    context_image_url: String(data.get("context_image_url") || "").trim() || null,
+  };
 }
 
-// ── Difficulty badge colour ───────────────────────────────────────────────────
+/** See AdminSpeakingTaskDetail for full docs on the comparison logic. */
+function promptHasChanges(payload: SpeakingPromptPayload, original: SpeakingPrompt): boolean {
+  const strip = (url: string | null | undefined) =>
+    url ? url.split("?")[0].trim() : null;
 
-const DIFFICULTY_STYLES: Record<string, string> = {
-  easy:   "bg-success/10 text-success border-success/20",
-  medium: "bg-warning/10 text-warning border-warning/20",
-  hard:   "bg-danger/10  text-danger  border-danger/20",
-};
-
-// ── Component ─────────────────────────────────────────────────────────────────
-
-/**
- * Data table of speaking prompts for the admin prompt management page.
- * All mutations are client-side only (mock) in Phase 1.
- */
-export function SpeakingPromptTable({ prompts: initial }: SpeakingPromptTableProps) {
-  const [rows,         setRows]         = useState<SpeakingPrompt[]>(initial);
-  const [editTarget,   setEditTarget]   = useState<SpeakingPrompt | undefined>(undefined);
-  const [deleteTarget, setDeleteTarget] = useState<SpeakingPrompt | undefined>(undefined);
-  const [showAdd,      setShowAdd]      = useState(false);
-
-  // ── Handlers (mock mutations) ──────────────────────────────────────────────
-
-  function handleSave(data: FormData) {
-    const updated: SpeakingPrompt = {
-      id:                   editTarget?.id ?? `sp-${Date.now()}`,
-      task_number:          Number(data.get("task_number")),
-      title:                String(data.get("title")),
-      prep_time_seconds:    Number(data.get("prep_time_seconds")),
-      response_time_seconds: Number(data.get("response_time_seconds")),
-      prompt_text:          String(data.get("prompt_text")),
-      difficulty:           String(data.get("difficulty")) as SpeakingPrompt["difficulty"],
-      is_active:            data.get("is_active") === "on",
-      created_at:           editTarget?.created_at ?? new Date().toISOString(),
-    };
-
-    setRows((prev) =>
-      editTarget
-        ? prev.map((r) => (r.id === editTarget.id ? updated : r))
-        : [...prev, updated]
-    );
-    setEditTarget(undefined);
-    setShowAdd(false);
-  }
-
-  function handleToggleActive(id: string) {
-    setRows((prev) =>
-      prev.map((r) => (r.id === id ? { ...r, is_active: !r.is_active } : r))
-    );
-  }
-
-  function handleDelete(id: string) {
-    setRows((prev) => prev.filter((r) => r.id !== id));
-    setDeleteTarget(undefined);
-  }
-
-  // ── Render ─────────────────────────────────────────────────────────────────
-
-  if (rows.length === 0) {
-    return (
-      <>
-        <EmptyState
-          title="No speaking prompts yet"
-          description="Add your first speaking prompt to get started."
-        />
-        <AddButton onClick={() => setShowAdd(true)} />
-        <PromptFormModal
-          open={showAdd}
-          skill="speaking"
-          onClose={() => setShowAdd(false)}
-          onSave={handleSave}
-        />
-      </>
-    );
-  }
+  const origSampleResponse =
+    (original as SpeakingPrompt & { sample_response_text?: string | null })
+      .sample_response_text ?? null;
 
   return (
-    <div className="space-y-4">
-      {/* Add button */}
-      <div className="flex justify-end">
-        <AddButton onClick={() => { setEditTarget(undefined); setShowAdd(true); }} />
-      </div>
-
-      {/* Table */}
-      <div className="rounded-xl border border-border overflow-hidden shadow-card bg-surface">
-        <Table>
-          <TableHeader>
-            <TableRow className="bg-muted hover:bg-muted">
-              <TableHead className="w-16 text-center">Task</TableHead>
-              <TableHead>Title</TableHead>
-              <TableHead className="w-20 text-center hidden sm:table-cell">Prep</TableHead>
-              <TableHead className="w-24 text-center hidden sm:table-cell">Response</TableHead>
-              <TableHead className="w-24 hidden md:table-cell">Difficulty</TableHead>
-              <TableHead className="w-20 text-center">Active</TableHead>
-              <TableHead className="w-24 text-right">Actions</TableHead>
-            </TableRow>
-          </TableHeader>
-
-          <TableBody>
-            {rows.map((prompt) => (
-              <TableRow key={prompt.id} className="group hover:bg-muted/50">
-                {/* Task number */}
-                <TableCell className="text-center">
-                  <Badge variant="outline" className="text-xs font-semibold">
-                    {prompt.task_number === 0 ? "P" : prompt.task_number}
-                  </Badge>
-                </TableCell>
-
-                {/* Title */}
-                <TableCell className="font-medium text-sm text-foreground max-w-xs truncate">
-                  {prompt.title}
-                </TableCell>
-
-                {/* Prep time */}
-                <TableCell className="text-center text-xs text-subtle hidden sm:table-cell">
-                  {prompt.prep_time_seconds}s
-                </TableCell>
-
-                {/* Response time */}
-                <TableCell className="text-center text-xs text-subtle hidden sm:table-cell">
-                  {prompt.response_time_seconds}s
-                </TableCell>
-
-                {/* Difficulty */}
-                <TableCell className="hidden md:table-cell">
-                  <span
-                    className={cn(
-                      "inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold border",
-                      DIFFICULTY_STYLES[prompt.difficulty] ?? "bg-muted text-subtle"
-                    )}
-                  >
-                    {prompt.difficulty}
-                  </span>
-                </TableCell>
-
-                {/* Active toggle */}
-                <TableCell className="text-center">
-                  <button
-                    onClick={() => handleToggleActive(prompt.id)}
-                    aria-label={prompt.is_active ? "Deactivate prompt" : "Activate prompt"}
-                    className="transition-colors"
-                  >
-                    {prompt.is_active
-                      ? <CheckCircle className="w-4 h-4 text-success mx-auto" />
-                      : <XCircle    className="w-4 h-4 text-subtle  mx-auto" />
-                    }
-                  </button>
-                </TableCell>
-
-                {/* Actions */}
-                <TableCell className="text-right">
-                  <div className="flex items-center justify-end gap-1.5">
-                    <button
-                      onClick={() => { setEditTarget(prompt); setShowAdd(true); }}
-                      aria-label={`Edit ${prompt.title}`}
-                      className="p-1.5 rounded-md hover:bg-primary/10 text-subtle
-                                 hover:text-primary transition-colors"
-                    >
-                      <Pencil className="w-3.5 h-3.5" />
-                    </button>
-                    <button
-                      onClick={() => setDeleteTarget(prompt)}
-                      aria-label={`Delete ${prompt.title}`}
-                      className="p-1.5 rounded-md hover:bg-danger/10 text-subtle
-                                 hover:text-danger transition-colors"
-                    >
-                      <Trash2 className="w-3.5 h-3.5" />
-                    </button>
-                  </div>
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </div>
-
-      {/* Add / Edit modal */}
-      <PromptFormModal
-        open={showAdd}
-        skill="speaking"
-        initialPrompt={editTarget}
-        onClose={() => { setShowAdd(false); setEditTarget(undefined); }}
-        onSave={handleSave}
-      />
-
-      {/* Delete confirm modal */}
-      <ConfirmModal
-        open={Boolean(deleteTarget)}
-        title="Delete prompt?"
-        description={`"${deleteTarget?.title}" will be permanently removed. This cannot be undone.`}
-        confirmLabel="Delete"
-        isDestructive
-        onCancel={() => setDeleteTarget(undefined)}
-        onConfirm={() => deleteTarget && handleDelete(deleteTarget.id)}
-      />
-    </div>
+    payload.prompt_text !== (original.prompt_text ?? "") ||
+    payload.task_number !== (original.task_number ?? 0) ||
+    payload.title !== (original.title ?? "") ||
+    payload.prep_time_seconds !== (original.prep_time_seconds ?? 30) ||
+    payload.response_time_seconds !== (original.response_time_seconds ?? 60) ||
+    payload.difficulty !== (original.difficulty ?? "medium") ||
+    payload.is_active !== (original.is_active ?? true) ||
+    payload.status !== (original.status ?? "draft") ||
+    (payload.sort_order ?? 0) !== (original.sort_order ?? 0) ||
+    (payload.slug ?? null) !== (original.slug ?? null) ||
+    (payload.topic ?? null) !== (original.topic ?? null) ||
+    strip(payload.context_image_url) !== strip(original.context_image_url) ||
+    (payload.sample_response_band12 ?? null) !== (origSampleResponse ?? null)
   );
 }
 
-// ── Add button sub-component ───────────────────────────────────────────────────
 
-function AddButton({ onClick }: { onClick: () => void }) {
+export function SpeakingPromptTable() {
+  const [editTarget, setEditTarget] = useState<SpeakingPrompt | undefined>(undefined);
+  const [deleteTarget, setDeleteTarget] = useState<SpeakingPrompt | undefined>(undefined);
+  const [modalOpen, setModalOpen] = useState(false);
+
+  const { data: prompts = [], isLoading, isError } = useAdminSpeakingPrompts();
+  const create = useCreateSpeakingPrompt(); const update = useUpdateSpeakingPrompt();
+  const remove = useDeleteSpeakingPrompt(); const publish = usePublishSpeakingPrompt();
+  const archive = useArchiveSpeakingPrompt();
+  const toggleActive = useToggleActiveSpeakingPrompt();
+  const isMutating = create.isPending || update.isPending || remove.isPending || publish.isPending || archive.isPending || toggleActive.isPending;
+
+  const openCreate = useCallback(() => { setEditTarget(undefined); setModalOpen(true); }, []);
+  const openEdit = useCallback((p: SpeakingPrompt) => { setEditTarget(p); setModalOpen(true); }, []);
+  const closeModal = useCallback(() => { setModalOpen(false); setEditTarget(undefined); }, []);
+
+  function handleSave(data: FormData) {
+    const payload = toPayload(data);
+
+    if (editTarget) {
+      // ── Edit mode: skip the API call entirely if nothing changed ──────────
+      if (!promptHasChanges(payload, editTarget)) {
+        toast.info("No changes to save.");
+        closeModal();
+        return;
+      }
+      update.mutate({ id: editTarget.id, payload }, { onSuccess: closeModal });
+    } else {
+      create.mutate(payload, { onSuccess: closeModal });
+    }
+  }
+
+  if (isLoading) return <div className="flex items-center justify-center h-40 gap-2 text-subtle text-sm"><Loader2 className="w-4 h-4 animate-spin" />Loading…</div>;
+  if (isError) return <div className="text-danger text-sm text-center py-10">Failed to load speaking prompts.</div>;
+
   return (
-    <button
-      id="add-speaking-prompt-btn"
-      onClick={onClick}
-      className="flex items-center gap-2 px-4 py-2 rounded-lg bg-primary hover:bg-primary-hover
-                 text-white text-sm font-semibold transition-colors shadow-sm"
-    >
-      <Plus className="w-4 h-4" />
-      Add Prompt
-    </button>
+    <div className="space-y-4">
+      <div className="flex justify-end"><AddButton id="add-speaking-prompt-btn" label="Add Prompt" onClick={openCreate} disabled={isMutating} /></div>
+
+      {prompts.length === 0 ? <EmptyState title="No speaking prompts yet" description="Add your first speaking prompt to get started." /> : (
+        <div className="rounded-xl border border-border overflow-hidden shadow-card bg-surface">
+          <Table>
+            <TableHeader>
+              <TableRow className="bg-muted hover:bg-muted">
+                <TableHead className="w-16 text-center">Task</TableHead><TableHead>Title</TableHead>
+                <TableHead className="w-20 text-center hidden sm:table-cell">Prep</TableHead>
+                <TableHead className="w-24 text-center hidden sm:table-cell">Resp</TableHead>
+                <TableHead className="w-24 hidden md:table-cell">Difficulty</TableHead>
+                <TableHead className="w-28 hidden lg:table-cell">Status</TableHead>
+                <TableHead className="w-20 text-center">Active</TableHead>
+                <TableHead className="w-32 text-right">Actions</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {prompts.map((p) => (
+                <TableRow key={p.id} className="group hover:bg-muted/50">
+                  <TableCell className="text-center"><Badge variant="outline" className="text-xs font-semibold">{p.task_number === 0 ? "P" : p.task_number}</Badge></TableCell>
+                  <TableCell className="font-medium text-sm text-foreground max-w-xs truncate">{p.title}</TableCell>
+                  <TableCell className="text-center text-xs text-subtle hidden sm:table-cell">{p.prep_time_seconds}s</TableCell>
+                  <TableCell className="text-center text-xs text-subtle hidden sm:table-cell">{p.response_time_seconds}s</TableCell>
+                  <TableCell className="hidden md:table-cell"><span className={cn("inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold border", DIFFICULTY_STYLES[p.difficulty] ?? "bg-muted text-subtle")}>{p.difficulty}</span></TableCell>
+                  <TableCell className="hidden lg:table-cell"><span className={cn("inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold border", STATUS_STYLES[p.status ?? "draft"] ?? "bg-muted text-subtle")}>{p.status ?? "draft"}</span></TableCell>
+                  <TableCell className="text-center">
+                    <PromptActionButtons status={p.status} isActive={p.is_active} isMutating={isMutating}
+                      onEdit={() => openEdit(p)} onDelete={() => setDeleteTarget(p)}
+                      onToggleActive={() => toggleActive.mutate(p.id)}
+                      onPublish={() => publish.mutate(p.id)} onArchive={() => archive.mutate(p.id)} />
+                  </TableCell>
+                  <TableCell />
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </div>
+      )}
+
+      <PromptFormModal open={modalOpen} skill="speaking" initialPrompt={editTarget} onClose={closeModal} onSave={handleSave} isSaving={create.isPending || update.isPending} />
+      <ConfirmModal open={Boolean(deleteTarget)} title="Delete prompt?" description={`"${deleteTarget?.title}" will be permanently removed.`} confirmLabel="Delete" isDestructive
+        onCancel={() => setDeleteTarget(undefined)} onConfirm={() => { if (deleteTarget) remove.mutate(deleteTarget.id, { onSuccess: () => setDeleteTarget(undefined) }); }} />
+    </div>
   );
 }

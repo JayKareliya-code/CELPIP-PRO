@@ -42,8 +42,12 @@ async def get_writing_task(db: AsyncSession, task_number: int) -> WritingPrompt:
 async def get_speaking_prompt_by_id(
     db: AsyncSession, prompt_id: uuid.UUID
 ) -> SpeakingPrompt:
-    """Return a speaking prompt by UUID or raise 404."""
-    prompt = await SpeakingPromptRepository(db).get_by_id(prompt_id)
+    """Return a published+active speaking prompt by UUID or raise 404.
+
+    Uses get_active_by_id() so archived/draft prompts cannot be accessed
+    even if the candidate has a direct bookmarked URL.
+    """
+    prompt = await SpeakingPromptRepository(db).get_active_by_id(prompt_id)
     if not prompt:
         raise HTTPException(status_code=404, detail="Speaking prompt not found")
     return prompt

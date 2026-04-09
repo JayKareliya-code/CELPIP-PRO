@@ -1,44 +1,71 @@
-import { notFound } from "next/navigation";
-import { auth }       from "@clerk/nextjs/server";
-import type { Metadata } from "next";
-import { PageWrapper }         from "@/components/layout/PageWrapper";
-import { TaskInstructionPage } from "@/components/speaking/TaskInstructionPage";
-import type { SpeakingTask }   from "@/lib/types";
+// ─────────────────────────────────────────────────────────────────────────────
+// /speaking/[task] — Task "folder" page.
+//
+// Shows all available prompts for a specific task number.
+// Clicking a prompt card routes to its full-screen practice session.
+// ─────────────────────────────────────────────────────────────────────────────
 
-interface PageProps { params: { task: string } }
+import { notFound }        from "next/navigation";
+import { auth }            from "@clerk/nextjs/server";
+import type { Metadata }   from "next";
+import { PageWrapper }     from "@/components/layout/PageWrapper";
+import { TaskPromptsFolder } from "@/components/speaking/TaskPromptsFolder";
+import type { SpeakingTask } from "@/lib/types";
+import { SPEAKING_TASK_NAMES } from "@/lib/constants";
+
+interface PageProps {
+  params: Promise<{ task: string }>;
+}
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
 
-async function fetchTask(taskId: string, token: string | null): Promise<SpeakingTask | null> {
+async function fetchPromptsForTask(
+  taskNumber: number,
+  token: string | null,
+): Promise<SpeakingTask[]> {
   try {
-    const res = await fetch(`${API_BASE}/api/v1/speaking/tasks/by-id/${taskId}`, {
+    // Fetch all tasks then filter — or use the by-task-number endpoint which
+    // currently returns one prompt. We fetch all and filter client-side, so
+    // multiple prompts per task are all returned correctly.
+    const res = await fetch(`${API_BASE}/api/v1/speaking/tasks`, {
       headers: { Authorization: `Bearer ${token}` },
       cache: "no-store",
     });
-    if (res.status === 404) return null;
-    if (!res.ok) return null;
-    return res.json();
+    if (!res.ok) return [];
+    const all: SpeakingTask[] = await res.json();
+    return all.filter((t) => t.task_number === taskNumber);
   } catch {
-    return null;
+    return [];
   }
 }
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
+  const { task } = await params;
+  const taskNum = Number(task);
+  const taskKey = taskNum === 0 ? "practice" : `task-${taskNum}`;
+  const taskName = SPEAKING_TASK_NAMES[taskKey] ?? `Task ${taskNum}`;
   return {
-    title: "Speaking Task — CELPIP Prep",
-    description: "Instructions, vocabulary tips, and structural template. Start your timed practice session.",
+    title: `${taskName} — Speaking | CELPIP PRO`,
+    description: `Choose a prompt for ${taskName} and start your timed speaking practice session.`,
   };
 }
 
-export default async function SpeakingTaskPage({ params }: PageProps) {
+export default async function SpeakingTaskFolderPage({ params }: PageProps) {
+  const { task } = await params;
+  const taskNumber = Number(task);
+
+  // Validate task number is 0–8
+  if (!Number.isInteger(taskNumber) || taskNumber < 0 || taskNumber > 8) {
+    notFound();
+  }
+
   const { getToken } = await auth();
   const token = await getToken();
-  const task = await fetchTask(params.task, token);
-  if (!task) notFound();
+  const prompts = await fetchPromptsForTask(taskNumber, token);
 
   return (
     <PageWrapper>
-      <TaskInstructionPage task={task} />
+      <TaskPromptsFolder taskNumber={taskNumber} prompts={prompts} />
     </PageWrapper>
   );
 }

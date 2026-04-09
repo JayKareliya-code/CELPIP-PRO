@@ -14,6 +14,21 @@ export type UserPlan = "starter" | "pro" | "ultra";
 
 // ── Speaking ─────────────────────────────────────────────────────────────────
 
+// ── Task 5 — Comparing & Persuading ─────────────────────────────────────────
+
+/** A single detail row inside a Task 5 option card (e.g. "Tuition cost: $20,000") */
+export interface ChoiceOptionDetail {
+  label: string;  // e.g. "Tuition cost"
+  value: string;  // e.g. "$20,000"
+}
+
+/** One option card — used for the two initial choices AND the curveball third option */
+export interface ChoiceOption {
+  name:       string;               // e.g. "Hairdressing"
+  image_url?: string | null;        // optional card image (stored S3 URL)
+  details:    ChoiceOptionDetail[]; // detail rows shown in the card
+}
+
 export interface SpeakingTask {
   id: string;
   /**
@@ -32,6 +47,19 @@ export interface SpeakingTask {
   /** Task 5 has two parts — special state machine */
   has_parts?: boolean;
   part_count?: number;
+  /**
+   * Image-based tasks (3 — Describing a Scene, 4 — Making Predictions,
+   * 8 — Unusual Situation). Tasks 3 & 4 share the same image; Task 8 uses
+   * a different image per prompt. URL served from backend/S3.
+   */
+  context_image_url?: string | null;
+  // ── Task 5 — Comparing & Persuading ──────────────────────────────────────
+  /** The two initial option cards shown during the PREP (selection) phase. */
+  choice_options?:            ChoiceOption[];
+  /** The surprise curveball third option revealed at the RECORDING (prep) phase. */
+  curveball_option?:          ChoiceOption;
+  /** Instruction banner text on the curveball screen (Step 2 prompt). */
+  curveball_instruction_text?: string | null;
 }
 
 // ── Writing ──────────────────────────────────────────────────────────────────
@@ -134,6 +162,14 @@ export interface DimensionScore {
 
 // ── Admin ─────────────────────────────────────────────────────────────────────
 
+/**
+ * Lifecycle status for any admin-managed content item.
+ * draft      → being created, not yet visible to users.
+ * published  → live and accessible per access rules.
+ * archived   → hidden from users, preserved in DB, cannot be newly assigned.
+ */
+export type ContentStatus = "draft" | "published" | "archived";
+
 export interface SpeakingPrompt {
   id: string;
   task_number: number;
@@ -144,6 +180,34 @@ export interface SpeakingPrompt {
   is_active: boolean;
   difficulty: Difficulty;
   created_at: string;
+  /** Task 5 has two recording parts. */
+  has_parts?:   boolean;
+  part_count?:  number;
+  vocabulary_tips?:   string[];
+  connector_phrases?: string[];
+  template_hint?:     string | null;
+  /**
+   * Scene image URL — present for Tasks 3, 4, 8.
+   * Tasks 3 & 4 share the same image per prompt set; Task 8 uses a unique image.
+   */
+  context_image_url?: string | null;
+  // ── CMS admin fields (optional for backward-compat with legacy mock data) ──
+  slug?:         string | null;
+  topic?:        string | null;
+  /** Instructions shown to the candidate above the prompt text. */
+  instructions_text?: string | null;
+  status?:       ContentStatus;
+  sort_order?:   number;
+  version_no?:   number;
+  published_at?: string | null;  // ISO 8601
+  archived_at?:  string | null;  // ISO 8601
+  updated_at?:   string;
+  // ── Task 5 — Comparing & Persuading ──────────────────────────────────────
+  choice_options?:             ChoiceOption[] | null;
+  curveball_option?:           ChoiceOption | null;
+  curveball_instruction_text?: string | null;
+  /** 0 = Option A, 1 = Option B — admin default selected choice for preview */
+  default_choice_index?:       number | null;
 }
 
 export interface WritingPrompt {
@@ -156,6 +220,16 @@ export interface WritingPrompt {
   time_limit_seconds: number;
   is_active: boolean;
   created_at: string;
+  // ── CMS admin fields (optional for backward-compat with legacy mock data) ──
+  slug?:         string | null;
+  topic?:        string | null;
+  instructions_text?: string | null;
+  status?:       ContentStatus;
+  sort_order?:   number;
+  version_no?:   number;
+  published_at?: string | null;  // ISO 8601
+  archived_at?:  string | null;  // ISO 8601
+  updated_at?:   string;
 }
 
 export interface CalibrationSample {

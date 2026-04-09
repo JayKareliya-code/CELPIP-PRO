@@ -1,0 +1,804 @@
+# Phase 3 Implementation Plan — Updated with Speaking Module Completion
+
+## CELPIP Exam Learning Platform
+
+**Phase focus:** One-time payments, plan-scoped entitlements, add-on bundles, mock tests, progress intelligence, learning-material gating, production hardening **+ complete Speaking Module functionality (prompt rotation, plan-based quotas, retry mechanics)**
+
+---
+
+# DELTA: Speaking Module Full Functionality *(New Addition)*
+
+> [!IMPORTANT]
+> This section is the **primary addition** to the original Phase 3 plan. It must be implemented **first**, before the commerce/billing workstreams. It covers prompt rotation by plan, attempt quota tracking per task, retry behaviour after quota exhaustion, and the frontend flow surfaces.
+
+---
+
+## SM-1. Business Rules — Attempts, Prompts and Retries
+
+### SM-1.1 Plans and Attempt Quotas
+
+The `users.plan` column enforces `('starter','pro','ultra')` via a CHECK constraint.
+
+| Plan | Task practice? | Attempts per task | Speaking mock tests |
+|------|---------------|-------------------|--------------------|
+| **Starter** | Locked | 0 | 1 included |
+| **Pro** | Yes | 5 per task (Tasks 0–8) | 2 included |
+| **Ultra** | Yes | 15 per task (Tasks 0–8) | 5 included |
+
+> [!NOTE]
+> These numbers live in `apps/web/lib/constants.ts` (`PRO_PLAN_LIMITS.speaking_attempts_per_task`) and in `apps/api/app/core/quota.py`. The backend `quota.py` is the canonical source. Both must stay in sync.
+
+### SM-1.2 Prompt Rotation Logic
+
+Currently `SpeakingPromptRepository.get_active_by_task()` returns the most recently created prompt (`.order_by(created_at.desc()).limit(1)`). This must change to serve a **different, unseen prompt** on each attempt until all available prompts for a task are exhausted.
+
+**Decision matrix:**
+
+```
+has_remaining_quota AND has_unseen_prompts  → assign next unseen prompt (oldest first)
+has_remaining_quota AND no_unseen_prompts   → assign last-seen prompt (repeat)
+quota_exhausted (retry allowed)             → same last-seen prompt, quota NOT deducted
+```
+
+> [!IMPORTANT]
+> Retries after quota exhaustion are **free and unlimited** — they do not consume quota, do not cycle to a new prompt, and still go through the full recording + AI pipeline.
+
+### SM-1.3 Quota Consumed vs. Bonus Retry
+
+- **Quota is consumed** only when an attempt starts AND quota remains.
+- **Retry attempts** (beyond quota) still create `attempts` rows but are flagged `is_bonus_retry = TRUE`.
+- History and admin views can distinguish counted attempts from bonus retries.
+
+---
+
+## SM-2. Schema Changes
+
+### SM-2.1 New column on `attempts`
+
+```sql
+ALTER TABLE attempts
+  ADD COLUMN is_bonus_retry BOOLEAN NOT NULL DEFAULT FALSE;
+```
+
+This column is `TRUE` when the user's per-task quota was already exhausted when the attempt was created.
+
+### SM-2.2 New partial index on `speaking_prompts`
+
+```sql
+CREATE INDEX idx_speaking_prompts_task_created
+  ON speaking_prompts (task_number, created_at ASC)
+  WHERE is_active = TRUE;
+```
+
+**Alembic migration:** `apps/api/alembic/versions/0005_bonus_retry_flag.py`
+
+---
+
+## SM-3. Backend Changes
+
+### SM-3.1 `SpeakingPromptRepository` — new method
+
+**File:** `apps/api/app/repositories/prompt_repo.py`
+
+```python
+async def get_next_unseen_prompt(
+    self,
+    task_number: int,
+    user_id: uuid.UUID,
+    already_attempted_ids: list[uuid.UUID],
+) -> SpeakingPrompt | None:
+    """Return oldest active prompt not yet attempted by this user for the task."""
+    q = (
+        select(SpeakingPrompt)
+        .where(SpeakingPrompt.is_active == True)
+        .where(SpeakingPrompt.task_number == task_number)
+        .where(SpeakingPrompt.id.not_in(already_attempted_ids))
+        .order_by(SpeakingPrompt.created_at.asc())
+        .limit(1)
+    )
+    result = await self.session.execute(q)
+    return result.scalar_one_or_none()
+```
+
+### SM-3.2 `AttemptRepository` — new helpers
+
+**File:** `apps/api/app/repositories/attempt_repo.py`
+
+```python
+async def get_attempted_prompt_ids(
+    self, user_id: uuid.UUID, skill: str, task_number: int,
+) -> list[uuid.UUID]:
+    """All distinct prompt IDs this user has attempted for this task."""
+    ...
+
+async def get_last_used_prompt_id(
+    self, user_id: uuid.UUID, skill: str, task_number: int,
+) -> uuid.UUID | None:
+    """Most recently used prompt ID for this user/task."""
+    ...
+
+async def count_non_bonus(
+    self, user_id: uuid.UUID, skill: str, task_number: int,
+) -> int:
+    """Count quota-consuming attempts (is_bonus_retry=False)."""
+    ...
+```
+
+### SM-3.3 `attempt_service.py` — rewritten `start_speaking`
+
+**File:** `apps/api/app/services/attempt_service.py`
+
+Logic:
+1. Starter plan + not mock test → `403 PLAN_LOCKED`
+2. Count `count_non_bonus` for this user/task
+3. If quota exhausted → `is_bonus_retry = True`, use last-seen prompt
+4. If within quota → resolve next unseen prompt (fall back to last-seen if all seen)
+5. Create `Attempt` row with `is_bonus_retry` flag
+6. Return `StartAttemptResponse` including `prompt_id`, `is_bonus_retry`, `remaining_attempts`
+
+### SM-3.4 API Contract — Breaking Change
+
+> [!WARNING]
+> **Breaking change.** `POST /api/v1/speaking/attempts/start` currently accepts `prompt_id` (UUID). After this change it accepts `task_number` (int). The backend resolves the prompt. Frontend and API schema must change together.
+
+**New request body:**
+```python
+class StartSpeakingAttemptRequest(BaseModel):
+    task_number: int       # was: prompt_id UUID
+    is_mock_test: bool = False
+```
+
+**Updated response:**
+```python
+class StartAttemptResponse(BaseModel):
+    attempt_id: str
+    prompt_id: str          # NEW — backend tells frontend which prompt was assigned
+    status: str
+    is_bonus_retry: bool    # NEW
+    remaining_attempts: int | None  # NEW — None means unlimited
+```
+
+### SM-3.5 Quota endpoint update
+
+**File:** `apps/api/app/api/v1/users.py`
+
+Add to `QuotaStatusResponse`:
+```python
+speaking_remaining_per_task: dict[int, int | None]  # None = unlimited
+is_bonus_retry_speaking: dict[int, bool]             # True = quota exhausted for that task
+```
+
+---
+
+## SM-4. Frontend Changes
+
+### SM-4.1 `useSpeakingUpload.ts`
+
+Stop sending `prompt_id`; send `task_number`. Store the `prompt_id` returned from the backend in the session store for use during the session.
+
+### SM-4.2 `useSpeakingAttempt.ts`
+
+Expose `isBonusRetry: boolean` and `remainingAttempts: number | null` from the hook.
+
+### SM-4.3 `SpeakingPracticeSession.tsx` — Bonus Retry Banner
+
+When `isBonusRetry === true`, render a dismissible amber strip at the top:
+
+> ⚡ Free Retry — This attempt does not count against your quota. Your prompt stays the same for bonus retries.
+
+Styled: `bg-amber-900/30 text-amber-300 border-b border-amber-800/40`
+
+### SM-4.4 `TaskCard.tsx` — Attempt Counter Badge
+
+New props:
+```ts
+attemptsUsed?: number;
+attemptsLimit?: number | null;
+isBonusRetryMode?: boolean;
+```
+
+Renders:
+- Within quota: `"3 / 5 attempts"` in a muted pill
+- Bonus retry mode: `"5 / 5 — Free retries"` in amber
+- Starter: existing `isLocked` behaviour unchanged
+
+### SM-4.5 `TaskGrid.tsx`
+
+Consume `useQuota("speaking")` and pass `remainingPerTask` and `isBonusRetryMode` per task into each `TaskCard`.
+
+### SM-4.6 `TaskInstructionPage.tsx` — Attempt Status Bar
+
+Add `AttemptStatusBar` (new component) above `StartPracticeButton`:
+- Progress bar (`used / limit`)
+- Remaining count label
+- Amber "Retry mode active" indicator when quota exhausted
+
+### SM-4.7 `SpeakingModuleHome.tsx` — Starter Gate
+
+Detect `user.plan === "starter"` via `useCurrentUser()`:
+- Lock all task cards (`isLocked={true}`)
+- Render `PlanGateBanner` at top: "Unlock individual task practice with Pro or Ultra"
+- Keep mock test entry point visible (1 mock included in Starter)
+
+### SM-4.8 Speaking Page Routing
+
+The speaking app directory is currently empty. Create proper Next.js pages:
+
+```
+apps/web/app/(main)/speaking/
+├── page.tsx                      # SpeakingModuleHome
+└── [taskNumber]/
+    ├── page.tsx                  # TaskInstructionPage
+    └── practice/
+        └── page.tsx              # SpeakingPracticeSession (full-screen)
+```
+
+> [!WARNING]
+> **URL slug change:** Old routing used the prompt UUID (`/speaking/[uuid]/practice`). New routing uses task number (`/speaking/[taskNumber]/practice`). The backend already supports `GET /api/v1/speaking/tasks/{task_number}`. Update `StartPracticeButton.tsx` link target.
+
+---
+
+## SM-5. `useQuota` Hook Updates
+
+**File:** `apps/web/lib/hooks/useQuota.ts`
+
+```ts
+export interface QuotaStatus {
+  remaining: number;
+  canAttempt: boolean;
+  showPaywall: boolean;
+  canAttemptTask?: Record<number, boolean>;
+  // NEW:
+  remainingPerTask?: Record<number, number | null>;
+  isBonusRetryMode?: Record<number, boolean>;
+}
+```
+
+Update `queryFn` to map `speaking_remaining_per_task` and `is_bonus_retry_speaking` from the backend response.
+
+---
+
+## SM-6. Alembic Migration `0005`
+
+**File:** `apps/api/alembic/versions/0005_bonus_retry_flag.py`
+
+```python
+"""Add is_bonus_retry to attempts and prompt rotation index. Revision: 0005"""
+from alembic import op
+import sqlalchemy as sa
+
+revision = "0005"
+down_revision = "0004"
+
+def upgrade() -> None:
+    op.add_column(
+        "attempts",
+        sa.Column("is_bonus_retry", sa.Boolean(), nullable=False, server_default="false"),
+    )
+    op.create_index(
+        "idx_speaking_prompts_task_created",
+        "speaking_prompts",
+        ["task_number", "created_at"],
+        postgresql_where=sa.text("is_active = TRUE"),
+    )
+
+def downgrade() -> None:
+    op.drop_index("idx_speaking_prompts_task_created", table_name="speaking_prompts")
+    op.drop_column("attempts", "is_bonus_retry")
+```
+
+---
+
+## SM-7. New Components
+
+| Component | Location | Purpose |
+|-----------|----------|---------|
+| `AttemptStatusBar` | `components/speaking/` | Per-task quota progress bar + retry mode label |
+| `BonusRetryBanner` | `components/speaking/` | Amber strip during free retry sessions |
+| `PlanGateBanner` | `components/speaking/` | Upgrade CTA for Starter-plan users |
+
+---
+
+## SM-8. Implementation Order
+
+> [!IMPORTANT]
+> Follow this order exactly to avoid breaking existing flows.
+
+1. DB migration `0005_bonus_retry_flag.py`
+2. `AttemptRepository` — `count_non_bonus`, `get_attempted_prompt_ids`, `get_last_used_prompt_id`
+3. `SpeakingPromptRepository` — `get_next_unseen_prompt`
+4. `attempt_service.start_speaking` — rotation + bonus retry logic
+5. API schemas — `StartSpeakingAttemptRequest` (task_number), `StartAttemptResponse` (prompt_id, is_bonus_retry, remaining_attempts)
+6. `speaking.py` route — update request body
+7. `users.py` quota route — add remaining/bonus_retry fields
+8. Frontend `useSpeakingUpload.ts` — send task_number, store returned prompt_id
+9. Frontend `useSpeakingAttempt.ts` — expose isBonusRetry, remainingAttempts
+10. Frontend `useQuota.ts` — extend type, map new backend fields
+11. `TaskCard.tsx` — attempt counter badge
+12. `TaskGrid.tsx` — wire quota data per task
+13. `TaskInstructionPage.tsx` — add AttemptStatusBar
+14. `SpeakingPracticeSession.tsx` — add BonusRetryBanner
+15. `SpeakingModuleHome.tsx` — Starter plan gate + PlanGateBanner
+16. Speaking app pages — create `(main)/speaking/` page tree
+
+---
+
+# 1. Executive Summary
+
+Phase 3 makes the platform **commercially usable, operationally safe, and extensible** for a one-time purchase model:
+
+- Base plan purchase (one-time): `starter`, `pro`, or `ultra`
+- Optional add-on bundles bought later (extra attempts, mock tests, materials)
+- Plan controls **capability tier**; add-ons control **quantity only**
+- Speaking module delivers full prompt rotation + bonus retry mechanics
+
+---
+
+# 2. Commercial Model
+
+## 2.1 Plans
+
+- `starter` — Free
+- `pro` — $49.99 CAD one-time
+- `ultra` — $99.99 CAD one-time
+
+## 2.2 Add-on Types
+
+**Consumable bundles:** 5 or 10 extra speaking attempts, 5 extra writing attempts, 2 extra mock tests  
+**Unlock bundles:** learning materials pack, advanced practice pack, drill exercises pack  
+**Hybrid bundles:** booster packs combining attempts + material unlocks
+
+## 2.3 Core Rule — Add-ons Do Not Upgrade Capability
+
+- Starter + extra attempts = more Starter-level attempts (not Pro reports)
+- Pro + extra attempts = more Pro-level pipeline and reports
+- Ultra + any add-on = Ultra-level throughout
+
+---
+
+# 3. Phase 3 Success Criteria
+
+- [ ] Speaking module: Starter locked, Pro/Ultra get rotating prompts up to quota, bonus retries after quota shown correctly
+- [ ] Users can purchase Starter, Pro, Ultra as one-time products
+- [ ] Users can purchase add-on bundles; base-plan capability unchanged
+- [ ] Backend enforces entitlements and balances correctly
+- [ ] Mock tests work end-to-end and consume correct balance
+- [ ] Progress and dashboard are meaningful retention surfaces
+- [ ] Learning materials gate by plan and add-on
+- [ ] Purchase ledger, audit logs, support tools, and alerts are operational
+- [ ] Phase 1 and Phase 2 flows remain stable
+
+---
+
+# 4. Revised Scope
+
+## In Scope
+
+**A. One-time billing and purchase ledger**
+- Stripe Checkout for one-time purchases, webhook handling, idempotent processing, internal purchase ledger
+
+**B. Entitlements and balances**
+- Capability tier resolver, balance engine, backend enforcement for attempts and mock tests
+
+**C. Billing UI**
+- Store page, base plan card, owned add-ons, balance summary, purchase history
+
+**D. Mock tests**
+- Speaking and writing mock-test orchestration, aggregate report, history
+
+**E. Speaking Module Completion (first priority)**
+- Plan-based access gating, prompt rotation, bonus retry, per-task attempt counters, new page routing
+
+**F. Progress and dashboard upgrades**
+- Progress page, score trends, weak-area insights, recommended next practice, balance widgets
+
+**G. Learning-material gating**
+- Plan-based default access, add-on unlock access, locked/unlocked rendering
+
+**H. Production hardening**
+- Audit logs, webhook observability, rate limiting, cleanup jobs, support tools, reconciliation
+
+---
+
+# 5. Product Decisions
+
+## 5.1 Capability vs. Quantity
+
+**Capability tier** (from base plan): AI depth, feedback richness, reporting, analytics, content richness  
+**Quantity balance** (plan allowance + add-ons − used): how many times the user can act
+
+## 5.2 Base Plan Behaviour
+
+| | Starter | Pro | Ultra |
+|---|---|---|---|
+| Task practice | Locked | 5/task | 15/task |
+| Speaking mocks | 1 | 2 | 5 |
+| Writing mocks | 1 | 2 | 5 |
+| AI feedback | Band estimate only | Full reports | Full + advanced |
+| Analytics | None | History | Weak areas, trends |
+
+## 5.3 Usage Policy
+
+- Quota checked at attempt creation; add-ons consumed only on success
+- Bonus retries: free, unlimited, same prompt, is_bonus_retry=true in DB
+- No refund policy — all purchases are final
+
+---
+
+# 6. Delivery Strategy
+
+**Week 1** — Speaking Module completion (days 1–3) + Commerce foundation (days 4–5)  
+**Week 2** — Entitlements and balance engine  
+**Week 3** — Mock tests and billing/store UX  
+**Week 4** — Progress, learning material gating, hardening, launch checklist
+
+---
+
+# 7. Backend Architecture
+
+## 7.1 Principles
+
+- Routes: HTTP contracts only
+- Services: business logic
+- Repositories: persistence
+- Workers: async and cleanup
+- Entitlements: resolved centrally
+
+## 7.2 New Files
+
+```text
+apps/api/app/
+├── api/v1/
+│   ├── commerce.py
+│   ├── entitlements.py
+│   ├── progress.py
+│   └── mock_tests.py
+├── models/
+│   ├── product_catalog.py
+│   ├── purchase_order.py
+│   ├── purchase_item.py
+│   ├── ownership_unlock.py
+│   ├── usage_balance.py
+│   ├── purchase_event.py
+│   ├── mock_test.py
+│   ├── mock_test_attempt_link.py
+│   └── progress_snapshot.py
+├── repositories/
+│   ├── product_repo.py
+│   ├── purchase_repo.py
+│   ├── balance_repo.py
+│   ├── entitlement_repo.py
+│   ├── mock_test_repo.py
+│   └── progress_repo.py
+├── services/
+│   ├── stripe_checkout_service.py
+│   ├── commerce_service.py
+│   ├── purchase_service.py
+│   ├── entitlement_service.py
+│   ├── balance_service.py
+│   ├── mock_test_service.py
+│   └── progress_service.py
+└── workers/
+    ├── cleanup_tasks.py
+    └── progress_tasks.py
+```
+
+---
+
+# 8. Database Changes
+
+## 8.1 Migration 0005 — Speaking Module (see SM-6)
+
+Adds `is_bonus_retry` column and partial index on `speaking_prompts`.
+
+## 8.2 New Commerce Tables
+
+**`product_catalog`** — every sellable product (base plans, consumables, unlocks)  
+**`purchase_orders`** — completed or attempted transactions  
+**`purchase_items`** — each product bought in an order  
+**`ownership_unlocks`** — non-consumable ownership (active base plan, material packs)  
+**`usage_balances`** — remaining consumable units with source tracking  
+**`purchase_events`** — webhook idempotency and audit trail  
+**`mock_tests`** — mock-test session records  
+**`mock_test_attempt_links`** — maps mock sessions to underlying attempt rows  
+**`progress_snapshots`** — cached progress metrics for dashboard
+
+---
+
+# 9. Entitlement and Balance Engine
+
+## EntitlementService Interface
+
+```python
+class EntitlementService:
+    async def get_active_base_plan(self, user_id): ...
+    async def get_capability_tier(self, user_id): ...
+    async def get_owned_unlocks(self, user_id): ...
+    async def get_balance_summary(self, user_id): ...
+    async def can_start_attempt(self, user_id, skill, task_number): ...
+    async def can_start_mock_test(self, user_id, skill): ...
+    async def can_access_learning_material(self, user_id, material_code): ...
+```
+
+## Balance Resolution Order
+
+1. Consume included plan allowance first
+2. Then consume purchased add-on balance
+3. Unlock flags checked separately from balance buckets
+
+## Structured Decision Output
+
+```json
+{
+  "allowed": false,
+  "reason_code": "NO_BALANCE_REMAINING",
+  "capability_tier": "starter",
+  "remaining_units": 0,
+  "purchase_cta": "/billing"
+}
+```
+
+---
+
+# 10. Stripe Integration
+
+- Hosted Checkout Session for one-time purchases
+- Webhook events: `checkout.session.completed`, `payment_intent.succeeded`, `payment_intent.payment_failed`
+- Each webhook handler: verify signature → persist event → reject duplicates → grant ownership/balance → log result
+- No refund policy
+
+---
+
+# 11. API Endpoints
+
+## Commerce
+| Endpoint | Purpose |
+|----------|---------|
+| `GET /api/v1/commerce/catalog` | Store catalog |
+| `POST /api/v1/commerce/checkout-session` | Create Stripe checkout |
+| `GET /api/v1/commerce/summary` | Owned products + balances |
+| `POST /api/v1/commerce/webhooks/stripe` | Stripe event handler |
+
+## Entitlements
+| Endpoint | Purpose |
+|----------|---------|
+| `GET /api/v1/entitlements/me` | Active plan, capability tier, owned unlocks |
+| `GET /api/v1/balances/me` | Remaining speaking/writing/mock balances |
+
+## Progress
+| Endpoint | Purpose |
+|----------|---------|
+| `GET /api/v1/progress/summary` | Band estimate, weak areas, recommendations |
+| `GET /api/v1/progress/trends` | Time-series bands, rolling averages |
+
+## Mock Tests
+| Endpoint | Purpose |
+|----------|---------|
+| `POST /api/v1/mock-tests/start` | Start session after entitlement + balance check |
+| `GET /api/v1/mock-tests/{id}` | Session state |
+| `POST /api/v1/mock-tests/{id}/submit` | Submit session |
+| `GET /api/v1/mock-tests/{id}/report` | Aggregate report |
+
+---
+
+# 12. Mock-Test Architecture
+
+Mock tests are a session orchestration layer over the existing attempt/report pipeline. Each task still produces normal attempt records. Balance consumed at session start. Plan controls report depth.
+
+---
+
+# 13. Progress and Dashboard
+
+**New dashboard widgets:** active plan card, remaining attempts, remaining mocks, owned material packs, weak areas, recommended next practice, progress sparkline
+
+**Progress metrics:** current band estimate, rolling average, best band, task averages, weakest 2–3 dimensions, streak days
+
+---
+
+# 14. Learning Material Gating
+
+Material accessible when:
+1. Active base plan includes it, OR
+2. User owns the relevant unlock add-on
+
+Do not hardcode content rules in UI — backend resolves access status, frontend renders unlocked/preview/locked.
+
+---
+
+# 15. Frontend Pages and Components
+
+## New Pages
+
+```text
+apps/web/app/(main)/
+├── speaking/
+│   ├── page.tsx                    # SpeakingModuleHome
+│   └── [taskNumber]/
+│       ├── page.tsx                # TaskInstructionPage
+│       └── practice/page.tsx       # SpeakingPracticeSession
+├── billing/page.tsx
+├── progress/page.tsx
+├── mock-tests/page.tsx
+└── mock-tests/[id]/
+    ├── page.tsx
+    └── report/page.tsx
+```
+
+## New Speaking Components
+
+```text
+apps/web/components/speaking/
+├── AttemptStatusBar.tsx
+├── BonusRetryBanner.tsx
+└── PlanGateBanner.tsx
+```
+
+## New Commerce/Progress Components
+
+```text
+apps/web/components/billing/
+├── StorePage.tsx, BasePlanCard.tsx, AddonCard.tsx
+├── OwnedProductsCard.tsx, BalanceSummaryCard.tsx
+├── PurchaseHistoryTable.tsx, LockedFeatureBanner.tsx
+
+apps/web/components/progress/
+├── ProgressPage.tsx, TrendChartCard.tsx, WeakAreasCard.tsx
+├── TaskBreakdownGrid.tsx, RecommendedNextPracticeCard.tsx
+
+apps/web/components/mock_tests/
+├── MockTestLanding.tsx, MockTestSessionShell.tsx
+├── MockTestGuard.tsx, MockTestProgressBar.tsx
+├── MockTestSummaryCard.tsx, MockTestReportPage.tsx
+
+apps/web/components/common/
+├── BalanceBadge.tsx, LockedFeatureCard.tsx
+├── PurchasePromptModal.tsx, OwnershipChip.tsx
+```
+
+## New Data Hooks
+
+```ts
+useQuota("speaking")      // extended: remainingPerTask, isBonusRetryMode
+useCommerceCatalog()
+useCommerceSummary()
+useEntitlements()
+useBalances()
+useProgressSummary()
+useMockTest()
+useMockTestReport()
+```
+
+---
+
+# 16. Background Jobs
+
+**`progress_tasks.py`** — recompute snapshots after completed attempts, nightly refresh  
+**`cleanup_tasks.py`** — archive expired audio, clean stale uploads, remove abandoned mock sessions  
+**`reconciliation_tasks.py`** (optional) — verify Stripe events against purchase ledger
+
+---
+
+# 17. Security
+
+- Webhook signature verification
+- Signed upload URLs only
+- Strict backend entitlement + balance enforcement
+- Rate limiting on checkout creation and attempt-start endpoints
+- No provider secrets in frontend
+- Role-protected admin pages
+
+---
+
+# 18. Observability
+
+**New metrics:** bonus retry rate per task, quota guard hit rate  
+**Existing:** checkout conversions, webhook success/failure, report generation time
+
+**Admin/support view extends to show:** per-task usage (used / limit / bonus retry mode), ability to re-sync purchases, manual balance grant tool
+
+---
+
+# 19. Testing Strategy
+
+## Unit Tests (new)
+- `get_next_unseen_prompt` with various seen-ID combinations (empty list, all seen, partial)
+- `count_non_bonus` excludes bonus retry rows correctly
+- Bonus retry triggered at exact quota boundary
+
+## Integration Tests (new)
+- Attempt start returns correct rotation through available prompts
+- 6th attempt for Pro user sets `is_bonus_retry=True` and returns same prompt as 5th
+- Starter plan returns 403 PLAN_LOCKED for task practice
+- Paid purchase grants correct balances
+
+## End-to-End Tests (new)
+- Starter: task cards locked, mock test accessible
+- Pro: 5 unique prompts across 5 attempts for same task, 6th is bonus retry
+- Ultra: same at 15 limit
+
+---
+
+# 20. Risks and Mitigations
+
+| Risk | Mitigation |
+|------|-----------|
+| Capability tier confused with add-on quantity | Separate data models, central entitlement service, integration tests |
+| Balance reservation race conditions | Transactional reservation, idempotency keys, audit history |
+| Prompt rotation repeats prematurely | Unit tests for edge cases, DB index for correctness |
+| `is_bonus_retry` flag not set correctly | Integration test at exact quota boundary |
+| Store UX confuses plan vs. add-on value | Clear separation in billing page copy and layout |
+
+---
+
+# 21. Implementation Order
+
+## Step 1 — Speaking Module (first priority)
+
+Migration 0005, repository helpers, `start_speaking` rewrite, API schema + route changes, all frontend components and page routing.
+
+## Step 2 — Commerce Foundation
+
+Product catalog, purchase ledger, Stripe checkout session, webhook skeleton.
+
+## Step 3 — Entitlements and Balance Engine
+
+`EntitlementService`, `BalanceService`, balance summary endpoint, structured enforcement errors.
+
+## Step 4 — Enforcement
+
+Apply entitlement + balance checks to all protected actions: individual attempts, mock tests, locked material access.
+
+## Step 5 — Billing/Store UI
+
+Store page, purchase history, owned products summary, add-on purchase flow.
+
+## Step 6 — Mock Tests
+
+Mock-test session model, balance consumption, aggregate report, mock-test history.
+
+## Step 7 — Progress
+
+Snapshot pipeline, progress page, weak-area insights, recommended next practice.
+
+## Step 8 — Learning Material Gating
+
+Plan-based defaults, add-on unlock resolution, locked/unlocked rendering.
+
+## Step 9 — Hardening and Launch
+
+Support tools, reconciliation jobs, rate limiting, alerts, cleanup jobs, launch QA checklist.
+
+---
+
+# 22. Definition of Done
+
+- [ ] Speaking module: Starter locked with upgrade CTA, Pro/Ultra users receive rotating unseen prompts up to plan quota, bonus retries after exhaustion shown correctly
+- [ ] One-time purchase flow works end-to-end for Starter, Pro, Ultra
+- [ ] Add-on bundles purchase and reflect in balance correctly
+- [ ] Base-plan capability tier enforced independently from add-on quantity
+- [ ] Mock tests consume correct balance and generate aggregate reports
+- [ ] Learning materials gate by plan and add-on
+- [ ] Progress page shows meaningful, tested data
+- [ ] Purchase ledger, audit logs, support tools, alerts operational
+- [ ] Phase 1 and Phase 2 flows stable
+
+---
+
+# 23. Final Recommendation
+
+Phase 3 is the commercialization and launch-readiness phase, with **Speaking Module full functionality as the immediate first deliverable**.
+
+Core architecture rule:
+> Base plan controls capability. Add-ons control quantity or unlock ownership.
+
+Speaking module rule:
+> Prompt rotation gives users progression. Bonus retries give unlimited practice without burning a new prompt slot.
+
+Engineering sequence:
+1. Speaking module DB + backend + frontend
+2. Product catalog and purchase ledger
+3. Entitlement and balance engine
+4. Billing/store UX
+5. Mock-test consumption and aggregation
+6. Progress and material gating
+7. Hardening and launch readiness

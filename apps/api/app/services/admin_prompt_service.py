@@ -32,8 +32,11 @@ async def update_speaking(
 ) -> SpeakingPrompt:
     repo = AdminSpeakingPromptRepo(session)
     old = _snap(prompt)
-    new_version = prompt.version_no + 1
+    new_version = (prompt.version_no or 0) + 1
     updated = await repo.update(prompt, **payload, updated_by=admin_id, version_no=new_version)
+    # updated_at uses onupdate=func.now() (server-side), so SQLAlchemy expires the
+    # attribute after flush. Refresh here so _snap() can read it synchronously.
+    await session.refresh(updated)
     await save_snapshot(session, entity_type="speaking_prompt", entity_id=updated.id,
                         version_no=new_version, snapshot=_snap(updated),
                         changed_by=admin_id, change_note="updated")
@@ -98,8 +101,10 @@ async def update_writing(
 ) -> WritingPrompt:
     repo = AdminWritingPromptRepo(session)
     old = _snap(prompt)
-    new_version = prompt.version_no + 1
+    new_version = (prompt.version_no or 0) + 1
     updated = await repo.update(prompt, **payload, updated_by=admin_id, version_no=new_version)
+    # Same refreshing pattern as update_speaking — onupdate expires updated_at.
+    await session.refresh(updated)
     await save_snapshot(session, entity_type="writing_prompt", entity_id=updated.id,
                         version_no=new_version, snapshot=_snap(updated),
                         changed_by=admin_id, change_note="updated")

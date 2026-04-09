@@ -1,6 +1,7 @@
 "use client";
 
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { Toaster } from "sonner";
 import { useRef } from "react";
 
 /**
@@ -33,6 +34,21 @@ export function Providers({ children }: { children: React.ReactNode }) {
   return (
     <QueryClientProvider client={queryClientRef.current}>
       {children}
+      {/* Sonner toast renderer — position and theme match the dark design system */}
+      <Toaster
+        position="bottom-right"
+        theme="dark"
+        richColors
+        closeButton
+        toastOptions={{
+          classNames: {
+            toast:       "bg-surface border border-border text-foreground text-sm rounded-xl shadow-panel",
+            description: "text-subtle",
+            actionButton: "bg-primary text-white",
+            cancelButton: "bg-muted text-foreground",
+          },
+        }}
+      />
     </QueryClientProvider>
   );
 }

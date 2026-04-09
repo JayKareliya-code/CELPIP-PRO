@@ -75,12 +75,14 @@ export const MOCK_SPEAKING_TASKS: SpeakingTask[] = [
     response_time_seconds: 60,
     difficulty:           "medium",
     prompt_text:
-      "[Image prompt] Look at the image. Describe what you see in as much detail as possible. " +
+      "Look at the image. Describe what you see in as much detail as possible. " +
       "Who is there? What is happening? What might happen next?",
     vocabulary_tips:      ["In the foreground", "In the background", "It appears that", "presumably", "adjacent to"],
     connector_phrases:    ["On the left side", "Towards the right", "In the centre", "Meanwhile"],
     template_hint:        "Overall scene  →  Foreground detail  →  Background detail  →  What might happen next",
     has_parts:            false,
+    // Tasks 3 & 4 share the same scene image (per CELPIP exam format)
+    context_image_url:    "https://picsum.photos/seed/celpip-scene/800/500",
   },
   {
     id:                   "task-4",
@@ -90,12 +92,14 @@ export const MOCK_SPEAKING_TASKS: SpeakingTask[] = [
     response_time_seconds: 60,
     difficulty:           "medium",
     prompt_text:
-      "Look at the three pictures. They show different situations that could happen in the future. " +
-      "Talk about each picture and make predictions about what might happen.",
+      "Look at the image. Based on what you see, make predictions about what might happen " +
+      "in the short-term and long-term future. Support your predictions with details from the image.",
     vocabulary_tips:      ["is likely to", "there's a good chance that", "I predict", "It's probable that", "might well"],
     connector_phrases:    ["In the first image", "Moving to the second picture", "Finally, in the last image"],
     template_hint:        "Describe each image  →  Make a prediction with reasoning  →  Connect all three",
     has_parts:            false,
+    // Tasks 3 & 4 share the same scene image (per CELPIP exam format)
+    context_image_url:    "https://picsum.photos/seed/celpip-scene/800/500",
   },
   {
     id:                   "task-5",
@@ -151,12 +155,14 @@ export const MOCK_SPEAKING_TASKS: SpeakingTask[] = [
     response_time_seconds: 60,
     difficulty:           "hard",
     prompt_text:
-      "[Image prompt] Look at the image. Something unusual is happening. " +
-      "Describe the scene and explain what you think led to this situation, and what might happen next.",
+      "Look at the image. Something unusual is happening. " +
+      "Describe the scene, explain what you think led to this situation, and predict what might happen next.",
     vocabulary_tips:      ["Evidently", "It would appear that", "This suggests", "Remarkably", "Unexpectedly"],
     connector_phrases:    ["What strikes me is", "This could be explained by", "As a consequence", "What might follow is"],
     template_hint:        "Describe the scene  →  Theorise a cause  →  Predict outcome  →  Personal reaction",
     has_parts:            false,
+    // Task 8 has its own unique image per prompt (different from Tasks 3 & 4)
+    context_image_url:    "https://picsum.photos/seed/celpip-unusual/800/500",
   },
 ];
 

@@ -1,5 +1,4 @@
 """Admin asset service — register, confirm, and manage content assets."""
-import hashlib
 import uuid
 from uuid import UUID
 
@@ -9,6 +8,7 @@ from app.repositories.admin_asset_repo import AdminAssetRepo
 from app.services.admin_audit_service import log_action
 from app.models.content_asset import ContentAsset
 from app.core.config import settings
+from app.services.storage.presigner import generate_presigned_upload, build_public_url
 
 
 _ALLOWED_MIME_BY_TYPE = {
@@ -29,18 +29,15 @@ def infer_asset_type(mime_type: str) -> str:
 
 
 async def generate_upload_url(
-    session: AsyncSession,  # noqa: ARG001 — kept for dependency injection consistency
+    session: AsyncSession,  # noqa: ARG001 — kept for DI consistency
     filename: str,
     mime_type: str,
     title: str,
     admin_id: UUID,
 ) -> dict:
-    """Return a presigned S3/R2 upload URL plus the storage_key to confirm later."""
-    from app.services.storage.s3 import generate_presigned_upload  # lazy import
-
+    """Return a presigned S3/R2 PUT URL plus the storage_key to confirm later."""
     storage_key = f"cms/{uuid.uuid4().hex}/{filename}"
-    presigned_url = await generate_presigned_upload(
-        bucket=settings.S3_BUCKET_NAME,
+    presigned_url = generate_presigned_upload(
         key=storage_key,
         content_type=mime_type,
         expires_in=300,
@@ -64,8 +61,7 @@ async def confirm_asset(
 ) -> ContentAsset:
     repo = AdminAssetRepo(session)
     asset_type = infer_asset_type(mime_type)
-    base = settings.S3_ENDPOINT_URL or f"https://s3.{settings.S3_REGION}.amazonaws.com"
-    public_url = f"{base}/{settings.S3_BUCKET_NAME}/{storage_key}"
+    public_url = build_public_url(storage_key)
 
     asset = await repo.create(
         asset_type=asset_type,

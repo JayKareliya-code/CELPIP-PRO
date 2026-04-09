@@ -26,6 +26,8 @@ import { CountdownOverlay }   from "@/components/speaking/CountdownOverlay";
 import { PrepTimerScreen }    from "@/components/speaking/PrepTimerScreen";
 import { RecordingInterface } from "@/components/speaking/RecordingInterface";
 import { Task5PartIndicator } from "@/components/speaking/Task5PartIndicator";
+import { Task5SelectionScreen }  from "@/components/speaking/Task5SelectionScreen";
+import { Task5CurveballScreen }  from "@/components/speaking/Task5CurveballScreen";
 import { UploadProgressBar }  from "@/components/speaking/UploadProgressBar";
 import { ProcessingScreen }   from "@/components/common/ProcessingScreen";
 import type { SpeakingTask }  from "@/lib/types";
@@ -48,7 +50,7 @@ interface SpeakingPracticeSessionProps {
  * All timer, upload, and navigation logic lives in useSpeakingAttempt.
  */
 export function SpeakingPracticeSession({ task }: SpeakingPracticeSessionProps) {
-  const { phase, secondsLeft, uploadProgress, start, exit } = useSpeakingAttempt();
+  const { phase, secondsLeft, uploadProgress, start, exit, selectedChoice } = useSpeakingAttempt();
 
   // Auto-start on mount
   useEffect(() => {
@@ -67,21 +69,50 @@ export function SpeakingPracticeSession({ task }: SpeakingPracticeSessionProps) 
         return <CountdownOverlay />;
 
       case "PREP":
+        // Task 5: interactive two-choice selection screen
+        if (task.task_number === 5 && task.choice_options?.length) {
+          return (
+            <Task5SelectionScreen
+              secondsLeft={secondsLeft}
+              totalPrepSeconds={task.prep_time_seconds}
+              promptText={task.prompt_text}
+              choiceOptions={task.choice_options}
+            />
+          );
+        }
+        // All other tasks: standard timer + prompt card
         return (
           <PrepTimerScreen
             secondsLeft={secondsLeft}
             totalPrepSeconds={task.prep_time_seconds}
             promptText={task.prompt_text}
+            imageUrl={task.context_image_url}
           />
         );
 
       case "RECORDING":
+        // Task 5: RECORDING = curveball PREP phase (no mic, just timer + curveball reveal)
+        if (task.task_number === 5 && task.curveball_option) {
+          return (
+            <Task5CurveballScreen
+              secondsLeft={secondsLeft}
+              totalSeconds={task.response_time_seconds}
+              curveballOption={task.curveball_option}
+              selectedChoice={selectedChoice}
+              curveballInstructionText={task.curveball_instruction_text ?? ""}
+              isRecording={false}
+            />
+          );
+        }
+        // All other tasks: normal Part 1 recording
         return (
           <div className="relative min-h-screen">
             <RecordingInterface
               secondsLeft={secondsLeft}
               totalResponseSeconds={task.response_time_seconds}
               partLabel={task.has_parts ? "Part 1 of 2" : undefined}
+              imageUrl={task.context_image_url}
+              promptText={task.prompt_text}
             />
             {task.has_parts && (
               <div className="absolute bottom-12 left-0 right-0 flex justify-center">
@@ -92,6 +123,20 @@ export function SpeakingPracticeSession({ task }: SpeakingPracticeSessionProps) 
         );
 
       case "RECORDING_PART2":
+        // Task 5: RECORDING_PART2 = curveball SPEAKING phase (mic active)
+        if (task.task_number === 5 && task.curveball_option) {
+          return (
+            <Task5CurveballScreen
+              secondsLeft={secondsLeft}
+              totalSeconds={task.response_time_seconds}
+              curveballOption={task.curveball_option}
+              selectedChoice={selectedChoice}
+              curveballInstructionText={task.curveball_instruction_text ?? ""}
+              isRecording={true}
+            />
+          );
+        }
+        // All other has_parts tasks: normal Part 2 recording
         return (
           <div className="relative min-h-screen">
             <RecordingInterface

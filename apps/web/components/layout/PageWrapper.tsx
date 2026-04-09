@@ -17,8 +17,8 @@ export function PageWrapper({ children, fullWidth = false, className }: PageWrap
   return (
     <main
       className={cn(
-        "flex-1 py-6 px-4 sm:px-6 lg:px-8",
-        !fullWidth && "max-w-7xl mx-auto w-full",
+        "flex-1 py-5 px-4 sm:px-5",
+        !fullWidth && "w-full",
         className
       )}
     >

@@ -137,20 +137,58 @@ class OpenAIProvider:
         transcript: str,
         prompt_text: str,
         system_prompt: str,
+        context_image_url: str | None = None,
     ) -> ScoringResult:
-        """GPT-4o-mini structured-output scoring for speaking."""
+        """
+        GPT-4o / GPT-4o-mini structured-output scoring for speaking.
+
+        When a scene image URL is provided (Tasks 3, 4, 8) the request is sent
+        as a vision message to GPT-4o (which supports image inputs).  Text-only
+        tasks use the cheaper GPT-4o-mini model.  Model selection is automatic.
+        """
+        # ── Build user message content ────────────────────────────────────────
+        text_block = (
+            f"PROMPT:\n{prompt_text}\n\n"
+            f"TRANSCRIPT:\n{transcript}"
+        )
+
+        if context_image_url:
+            # Vision message: content is a list of typed parts.
+            # The image is included BEFORE the text so the model "sees" the scene
+            # first, mirroring the candidate's experience during the task.
+            user_content: str | list = [
+                {
+                    "type": "image_url",
+                    "image_url": {
+                        "url": context_image_url,
+                        # "auto" lets the API balance detail vs. token cost.
+                        # Switch to "high" if scoring accuracy needs improvement.
+                        "detail": "auto",
+                    },
+                },
+                {
+                    "type": "text",
+                    "text": text_block,
+                },
+            ]
+            # GPT-4o is required for vision inputs; mini does not support them.
+            model = settings.AI_VISION_SCORING_MODEL   # "gpt-4o" (see config)
+            logger.debug(
+                "Vision scoring request: model=%s image=%s",
+                model,
+                context_image_url,
+            )
+        else:
+            # Text-only: plain string content, cheaper mini model.
+            user_content = text_block
+            model = self._scoring_model   # "gpt-4o-mini"
+
         payload = {
-            "model": self._scoring_model,
+            "model": model,
             "response_format": {"type": "json_schema", "json_schema": _SPEAKING_SCHEMA},
             "messages": [
                 {"role": "system", "content": system_prompt},
-                {
-                    "role": "user",
-                    "content": (
-                        f"PROMPT:\n{prompt_text}\n\n"
-                        f"TRANSCRIPT:\n{transcript}"
-                    ),
-                },
+                {"role": "user",   "content": user_content},
             ],
         }
         resp = await self._client.post("/chat/completions", json=payload)
@@ -177,13 +215,15 @@ class OpenAIProvider:
             usage=usage,
         )
         logger.info(
-            "Speaking scored: band=%.1f task=%d coh=%d voc=%d flu=%d gram=%d",
+            "Speaking scored: model=%s band=%.1f task=%d coh=%d voc=%d flu=%d gram=%d vision=%s",
+            model,
             result.estimated_band,
             result.task_completion,
             result.coherence,
             result.vocabulary,
             result.fluency,
             result.grammar,
+            bool(context_image_url),
         )
         return result
 

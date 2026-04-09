@@ -60,14 +60,15 @@ class Settings(BaseSettings):
     # ── AI Scoring (Phase 2) ──────────────────────────────────────────────────
     # Provider selection — hot-swappable via config, no code changes required.
     # Valid values: "openai" | "anthropic" | "gemini"
-    AI_SCORING_PROVIDER:  str = "openai"
-    AI_SCORING_MODEL:     str = "gpt-4o-mini"   # LLM used for rubric scoring
-    AI_STT_PROVIDER:      str = "openai"
-    AI_STT_MODEL:         str = "whisper-1"     # STT model for speaking
-    AI_FEEDBACK_PROVIDER: str = "openai"
-    AI_FEEDBACK_MODEL:    str = "gpt-4o-mini"
-    AI_MAX_RETRIES:       int = 3
-    AI_TIMEOUT_SECS:      int = 90
+    AI_SCORING_PROVIDER:       str = "openai"
+    AI_SCORING_MODEL:          str = "gpt-4o-mini"  # LLM for text-only tasks
+    AI_VISION_SCORING_MODEL:   str = "gpt-4o"       # Vision-capable LLM for image tasks (3,4,8)
+    AI_STT_PROVIDER:           str = "openai"
+    AI_STT_MODEL:              str = "whisper-1"    # STT model for speaking
+    AI_FEEDBACK_PROVIDER:      str = "openai"
+    AI_FEEDBACK_MODEL:         str = "gpt-4o-mini"
+    AI_MAX_RETRIES:            int = 3
+    AI_TIMEOUT_SECS:           int = 90
 
     # AI Provider API Keys — only set the key for the active provider.
     # OPENAI_API_KEY is required when AI_SCORING_PROVIDER=openai (default).

@@ -1,16 +1,11 @@
 """
-S3 / Cloudflare R2 presigned URL helpers + synchronous audio download.
+S3 / Cloudflare R2 presigned URL helpers.
 
-generate_upload_url / generate_download_url remain in storage_service.py
-(Phase 1 public surface). This module adds the internal download helper
-used by the Celery speaking pipeline to fetch audio bytes before STT.
-
-Design notes:
-  - download_from_s3 is async (uses httpx) so it can run inside asyncio.run()
-    in the Celery worker without blocking the thread pool.
-  - The S3 key is taken from speaking_attempts.audio_s3_key; it already
-    encodes the full prefix (audio/{user_id}/{attempt_id}.webm).
-  - On error, the exception propagates — the Celery task catches it and retries.
+Public surface:
+  generate_presigned_upload  — admin image/asset upload (PUT presign)
+  generate_presigned_get     — short-lived authenticated GET URL (preview / display)
+  build_public_url           — deterministic public URL from an S3 key
+  download_from_s3           — Celery pipeline audio fetch (async GET)
 """
 from __future__ import annotations
 
@@ -28,7 +23,7 @@ logger = logging.getLogger(__name__)
 
 @lru_cache(maxsize=1)
 def _get_s3_client():
-    """Cached boto3 S3 client (supports AWS + Cloudflare R2 via endpoint override)."""
+    """Cached boto3 S3 client (supports AWS S3 + Cloudflare R2)."""
     kwargs: dict = dict(
         region_name=settings.S3_REGION,
         aws_access_key_id=settings.AWS_ACCESS_KEY_ID,
@@ -40,43 +35,70 @@ def _get_s3_client():
     return boto3.client("s3", **kwargs)
 
 
-def _generate_download_url(s3_key: str) -> str:
-    """Generate a short-lived presigned GET URL for the given S3 key."""
+def build_public_url(s3_key: str) -> str:
+    """Return the public URL for an uploaded S3 object.
+
+    Uses the custom R2/CDN endpoint when configured, otherwise the AWS regional URL.
+    """
+    base = settings.S3_ENDPOINT_URL or f"https://s3.{settings.S3_REGION}.amazonaws.com"
+    return f"{base}/{settings.S3_BUCKET_NAME}/{s3_key}"
+
+
+def generate_presigned_upload(key: str, content_type: str, expires_in: int = 300) -> str:
+    """Return a presigned S3 PUT URL.
+
+    Boto3 presigning is a pure local HMAC — no network call.
+    The browser PUTs the file body directly to this URL.
+
+    Args:
+        key:          Full S3 key, e.g. 'speaking-task-3/uuid-scene.jpg'
+        content_type: MIME type the browser must include as Content-Type on the PUT.
+        expires_in:   Lifetime in seconds (default 5 min).
+    """
     return _get_s3_client().generate_presigned_url(
-        "get_object",
-        Params={"Bucket": settings.S3_BUCKET_NAME, "Key": s3_key},
-        ExpiresIn=300,  # 5 minutes — enough to complete STT
+        "put_object",
+        Params={"Bucket": settings.S3_BUCKET_NAME, "Key": key, "ContentType": content_type},
+        ExpiresIn=expires_in,
     )
 
 
-async def download_from_s3(s3_key: str) -> bytes:
-    """
-    Download audio bytes from S3 using a short-lived presigned URL.
+def generate_presigned_get(key: str, expires_in: int = 3600) -> str:
+    """Return a presigned S3 GET URL for browser image display.
+
+    Default expiry is 1 hour — long enough for an admin editing session.
+    Use this for any image that lives in a private bucket (i.e. all buckets
+    unless you explicitly set a public-read bucket policy).
 
     Args:
-        s3_key: The S3 object key stored in speaking_attempts.audio_s3_key.
-                Example: "audio/user-uuid/attempt-uuid.webm"
+        key:        Full S3 key, e.g. 'speaking-task-3/uuid-scene.jpg'
+        expires_in: Lifetime in seconds (default 1 hour).
+    """
+    return _get_s3_client().generate_presigned_url(
+        "get_object",
+        Params={"Bucket": settings.S3_BUCKET_NAME, "Key": key},
+        ExpiresIn=expires_in,
+    )
 
-    Returns:
-        Raw audio bytes.
 
-    Raises:
-        httpx.HTTPStatusError: If the download fails (caller should retry).
-        RuntimeError:          If AWS credentials are missing.
+def _generate_download_url(s3_key: str) -> str:
+    """Short-lived presigned GET URL (Celery pipeline internal use only)."""
+    return generate_presigned_get(key=s3_key, expires_in=300)
+
+
+async def download_from_s3(s3_key: str) -> bytes:
+    """Download audio bytes from S3 via a presigned GET URL (async).
+
+    Used by the Celery speaking pipeline before Whisper STT.
+    Raises RuntimeError if AWS credentials are not configured.
     """
     if not settings.AWS_ACCESS_KEY_ID or settings.AWS_ACCESS_KEY_ID == "REPLACE_ME":
         raise RuntimeError(
             "AWS_ACCESS_KEY_ID is not configured. "
             "Set your S3/R2 credentials in .env before running the speaking pipeline."
         )
-
     url = _generate_download_url(s3_key)
-    logger.debug("Downloading audio from S3: key=%s", s3_key)
-
     async with httpx.AsyncClient(timeout=60.0) as client:
         resp = await client.get(url)
         resp.raise_for_status()
-        audio_bytes = resp.content
-
-    logger.debug("Audio downloaded: %d bytes from key=%s", len(audio_bytes), s3_key)
-    return audio_bytes
+    logger.debug("Downloaded %d bytes from S3 key=%s", len(resp.content), s3_key)
+    return resp.content
