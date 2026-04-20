@@ -15,9 +15,9 @@
     /* popover — same as card */
     --popover:            228 22% 11%;
     --popover-foreground: 220 20% 92%;
-    /* indigo primary */
-    --primary:            239 84% 67%;
-    --primary-foreground: 0   0%  100%;
+    /* amber-gold primary */
+    --primary:            38  65% 51%;
+    --primary-foreground: 0   0%  5%;
     /* secondary surfaces — slightly lighter than card */
     --secondary:          228 20% 16%;
     --secondary-foreground: 220 15% 75%;
@@ -33,7 +33,7 @@
     /* borders and inputs */
     --border:             228 18% 18%;
     --input:              228 18% 18%;
-    --ring:               239 84% 67%;
+    --ring:               38  65% 51%;
     --radius:             0.5rem;
   }
 }
@@ -77,7 +77,7 @@
 
   /* Glowing primary button effect */
   .btn-glow {
-    @apply shadow-[0_0_20px_rgba(99,102,241,0.35)] hover:shadow-[0_0_30px_rgba(99,102,241,0.55)] transition-shadow duration-300;
+    @apply shadow-[0_0_20px_rgba(200,150,62,0.35)] hover:shadow-[0_0_30px_rgba(200,150,62,0.55)] transition-shadow duration-300;
   }
 
   /* Animation delay helpers — use instead of inline style={{ animationDelay }} */

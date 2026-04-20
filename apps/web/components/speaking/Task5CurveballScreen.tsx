@@ -15,11 +15,12 @@
 
 "use client";
 
-import { Mic }                        from "lucide-react";
-import { TimerRing }              from "@/components/common/TimerRing";
-import { TimerDisplay }           from "@/components/common/TimerDisplay";
-import { MicWaveform }            from "@/components/speaking/MicWaveform";
-import { cn }                     from "@/lib/utils";
+import { Mic }           from "lucide-react";
+import { TimerRing }    from "@/components/common/TimerRing";
+import { TimerDisplay } from "@/components/common/TimerDisplay";
+import { TimerBar }     from "@/components/common/TimerBar";
+import { MicWaveform }  from "@/components/speaking/MicWaveform";
+import { cn }           from "@/lib/utils";
 import { RESPONSE_PULSE_THRESHOLD_SECS } from "@/lib/constants";
 import type { ChoiceOption }      from "@/lib/types";
 
@@ -88,23 +89,17 @@ export function Task5CurveballScreen({
   curveballInstructionText,
   isRecording,
 }: Task5CurveballScreenProps) {
-  const pct     = totalSeconds > 0 ? secondsLeft / totalSeconds : 0;
-  const fillPct = Math.round(Math.min(1, Math.max(0, pct)) * 100);
-  const isLow   = secondsLeft <= RESPONSE_PULSE_THRESHOLD_SECS;
-
-  const barColour =
-    isLow        ? "bg-danger"  :
-    fillPct > 50 ? "bg-success" : "bg-warning";
+  const isLow = secondsLeft <= RESPONSE_PULSE_THRESHOLD_SECS;
 
   return (
     // h-screen + overflow-hidden → no scrolling
-    <div className="flex flex-col h-screen overflow-hidden bg-canvas px-4 pt-4 pb-3 gap-3 items-center">
+    <div className="flex flex-col h-screen overflow-hidden bg-canvas px-4 pt-2 pb-3 gap-3 items-center">
 
       {/* ── 1. Compact header ───────────────────────────────────────────────── */}
       <div className="flex items-center gap-4 w-full max-w-3xl shrink-0">
         {isRecording ? (
-          // Recording phase: depleting progress bar fills the header width
-          <div className="w-full space-y-1">
+          // Recording phase: phase badge + timer display on one row, then TimerBar below
+          <div className="w-full space-y-2">
             {/* REC badge row */}
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
@@ -117,16 +112,12 @@ export function Task5CurveballScreen({
               </div>
               <TimerDisplay secondsLeft={secondsLeft} variant="dark" size="sm" pulseWhenCritical />
             </div>
-            {/* Depleting bar */}
-            <div className="w-full h-2 rounded-full bg-white/10 overflow-hidden">
-              <div
-                className={cn("h-full rounded-full transition-all duration-1000", barColour)}
-                style={{ width: `${fillPct}%` }}
-              />
-            </div>
-            <p className="text-xs text-canvas-subtle">
-              {isLow ? "⚡ Finish your thought!" : "Speak clearly and naturally"}
-            </p>
+            {/* Shared TimerBar — consistent with RecordingInterface */}
+            <TimerBar
+              secondsLeft={secondsLeft}
+              totalSeconds={totalSeconds}
+              hint={isLow ? "⚡ Finish your thought!" : "Speak clearly and naturally"}
+            />
           </div>
         ) : (
           // Prep phase: compact ring (72 px) + badge
@@ -137,7 +128,7 @@ export function Task5CurveballScreen({
                 <TimerDisplay secondsLeft={secondsLeft} variant="dark" size="sm" />
               </div>
             </div>
-            <span className="text-xs font-semibold tracking-[0.18em] uppercase text-primary px-3 py-1 rounded-full border border-primary/30 bg-primary/10 select-none">
+            <span className="text-xs font-semibold tracking-[0.2em] uppercase text-primary px-3 py-1 rounded-full border border-primary/30 bg-primary/10 select-none">
               Preparation Time
             </span>
           </>

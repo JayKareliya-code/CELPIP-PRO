@@ -114,11 +114,11 @@ export function PracticeTestList({ skill, user: serverUser }: PracticeTestListPr
 
       {/* ── Test slot list ───────────────────────────────────────────────────── */}
       <div className="space-y-3">
-        <h2 className="text-xs font-semibold uppercase tracking-wide text-foreground/50">
+        <h2 className="text-sm font-semibold uppercase tracking-wide text-foreground/70">
           Your practice tests
         </h2>
 
-        <div className="space-y-2.5">
+        <div className="space-y-3">
           {isLoading
             ? Array.from({ length: MAX_PRACTICE_SLOTS }).map((_, i) => (
                 <SkeletonSlot key={i} />
@@ -128,8 +128,7 @@ export function PracticeTestList({ skill, user: serverUser }: PracticeTestListPr
                   key={slot.slotNumber}
                   slot={slot}
                   skill={skill}
-                  // TODO: replace with real practice session URL (Phase 2)
-                  href={slot.isLocked ? undefined : `/speaking/0`}
+                  href={slot.isLocked ? undefined : `/practice/${skill}/${slot.slotNumber}`}
                 />
               ))}
         </div>

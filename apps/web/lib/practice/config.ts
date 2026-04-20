@@ -82,3 +82,18 @@ export const MAX_PRACTICE_SLOTS = Math.max(
   ULTRA_PLAN_LIMITS.speaking_mock_tests,
   ULTRA_PLAN_LIMITS.writing_mock_tests,
 );
+
+// ── Mock Exam constants ─────────────────────────────────────────────────────────────────
+
+/** Seconds of rest displayed between tasks in a full mock speaking exam. */
+export const MOCK_EXAM_BREAK_SECONDS = 30;
+
+/** Ordered task numbers that make up a full CELPIP speaking mock exam. */
+export const MOCK_EXAM_TASK_NUMBERS = [1, 2, 3, 4, 5, 6, 7, 8] as const;
+export type MockExamTaskNumber = typeof MOCK_EXAM_TASK_NUMBERS[number];
+
+/**
+ * S3 folder prefix for mock exam audio recordings.
+ * Kept separate from individual practice attempts (which use "speaking/").
+ */
+export const MOCK_EXAM_S3_PREFIX = "mock-tests" as const;

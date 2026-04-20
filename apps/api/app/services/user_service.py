@@ -5,7 +5,7 @@ from app.models.user import User
 from app.repositories.user_repo import UserRepository
 
 
-def _update_streak(user: User) -> None:
+def _update_streak(user: User, today: date) -> None:
     """Increment, maintain, or reset the user's practice streak.
 
     Rules:
@@ -13,8 +13,10 @@ def _update_streak(user: User) -> None:
       - Active again today (same day)  → no change (already counted)
       - Active yesterday               → streak += 1
       - Gap of 2+ days                 → streak resets to 1
+
+    ``today`` is the caller-provided local date (from X-User-Date header)
+    so that streak logic is based on the user's clock, not the server's UTC date.
     """
-    today = date.today()
     last = user.last_active_date
 
     if last is None:
@@ -34,8 +36,15 @@ def _update_streak(user: User) -> None:
 
 
 async def get_or_create_user(
-    db: AsyncSession, clerk_user_id: str, email: str, full_name: str
+    db: AsyncSession, clerk_user_id: str, email: str, full_name: str,
+    user_date: date | None = None,
 ) -> User:
+    """Fetch (or create) the local User row and update the streak.
+
+    ``user_date`` should be the user's local calendar date, derived from the
+    ``X-User-Date`` request header.  Falls back to the server date when absent.
+    """
+    today = user_date or date.today()
     repo = UserRepository(db)
     user = await repo.get_by_clerk_id(clerk_user_id)
 
@@ -47,14 +56,14 @@ async def get_or_create_user(
                 full_name=full_name,
                 plan="starter",
                 streak_days=1,
-                last_active_date=date.today(),
+                last_active_date=today,
             )
         except IntegrityError:
             # Concurrent first-login race: another request inserted the row first.
             await db.rollback()
             user = await repo.get_by_clerk_id(clerk_user_id)
     else:
-        _update_streak(user)
+        _update_streak(user, today)
         await db.flush()
 
     return user

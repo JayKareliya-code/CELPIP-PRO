@@ -17,17 +17,9 @@ import { inputCls }                    from "@/components/admin/shared/inputCls"
 import { cn }                          from "@/lib/utils";
 import { API_V1, authHeaders }         from "@/lib/api";
 import { OptionEditor }                from "@/components/admin/form/OptionEditor";
+import { SPEAKING_TASK_CONFIG, IMAGE_TASK_NUMBERS } from "@/lib/constants";
+import { API_BASE, MAX_UPLOAD_BYTES, IMAGE_ACCEPT_TYPES, stripPresign, uploadFileToS3 } from "@/lib/admin/imageUpload";
 import type { SpeakingPrompt, ChoiceOption } from "@/lib/types";
-
-const API_BASE     = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
-const IMAGE_TASKS  = new Set([3, 4, 8]);
-const ACCEPT_TYPES = "image/jpeg,image/png,image/webp,image/gif";
-const MAX_BYTES    = 5 * 1024 * 1024;
-
-function stripPresign(url: string): string {
-  try { return new URL(url).origin + new URL(url).pathname; }
-  catch (_) { return url; }
-}
 
 type UploadState = "idle" | "signing" | "uploading" | "done" | "error";
 
@@ -180,11 +172,13 @@ interface Props {
 }
 
 export function SpeakingFormFields({ initial, taskNumber }: Props) {
-  const showImageField = taskNumber === undefined || IMAGE_TASKS.has(taskNumber);
+  const showImageField = taskNumber === undefined || IMAGE_TASK_NUMBERS.has(taskNumber);
   const showTask5Field = taskNumber === 5;
   const { getToken }   = useAuth();
 
-  const fileRef = useRef<HTMLInputElement>(null);
+  const fileRef   = useRef<HTMLInputElement>(null);
+  // Holds the AbortController for the in-flight XHR so we can cancel on unmount
+  const abortRef  = useRef<AbortController | null>(null);
 
   // publicUrl  → stored in the hidden form input → written to DB (ALWAYS the clean path URL)
   const [publicUrl,   setPublicUrl]  = useState<string>(
@@ -211,8 +205,16 @@ export function SpeakingFormFields({ initial, taskNumber }: Props) {
     setProgress(0);
     setError("");
 
-    const url  = initial?.context_image_url;
+    const url   = initial?.context_image_url;
     const clean = url ? stripPresign(url) : "";
+
+    // Always sync publicUrl with the current prompt's stored image URL so the
+    // hidden form input has the correct value when submitted.
+    //
+    // Base UI keeps DialogContent (and therefore SpeakingFormFields) mounted even
+    // when the dialog is closed — meaning the same component instance is reused
+    // across different edit sessions.  Without this setPublicUrl call, the hidden
+    // input retains the PREVIOUS prompt's value (or "") when a new prompt is opened.
     setPublicUrl(clean);
 
     if (!url || !showImageField) {
@@ -235,8 +237,12 @@ export function SpeakingFormFields({ initial, taskNumber }: Props) {
       })
       .catch(() => { /* keep the one from list API */ })
     );
+
+    // Abort any in-flight XHR when we switch prompts or the component unmounts
+    return () => { abortRef.current?.abort(); };
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [initial?.id, showImageField]);
+
 
   // ── Upload handler ─────────────────────────────────────────────────────────
 
@@ -244,7 +250,7 @@ export function SpeakingFormFields({ initial, taskNumber }: Props) {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    if (file.size > MAX_BYTES) {
+    if (file.size > MAX_UPLOAD_BYTES) {
       setError(`File too large — max 5 MB (this file is ${(file.size / 1024 / 1024).toFixed(1)} MB)`);
       setUpload("error");
       return;
@@ -281,17 +287,16 @@ export function SpeakingFormFields({ initial, taskNumber }: Props) {
 
       // Step 2 — PUT file body directly to S3 with XHR for progress tracking
       setUpload("uploading");
-      await new Promise<void>((resolve, reject) => {
-        const xhr = new XMLHttpRequest();
-        xhr.open("PUT", data.upload_url);
-        xhr.setRequestHeader("Content-Type", file.type);
-        xhr.upload.onprogress = (ev) => {
-          if (ev.lengthComputable) setProgress(Math.round((ev.loaded / ev.total) * 100));
-        };
-        xhr.onload  = () => (xhr.status >= 200 && xhr.status < 300 ? resolve() : reject(new Error(`S3 PUT ${xhr.status}`)));
-        xhr.onerror = () => reject(new Error("Network error during upload"));
-        xhr.send(file);
-      });
+      const controller = new AbortController();
+      abortRef.current = controller;
+      await uploadFileToS3(
+        data.upload_url,
+        file,
+        file.type,
+        setProgress,
+        controller.signal,
+      );
+      abortRef.current = null;
 
       // Step 3 — store public_url in form (DB), preview_url for <img>
       setPublicUrl(data.public_url);   // → hidden input → DB
@@ -300,6 +305,7 @@ export function SpeakingFormFields({ initial, taskNumber }: Props) {
       setProgress(100);
 
     } catch (err) {
+      if (err instanceof DOMException && err.name === "AbortError") return; // silent on unmount
       setError(err instanceof Error ? err.message : "Upload failed");
       setUpload("error");
     } finally {
@@ -320,17 +326,35 @@ export function SpeakingFormFields({ initial, taskNumber }: Props) {
   const isBusy    = uploadState === "signing" || uploadState === "uploading";
   const hasImage  = Boolean(previewUrl || publicUrl);
 
+  // ── Derive task-appropriate timing defaults ─────────────────────────────
+  // When creating a NEW prompt: use SPEAKING_TASK_CONFIG defaults for the task.
+  // When EDITING an existing prompt: always use the saved DB values.
+  const taskKey = (taskNumber === 0 ? "practice" : taskNumber) as keyof typeof SPEAKING_TASK_CONFIG;
+  const taskCfg = SPEAKING_TASK_CONFIG[taskKey] ?? SPEAKING_TASK_CONFIG.practice;
+  const defaultPrepTime     = initial?.prep_time_seconds      ?? taskCfg.prep;
+  const defaultResponseTime = initial?.response_time_seconds  ?? taskCfg.response;
+
   return (
     <>
       {/* ── Timing ──────────────────────────────────────────────────────── */}
       <div className="grid grid-cols-2 gap-3">
-        <Field label="Prep Time (sec)" htmlFor="prep_time_seconds" required>
+        <Field
+          label="Prep Time (sec)"
+          htmlFor="prep_time_seconds"
+          hint={taskNumber !== undefined ? `Standard for Task ${taskNumber === 0 ? "0 (Practice)" : taskNumber}: ${taskCfg.prep}s` : undefined}
+          required
+        >
           <input id="prep_time_seconds" name="prep_time_seconds" type="number" min={0} required
-            defaultValue={initial?.prep_time_seconds ?? 30} className={inputCls} />
+            defaultValue={defaultPrepTime} className={inputCls} />
         </Field>
-        <Field label="Response Time (sec)" htmlFor="response_time_seconds" required>
+        <Field
+          label="Response Time (sec)"
+          htmlFor="response_time_seconds"
+          hint={taskNumber !== undefined ? `Standard for Task ${taskNumber === 0 ? "0 (Practice)" : taskNumber}: ${taskCfg.response}s` : undefined}
+          required
+        >
           <input id="response_time_seconds" name="response_time_seconds" type="number" min={1} required
-            defaultValue={initial?.response_time_seconds ?? 60} className={inputCls} />
+            defaultValue={defaultResponseTime} className={inputCls} />
         </Field>
       </div>
 
@@ -374,7 +398,7 @@ export function SpeakingFormFields({ initial, taskNumber }: Props) {
                 ref={fileRef}
                 id="scene-image-picker"
                 type="file"
-                accept={ACCEPT_TYPES}
+                accept={IMAGE_ACCEPT_TYPES}
                 className="sr-only"
                 onChange={handleFileChange}
                 disabled={isBusy}

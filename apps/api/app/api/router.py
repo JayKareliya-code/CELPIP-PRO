@@ -1,5 +1,5 @@
 from fastapi import APIRouter
-from app.api.v1 import health, users, speaking, writing, attempts, admin
+from app.api.v1 import health, users, speaking, writing, attempts, admin, mock_exam, billing
 from app.api.v1 import reports, history          # Phase 2
 from app.api.v1 import (                         # Phase CMS
     admin_prompts,
@@ -28,3 +28,9 @@ api_router.include_router(admin_materials.router, prefix="/admin", tags=["Admin 
 api_router.include_router(admin_assets.router,    prefix="/admin", tags=["Admin CMS — Assets"])
 api_router.include_router(admin_tags.router,      prefix="/admin", tags=["Admin CMS — Tags"])
 api_router.include_router(admin_audit.router,     prefix="/admin", tags=["Admin CMS — Audit"])
+
+# Mock exam
+api_router.include_router(mock_exam.router, tags=["Mock Exam"])
+
+# Billing — Stripe one-time payments
+api_router.include_router(billing.router, prefix="", tags=["Billing"])

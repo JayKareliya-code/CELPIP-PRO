@@ -12,6 +12,9 @@ from app.models.score_report import ScoreReport, ScoreDimension
 from app.models.transcript import Transcript
 from app.models.feedback_report import FeedbackReport
 
+# Mock exam
+from app.models.mock_exam_attempt import MockExamTaskAttempt
+
 __all__ = [
     # Phase 1
     "Base", "User", "Subscription",
@@ -23,4 +26,6 @@ __all__ = [
     "ScoreReport", "ScoreDimension",
     "Transcript",
     "FeedbackReport",
+    # Mock exam
+    "MockExamTaskAttempt",
 ]

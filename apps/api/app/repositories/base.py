@@ -27,8 +27,14 @@ class BaseRepository(Generic[ModelT]):
         return obj
 
     async def update(self, obj: ModelT, **kwargs) -> ModelT:
+        # Only set attributes that correspond to actual DB columns.
+        # Unknown keys are silently ignored to prevent phantom Python attributes
+        # being attached to the ORM object (they would never be persisted but
+        # would cause confusing debugs if an attribute check followed the flush).
+        col_names = {c.name for c in obj.__table__.columns}
         for key, value in kwargs.items():
-            setattr(obj, key, value)
+            if key in col_names:
+                setattr(obj, key, value)
         self.session.add(obj)
         await self.session.flush()
         return obj

@@ -1,8 +1,9 @@
 "use client";
 
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { Toaster } from "sonner";
-import { useRef } from "react";
+import { Toaster }        from "sonner";
+import { useRef }         from "react";
+import { AuthCacheGuard } from "@/components/layout/AuthCacheGuard";
 
 /**
  * Client-side providers wrapper.
@@ -14,6 +15,10 @@ import { useRef } from "react";
  * Pattern: create the QueryClient inside a ref so a new instance is NOT
  * created on every render, while still being created fresh per server request
  * in SSR/RSC environments.
+ *
+ * Security: AuthCacheGuard is mounted here so it runs for EVERY page.
+ * It watches the Clerk userId and calls queryClient.clear() on any change,
+ * preventing stale data from one user being served to another.
  */
 export function Providers({ children }: { children: React.ReactNode }) {
   // useRef ensures the same QueryClient instance is reused across renders
@@ -22,10 +27,13 @@ export function Providers({ children }: { children: React.ReactNode }) {
     queryClientRef.current = new QueryClient({
       defaultOptions: {
         queries: {
-          // Do not retry on the client by default — let the UI surface errors
+          // Retry once on failure — surfaces errors quickly without hammering the API.
           retry: 1,
-          // Keep data fresh for 60 seconds before a background refetch
-          staleTime: 60_000,
+          // Conservative default: 30 s. Most queries override this individually.
+          // Auth-scoped queries (current-user, billing-status) use per-query staleTime.
+          staleTime: 30_000,
+          // Never re-use data from a previous user session once the window refocuses.
+          refetchOnWindowFocus: true,
         },
       },
     });
@@ -33,7 +41,15 @@ export function Providers({ children }: { children: React.ReactNode }) {
 
   return (
     <QueryClientProvider client={queryClientRef.current}>
+      {/*
+        AuthCacheGuard watches the Clerk userId and wipes the entire cache the
+        moment it changes (sign-in, sign-out, account switch). This is the
+        single most important guard against cross-user data leakage.
+      */}
+      <AuthCacheGuard />
+
       {children}
+
       {/* Sonner toast renderer — position and theme match the dark design system */}
       <Toaster
         position="bottom-right"
@@ -42,8 +58,8 @@ export function Providers({ children }: { children: React.ReactNode }) {
         closeButton
         toastOptions={{
           classNames: {
-            toast:       "bg-surface border border-border text-foreground text-sm rounded-xl shadow-panel",
-            description: "text-subtle",
+            toast:        "bg-surface border border-border text-foreground text-sm rounded-xl shadow-panel",
+            description:  "text-subtle",
             actionButton: "bg-primary text-white",
             cancelButton: "bg-muted text-foreground",
           },

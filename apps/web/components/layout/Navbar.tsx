@@ -2,53 +2,276 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useAuth, UserButton } from "@clerk/nextjs";
-import { BookOpen, Menu, X } from "lucide-react";
-import { useState, useEffect } from "react";
+import { useAuth, useUser, useClerk } from "@clerk/nextjs";
+import { useCurrentUser } from "@/lib/hooks/useCurrentUser";
+import {
+  ChevronDown, LogOut, LayoutDashboard, User2,
+  Settings, Zap, CreditCard, Mic, PenLine, PlayCircle,
+  History, TrendingUp, Menu, X,
+} from "lucide-react";
+import { useState, useEffect, useRef } from "react";
 import { cn } from "@/lib/utils";
 
+// ── Plan badge ────────────────────────────────────────────────────────────────
+
+type Plan = "ultra" | "pro" | "starter" | string;
+
+function PlanBadge({ plan, size = "sm" }: { plan: Plan; size?: "xs" | "sm" }) {
+  const label = plan === "ultra" ? "Ultra" : plan === "pro" ? "Pro" : "Starter";
+  const cls =
+    plan === "ultra"
+      ? "bg-amber-900/40 border-amber-700/50 text-amber-300"
+      : plan === "pro"
+        ? "bg-amber-900/30 border-amber-700/40 text-amber-400"
+        : "bg-white/[0.05] border-white/[0.10] text-white/35";
+  return (
+    <span
+      className={cn(
+        "inline-flex items-center gap-1 rounded-full border font-semibold select-none",
+        size === "xs" ? "px-1.5 py-0.5 text-[10px]" : "px-2 py-0.5 text-xs",
+        cls,
+      )}
+    >
+      <Zap className={size === "xs" ? "w-3.5 h-3.5" : "w-4 h-4"} />
+      {label}
+    </span>
+  );
+}
+
+// ── Brand ─────────────────────────────────────────────────────────────────────
+
+function Brand() {
+  return (
+    <Link
+      href="/"
+      className="flex items-center select-none group shrink-0"
+      aria-label="CELPIPBro home"
+    >
+      <span className="text-3xl font-black tracking-tight text-white group-hover:text-white/90 transition-colors">
+        CELPIP
+      </span>
+      <span className="text-3xl font-black tracking-tight text-amber-400 group-hover:text-amber-300 transition-colors">
+        BRO
+      </span>
+    </Link>
+  );
+}
+
+// ── Nav links (shown in center for authenticated users) ───────────────────────
+
 const NAV_LINKS = [
-  { href: "/dashboard", label: "Dashboard" },
-  { href: "/speaking",  label: "Speaking"  },
-  { href: "/writing",   label: "Writing"   },
-  { href: "/history",   label: "History"   },
+  { href: "/dashboard", label: "Dashboard",  icon: LayoutDashboard },
+  { href: "/speaking",  label: "Speaking",   icon: Mic            },
+  { href: "/writing",   label: "Writing",    icon: PenLine        },
+  { href: "/practice",  label: "Practice",   icon: PlayCircle     },
+  { href: "/history",   label: "History",    icon: History        },
+  { href: "/progress",  label: "Progress",   icon: TrendingUp     },
+  { href: "/billing",   label: "Billing",    icon: CreditCard     },
 ];
 
-/**
- * Main site navigation bar.
- * - Transparent on landing page, white + shadow on all other pages.
- * - Shows auth state via useAuth() hook (Clerk v7 compatible).
- * - Mobile: hamburger toggle collapses to a full-width drawer.
- */
+function NavLinks({ pathname, onClick }: { pathname: string; onClick?: () => void }) {
+  return (
+    <>
+      {NAV_LINKS.map(({ href, label }) => {
+        const active = pathname.startsWith(href);
+        return (
+          <Link
+            key={href}
+            href={href}
+            onClick={onClick}
+            className={cn(
+              "relative text-sm font-medium transition-colors duration-150 whitespace-nowrap px-1 py-0.5 group",
+              active
+                ? "text-amber-400"
+                : "text-white/55 hover:text-white/90",
+            )}
+          >
+            {label}
+            {/* underline indicator */}
+            <span
+              className={cn(
+                "absolute -bottom-0.5 left-0 h-[2px] w-full rounded-full transition-all duration-200",
+                active
+                  ? "bg-amber-400 opacity-100"
+                  : "bg-amber-400 opacity-0 group-hover:opacity-40",
+              )}
+            />
+          </Link>
+        );
+      })}
+    </>
+  );
+}
+
+// ── Profile dropdown ──────────────────────────────────────────────────────────
+
+function ProfileDropdown() {
+  const { user }          = useUser();
+  const { user: appUser } = useCurrentUser();
+  const { signOut }       = useClerk();
+  const [open, setOpen]   = useState(false);
+  const ref               = useRef<HTMLDivElement>(null);
+
+  const plan        = appUser?.plan ?? "starter";
+  const displayName = user?.fullName ?? user?.username ?? user?.primaryEmailAddress?.emailAddress ?? "Account";
+  const email       = user?.primaryEmailAddress?.emailAddress ?? "";
+  const avatarUrl   = user?.imageUrl ?? null;
+
+  useEffect(() => {
+    function handleClick(e: MouseEvent) {
+      if (ref.current && !ref.current.contains(e.target as Node)) {
+        setOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClick);
+    return () => document.removeEventListener("mousedown", handleClick);
+  }, []);
+
+  return (
+    <div ref={ref} className="relative shrink-0">
+      {/* Trigger button */}
+      <button
+        id="profile-dropdown-trigger"
+        onClick={() => setOpen((p) => !p)}
+        className={cn(
+          "flex items-center gap-2 pl-1 pr-2.5 py-1 rounded-full",
+          "border transition-all duration-150",
+          open
+            ? "border-amber-500/30 bg-amber-500/10"
+            : "border-white/[0.08] hover:border-amber-500/20 hover:bg-white/[0.04]",
+        )}
+      >
+        {/* Avatar */}
+        {avatarUrl ? (
+          <img
+            src={avatarUrl}
+            alt={displayName}
+            className="w-8 h-8 rounded-full object-cover ring-2 ring-amber-500/20 shrink-0"
+          />
+        ) : (
+          <div className="w-8 h-8 rounded-full bg-amber-900/30 border border-amber-700/30 flex items-center justify-center shrink-0">
+            <User2 className="w-4 h-4 text-amber-400" />
+          </div>
+        )}
+
+        {/* Plan badge (always visible) */}
+        <PlanBadge plan={plan} size="xs" />
+
+        <ChevronDown
+          className={cn(
+            "w-3.5 h-3.5 text-white/40 transition-transform duration-200 shrink-0",
+            open && "rotate-180",
+          )}
+        />
+      </button>
+
+      {/* Dropdown panel */}
+      {open && (
+        <div
+          className={cn(
+            "absolute right-0 mt-2 w-64 rounded-xl z-50",
+            "border border-white/[0.08] bg-[#111318]/95 backdrop-blur-xl",
+            "shadow-[0_16px_48px_rgba(0,0,0,0.7)]",
+            "py-1 animate-in fade-in-0 zoom-in-95 slide-in-from-top-2 duration-150",
+          )}
+        >
+          {/* User info header */}
+          <div className="px-4 py-3 border-b border-white/[0.06]">
+            <p className="text-sm font-semibold text-white/90 truncate">{displayName}</p>
+            {email && displayName !== email && (
+              <p className="text-xs text-white/35 truncate mt-0.5">{email}</p>
+            )}
+            <div className="mt-2">
+              <PlanBadge plan={plan} size="sm" />
+            </div>
+          </div>
+
+          {/* nav items */}
+          <div className="py-1">
+            {[
+              { href: "/settings", label: "Settings", icon: Settings },
+            ].map(({ href, label, icon: Icon }) => (
+              <Link
+                key={href}
+                href={href}
+                onClick={() => setOpen(false)}
+                className="flex items-center gap-3 px-4 py-2.5 text-sm text-white/50 hover:text-white/90 hover:bg-white/[0.04] transition-colors"
+              >
+                <Icon className="w-4 h-4" />
+                {label}
+              </Link>
+            ))}
+          </div>
+
+          {/* Sign out */}
+          <div className="border-t border-white/[0.06] py-1">
+            <button
+              id="profile-signout-btn"
+              onClick={() => signOut({ redirectUrl: "/" })}
+              className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-red-400/80 hover:text-red-300 hover:bg-red-500/[0.06] transition-colors"
+            >
+              <LogOut className="w-4 h-4" />
+              Sign out
+            </button>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ── Mobile menu ───────────────────────────────────────────────────────────────
+
+function MobileMenu({ pathname }: { pathname: string }) {
+  const [open, setOpen] = useState(false);
+
+  // Close on route change
+  useEffect(() => { setOpen(false); }, [pathname]);
+
+  return (
+    <>
+      <button
+        id="mobile-menu-trigger"
+        onClick={() => setOpen((p) => !p)}
+        className="flex items-center justify-center w-9 h-9 rounded-lg border border-white/[0.08] hover:border-white/[0.14] hover:bg-white/[0.04] transition-colors"
+        aria-label="Toggle menu"
+      >
+        {open ? <X className="w-4 h-4 text-white/70" /> : <Menu className="w-4 h-4 text-white/70" />}
+      </button>
+
+      {open && (
+        <div className="absolute top-full left-0 right-0 z-40 bg-[#0D0F17]/98 backdrop-blur-xl border-b border-white/[0.07] px-4 py-3 flex flex-col gap-1">
+          {NAV_LINKS.map(({ href, label, icon: Icon }) => {
+            const active = pathname.startsWith(href);
+            return (
+              <Link
+                key={href}
+                href={href}
+                onClick={() => setOpen(false)}
+                className={cn(
+                  "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors",
+                  active
+                    ? "bg-amber-500/10 text-amber-400 border border-amber-500/20"
+                    : "text-white/55 hover:text-white/90 hover:bg-white/[0.04]",
+                )}
+              >
+                <Icon className="w-4 h-4 shrink-0" />
+                {label}
+              </Link>
+            );
+          })}
+        </div>
+      )}
+    </>
+  );
+}
+
+// ── Navbar ────────────────────────────────────────────────────────────────────
+
 export function Navbar() {
   const pathname                 = usePathname();
   const { isSignedIn, isLoaded } = useAuth();
-  const [mobileOpen, setMobileOpen] = useState(false);
-  const [scrolled, setScrolled]     = useState(false);
 
-  const isLanding = pathname === "/";
-  const isActive  = (href: string) => pathname.startsWith(href);
-
-  // Close the mobile drawer whenever the route changes (soft navigation).
-  useEffect(() => {
-    setMobileOpen(false);
-  }, [pathname]);
-
-  // Track scroll depth for landing-page frosted-glass effect.
-  // Guard: only update state when the boolean actually flips to avoid a
-  // re-render on every scroll event beyond the 20 px threshold.
-  useEffect(() => {
-    if (!isLanding) return;
-    const handleScroll = () => {
-      const nextScrolled = window.scrollY > 20;
-      setScrolled((prev) => (prev !== nextScrolled ? nextScrolled : prev));
-    };
-    window.addEventListener("scroll", handleScroll, { passive: true });
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, [isLanding]);
-
-  // Optimistic auth: middleware blocks unauthenticated access, so treat
-  // "not yet loaded" as signed-in to prevent nav flicker on page transitions.
   const showAuthNav   = !isLoaded || !!isSignedIn;
   const showPublicNav = !showAuthNav;
 
@@ -56,103 +279,58 @@ export function Navbar() {
     <header
       className={cn(
         "sticky top-0 z-50 w-full transition-all duration-300",
-        isLanding && !scrolled
-          ? "bg-transparent"
-          : "bg-surface/95 backdrop-blur-md border-b border-border shadow-sm"
+        "bg-[#0D0F17]/95 backdrop-blur-md border-b border-white/[0.06]",
       )}
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-20">
+        <div className="flex items-center h-14 gap-6">
 
-          {/* Logo */}
-          <Link
-            href="/"
-            className="flex items-center gap-2 font-bold text-xl text-primary hover:opacity-80 transition-opacity"
-          >
-            <BookOpen className="w-5 h-5" />
-            <span>CELPIP<span className="text-subtle font-normal">Pro</span></span>
-          </Link>
+          {/* Brand — always left */}
+          <Brand />
 
-          {/* Desktop nav links — signed in only */}
-          {showAuthNav && (
-            <nav className="hidden md:flex items-center gap-1">
-              {NAV_LINKS.map((link) => (
-                <Link
-                  key={link.href}
-                  href={link.href}
-                  aria-current={isActive(link.href) ? "page" : undefined}
-                  className={cn(
-                    "px-3 py-2 rounded-lg text-sm font-medium transition-colors",
-                    isActive(link.href)
-                      ? "bg-primary-light text-primary"
-                      : "text-subtle hover:text-foreground hover:bg-muted"
-                  )}
-                >
-                  {link.label}
-                </Link>
-              ))}
-            </nav>
-          )}
+          {/* Spacer — pushes everything else to the right */}
+          <div className="flex-1" />
 
-          {/* Right side */}
-          <div className="flex items-center gap-3">
+          {/* Right side — nav links + profile (desktop) */}
+          <div className="flex items-center gap-6 shrink-0">
 
-            {/* Signed-out: Sign In + Get Started buttons */}
+            {/* Nav links — desktop only, auth users */}
+            {showAuthNav && (
+              <nav className="hidden lg:flex items-center gap-5">
+                <NavLinks pathname={pathname} />
+              </nav>
+            )}
+
+            {/* Public nav links */}
             {showPublicNav && (
               <>
                 <Link
                   href="/sign-in"
-                  className="text-sm font-medium text-subtle hover:text-foreground transition-colors"
+                  className="text-sm font-medium text-white/55 hover:text-white/90 transition-colors"
                 >
                   Sign In
                 </Link>
                 <Link
                   href="/sign-up"
-                  className="text-sm font-semibold bg-primary text-white px-4 py-2 rounded-lg hover:bg-primary-hover transition-colors"
+                  className="text-sm font-semibold bg-amber-500 hover:bg-amber-400 text-black px-4 py-1.5 rounded-lg transition-colors"
                 >
                   Get Started
                 </Link>
               </>
             )}
 
-            {/* Signed-in: avatar + mobile hamburger */}
+            {showAuthNav && <ProfileDropdown />}
+
+            {/* Mobile hamburger — auth only, hidden on lg+ */}
             {showAuthNav && (
-              <>
-                <UserButton />
-                <button
-                  className="md:hidden p-2 rounded-lg hover:bg-muted transition-colors"
-                  onClick={() => setMobileOpen(!mobileOpen)}
-                  aria-label="Toggle menu"
-                >
-                  {mobileOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
-                </button>
-              </>
+              <div className="relative lg:hidden">
+                <MobileMenu pathname={pathname} />
+              </div>
             )}
           </div>
+
         </div>
       </div>
-
-      {/* Mobile drawer */}
-      {mobileOpen && showAuthNav && (
-        <div className="md:hidden bg-surface border-t border-border px-4 py-3 space-y-1">
-          {NAV_LINKS.map((link) => (
-            <Link
-              key={link.href}
-              href={link.href}
-              aria-current={isActive(link.href) ? "page" : undefined}
-              onClick={() => setMobileOpen(false)}
-              className={cn(
-                "block px-3 py-2 rounded-lg text-sm font-medium transition-colors",
-                isActive(link.href)
-                  ? "bg-primary-light text-primary"
-                  : "text-subtle hover:text-foreground hover:bg-muted"
-              )}
-            >
-              {link.label}
-            </Link>
-          ))}
-        </div>
-      )}
     </header>
   );
 }

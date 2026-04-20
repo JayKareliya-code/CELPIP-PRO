@@ -1,22 +1,32 @@
 import type { Metadata } from "next";
-import { PageWrapper } from "@/components/layout/PageWrapper";
-import { PlaceholderPage } from "@/components/layout/PlaceholderPage";
+import { BillingPageClient } from "@/components/billing/BillingPageClient";
 
-export const metadata: Metadata = { title: "Billing & Plans" };
+export const metadata: Metadata = {
+  title: "Billing & Plans",
+  description: "View and manage your CELPIPBro plan. One-time payments — no subscriptions.",
+};
 
 /**
- * Billing page placeholder — /billing
- * Stripe integration, plan upgrade flow, and purchase confirmation come in Phase 3.
+ * Billing page — /billing
+ *
+ * Server Component: reads Stripe redirect query params and passes them to the
+ * client boundary. No auth guard needed — the layout handles that.
  */
-export default function BillingPage() {
+export default async function BillingPage({
+  searchParams,
+}: {
+  searchParams: Promise<Record<string, string>>;
+}) {
+  const params   = await searchParams;
+  const success  = params.success === "true";
+  const canceled = params.canceled === "true";
+  const plan     = params.plan ?? undefined;
+
   return (
-    <PageWrapper>
-      <PlaceholderPage
-        title="Billing &amp; Plans"
-        description="Plan upgrade flow, Stripe integration, and purchase history are coming in Phase 3."
-        availableIn="Phase 3"
-        cta={{ label: "Back to Dashboard", href: "/dashboard" }}
-      />
-    </PageWrapper>
+    <BillingPageClient
+      success={success}
+      canceled={canceled}
+      planParam={plan}
+    />
   );
 }

@@ -58,10 +58,18 @@ class SpeakingPrompt(Base, TimestampMixin):
     published_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     archived_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
 
+    # Prompt pool tag (migration 0008)
+    # "practice" → served in individual task practice attempts (default)
+    # "mock"     → served in full mock exam sessions only
+    prompt_tag: Mapped[str] = mapped_column(
+        String(16), nullable=False, server_default="practice"
+    )
+
     __table_args__ = (
         CheckConstraint("task_number BETWEEN 0 AND 8", name="check_speaking_task_number"),
         CheckConstraint("difficulty IN ('easy', 'medium', 'hard')", name="check_speaking_difficulty"),
         CheckConstraint(_CMS_STATUS_CHECK, name="check_speaking_status"),
+        CheckConstraint("prompt_tag IN ('practice', 'mock')", name="check_speaking_prompt_tag"),
     )
 
 
@@ -99,8 +107,16 @@ class WritingPrompt(Base, TimestampMixin):
     published_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     archived_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
 
+    # Prompt pool tag — mirrors SpeakingPrompt.prompt_tag
+    # "practice" → served in individual task practice (default)
+    # "mock"     → served in full mock writing exam sessions only
+    prompt_tag: Mapped[str] = mapped_column(
+        String(16), nullable=False, server_default="practice"
+    )
+
     __table_args__ = (
         CheckConstraint("task_number IN (1, 2)", name="check_writing_task_number"),
         CheckConstraint("difficulty IN ('easy', 'medium', 'hard')", name="check_writing_difficulty"),
         CheckConstraint(_CMS_STATUS_CHECK, name="check_writing_status"),
+        CheckConstraint("prompt_tag IN ('practice', 'mock')", name="check_writing_prompt_tag"),
     )

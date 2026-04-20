@@ -18,12 +18,17 @@ const SEGMENT_LABELS: Record<string, string> = {
   prompts:     "Prompts",
   calibration: "Calibration",
   practice:    "Practice",
+  instruction: "Instructions",
   tips:        "Tips & Vocabulary",
   status:      "Processing",
   report:      "Report",
   attempts:    "Attempts",
+  // Writing-specific task IDs (mock data)
+  "writing-task-1": "Task 1 — Writing an Email",
+  "writing-task-2": "Task 2 — Opinion Essay",
   ...SPEAKING_TASK_NAMES,   // e.g. "task-1" → "Task 1 — Giving Advice"
 };
+
 
 /**
  * Auto-generates breadcrumbs from the current URL path segments.

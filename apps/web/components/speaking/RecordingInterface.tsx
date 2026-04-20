@@ -5,19 +5,20 @@
 //
 // Layout variants:
 //   text-only  (Tasks 1, 2, 6, 7)
-//     → classic centred layout: REC • waveform • timer • bar
+//     → centred column: phase badge → mic icon → waveform → timer → bar
 //
 //   with-image (Tasks 3, 4, 8)
-//     → image panel persists so candidates can keep referring to it
 //     → narrow:  image top (compact) → recording controls below
-//     → wide:    image left (medium, sticky) | recording controls right
+//     → wide:    image left (sticky) | recording controls right
+//
+// Both variants use the same TimerBar as the primary recording-time indicator.
 // ─────────────────────────────────────────────────────────────────────────────
 
-import { Mic }          from "lucide-react";
-import { MicWaveform }  from "@/components/speaking/MicWaveform";
+import { Mic }         from "lucide-react";
+import { MicWaveform } from "@/components/speaking/MicWaveform";
 import { TimerDisplay } from "@/components/common/TimerDisplay";
-import { cn }           from "@/lib/utils";
-import { RESPONSE_PULSE_THRESHOLD_SECS } from "@/lib/constants";
+import { TimerBar }    from "@/components/common/TimerBar";
+import { cn }          from "@/lib/utils";
 
 // ── Props ─────────────────────────────────────────────────────────────────────
 
@@ -38,32 +39,11 @@ interface RecordingInterfaceProps {
   className?: string;
 }
 
-/**
- * Recording phase full-screen UI.
- *
- * Timer bar is a plain CSS div (width driven by `fillPct`), NOT a shadcn/ui
- * Progress, to avoid the base-ui double-track rendering bug.
- */
-export function RecordingInterface({
-  secondsLeft,
-  totalResponseSeconds,
-  partLabel,
-  imageUrl,
-  promptText,
-  className,
-}: RecordingInterfaceProps) {
-  const pct     = totalResponseSeconds > 0 ? secondsLeft / totalResponseSeconds : 0;
-  const fillPct = Math.round(Math.min(1, Math.max(0, pct)) * 100);
-  const isLow   = secondsLeft <= RESPONSE_PULSE_THRESHOLD_SECS;
-  const hasImage = Boolean(imageUrl);
+// ── Shared sub-elements ───────────────────────────────────────────────────────
 
-  // Colour of the single timer bar
-  const barColour =
-    isLow        ? "bg-danger"  :
-    fillPct > 50 ? "bg-success" : "bg-warning";
-
-  // ── Shared: REC indicator ─────────────────────────────────────────────────
-  const recIndicator = (
+/** REC • [part label] badge row */
+function RecIndicator({ partLabel }: { partLabel?: string }) {
+  return (
     <div className="flex items-center gap-3">
       <span className="relative flex h-3 w-3">
         <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-danger opacity-75" />
@@ -79,17 +59,49 @@ export function RecordingInterface({
       )}
     </div>
   );
+}
 
-  // ── Shared: mic ring ──────────────────────────────────────────────────────
-  const micRing = (
-    <div className="flex h-20 w-20 items-center justify-center rounded-full bg-danger/10 border border-danger/30 animate-pulse-ring">
-      <Mic className="w-9 h-9 text-danger" />
+/** Pulsing mic icon ring */
+function MicRing({ size = "lg" }: { size?: "sm" | "lg" }) {
+  const ring = size === "lg"
+    ? "h-20 w-20"
+    : "h-14 w-14";
+  const icon = size === "lg"
+    ? "w-9 h-9"
+    : "w-6 h-6";
+  return (
+    <div className={cn(
+      "flex items-center justify-center rounded-full bg-danger/10 border border-danger/30 animate-pulse-ring",
+      ring,
+    )}>
+      <Mic className={cn("text-danger", icon)} />
     </div>
   );
+}
 
-  // ── Shared: waveform + timer + bar ────────────────────────────────────────
-  const controls = (
+// ── Main Component ────────────────────────────────────────────────────────────
+
+/**
+ * Recording phase full-screen UI.
+ *
+ * The TimerBar (horizontal depleting slider) is the primary time indicator
+ * for all recording tasks — consistent regardless of layout variant.
+ */
+export function RecordingInterface({
+  secondsLeft,
+  totalResponseSeconds,
+  partLabel,
+  imageUrl,
+  promptText,
+  className,
+}: RecordingInterfaceProps) {
+  const hasImage = Boolean(imageUrl);
+
+  /** Core recording controls block — identical for both layout variants */
+  const recordingControls = (
     <div className="flex flex-col items-center gap-5 w-full">
+      <RecIndicator partLabel={partLabel} />
+      <MicRing />
       <MicWaveform isActive className="h-12 w-full max-w-xs" />
 
       <TimerDisplay
@@ -99,20 +111,12 @@ export function RecordingInterface({
         pulseWhenCritical
       />
 
-      {/* Single depleting timer bar — plain div, no Progress wrapper */}
-      <div className="w-full max-w-md space-y-2">
-        <div className="w-full h-2 rounded-full bg-white/10 overflow-hidden">
-          <div
-            className={cn("h-full rounded-full transition-all duration-1000", barColour)}
-            style={{ width: `${fillPct}%` }}
-          />
-        </div>
-        <p className="text-xs text-canvas-subtle text-center">
-          {isLow
-            ? "⚡ Finish your thought!"
-            : "Speak clearly and at a natural pace"}
-        </p>
-      </div>
+      {/* Depleting timer bar — primary recording time indicator */}
+      <TimerBar
+        secondsLeft={secondsLeft}
+        totalSeconds={totalResponseSeconds}
+        className="max-w-md"
+      />
     </div>
   );
 
@@ -121,8 +125,8 @@ export function RecordingInterface({
     return (
       <div
         className={cn(
-          "flex flex-col items-center justify-start min-h-screen bg-canvas px-4 py-6 gap-5",
-          "lg:flex-row lg:items-start lg:justify-center lg:gap-8 lg:py-10",
+          "flex flex-col items-center justify-start min-h-screen bg-canvas px-4 pt-3 pb-6 gap-6",
+          "lg:flex-row lg:items-start lg:justify-center lg:gap-8 lg:pt-5 lg:pb-10",
           className,
         )}
       >
@@ -150,10 +154,8 @@ export function RecordingInterface({
         </div>
 
         {/* ── Right: recording controls ─────────────────────────────────── */}
-        <div className="w-full lg:w-80 flex flex-col items-center gap-6 lg:pt-4">
-          {recIndicator}
-          {micRing}
-          {controls}
+        <div className="w-full lg:w-80 flex flex-col items-center gap-6 lg:pt-8">
+          {recordingControls}
         </div>
       </div>
     );
@@ -167,9 +169,7 @@ export function RecordingInterface({
         className,
       )}
     >
-      {recIndicator}
-      {micRing}
-      {controls}
+      {recordingControls}
     </div>
   );
 }

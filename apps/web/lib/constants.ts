@@ -37,6 +37,13 @@ export const SPEAKING_TASK_CONFIG = {
   8:        { prep: 30,  response: 60  },
 } as const;
 
+/**
+ * Task numbers that require a context scene image.
+ * Single source of truth — import this instead of redeclaring `new Set([3, 4, 8])`
+ * in every component that needs it.
+ */
+export const IMAGE_TASK_NUMBERS: ReadonlySet<number> = new Set([3, 4, 8]);
+
 // ── Writing Task Timings (seconds) ────────────────────────────────────────────
 
 export const WRITING_TASK_CONFIG = {

@@ -145,8 +145,11 @@ export function HistoryTable({
                 <TableCell className="font-medium text-foreground text-sm">
                   <div className="flex flex-col gap-0.5">
                     <span>{item.task_title}</span>
-                    {/* Date shown inline on mobile */}
-                    <span className="md:hidden text-xs text-subtle">{timeAgo(item.created_at)}</span>
+                    {/* Task number pill + date on mobile */}
+                    <span className="text-xs text-subtle">
+                      Task {item.task_number}
+                      <span className="md:hidden"> · {timeAgo(item.created_at)}</span>
+                    </span>
                   </div>
                 </TableCell>
 

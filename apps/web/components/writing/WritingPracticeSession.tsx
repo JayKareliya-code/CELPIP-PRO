@@ -41,6 +41,7 @@ export function WritingPracticeSession({ task }: WritingPracticeSessionProps) {
     phase,
     secondsLeft,
     wordCount,
+    submitError,
     start,
     setContent,
     submit,
@@ -118,6 +119,19 @@ export function WritingPracticeSession({ task }: WritingPracticeSessionProps) {
                 editable
                 sessionKey={draftKey}
               />
+
+              {/* ── Submit error banner ────────────────────────────────── */}
+              {submitError && (
+                <div className="rounded-lg border border-red-700/40 bg-red-950/40 px-4 py-3
+                                flex items-start gap-3 text-sm">
+                  <span className="text-red-400 shrink-0 mt-0.5">⚠</span>
+                  <div>
+                    <p className="font-semibold text-red-300">Submission failed</p>
+                    <p className="text-red-400/80 mt-0.5">{submitError}</p>
+                    <p className="text-red-400/60 text-xs mt-1">Your writing is preserved. Click Submit to try again.</p>
+                  </div>
+                </div>
+              )}
 
               {/* ── Below-editor row: word count + submit ──────────────── */}
               <div className="flex items-center justify-between pt-1">

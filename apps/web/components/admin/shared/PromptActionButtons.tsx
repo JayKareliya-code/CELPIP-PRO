@@ -1,9 +1,9 @@
 "use client";
 
 // ─────────────────────────────────────────────────────────────────────────────
-// components/admin/shared/PromptTableRow.tsx
-// Generic prompt table row — action buttons shared across speaking + writing.
-// ─────────────────────────────────────────────────────────────────────────────
+// components/admin/shared/PromptActionButtons.tsx
+// Generic prompt action buttons shared across speaking + writing tables.
+// Active toggle + publish/archive + edit + delete.
 
 import { Pencil, Trash2, Upload, Archive, CheckCircle, XCircle } from "lucide-react";
 

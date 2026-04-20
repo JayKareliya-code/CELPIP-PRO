@@ -35,10 +35,16 @@ async def enforce_quota(
     task_number: int,
     is_mock_test: bool,
     db: AsyncSession,
+    mock_exam_number: int | None = None,
 ) -> None:
     """
     Raises HTTP 402 if the user is over-quota.
     Must be called inside the attempt creation transaction.
+
+    For writing mock exams:
+    - mock_exam_number is the test slot (1, 2, 3 …).
+    - Re-doing a slot the user has already started is always allowed (redo = free).
+    - Only NEW slots (never started before) count against the limit.
     """
     repo = AttemptRepository(db)
     limits = get_plan_limits(user.plan, skill)
@@ -54,7 +60,15 @@ async def enforce_quota(
         )
 
     if is_mock_test and limits.mock_tests is not None:
-        used = await repo.count_mock_tests_by_user_skill(user.id, skill)
+        # ── Slot-aware redo check ─────────────────────────────────────────────
+        # If the user has already used this exact slot, let them redo for free.
+        if mock_exam_number is not None:
+            already_used = await repo.has_used_mock_slot(user.id, skill, mock_exam_number)
+            if already_used:
+                return  # redo — no quota charge
+
+        # ── New-slot quota check ──────────────────────────────────────────────
+        used = await repo.count_distinct_mock_slots(user.id, skill)
         if used >= limits.mock_tests:
             raise HTTPException(status_code=402, detail={
                 "code": "QUOTA_EXCEEDED",
@@ -68,3 +82,4 @@ async def enforce_quota(
                 "code": "QUOTA_EXCEEDED",
                 "used": used, "limit": limits.per_task,
             })
+

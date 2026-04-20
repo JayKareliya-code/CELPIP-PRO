@@ -40,6 +40,8 @@ class SpeakingTaskResponse(BaseModel):
     curveball_option:           ChoiceOption       | None = None
     curveball_instruction_text: str                | None = None
     default_choice_index:       int                | None = None
+    # Prompt pool tag — "practice" or "mock"
+    prompt_tag:                 str = "practice"
 
 
 

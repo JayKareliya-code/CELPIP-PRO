@@ -8,8 +8,17 @@ from app.repositories.prompt_repo import SpeakingPromptRepository, WritingPrompt
 
 
 async def get_speaking_tasks(db: AsyncSession) -> list[SpeakingPrompt]:
-    """Return all active speaking prompts."""
+    """Return all active 'practice' speaking prompts."""
     return await SpeakingPromptRepository(db).list_active()
+
+
+async def get_mock_exam_prompts(db: AsyncSession) -> list[SpeakingPrompt]:
+    """Return all published+active 'mock' speaking prompts in task order.
+
+    Used exclusively by the GET /mock-exam/prompts endpoint. Falls back
+    gracefully — the route raises 404 if the list is empty.
+    """
+    return await SpeakingPromptRepository(db).list_active_mock()
 
 
 async def get_speaking_task(db: AsyncSession, task_number: int) -> SpeakingPrompt:
@@ -24,8 +33,17 @@ async def get_speaking_task(db: AsyncSession, task_number: int) -> SpeakingPromp
 
 
 async def get_writing_tasks(db: AsyncSession) -> list[WritingPrompt]:
-    """Return all active writing prompts."""
+    """Return all active PRACTICE writing prompts (prompt_tag='practice')."""
     return await WritingPromptRepository(db).list_active()
+
+
+async def get_writing_mock_tasks(db: AsyncSession) -> list[WritingPrompt]:
+    """Return all active MOCK writing prompts (prompt_tag='mock').
+
+    Used by GET /writing/mock-prompts to serve the writing mock exam shell.
+    """
+    return await WritingPromptRepository(db).list_mock_active()
+
 
 
 async def get_writing_task(db: AsyncSession, task_number: int) -> WritingPrompt:
@@ -56,8 +74,13 @@ async def get_speaking_prompt_by_id(
 async def get_writing_prompt_by_id(
     db: AsyncSession, prompt_id: uuid.UUID
 ) -> WritingPrompt:
-    """Return a writing prompt by UUID or raise 404."""
-    prompt = await WritingPromptRepository(db).get_by_id(prompt_id)
+    """Return a published+active writing prompt by UUID or raise 404.
+
+    Uses get_active_by_id() so archived/draft prompts cannot be accessed
+    even if the candidate has a direct bookmarked URL — mirrors
+    get_speaking_prompt_by_id().
+    """
+    prompt = await WritingPromptRepository(db).get_active_by_id(prompt_id)
     if not prompt:
         raise HTTPException(status_code=404, detail="Writing prompt not found")
     return prompt

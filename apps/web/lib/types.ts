@@ -60,6 +60,35 @@ export interface SpeakingTask {
   curveball_option?:          ChoiceOption;
   /** Instruction banner text on the curveball screen (Step 2 prompt). */
   curveball_instruction_text?: string | null;
+  /**
+   * Prompt pool tag.
+   * "practice" (default) — used in individual task practice attempts.
+   * "mock" — used in full mock exam sessions only.
+   */
+  prompt_tag?: "practice" | "mock";
+}
+
+// ── Mock Exam ─────────────────────────────────────────────────────────────────
+
+/**
+ * Admin-curated prompt for use in a full mock exam.
+ * Separate content type from SpeakingTask (individual practice).
+ * Fetched from GET /api/v1/mock-exam/prompts
+ */
+export interface MockExamPrompt extends SpeakingTask {
+  /** Always 1–8 in a mock exam (no task_number 0 practice task). */
+  task_number: 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8;
+}
+
+/** One task slot in a running mock exam session. */
+export interface MockExamTask {
+  taskNumber: 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8;
+  prompt: MockExamPrompt;
+  /** Set after the task audio upload completes. */
+  attemptId: string | null;
+  /** Populated by the backend after AI scoring completes. */
+  estimatedBand: number | null;
+  status: "pending" | "active" | "uploading" | "done" | "error";
 }
 
 // ── Writing ──────────────────────────────────────────────────────────────────
@@ -215,9 +244,11 @@ export interface WritingPrompt {
   task_number: 1 | 2;
   title: string;
   prompt_text: string;
+  task_type: string;
   min_words: number;
   max_words: number | null;
   time_limit_seconds: number;
+  difficulty: "easy" | "medium" | "hard";
   is_active: boolean;
   created_at: string;
   // ── CMS admin fields (optional for backward-compat with legacy mock data) ──
@@ -231,6 +262,7 @@ export interface WritingPrompt {
   archived_at?:  string | null;  // ISO 8601
   updated_at?:   string;
 }
+
 
 export interface CalibrationSample {
   id: string;

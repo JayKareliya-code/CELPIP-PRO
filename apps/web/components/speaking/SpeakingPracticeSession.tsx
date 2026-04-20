@@ -19,9 +19,9 @@
 "use client";
 
 import { useEffect } from "react";
-import { XCircle }   from "lucide-react";
 
-import { useSpeakingAttempt } from "@/lib/hooks/useSpeakingAttempt";
+import { useSpeakingAttempt }     from "@/lib/hooks/useSpeakingAttempt";
+import { usePracticeSessionStore } from "@/store/practiceSessionStore";
 import { CountdownOverlay }   from "@/components/speaking/CountdownOverlay";
 import { PrepTimerScreen }    from "@/components/speaking/PrepTimerScreen";
 import { RecordingInterface } from "@/components/speaking/RecordingInterface";
@@ -51,6 +51,9 @@ interface SpeakingPracticeSessionProps {
  */
 export function SpeakingPracticeSession({ task }: SpeakingPracticeSessionProps) {
   const { phase, secondsLeft, uploadProgress, start, exit, selectedChoice } = useSpeakingAttempt();
+  // Needed for Task 5 selection screen — passed as explicit props now that
+  // Task5SelectionScreen no longer reads from the store directly.
+  const { setSelectedChoice } = usePracticeSessionStore();
 
   // Auto-start on mount
   useEffect(() => {
@@ -58,8 +61,6 @@ export function SpeakingPracticeSession({ task }: SpeakingPracticeSessionProps) 
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // ── Exit button visibility ─────────────────────────────────────────────────
-  const canExit = phase !== "UPLOADING" && phase !== "PROCESSING" && phase !== "DONE";
 
   // ── Phase → screen ────────────────────────────────────────────────────────
 
@@ -77,6 +78,8 @@ export function SpeakingPracticeSession({ task }: SpeakingPracticeSessionProps) 
               totalPrepSeconds={task.prep_time_seconds}
               promptText={task.prompt_text}
               choiceOptions={task.choice_options}
+              selectedChoice={selectedChoice}
+              onSelect={setSelectedChoice}
             />
           );
         }
@@ -168,23 +171,7 @@ export function SpeakingPracticeSession({ task }: SpeakingPracticeSessionProps) 
 
   return (
     <div className="relative">
-      {/* Active screen */}
       {renderScreen()}
-
-      {/* Exit button — top-right corner */}
-      {canExit && (
-        <button
-          onClick={exit}
-          className="fixed top-4 right-4 z-50 flex items-center gap-2 px-3 py-2 rounded-lg
-                     bg-white/5 hover:bg-white/10 border border-white/10 hover:border-white/20
-                     text-canvas-subtle hover:text-canvas-text text-sm font-medium
-                     transition-all duration-150"
-          aria-label="Exit practice session"
-        >
-          <XCircle className="w-4 h-4" />
-          Exit
-        </button>
-      )}
     </div>
   );
 }

@@ -1,23 +1,27 @@
 // ─────────────────────────────────────────────────────────────────────────────
 // useWritingAttempt.ts — Writing session orchestration hook
 //
-// State persistence across page refreshes:
-//   When WRITING phase begins, the session start time is saved to sessionStorage.
-//   On `start(task)` if a previous session is found for the same task:
-//     • remaining seconds = totalSeconds − elapsed → resumes mid-timer
-//     • skips COUNTDOWN and goes straight to WRITING
-//     • if time has already expired → immediately submits
-//
 // Phase machine:
 //   IDLE → COUNTDOWN → WRITING → SUBMITTING → PROCESSING → DONE
 //   (on resume) IDLE → WRITING (skips COUNTDOWN)
+//
+// API pipeline (SUBMITTING phase):
+//   1. POST /writing/attempts/start        → { attempt_id }
+//   2. POST /writing/attempts/{id}/submit  → sends essay_text + auto_submitted
+//   3. Navigate to /attempts/{id}/status   (real-time polling page)
+//
+// Session persistence across page refreshes:
+//   Start time + total seconds saved to sessionStorage so the timer can resume
+//   if the user refreshes mid-session without losing elapsed time.
 // ─────────────────────────────────────────────────────────────────────────────
 
 "use client";
 
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useRouter }   from "next/navigation";
+import { useAuth }     from "@clerk/nextjs";
 import { countWords }  from "@/lib/utils";
+import { API_V1, USE_MOCK, authHeaders } from "@/lib/api";
 import {
   COUNTDOWN_STEPS,
   COUNTDOWN_STEP_DURATION_MS,
@@ -38,9 +42,10 @@ export type WritingPhase =
 // ── Public interface ──────────────────────────────────────────────────────────
 
 export interface UseWritingAttemptReturn {
-  phase:       WritingPhase;
-  secondsLeft: number;
-  wordCount:   number;
+  phase:        WritingPhase;
+  secondsLeft:  number;
+  wordCount:    number;
+  submitError:  string | null;
   /** Start (or resume) a session for the given task. Call once on mount. */
   start: (task: WritingTask) => void;
   /** Called by WritingEditor on every keystroke with the latest content. */
@@ -82,31 +87,30 @@ export function clearSession(taskId: string): void {
 
 // ── Internal constants ─────────────────────────────────────────────────────────
 
-const TICK_MS              = 1_000;
-const TOTAL_COUNTDOWN_MS   = COUNTDOWN_STEPS.length * COUNTDOWN_STEP_DURATION_MS;
-const MOCK_UPLOAD_TOTAL_MS = 1_800;
-const MOCK_PROCESSING_DELAY = ATTEMPT_POLL_INTERVAL_MS;
+const TICK_MS            = 1_000;
+const TOTAL_COUNTDOWN_MS = COUNTDOWN_STEPS.length * COUNTDOWN_STEP_DURATION_MS;
+
+const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
 
 // ── Hook ──────────────────────────────────────────────────────────────────────
 
-/**
- * Writing session state machine with refresh-proof timer resumption.
- *
- * On a fresh start: IDLE → COUNTDOWN → WRITING
- * On page refresh:  IDLE → WRITING (timer resumes from saved timestamp)
- */
 export function useWritingAttempt(): UseWritingAttemptReturn {
-  const router = useRouter();
+  const router       = useRouter();
+  const { getToken } = useAuth();
 
   const [phase,       setPhase]       = useState<WritingPhase>("IDLE");
   const [secondsLeft, setSecondsLeft] = useState(0);
   const [wordCount,   setWordCount]   = useState(0);
+  const [submitError, setSubmitError] = useState<string | null>(null);
 
-  const taskRef       = useRef<WritingTask | null>(null);
-  const secsRef       = useRef(0);
-  const tickRef       = useRef<ReturnType<typeof setInterval>  | null>(null);
-  const countdownRef  = useRef<ReturnType<typeof setTimeout>   | null>(null);
-  const processingRef = useRef<ReturnType<typeof setTimeout>   | null>(null);
+  // Refs — stable across re-renders, safe inside interval callbacks
+  const taskRef        = useRef<WritingTask | null>(null);
+  const secsRef        = useRef(0);
+  const plainTextRef   = useRef("");          // latest essay plain text
+  const autoSubmitted  = useRef(false);       // was time-expired when submitted?
+  const tickRef        = useRef<ReturnType<typeof setInterval>  | null>(null);
+  const countdownRef   = useRef<ReturnType<typeof setTimeout>   | null>(null);
+  const processingRef  = useRef<ReturnType<typeof setTimeout>   | null>(null);
 
   // ── Timer management ──────────────────────────────────────────────────────
 
@@ -122,7 +126,7 @@ export function useWritingAttempt(): UseWritingAttemptReturn {
     setPhase(next);
   }, []);
 
-  // ── Phase-driven side effects ──────────────────────────────────────────────
+  // ── Phase-driven side effects ─────────────────────────────────────────────
 
   useEffect(() => {
     clearAll();
@@ -133,7 +137,6 @@ export function useWritingAttempt(): UseWritingAttemptReturn {
         countdownRef.current = setTimeout(() => {
           const task = taskRef.current;
           if (!task) return;
-          // Persist start time so a refresh can resume
           saveSession(task.id, task.time_limit_seconds);
           goToPhase("WRITING", task.time_limit_seconds);
         }, TOTAL_COUNTDOWN_MS);
@@ -146,6 +149,7 @@ export function useWritingAttempt(): UseWritingAttemptReturn {
             const task = taskRef.current;
             if (task) clearSession(task.id);
             clearAll();
+            autoSubmitted.current = true;
             goToPhase("SUBMITTING");
           } else {
             secsRef.current -= 1;
@@ -156,18 +160,18 @@ export function useWritingAttempt(): UseWritingAttemptReturn {
       }
 
       case "SUBMITTING": {
-        processingRef.current = setTimeout(
-          () => goToPhase("PROCESSING"),
-          MOCK_UPLOAD_TOTAL_MS
-        );
+        // Run the real API pipeline asynchronously
+        runSubmitPipeline();
         break;
       }
 
+      // PROCESSING: navigate after a brief delay so the spinner is visible
       case "PROCESSING": {
-        const mockId = `mock-attempt-${Date.now()}`;
+        const attemptId = attemptIdRef.current;
+        if (!attemptId) break;
         processingRef.current = setTimeout(() => {
-          router.push(`/attempts/${mockId}/status`);
-        }, MOCK_PROCESSING_DELAY);
+          router.push(`/attempts/${attemptId}/status`);
+        }, ATTEMPT_POLL_INTERVAL_MS);
         break;
       }
 
@@ -180,16 +184,70 @@ export function useWritingAttempt(): UseWritingAttemptReturn {
 
   useEffect(() => clearAll, [clearAll]);
 
+  // ── API pipeline refs ─────────────────────────────────────────────────────
+
+  const attemptIdRef = useRef<string | null>(null);
+
+  async function runSubmitPipeline() {
+    const task = taskRef.current;
+    if (!task) return;
+
+    // ── Mock mode ─────────────────────────────────────────────────────────────
+    if (USE_MOCK) {
+      const mockId = `mock-attempt-${Date.now()}`;
+      attemptIdRef.current = mockId;
+      goToPhase("PROCESSING");
+      return;
+    }
+
+    // ── Real pipeline ─────────────────────────────────────────────────────────
+    try {
+      const token   = await getToken();
+      const headers = { ...authHeaders(token), "Content-Type": "application/json" };
+
+      // Step 1 — create attempt (quota check happens here)
+      const startRes = await fetch(`${API_BASE}${API_V1}/writing/attempts/start`, {
+        method: "POST",
+        headers,
+        body:   JSON.stringify({ prompt_id: task.id, is_mock_test: false }),
+      });
+      if (!startRes.ok) {
+        const err = await startRes.json().catch(() => ({}));
+        throw new Error((err as { detail?: string }).detail ?? `start failed: ${startRes.status}`);
+      }
+      const { attempt_id } = await startRes.json() as { attempt_id: string };
+      attemptIdRef.current = attempt_id;
+
+      // Step 2 — submit essay (saves text + enqueues Celery scoring)
+      const submitRes = await fetch(`${API_BASE}${API_V1}/writing/attempts/${attempt_id}/submit`, {
+        method: "POST",
+        headers,
+        body:   JSON.stringify({
+          essay_text:     plainTextRef.current,
+          auto_submitted: autoSubmitted.current,
+        }),
+      });
+      if (!submitRes.ok) {
+        const err = await submitRes.json().catch(() => ({}));
+        throw new Error((err as { detail?: string }).detail ?? `submit failed: ${submitRes.status}`);
+      }
+
+      // Step 3 — advance to PROCESSING (triggers navigation)
+      goToPhase("PROCESSING");
+
+    } catch (err) {
+      console.error("[useWritingAttempt] Submit pipeline failed:", err);
+      setSubmitError(err instanceof Error ? err.message : "Submission failed. Please try again.");
+      // Revert to WRITING so the user can retry manually
+      goToPhase("WRITING", secsRef.current);
+    }
+  }
+
   // ── Public API ─────────────────────────────────────────────────────────────
 
-  /**
-   * Called on mount. Checks sessionStorage for a persisted session:
-   *   - Found + time remaining → jump straight to WRITING with elapsed time
-   *   - Found + expired        → go directly to SUBMITTING
-   *   - Not found              → normal COUNTDOWN → WRITING flow
-   */
   const start = useCallback((task: WritingTask) => {
     taskRef.current = task;
+    autoSubmitted.current = false;
 
     const saved = loadSession(task.id);
     if (saved) {
@@ -197,12 +255,10 @@ export function useWritingAttempt(): UseWritingAttemptReturn {
       const remaining = saved.totalSeconds - elapsed;
 
       if (remaining <= 0) {
-        // Time ran out while the tab was closed — auto-submit immediately
         clearSession(task.id);
+        autoSubmitted.current = true;
         goToPhase("SUBMITTING");
       } else {
-        // Resume mid-timer — skip countdown, go straight to WRITING
-        // Re-save with the original startedAt so the countdown is still correct
         goToPhase("WRITING", remaining);
       }
     } else {
@@ -211,6 +267,7 @@ export function useWritingAttempt(): UseWritingAttemptReturn {
   }, [goToPhase]);
 
   const setContent = useCallback((_html: string, plainText: string) => {
+    plainTextRef.current = plainText;
     setWordCount(countWords(plainText));
   }, []);
 
@@ -218,6 +275,7 @@ export function useWritingAttempt(): UseWritingAttemptReturn {
     const task = taskRef.current;
     if (task) clearSession(task.id);
     clearAll();
+    autoSubmitted.current = false;
     goToPhase("SUBMITTING");
   }, [clearAll, goToPhase]);
 
@@ -229,5 +287,5 @@ export function useWritingAttempt(): UseWritingAttemptReturn {
     router.back();
   }, [clearAll, router]);
 
-  return { phase, secondsLeft, wordCount, start, setContent, submit, exit };
+  return { phase, secondsLeft, wordCount, submitError, start, setContent, submit, exit };
 }

@@ -14,23 +14,15 @@
 
 "use client";
 
-import { useCallback, useId, useRef, useState } from "react";
+import { useCallback, useId, useMemo, useRef, useState } from "react";
 import { ImageIcon, Plus, Trash2, UploadCloud, X } from "lucide-react";
 import { useAuth }       from "@clerk/nextjs";
 import { Field }         from "@/components/admin/shared/Field";
 import { inputCls }      from "@/components/admin/shared/inputCls";
 import { cn }            from "@/lib/utils";
 import { API_V1, authHeaders } from "@/lib/api";
+import { API_BASE, MAX_UPLOAD_BYTES, IMAGE_ACCEPT_TYPES, stripPresign, uploadFileToS3 } from "@/lib/admin/imageUpload";
 import type { ChoiceOption, ChoiceOptionDetail } from "@/lib/types";
-
-const API_BASE    = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
-const ACCEPT      = "image/jpeg,image/png,image/webp,image/gif";
-const MAX_BYTES   = 5 * 1024 * 1024;
-
-function stripPresign(url: string): string {
-  try { return new URL(url).origin + new URL(url).pathname; }
-  catch { return url; }
-}
 
 // ── Internal State Types ──────────────────────────────────────────────────────
 
@@ -63,6 +55,7 @@ export function OptionEditor({ fieldName, label, initial, slot }: OptionEditorPr
   const uid        = useId();
   const { getToken } = useAuth();
   const fileRef    = useRef<HTMLInputElement>(null);
+  const abortRef   = useRef<AbortController | null>(null);
 
   // Core state
   const [name,    setName]    = useState(initial?.name    ?? "");
@@ -79,12 +72,16 @@ export function OptionEditor({ fieldName, label, initial, slot }: OptionEditorPr
   const [progress,    setProgress]   = useState(0);
   const [uploadError, setUploadErr]  = useState("");
 
-  // ── Computed hidden JSON value ──────────────────────────────────────────────
-  const json = JSON.stringify({
+  // ── Computed hidden JSON value ────────────────────────────────────────────
+  // Wrapped in useMemo so the hidden input value is stable across parent
+  // re-renders where name/rows/publicUrl haven't changed.  Without this,
+  // React sees a new string reference every render and marks the input as
+  // "changed" in the DOM diff, causing promptHasChanges to fire a false positive.
+  const json = useMemo(() => JSON.stringify({
     name,
     ...(publicUrl ? { image_url: publicUrl } : {}),
     details: rows.map(({ label: l, value: v }) => ({ label: l, value: v })),
-  });
+  }), [name, publicUrl, rows]);
 
   // ── Row helpers ────────────────────────────────────────────────────────────
 
@@ -105,7 +102,7 @@ export function OptionEditor({ fieldName, label, initial, slot }: OptionEditorPr
   async function handleFile(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
     if (!file) return;
-    if (file.size > MAX_BYTES) {
+    if (file.size > MAX_UPLOAD_BYTES) {
       setUploadErr(`File too large — max 5 MB (${(file.size / 1024 / 1024).toFixed(1)} MB)`);
       setUpload("error");
       return;
@@ -130,23 +127,17 @@ export function OptionEditor({ fieldName, label, initial, slot }: OptionEditorPr
       };
 
       setUpload("uploading");
-      await new Promise<void>((resolve, reject) => {
-        const xhr = new XMLHttpRequest();
-        xhr.open("PUT", data.upload_url);
-        xhr.setRequestHeader("Content-Type", file.type);
-        xhr.upload.onprogress = ev => {
-          if (ev.lengthComputable) setProgress(Math.round((ev.loaded / ev.total) * 100));
-        };
-        xhr.onload  = () => (xhr.status >= 200 && xhr.status < 300 ? resolve() : reject(new Error(`S3 ${xhr.status}`)));
-        xhr.onerror = () => reject(new Error("Network error"));
-        xhr.send(file);
-      });
+      const controller = new AbortController();
+      abortRef.current = controller;
+      await uploadFileToS3(data.upload_url, file, file.type, setProgress, controller.signal);
+      abortRef.current = null;
 
       setPublicUrl(data.public_url);
       setPreviewUrl(data.preview_url);
       setUpload("done");
       setProgress(100);
     } catch (err) {
+      if (err instanceof DOMException && err.name === "AbortError") return; // silent on unmount
       setUploadErr(err instanceof Error ? err.message : "Upload failed");
       setUpload("error");
     } finally {
@@ -205,7 +196,7 @@ export function OptionEditor({ fieldName, label, initial, slot }: OptionEditorPr
                 ref={fileRef}
                 id={`${uid}-img`}
                 type="file"
-                accept={ACCEPT}
+                accept={IMAGE_ACCEPT_TYPES}
                 className="sr-only"
                 onChange={handleFile}
                 disabled={isBusy}

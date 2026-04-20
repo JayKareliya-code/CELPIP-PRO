@@ -8,9 +8,9 @@
 
 import { useState }            from "react";
 import { Mic, PenLine }        from "lucide-react";
-import { SpeakingTaskGrid }    from "@/components/admin/SpeakingTaskGrid";
-import { WritingPromptTable }  from "@/components/admin/WritingPromptTable";
-import { cn }                  from "@/lib/utils";
+import { SpeakingTaskGrid }      from "@/components/admin/SpeakingTaskGrid";
+import { WritingAdminTaskGrid }  from "@/components/admin/WritingAdminTaskGrid";
+import { cn }                    from "@/lib/utils";
 
 type ActiveTab = "speaking" | "writing";
 
@@ -72,7 +72,7 @@ export function AdminPromptTabs() {
         aria-labelledby="prompts-tab-writing"
         hidden={active !== "writing"}
       >
-        {active === "writing" && <WritingPromptTable />}
+        {active === "writing" && <WritingAdminTaskGrid />}
       </div>
     </div>
   );

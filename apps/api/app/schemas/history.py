@@ -1,7 +1,8 @@
 """
 Pydantic schemas for the history API response.
 
-GET /api/v1/history → PaginatedHistory
+GET /api/v1/history              → PaginatedHistory
+GET /api/v1/history/mock-exams  → PaginatedMockExamHistory
 """
 from __future__ import annotations
 
@@ -29,4 +30,33 @@ class PaginatedHistory(BaseModel):
     total: int       # total rows matching the filter (before pagination)
     page: int
     limit: int
+    has_next: bool
+
+
+# ── Mock exam history ─────────────────────────────────────────────────────────
+
+class MockExamTaskResult(BaseModel):
+    """Per-task band score within one mock exam session."""
+    task_number:    int
+    status:         str            # pending | processing | complete | failed
+    estimated_band: float | None
+
+
+class MockExamSession(BaseModel):
+    """One full mock exam session (all tasks for one skill)."""
+    session_id:     str
+    skill:          str            # "speaking" | "writing"
+    tasks:          list[MockExamTaskResult]
+    avg_band:       float | None   # mean of completed task bands; None if none scored
+    tasks_complete: int            # how many tasks are status=complete
+    tasks_total:    int            # 8 for speaking, 2 for writing
+    created_at:     datetime       # timestamp of the earliest task in the session
+
+
+class PaginatedMockExamHistory(BaseModel):
+    """Paginated list of mock exam sessions."""
+    items:    list[MockExamSession]
+    total:    int     # total sessions
+    page:     int
+    limit:    int
     has_next: bool

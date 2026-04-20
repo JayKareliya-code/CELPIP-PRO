@@ -6,6 +6,9 @@
 //
 // All consumers depend only on this hook — never import MOCK_USER directly
 // from mockData in page components.
+//
+// Cache-safety: the query key includes the Clerk userId so different users
+// never share a cache entry, even within the same browser tab session.
 // ─────────────────────────────────────────────────────────────────────────────
 
 "use client";
@@ -32,14 +35,22 @@ export interface UseCurrentUserReturn {
  *
  * In mock mode (`NEXT_PUBLIC_USE_MOCK=true`) this returns MOCK_USER immediately.
  * In production it calls `GET /api/v1/users/me` with a Clerk Bearer token.
- * React Query cache key `["current-user"]` — all components share one result.
+ *
+ * Cache key: `["current-user", userId]` — the Clerk userId is part of the key
+ * so that User A and User B are **never** served from the same cache entry.
+ * AuthCacheGuard in Providers.tsx additionally calls queryClient.clear() on
+ * every user switch for belt-and-suspenders protection.
  */
 export function useCurrentUser(): UseCurrentUserReturn {
-  const { isSignedIn, isLoaded: clerkLoaded } = useUser();
+  const { user: clerkUser, isSignedIn, isLoaded: clerkLoaded } = useUser();
   const { getToken } = useAuth();
 
+  // Include the userId in the cache key — different users → different cache slots.
+  const userId = clerkUser?.id ?? null;
+
   const { data, isLoading, isError } = useQuery<AppUser>({
-    queryKey: ["current-user"],
+    // DO NOT use a static key like ["current-user"] — that leaks data across users.
+    queryKey: ["current-user", userId],
 
     queryFn: async (): Promise<AppUser> => {
       if (USE_MOCK) return MOCK_USER;
@@ -50,7 +61,11 @@ export function useCurrentUser(): UseCurrentUserReturn {
     },
 
     enabled: USE_MOCK || (clerkLoaded && !!isSignedIn),
-    staleTime: 5 * 60_000,
+    // 2 minutes — short enough that plan changes propagate quickly. The SSE
+    // hook (usePlanEvents) provides instant invalidation for plan upgrades.
+    staleTime: 2 * 60_000,
+    // Never serve stale user data to a freshly focused tab.
+    refetchOnWindowFocus: true,
   });
 
   return {

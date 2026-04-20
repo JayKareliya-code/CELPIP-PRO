@@ -20,6 +20,31 @@ const STATUS_OPTIONS = [
   { value: "archived",  label: "Archived"   },
 ] as const;
 
+const PROMPT_TAG_OPTIONS = [
+  {
+    value: "practice",
+    label: "Practice",
+    description: "Served in individual task attempts",
+  },
+  {
+    value: "mock",
+    label: "Mock Exam",
+    description: "Served in full mock exam sessions only",
+  },
+] as const;
+
+/**
+ * Read the band-12 sample response text from either the DB column name
+ * (sample_response_text, as returned by to_dict) or the frontend alias
+ * (sample_response_band12). The backend remaps the field in _remap() on save
+ * but the GET response uses the DB column name.
+ */
+function getSampleResponse(prompt?: SpeakingPrompt | WritingPrompt): string {
+  if (!prompt) return "";
+  const p = prompt as unknown as Record<string, unknown>;
+  return String(p.sample_response_band12 ?? p.sample_response_text ?? "");
+}
+
 interface Props {
   skill:            Skill;
   initial?:         SpeakingPrompt | WritingPrompt;
@@ -42,7 +67,7 @@ export function SharedFormFields({ skill, initial, lockedTaskNumber }: Props) {
         </Field>
       )}
 
-      {/* Title / Slug / Topic — hidden in task-context mode */}
+      {/* Title / Slug / Topic — hidden in task-context (locked) mode for all skills */}
       {!isLocked && (
         <>
           <Field label="Title" htmlFor="title" required>
@@ -87,9 +112,48 @@ export function SharedFormFields({ skill, initial, lockedTaskNumber }: Props) {
       <Field label="Band-12 Sample Response" htmlFor="sample_response_band12"
         hint="Shown to candidates after submission. Leave blank to hide.">
         <textarea id="sample_response_band12" name="sample_response_band12" rows={5}
-          defaultValue={(initial as (SpeakingPrompt & { sample_response_band12?: string }) | undefined)?.sample_response_band12 ?? ""}
+          defaultValue={getSampleResponse(initial)}
           className={cn(inputCls, "resize-y text-sm")}
           placeholder="Write the ideal band-12 response here…" />
+      </Field>
+
+      {/* Prompt Pool — controls which pool this prompt belongs to */}
+      <Field
+        label="Prompt Pool"
+        htmlFor="prompt_tag"
+        hint="Controls whether this prompt appears in individual practice or the mock exam."
+      >
+        <div className="flex gap-2">
+          {PROMPT_TAG_OPTIONS.map((opt) => {
+            // We render a hidden radio input + styled label so FormData picks it up
+            const defaultChecked =
+              (initial as SpeakingPrompt & { prompt_tag?: string })?.prompt_tag === opt.value ||
+              (!(initial as SpeakingPrompt & { prompt_tag?: string })?.prompt_tag && opt.value === "practice");
+            return (
+              <label
+                key={opt.value}
+                htmlFor={`prompt_tag_${opt.value}`}
+                className={cn(
+                  "flex-1 flex flex-col gap-0.5 cursor-pointer rounded-lg border px-3 py-2.5",
+                  "transition-all duration-150 select-none",
+                  "has-[:checked]:border-primary has-[:checked]:bg-primary/8 has-[:checked]:text-primary",
+                  "border-border hover:border-primary/50",
+                )}
+              >
+                <input
+                  type="radio"
+                  id={`prompt_tag_${opt.value}`}
+                  name="prompt_tag"
+                  value={opt.value}
+                  defaultChecked={defaultChecked}
+                  className="sr-only"
+                />
+                <span className="text-sm font-semibold">{opt.label}</span>
+                <span className="text-xs text-subtle">{opt.description}</span>
+              </label>
+            );
+          })}
+        </div>
       </Field>
 
       <div className="flex items-center gap-2">

@@ -15,7 +15,7 @@
 // ─────────────────────────────────────────────────────────────────────────────
 
 import { useMemo } from "react";
-import { Mic, Zap, ArrowRight, BookOpen } from "lucide-react";
+import { Mic, ArrowRight, BookOpen } from "lucide-react";
 import Link from "next/link";
 import { BreadcrumbNav } from "@/components/layout/BreadcrumbNav";
 import { SpeakingTaskCard } from "@/components/speaking/SpeakingTaskCard";
@@ -118,16 +118,6 @@ export function SpeakingModuleHome({ tasks }: SpeakingModuleHomeProps) {
           </div>
         </div>
 
-        {/* Plan chip */}
-        <div className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-semibold border ${plan === "ultra"
-          ? "bg-amber-900/30 border-amber-700/40 text-amber-300"
-          : plan === "pro"
-            ? "bg-indigo-900/30 border-indigo-700/40 text-indigo-300"
-            : "bg-white/5 border-white/10 text-white/40"
-          }`}>
-          <Zap className="w-3 h-3" />
-          {plan === "ultra" ? "Ultra Plan" : plan === "pro" ? "Pro Plan" : "Starter Plan"}
-        </div>
       </div>
 
       {/* ── Starter upgrade banner ─────────────────────────────────────────── */}

@@ -15,12 +15,12 @@ const config: Config = {
     },
     extend: {
       colors: {
-        // ── Brand (dark-optimised) ──────────────────────────────────────────
+        // ── Brand (dark-optimised, amber-gold theme) ────────────────────────
         primary: {
-          DEFAULT:    "#6366F1",   // vibrant indigo
-          hover:      "#818CF8",   // lighter on hover in dark
-          light:      "#1E1B4B",   // dark indigo tint for backgrounds
-          foreground: "#FFFFFF",
+          DEFAULT:    "#C8963E",   // warm amber-gold
+          hover:      "#D4A853",   // brighter gold on hover
+          light:      "#2A1E0A",   // dark amber tint for backgrounds
+          foreground: "#0D0D0D",   // near-black text on gold CTA
         },
         success: { DEFAULT: "#34D399", light: "#064E3B", foreground: "#fff" },
         warning: { DEFAULT: "#FBBF24", light: "#451A03", foreground: "#fff" },
@@ -76,8 +76,8 @@ const config: Config = {
       boxShadow: {
         card:   "0 1px 3px rgba(0,0,0,0.07), 0 1px 2px rgba(0,0,0,0.05)",
         panel:  "0 10px 25px rgba(0,0,0,0.08)",
-        focus:  "0 0 0 3px rgba(79,70,229,0.3)",
-        "card-hover": "0 4px 12px rgba(0,0,0,0.10)",
+        focus:  "0 0 0 3px rgba(200,150,62,0.35)",
+        "card-hover": "0 4px 12px rgba(0,0,0,0.20)",
       },
       keyframes: {
         // shadcn/ui animations

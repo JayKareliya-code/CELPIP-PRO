@@ -23,8 +23,9 @@ class ConfirmUploadRequest(BaseModel):
 
 class StartWritingAttemptRequest(BaseModel):
     """Body for POST /writing/attempts/start."""
-    prompt_id: UUID
-    is_mock_test: bool = False
+    prompt_id:        UUID
+    is_mock_test:     bool    = False
+    mock_exam_number: int | None = None   # test slot (1–N); required when is_mock_test=True
 
 class SubmitWritingRequest(BaseModel):
     essay_text:     str
@@ -51,3 +52,6 @@ class QuotaStatusResponse(BaseModel):
     writing_limit_per_task:  int | None
     can_attempt_speaking:    dict[int, bool]
     can_attempt_writing:     dict[int, bool]
+    # ── Mock-exam session counts (used by usePracticeQuota) ──────────────────
+    speaking_mock_tests_used: int = 0
+    writing_mock_tests_used:  int = 0

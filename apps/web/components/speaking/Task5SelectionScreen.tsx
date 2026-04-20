@@ -11,12 +11,11 @@
 
 "use client";
 
-import { CheckCircle2 }            from "lucide-react";
-import { TimerRing }               from "@/components/common/TimerRing";
-import { TimerDisplay }            from "@/components/common/TimerDisplay";
-import { usePracticeSessionStore } from "@/store/practiceSessionStore";
-import { cn }                      from "@/lib/utils";
-import type { ChoiceOption }       from "@/lib/types";
+import { CheckCircle2 }      from "lucide-react";
+import { TimerRing }         from "@/components/common/TimerRing";
+import { TimerDisplay }      from "@/components/common/TimerDisplay";
+import { cn }                from "@/lib/utils";
+import type { ChoiceOption } from "@/lib/types";
 
 // ── Props ─────────────────────────────────────────────────────────────────────
 
@@ -25,6 +24,10 @@ interface Task5SelectionScreenProps {
   totalPrepSeconds: number;
   promptText:       string;
   choiceOptions:    ChoiceOption[];
+  /** Currently selected option — controlled by the parent (practice or mock exam store). */
+  selectedChoice:   ChoiceOption | null;
+  /** Callback when the user taps an option card. */
+  onSelect:         (option: ChoiceOption) => void;
 }
 
 // ── Option Card ───────────────────────────────────────────────────────────────
@@ -108,11 +111,12 @@ export function Task5SelectionScreen({
   totalPrepSeconds,
   promptText,
   choiceOptions,
+  selectedChoice,
+  onSelect,
 }: Task5SelectionScreenProps) {
-  const { selectedChoice, setSelectedChoice } = usePracticeSessionStore();
 
   const selectedIndex = selectedChoice
-    ? choiceOptions.findIndex((o) => o === selectedChoice)
+    ? choiceOptions.findIndex((o) => o.name === selectedChoice.name)
     : -1;
 
   const hasSelected = Boolean(selectedChoice);
@@ -120,7 +124,7 @@ export function Task5SelectionScreen({
 
   return (
     // h-screen + overflow-hidden → the entire session lives in one viewport, no scroll
-    <div className="flex flex-col h-screen overflow-hidden bg-canvas px-4 pt-6 pb-3 gap-3 items-center">
+    <div className="flex flex-col h-screen overflow-hidden bg-canvas px-4 pt-2 pb-3 gap-3 items-center">
 
       {/* ── 1. Compact header ─────────────────────────────────────────────── */}
       <div className="flex items-center gap-4 w-full max-w-3xl shrink-0">
@@ -144,7 +148,7 @@ export function Task5SelectionScreen({
 
         {/* Badge + urgent warning */}
         <div className="flex flex-col gap-1">
-          <span className="text-xs font-semibold tracking-[0.18em] uppercase text-primary px-3 py-1 rounded-full border border-primary/30 bg-primary/10 w-fit select-none">
+          <span className="text-xs font-semibold tracking-[0.2em] uppercase text-primary px-3 py-1 rounded-full border border-primary/30 bg-primary/10 w-fit select-none">
             Selection Time
           </span>
           {isUrgent && !hasSelected && (
@@ -171,7 +175,7 @@ export function Task5SelectionScreen({
             option={option}
             index={i}
             isSelected={selectedIndex === i}
-            onSelect={setSelectedChoice}
+            onSelect={option => onSelect(option)}
           />
         ))}
       </div>

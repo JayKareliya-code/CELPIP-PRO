@@ -14,10 +14,11 @@ import {
 import { Badge }  from "@/components/ui/badge";
 import { cn }     from "@/lib/utils";
 import { DIFFICULTY_STYLES, STATUS_STYLES } from "@/lib/admin/promptBadges";
+import { IMAGE_TASK_NUMBERS } from "@/lib/constants";
 import type { SpeakingPrompt } from "@/lib/types";
 
 /** Task numbers that require a context scene image. */
-const IMAGE_TASKS = new Set([3, 4, 8]);
+// IMAGE_TASK_NUMBERS is the single source of truth — imported from lib/constants.
 
 /**
  * A small image thumbnail for the table row.
@@ -38,6 +39,8 @@ function ImageThumb({ url }: { url: string | null }) {
         src={url}
         alt="Scene"
         crossOrigin="anonymous"
+        loading="lazy"
+        decoding="async"
         onError={() => setFailed(true)}
         className="shrink-0 w-10 h-7 rounded object-cover border border-border"
       />
@@ -88,7 +91,7 @@ export function SpeakingPromptsTable({
               <TableCell className="py-3">
                 <div className="flex items-start gap-2.5">
                   {/* Image thumbnail / placeholder for Tasks 3, 4, 8 */}
-                  {IMAGE_TASKS.has(p.task_number) && (
+                  {IMAGE_TASK_NUMBERS.has(p.task_number) && (
                     <ImageThumb url={p.context_image_url ?? null} />
                   )}
                   <div className="min-w-0">

@@ -7,10 +7,7 @@
 
 import { ArrowLeft, Plus, ImageIcon } from "lucide-react";
 import { useRouter }                  from "next/navigation";
-import { SPEAKING_TASK_NAMES }        from "@/lib/constants";
-
-/** Task numbers that use a scene image. */
-const IMAGE_TASKS = new Set([3, 4, 8]);
+import { SPEAKING_TASK_NAMES, IMAGE_TASK_NUMBERS } from "@/lib/constants";
 
 interface Props {
   taskNumber:  number;
@@ -23,7 +20,7 @@ export function SpeakingTaskHeader({ taskNumber, promptCount, isMutating, onAdd 
   const router      = useRouter();
   const taskName    = SPEAKING_TASK_NAMES[`task-${taskNumber}`] ?? `Task ${taskNumber}`;
   const [, shortName] = taskName.split("—").map((s) => s.trim());
-  const isImageTask = IMAGE_TASKS.has(taskNumber);
+  const isImageTask = IMAGE_TASK_NUMBERS.has(taskNumber);
 
   return (
     <>

@@ -40,6 +40,19 @@ export function authHeaders(token: string | null | undefined): HeadersInit {
   return { Authorization: `Bearer ${token}` };
 }
 
+/**
+ * Returns the user's current local date as YYYY-MM-DD.
+ * Sent as X-User-Date on every request so the backend can compute
+ * streak logic against the user's calendar day, not the server's UTC date.
+ */
+export function localDateHeader(): HeadersInit {
+  const now = new Date();
+  const yyyy = now.getFullYear();
+  const mm   = String(now.getMonth() + 1).padStart(2, "0");
+  const dd   = String(now.getDate()).padStart(2, "0");
+  return { "X-User-Date": `${yyyy}-${mm}-${dd}` };
+}
+
 // ── Core Fetch Helper ─────────────────────────────────────────────────────────
 
 /**
@@ -56,6 +69,7 @@ export async function apiFetch<T>(
     ...options,
     headers: {
       "Content-Type": "application/json",
+      ...localDateHeader(),
       ...(options.headers ?? {}),
     },
   });

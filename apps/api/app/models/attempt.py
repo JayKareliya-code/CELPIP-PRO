@@ -18,6 +18,9 @@ class Attempt(Base, TimestampMixin):
     task_number: Mapped[int] = mapped_column(Integer, nullable=False)
     # -1 sentinel means this is a full mock test, not a per-task practice attempt
     is_mock_test: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
+    # For writing mock exams: which test slot (1, 2, 3 …) this attempt belongs to.
+    # Quota is counted as DISTINCT mock_exam_number — re-doing the same slot is free.
+    mock_exam_number: Mapped[int | None] = mapped_column(Integer, nullable=True)
     status: Mapped[str] = mapped_column(Text, default="pending", index=True, nullable=False)
     celery_task_id: Mapped[str | None] = mapped_column(Text)
     error_message: Mapped[str | None] = mapped_column(Text)
@@ -30,6 +33,7 @@ class Attempt(Base, TimestampMixin):
         ),
         Index("idx_attempts_quota", "user_id", "skill", "task_number"),
         Index("idx_attempts_mock", "user_id", "skill", "is_mock_test"),
+        Index("idx_attempts_writing_mock_slot", "user_id", "skill", "mock_exam_number"),
     )
 
 

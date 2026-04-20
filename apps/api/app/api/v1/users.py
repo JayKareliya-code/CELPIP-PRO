@@ -1,6 +1,6 @@
 from typing import Annotated
 from fastapi import APIRouter, Depends
-from sqlalchemy import text
+from sqlalchemy import text, func, distinct
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.deps import get_db
@@ -113,13 +113,27 @@ async def get_my_quota(
     """Return per-task quota usage for the authenticated user (single GROUP BY per skill)."""
     repo = AttemptRepository(db)
 
-    # Two GROUP BY queries instead of 11 sequential round-trips
+    # Per-task individual practice counts
     s_used_raw = await repo.count_per_task(user.id, "speaking")
     w_used_raw = await repo.count_per_task(user.id, "writing")
 
     # Normalise to full task number ranges expected by the frontend
     s_used_per_task: dict[int, int] = {i: s_used_raw.get(i, 0) for i in range(9)}
     w_used_per_task: dict[int, int] = {i: w_used_raw.get(i, 0) for i in range(1, 3)}
+
+    # Distinct speaking mock exam sessions (uses the mock_exam_task_attempts table)
+    mock_result = await db.execute(
+        text(
+            "SELECT COUNT(DISTINCT session_id) "
+            "FROM mock_exam_task_attempts "
+            "WHERE user_id = :uid"
+        ),
+        {"uid": user.id},
+    )
+    speaking_mock_used: int = mock_result.scalar() or 0
+
+    # Writing mock attempts (uses the attempts table with is_mock_test=true)
+    writing_mock_used: int = await repo.count_mock_tests_by_user_skill(user.id, "writing")
 
     s_limits = get_plan_limits(user.plan, "speaking")
     w_limits = get_plan_limits(user.plan, "writing")
@@ -143,4 +157,6 @@ async def get_my_quota(
         writing_limit_per_task=w_limit,
         can_attempt_speaking=s_can,
         can_attempt_writing=w_can,
+        speaking_mock_tests_used=speaking_mock_used,
+        writing_mock_tests_used=writing_mock_used,
     )

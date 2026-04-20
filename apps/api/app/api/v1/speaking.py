@@ -2,10 +2,9 @@
 import uuid
 import logging
 from typing import Annotated
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.core.config import settings
 from app.core.deps import get_db
 from app.core.security import get_current_user
 from app.models.user import User
@@ -20,28 +19,12 @@ from app.schemas.attempt import (
 from app.services import prompt_service, attempt_service
 from app.services.storage_service import generate_upload_url
 from app.services.storage.presigner import generate_presigned_get
+from app.api.v1._prompt_helpers import extract_s3_key as _extract_s3_key  # shared robust extractor
 
 logger = logging.getLogger(__name__)
 router = APIRouter()
 
 # ── S3 key extraction ─────────────────────────────────────────────────────────
-
-def _extract_s3_key(stored_url: str) -> str:
-    """Extract the raw S3 key from a stored context_image_url.
-
-    Handles three formats:
-      1. Raw key:         'speaking-task-3/uuid-file.jpg'
-      2. Clean path URL:  'https://endpoint/bucket/speaking-task-3/uuid-file.jpg'
-      3. Presigned URL:   'https://endpoint/bucket/key?X-Amz-Algorithm=...'
-         (stored before the frontend stripPresign() guard was added)
-
-    Always strips query params so the returned value is a plain S3 key.
-    """
-    if not stored_url.startswith("http"):
-        return stored_url.split("?")[0]
-    marker = f"/{settings.S3_BUCKET_NAME}/"
-    raw_key = stored_url.split(marker, 1)[-1] if marker in stored_url else stored_url
-    return raw_key.split("?")[0]  # strip X-Amz-* query params
 
 
 def _sign_option_image(image_url: str, prompt_id: str) -> str:
@@ -124,6 +107,24 @@ async def get_speaking_task_by_id(
     """Return a single active speaking prompt by UUID with a presigned image URL."""
     prompt = await prompt_service.get_speaking_prompt_by_id(db, prompt_id)
     return _sign_prompt(prompt)
+
+
+@router.get("/tasks/{task_number}/attempted-prompts", response_model=list[str])
+async def get_attempted_prompt_ids(
+    task_number: int,
+    user: Annotated[User, Depends(get_current_user)],
+    db:   Annotated[AsyncSession, Depends(get_db)],
+) -> list[str]:
+    """Return prompt UUIDs the user has already attempted for a given task.
+
+    Used by the /speaking/[task] prompt-list page to mark prompts as
+    attempted so the UI can show a green 'Redo' CTA instead of 'Start Practice'.
+    """
+    from app.repositories.attempt_repo import AttemptRepository
+    ids = await AttemptRepository(db).get_attempted_prompt_ids(
+        user.id, task_number
+    )
+    return list(ids)
 
 
 @router.get("/tasks/{task_number}", response_model=SpeakingTaskResponse)

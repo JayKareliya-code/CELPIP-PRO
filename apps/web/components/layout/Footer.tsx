@@ -1,30 +1,44 @@
 import Link from "next/link";
-import { BookOpen } from "lucide-react";
 
 /**
- * Minimal authenticated footer — single bar with copyright + legal links.
- * The full marketing footer is only needed on public/landing pages.
+ * Authenticated app footer — single bar with brand + copyright + legal links.
+ * Brand treatment exactly mirrors the Navbar <Brand /> component:
+ *   CELPIP   → white, font-black
+ *   BRO      → amber-400, font-black
+ * Background matches the navbar: dark navy (#0D0F17) with a top border.
  */
 export function Footer() {
   return (
-    <footer className="bg-surface border-t border-border mt-auto">
-      <div className="px-4 sm:px-5 py-3 flex flex-col sm:flex-row items-center justify-between gap-2">
-        {/* Brand */}
-        <Link href="/" className="flex items-center gap-1.5 font-semibold text-sm text-primary">
-          <BookOpen className="w-4 h-4" />
-          CELPIPPro
-        </Link>
+    <footer className="bg-[#0D0F17] border-t border-white/[0.06] mt-auto">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-2 py-3">
 
-        {/* Copyright */}
-        <p className="text-xs text-subtle">
-          © {new Date().getFullYear()} CELPIPPro · Not affiliated with Paragon Testing Enterprises.
-        </p>
+          {/* Brand — identical two-tone logotype as Navbar */}
+          <Link
+            href="/"
+            className="flex items-center select-none group shrink-0"
+            aria-label="CELPIPBro home"
+          >
+            <span className="text-lg font-black tracking-tight text-white group-hover:text-white/90 transition-colors">
+              CELPIP
+            </span>
+            <span className="text-lg font-black tracking-tight text-amber-400 group-hover:text-amber-300 transition-colors">
+              BRO
+            </span>
+          </Link>
 
-        {/* Minimal links */}
-        <div className="flex items-center gap-4 text-xs text-subtle">
-          <Link href="/privacy" className="hover:text-foreground transition-colors">Privacy</Link>
-          <Link href="/terms"   className="hover:text-foreground transition-colors">Terms</Link>
-          <Link href="/contact" className="hover:text-foreground transition-colors">Contact</Link>
+          {/* Copyright */}
+          <p className="text-xs text-white/35 text-center">
+            © {new Date().getFullYear()} CELPIPBro · Not affiliated with Paragon Testing Enterprises.
+          </p>
+
+          {/* Legal links */}
+          <div className="flex items-center gap-4 text-xs text-white/35">
+            <Link href="/privacy" className="hover:text-white/70 transition-colors">Privacy</Link>
+            <Link href="/terms"   className="hover:text-white/70 transition-colors">Terms</Link>
+            <Link href="/contact" className="hover:text-white/70 transition-colors">Contact</Link>
+          </div>
+
         </div>
       </div>
     </footer>

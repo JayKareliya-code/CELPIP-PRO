@@ -20,12 +20,15 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useAuth } from "@clerk/nextjs";
+import { useQuery } from "@tanstack/react-query";
 import {
   Clock,
   Mic,
   ChevronLeft,
   Sparkles,
   PlayCircle,
+  RotateCcw,
   Lock,
   Timer,
   ImageIcon,
@@ -34,6 +37,7 @@ import { BreadcrumbNav }    from "@/components/layout/BreadcrumbNav";
 import { useCurrentUser }   from "@/lib/hooks/useCurrentUser";
 import { useQuota }         from "@/lib/hooks/useQuota";
 import { cn }               from "@/lib/utils";
+import { API_V1, api, authHeaders } from "@/lib/api";
 import {
   PRO_PLAN_LIMITS,
   ULTRA_PLAN_LIMITS,
@@ -190,15 +194,7 @@ function PromptCard({
 
               {/* CTA */}
               <div className="px-4 pb-4 pt-1">
-                <div className={cn(
-                  "w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg",
-                  "text-sm font-semibold transition-all duration-150",
-                  "bg-indigo-600/70 group-hover:bg-indigo-600/90",
-                  "text-indigo-100 border border-indigo-500/40 group-hover:border-indigo-400/60"
-                )}>
-                  <PlayCircle className="w-4 h-4" />
-                  {isBonusRetry ? "Practice Again (Free Retry)" : "Start Practice"}
-                </div>
+                <CtaButton isAlreadyAttempted={isAlreadyAttempted} isBonusRetry={isBonusRetry} />
               </div>
             </div>
           </div>
@@ -254,15 +250,7 @@ function PromptCard({
 
             {/* CTA */}
             <div className="px-4 pb-4 pt-1">
-              <div className={cn(
-                "w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg",
-                "text-sm font-semibold transition-all duration-150",
-                "bg-indigo-600/70 group-hover:bg-indigo-600/90",
-                "text-indigo-100 border border-indigo-500/40 group-hover:border-indigo-400/60"
-              )}>
-                <PlayCircle className="w-4 h-4" />
-                {isBonusRetry ? "Practice Again (Free Retry)" : "Start Practice"}
-              </div>
+              <CtaButton isAlreadyAttempted={isAlreadyAttempted} isBonusRetry={isBonusRetry} />
             </div>
           </>
         )}
@@ -270,6 +258,58 @@ function PromptCard({
     </Link>
   );
 
+}
+
+// ── CTA Button ───────────────────────────────────────────────────────────────
+// Three states:
+//   isAlreadyAttempted → green "Redo" button
+//   isBonusRetry       → amber "Practice Again (Free Retry)"
+//   default            → indigo "Start Practice"
+
+function CtaButton({
+  isAlreadyAttempted,
+  isBonusRetry,
+}: {
+  isAlreadyAttempted: boolean;
+  isBonusRetry:       boolean;
+}) {
+  if (isAlreadyAttempted && !isBonusRetry) {
+    return (
+      <div className={cn(
+        "w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg",
+        "text-sm font-semibold transition-all duration-150",
+        "bg-emerald-700/60 group-hover:bg-emerald-700/80",
+        "text-emerald-100 border border-emerald-600/40 group-hover:border-emerald-500/60",
+      )}>
+        <RotateCcw className="w-4 h-4" />
+        Redo
+      </div>
+    );
+  }
+  if (isBonusRetry) {
+    return (
+      <div className={cn(
+        "w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg",
+        "text-sm font-semibold transition-all duration-150",
+        "bg-amber-700/60 group-hover:bg-amber-700/80",
+        "text-amber-100 border border-amber-600/40 group-hover:border-amber-500/60",
+      )}>
+        <RotateCcw className="w-4 h-4" />
+        Practice Again (Free Retry)
+      </div>
+    );
+  }
+  return (
+    <div className={cn(
+      "w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg",
+      "text-sm font-semibold transition-all duration-150",
+      "bg-indigo-600/70 group-hover:bg-indigo-600/90",
+      "text-indigo-100 border border-indigo-500/40 group-hover:border-indigo-400/60",
+    )}>
+      <PlayCircle className="w-4 h-4" />
+      Start Practice
+    </div>
+  );
 }
 
 // ── Coming Soon Placeholder ───────────────────────────────────────────────────
@@ -310,9 +350,25 @@ function ComingSoonCard({ index }: { index: number }) {
 export function TaskPromptsFolder({ taskNumber, prompts }: TaskPromptsFolderProps) {
   const router = useRouter();
   const { user } = useCurrentUser();
+  const { getToken } = useAuth();
   const plan     = user?.plan ?? "starter";
 
   const { speaking_used_per_task } = useQuota("speaking");
+
+  // ── Fetch which prompts this user has already attempted ───────────────────
+  const { data: attemptedPromptIds } = useQuery<string[]>({
+    queryKey: ["attemptedPrompts", taskNumber, user?.id],
+    queryFn: async () => {
+      const token = await getToken();
+      return api.get<string[]>(
+        `${API_V1}/speaking/tasks/${taskNumber}/attempted-prompts`,
+        { headers: authHeaders(token) },
+      );
+    },
+    enabled: !!user && !user.plan.includes("starter"),
+    staleTime: 30_000,
+  });
+  const attemptedSet = new Set(attemptedPromptIds ?? []);
 
   const attemptsLimit: number | null =
     plan === "pro"
@@ -479,7 +535,7 @@ export function TaskPromptsFolder({ taskNumber, prompts }: TaskPromptsFolderProp
                 prompt={prompt}
                 index={i}
                 taskNumber={taskNumber}
-                isAlreadyAttempted={false} // TODO: wire from quota after SM-5 backend
+                isAlreadyAttempted={attemptedSet.has(prompt.id)}
                 isBonusRetry={isBonusRetry && !isStarter}
               />
             ))}

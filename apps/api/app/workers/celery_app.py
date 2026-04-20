@@ -9,6 +9,8 @@ celery_app = Celery(
     include=[
         "app.workers.speaking_tasks",
         "app.workers.writing_tasks",
+        "app.workers.mock_exam_tasks",      # isolated speaking mock-exam scoring queue
+        "app.workers.writing_mock_tasks",   # isolated writing mock-exam scoring queue
     ],
 )
 
@@ -19,8 +21,10 @@ celery_app.conf.update(
     timezone="UTC",
     enable_utc=True,
     task_routes={
-        "app.workers.speaking_tasks.*": {"queue": "speaking"},
-        "app.workers.writing_tasks.*": {"queue": "writing"},
+        "app.workers.speaking_tasks.*":      {"queue": "speaking"},
+        "app.workers.writing_tasks.*":       {"queue": "writing"},
+        "app.workers.mock_exam_tasks.*":     {"queue": "mock_exam"},
+        "app.workers.writing_mock_tasks.*":  {"queue": "writing_mock"},
     },
     task_acks_late=True,              # acknowledge after completion — safe retries
     task_reject_on_worker_lost=True,  # requeue if worker dies mid-task

@@ -13,7 +13,7 @@ import { redirect } from "next/navigation";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "CELPIPPro — Free CELPIP Mock Test + AI Feedback",
+  title: "CELPIPBro — Free CELPIP Mock Test + AI Feedback",
   description:
     "Start with a free CELPIP mock test. Practice all 8 Speaking tasks and 2 Writing tasks with AI rubric-based feedback. Pay once, practice until you pass.",
 };

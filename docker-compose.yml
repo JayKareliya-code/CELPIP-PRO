@@ -70,7 +70,7 @@ services:
     command: >
       celery -A app.workers.celery_app worker
       --loglevel=info
-      -Q speaking,writing
+      -Q speaking,writing,mock_exam,writing_mock
       --concurrency=2
     env_file: ./apps/api/.env
     environment:

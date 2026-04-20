@@ -19,8 +19,8 @@ const sourceSerif = Source_Serif_4({
 
 export const metadata: Metadata = {
   title: {
-    default: "CELPIPPro — AI-Powered CELPIP Exam Practice",
-    template: "%s | CELPIPPro",
+    default: "CELPIPBro — AI-Powered CELPIP Exam Practice",
+    template: "%s | CELPIPBro",
   },
   description:
     "Practice CELPIP Speaking and Writing tasks with AI-powered feedback, rubric-based scoring, and personalized progress tracking. Achieve your target band score.",
@@ -28,8 +28,8 @@ export const metadata: Metadata = {
   openGraph: {
     type:        "website",
     locale:      "en_CA",
-    siteName:    "CELPIPPro",
-    title:       "CELPIPPro — AI-Powered CELPIP Exam Practice",
+    siteName:    "CELPIPBro",
+    title:       "CELPIPBro — AI-Powered CELPIP Exam Practice",
     description: "Practice CELPIP Speaking and Writing with AI feedback and rubric-based scoring.",
   },
 };

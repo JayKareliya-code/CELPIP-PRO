@@ -127,8 +127,14 @@ async def start_writing(
     user: User,
     prompt_id: uuid.UUID,
     is_mock_test: bool = False,
+    mock_exam_number: int | None = None,
 ) -> StartAttemptResponse:
-    """Create a writing attempt after quota check."""
+    """Create a writing attempt after quota check.
+
+    mock_exam_number identifies the test slot (1, 2, 3 …).  When provided,
+    quota is enforced at the SLOT level: re-doing a slot is always free; only
+    genuinely new slots count against the plan limit.
+    """
     prompt = await WritingPromptRepository(db).get_by_id(prompt_id)
     if not prompt:
         raise HTTPException(status_code=404, detail="Writing prompt not found")
@@ -139,6 +145,7 @@ async def start_writing(
         task_number=prompt.task_number,
         is_mock_test=is_mock_test,
         db=db,
+        mock_exam_number=mock_exam_number,
     )
 
     repo = AttemptRepository(db)
@@ -150,15 +157,21 @@ async def start_writing(
         is_mock_test=is_mock_test,
         status="pending",
     )
+    # Store the slot number so quota can count DISTINCT slots later
+    if mock_exam_number is not None:
+        attempt.mock_exam_number = mock_exam_number
+        db.add(attempt)
+
     db.add(WritingAttempt(attempt_id=attempt.id))
     await db.flush()
 
-    logger.info("Writing attempt %s created for user %s", attempt.id, user.id)
+    logger.info("Writing attempt %s created for user %s (slot=%s)", attempt.id, user.id, mock_exam_number)
     return StartAttemptResponse(
         attempt_id=attempt.id,
         status=attempt.status,
         created_at=attempt.created_at,
     )
+
 
 
 async def submit_writing(
@@ -193,8 +206,14 @@ async def submit_writing(
     await db.flush()
 
     try:
-        from app.workers.writing_tasks import score_writing_attempt
-        task = score_writing_attempt.delay(str(attempt_id))
+        if attempt.is_mock_test:
+            # Mock exam → lightweight band-estimate only (no rubric/feedback)
+            from app.workers.writing_mock_tasks import score_writing_mock_task  # noqa: PLC0415
+            task = score_writing_mock_task.delay(str(attempt_id))
+        else:
+            # Practice attempt → full rubric scoring + feedback pipeline
+            from app.workers.writing_tasks import score_writing_attempt  # noqa: PLC0415
+            task = score_writing_attempt.delay(str(attempt_id))
         attempt.celery_task_id = task.id
         db.add(attempt)
         await db.flush()

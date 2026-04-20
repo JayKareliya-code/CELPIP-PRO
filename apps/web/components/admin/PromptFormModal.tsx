@@ -70,7 +70,7 @@ export function PromptFormModal({
         >
           <SharedFormFields skill={skill} initial={initialPrompt} lockedTaskNumber={lockedTaskNumber} />
           {skill === "speaking" && <SpeakingFormFields initial={sp} taskNumber={lockedTaskNumber ?? sp?.task_number} />}
-          {skill === "writing"  && <WritingFormFields  initial={wp} />}
+          {skill === "writing"  && <WritingFormFields  initial={wp} taskNumber={lockedTaskNumber ?? wp?.task_number} />}
         </form>
 
         <DialogFooter className="pt-4 flex gap-2 justify-end">
@@ -80,8 +80,10 @@ export function PromptFormModal({
             Cancel
           </button>
           <button type="submit" form="prompt-form"
+            disabled={isSaving}
             className="px-4 py-2 rounded-lg bg-primary hover:bg-primary-hover text-white
-                       text-sm font-semibold transition-colors shadow-sm">
+                       text-sm font-semibold transition-colors shadow-sm
+                       disabled:opacity-50 disabled:cursor-not-allowed">
             {isEdit ? "Save Changes" : "Add Prompt"}
             {isSaving && <span className="ml-1.5 inline-block w-3.5 h-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin" />}
           </button>

@@ -1,38 +1,55 @@
-import { notFound }                from "next/navigation";
-import type { Metadata }            from "next";
-import { WritingPracticeSession }  from "@/components/writing/WritingPracticeSession";
-import { MOCK_WRITING_TASKS }       from "@/lib/mockData";
+// ─────────────────────────────────────────────────────────────────────────────
+// /writing/[task]/practice — Timed writing practice session.
+// ─────────────────────────────────────────────────────────────────────────────
 
-// ── Types ─────────────────────────────────────────────────────────────────────
+import { notFound }               from "next/navigation";
+import { auth }                   from "@clerk/nextjs/server";
+import type { Metadata }          from "next";
+import { WritingPracticeSession } from "@/components/writing/WritingPracticeSession";
+import type { WritingTask }       from "@/lib/types";
 
 interface PageProps {
-  params: { task: string };
+  params: Promise<{ task: string }>;
 }
 
-// ── Metadata ──────────────────────────────────────────────────────────────────
+const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
 
-export function generateMetadata({ params }: PageProps): Metadata {
-  const task = MOCK_WRITING_TASKS.find((t) => t.id === params.task);
-  const title = task
-    ? `Practice — Task ${task.task_number}: ${task.title}`
-    : "Writing Practice";
+async function fetchAllWritingTasks(token: string | null): Promise<WritingTask[]> {
+  try {
+    const res = await fetch(`${API_BASE}/api/v1/writing/tasks`, {
+      headers: { Authorization: `Bearer ${token}` },
+      cache: "no-store",
+    });
+    if (!res.ok) return [];
+    return res.json();
+  } catch {
+    return [];
+  }
+}
+
+export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
+  const { task: taskId } = await params;
+  const label = taskId.includes("1") ? "Task 1 — Writing an Email" : "Task 2 — Opinion Essay";
   return {
-    title,
-    description: `Timed writing session for ${title}. Compose your response, track your word count, and submit before time runs out.`,
+    title: `Practice — ${label} | CELPIP PRO`,
+    description: `Timed writing session for ${label}. Compose your response, track your word count, and submit before time runs out.`,
   };
 }
 
 /**
  * Writing practice session page — /writing/[task]/practice
  *
- * Server component: resolves the task from mock data (swap for API on Day 10),
- * then hands off to WritingPracticeSession which is a "use client" component.
- *
- * No PageWrapper here — WritingPracticeSession renders full-screen focus mode
- * with its own layout (sticky header bar, no navbar/sidebar visible).
+ * No PageWrapper — WritingPracticeSession renders full-screen focus mode
+ * with its own layout (sticky header bar, no navbar visible).
  */
-export default function WritingPracticePage({ params }: PageProps) {
-  const task = MOCK_WRITING_TASKS.find((t) => t.id === params.task);
+export default async function WritingPracticePage({ params }: PageProps) {
+  const { task: taskId } = await params;
+
+  const { getToken } = await auth();
+  const token = await getToken();
+
+  const allTasks = await fetchAllWritingTasks(token);
+  const task = allTasks.find((t) => t.id === taskId) ?? null;
   if (!task) notFound();
 
   return <WritingPracticeSession task={task} />;

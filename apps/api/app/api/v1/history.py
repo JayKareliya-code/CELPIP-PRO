@@ -14,8 +14,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.core.deps import get_db
 from app.core.security import get_current_user
 from app.models.user import User
-from app.schemas.history import PaginatedHistory
-from app.services.history_service import get_user_history
+from app.schemas.history import PaginatedHistory, PaginatedMockExamHistory
+from app.services.history_service import get_user_history, get_mock_exam_history
 
 router = APIRouter(tags=["History"])
 
@@ -41,6 +41,22 @@ async def list_history(
         db,
         user_id=current_user.id,
         skill=skill,
+        page=page,
+        limit=limit,
+    )
+
+
+@router.get("/history/mock-exams", response_model=PaginatedMockExamHistory)
+async def list_mock_exam_history(
+    page:  int = Query(default=1, ge=1),
+    limit: int = Query(default=10, ge=1, le=50),
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+) -> PaginatedMockExamHistory:
+    """Return a paginated list of completed mock exam sessions, newest first."""
+    return await get_mock_exam_history(
+        db,
+        user_id=current_user.id,
         page=page,
         limit=limit,
     )

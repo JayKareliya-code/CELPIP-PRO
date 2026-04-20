@@ -1,4 +1,4 @@
-// ─────────────────────────────────────────────────────────────────────────────
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 // lib/hooks/useAdminPrompts.ts
 //
 // React Query hooks for the Admin Prompt Management CMS.
@@ -6,8 +6,8 @@
 // Cache invalidation strategy:
 //   Mutations invalidate by BASE key only (no filter args) so React Query's
 //   prefix matching catches every variant: [], [{}], [{status:"draft"}] etc.
-//   ["adminSpeakingPrompts"] matches ["adminSpeakingPrompts", {}] ✓
-// ─────────────────────────────────────────────────────────────────────────────
+//   ["adminSpeakingPrompts"] matches ["adminSpeakingPrompts", {}] âœ“
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 "use client";
 
@@ -15,11 +15,11 @@ import { useAuth }           from "@clerk/nextjs";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast }             from "sonner";
 import { api, API_V1, authHeaders, ApiError } from "@/lib/api";
-import type { SpeakingPrompt, WritingPrompt } from "@/lib/types";
+import type { SpeakingPrompt, WritingPrompt, ChoiceOption } from "@/lib/types";
 
-// ── Query Keys ────────────────────────────────────────────────────────────────
+// â”€â”€ Query Keys â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
-/** Base keys used for prefix-based invalidation — never include filter args here. */
+/** Base keys used for prefix-based invalidation â€” never include filter args here. */
 const BASE_KEYS = {
   adminSpeaking: ["adminSpeakingPrompts"] as const,
   adminWriting:  ["adminWritingPrompts"]  as const,
@@ -40,7 +40,7 @@ export const QUERY_KEYS = {
   publicWriting:  BASE_KEYS.publicWriting,
 } as const;
 
-// ── Payload types ─────────────────────────────────────────────────────────────
+// â”€â”€ Payload types â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 export interface SpeakingPromptPayload {
   task_number:             number;
@@ -62,15 +62,20 @@ export interface SpeakingPromptPayload {
   sort_order?:             number;
   is_active?:              boolean;
   status?:                 "draft" | "published" | "archived";
-  // ── Task 5 — Comparing & Persuading ─────────────────────────────────────
+  // â”€â”€ Task 5 â€” Comparing & Persuading â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   /** The two initial option cards shown during the PREP (selection) phase. */
-  choice_options?:             unknown[] | null;
+  choice_options?:             ChoiceOption[] | null;
   /** The surprise curveball third option revealed at RECORDING phase. */
-  curveball_option?:           Record<string, unknown> | null;
+  curveball_option?:           ChoiceOption | null;
   /** Instruction banner text shown on the curveball screen. */
   curveball_instruction_text?: string | null;
-  /** 0 = Option A, 1 = Option B — admin preview default / scoring reference. */
+  /** 0 = Option A, 1 = Option B â€” admin preview default / scoring reference. */
   default_choice_index?:       number | null;
+  /**
+   * Prompt pool tag. "practice" (default) = individual task attempts only.
+   * "mock" = full mock exam sessions only.
+   */
+  prompt_tag?:                 "practice" | "mock";
 }
 
 export interface WritingPromptPayload {
@@ -92,9 +97,10 @@ export interface WritingPromptPayload {
   sort_order?:               number;
   is_active?:                boolean;
   status?:                   "draft" | "published" | "archived";
+  prompt_tag?:               "practice" | "mock";
 }
 
-// ── Internal helpers ──────────────────────────────────────────────────────────
+// â”€â”€ Internal helpers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 function useAdminToken() {
   const { getToken, isSignedIn } = useAuth();
@@ -111,7 +117,7 @@ function handleMutationError(err: unknown, fallback: string) {
   toast.error(msg);
 }
 
-/** Invalidate by base key — matches ALL filter variants via prefix matching. */
+/** Invalidate by base key â€” matches ALL filter variants via prefix matching. */
 function invalidateSpeaking(qc: ReturnType<typeof useQueryClient>) {
   qc.invalidateQueries({ queryKey: BASE_KEYS.adminSpeaking });
 }
@@ -125,9 +131,9 @@ function invalidatePublicWriting(qc: ReturnType<typeof useQueryClient>) {
   qc.invalidateQueries({ queryKey: BASE_KEYS.publicWriting });
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 // SPEAKING HOOKS
-// ─────────────────────────────────────────────────────────────────────────────
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 interface SpeakingListFilters {
   status?:      string;
@@ -156,7 +162,7 @@ export function useAdminSpeakingPrompts(filters: SpeakingListFilters = {}) {
     },
     enabled:              isSignedIn,   // don't fire until Clerk confirms the session
     staleTime:            30_000,
-    retry:                1,            // fail fast — don't cascade retries on hot reload
+    retry:                1,            // fail fast â€” don't cascade retries on hot reload
     refetchOnWindowFocus: false,        // prevent refetch on tab switch / hot reload focus
   });
 }
@@ -222,7 +228,7 @@ export function usePublishSpeakingPrompt() {
     onSuccess: () => {
       invalidateSpeaking(qc);
       invalidatePublicSpeaking(qc);
-      toast.success("Prompt published — now visible to candidates.");
+      toast.success("Prompt published â€” now visible to candidates.");
     },
     onError: (err) => handleMutationError(err, "Failed to publish prompt."),
   });
@@ -249,7 +255,7 @@ export function useArchiveSpeakingPrompt() {
  * Toggle is_active for a speaking prompt.
  *
  * Uses a dedicated /toggle-active endpoint instead of the full PATCH so only
- * the is_active boolean is written — no risk of corrupting context_image_url,
+ * the is_active boolean is written â€” no risk of corrupting context_image_url,
  * status, or any other field with stale payload values.
  */
 export function useToggleActiveSpeakingPrompt() {
@@ -274,9 +280,9 @@ export function useToggleActiveSpeakingPrompt() {
 
 
 
-// ─────────────────────────────────────────────────────────────────────────────
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 // WRITING HOOKS
-// ─────────────────────────────────────────────────────────────────────────────
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 interface WritingListFilters {
   status?:      string;
@@ -303,7 +309,7 @@ export function useAdminWritingPrompts(filters: WritingListFilters = {}) {
       return api.get<WritingPrompt[]>(`${API_V1}/admin/writing-prompts${qs}`, { headers });
     },
     enabled:              isSignedIn,
-    staleTime:            30_000,
+    staleTime:            0,          // always refetch after mutation invalidation
     retry:                1,
     refetchOnWindowFocus: false,
   });
@@ -370,7 +376,7 @@ export function usePublishWritingPrompt() {
     onSuccess: () => {
       invalidateWriting(qc);
       invalidatePublicWriting(qc);
-      toast.success("Prompt published — now visible to candidates.");
+      toast.success("Prompt published â€” now visible to candidates.");
     },
     onError: (err) => handleMutationError(err, "Failed to publish prompt."),
   });
@@ -390,5 +396,29 @@ export function useArchiveWritingPrompt() {
       toast.success("Prompt archived.");
     },
     onError: (err) => handleMutationError(err, "Failed to archive prompt."),
+  });
+}
+
+/**
+ * Toggle is_active for a writing prompt.
+ * Uses a dedicated /toggle-active endpoint — mirrors the speaking equivalent.
+ */
+export function useToggleActiveWritingPrompt() {
+  const qc         = useQueryClient();
+  const { getHeaders } = useAdminToken();
+  return useMutation<{ id: string; is_active: boolean }, Error, string>({
+    mutationFn: async (id) => {
+      const headers = await getHeaders();
+      return api.post<{ id: string; is_active: boolean }>(
+        `${API_V1}/admin/writing-prompts/${id}/toggle-active`,
+        {},
+        { headers },
+      );
+    },
+    onSuccess: () => {
+      invalidateWriting(qc);
+      invalidatePublicWriting(qc);
+    },
+    onError: (err) => handleMutationError(err, "Failed to toggle prompt active state."),
   });
 }

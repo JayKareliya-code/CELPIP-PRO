@@ -2,8 +2,9 @@ from typing import Annotated
 import asyncio
 import time
 import httpx
+from datetime import date
 from jose import jwt, jwk, JWTError
-from fastapi import Depends, HTTPException
+from fastapi import Depends, HTTPException, Request
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from sqlalchemy.ext.asyncio import AsyncSession
 import logging
@@ -43,6 +44,7 @@ async def _get_jwks() -> dict:
 
 
 async def get_current_user(
+    request:     Request,
     credentials: Annotated[HTTPAuthorizationCredentials, Depends(security)],
     db:          Annotated[AsyncSession, Depends(get_db)],
 ) -> User:
@@ -52,6 +54,17 @@ async def get_current_user(
         detail="Could not validate credentials",
         headers={"WWW-Authenticate": "Bearer"},
     )
+
+    # Parse the user's local date from the X-User-Date header so that streak
+    # logic runs against the caller's calendar day, not the server's UTC date.
+    user_date: date | None = None
+    raw_date = request.headers.get("x-user-date")
+    if raw_date:
+        try:
+            user_date = date.fromisoformat(raw_date)
+        except ValueError:
+            pass  # malformed header — fall back to server date gracefully
+
     try:
         token = credentials.credentials
 
@@ -62,7 +75,8 @@ async def get_current_user(
             if not clerk_user_id:
                 raise exc
             return await get_or_create_user(
-                db, clerk_user_id, f"{clerk_user_id}@example.com", "Test User"
+                db, clerk_user_id, f"{clerk_user_id}@example.com", "Test User",
+                user_date=user_date,
             )
 
         jwks   = await _get_jwks()
@@ -94,7 +108,7 @@ async def get_current_user(
         logger.warning("JWT validation failed", exc_info=True)
         raise exc
 
-    return await get_or_create_user(db, clerk_user_id, email, full_name)
+    return await get_or_create_user(db, clerk_user_id, email, full_name, user_date=user_date)
 
 
 async def require_admin(user: Annotated[User, Depends(get_current_user)]) -> User:

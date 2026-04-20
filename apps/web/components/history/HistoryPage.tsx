@@ -1,41 +1,53 @@
 "use client";
 
 // ─────────────────────────────────────────────────────────────────────────────
-// HistoryPage.tsx — Full history page shell
-//
-// Owns: skill filter state + pagination state
-// Delegates: data fetching to useHistory hook, rendering to HistoryTable
+// HistoryPage.tsx — History page with Practice + Mock Exam tabs
 // ─────────────────────────────────────────────────────────────────────────────
 
-import { useState }            from "react";
-import { History }             from "lucide-react";
-import { useHistory }          from "@/lib/hooks/useHistory";
-import { HistoryFilterBar }    from "./HistoryFilterBar";
-import { HistoryTable }        from "./HistoryTable";
-import type { Skill }          from "@/lib/types";
+import { useState }                    from "react";
+import { History, ClipboardList }      from "lucide-react";
+import { PageWrapper }                 from "@/components/layout/PageWrapper";
+import { useHistory }                  from "@/lib/hooks/useHistory";
+import { HistoryFilterBar }            from "./HistoryFilterBar";
+import { HistoryTable }                from "./HistoryTable";
+import { MockExamHistorySection }      from "./MockExamHistorySection";
+import type { Skill, PaginatedHistory } from "@/lib/types";
+
+// ── View mode ─────────────────────────────────────────────────────────────────
+
+type ViewMode = "practice" | "mock";
+
+const VIEW_TABS: { label: string; value: ViewMode; icon: string }[] = [
+  { label: "Practice",    value: "practice", icon: "🎤" },
+  { label: "Mock Exams",  value: "mock",     icon: "📋" },
+];
+
+// ── Page ──────────────────────────────────────────────────────────────────────
 
 export function HistoryPage() {
+  const [view,  setView]  = useState<ViewMode>("practice");
   const [skill, setSkill] = useState<Skill | null>(null);
   const [page,  setPage]  = useState(1);
 
-  // Reset to page 1 whenever the skill filter changes
-  function handleSkillChange(s: Skill | null) {
-    setSkill(s);
-    setPage(1);
-  }
+  function handleSkillChange(s: Skill | null) { setSkill(s); setPage(1); }
+  function handleViewChange(v: ViewMode)      { setView(v); setPage(1); setSkill(null); }
 
-  const { history, isLoading, isError } = useHistory(skill, page);
+  const { history, isLoading, isError } = useHistory(
+    view === "practice" ? skill : null,
+    view === "practice" ? page  : 1,
+  );
 
   return (
-    <div className="mx-auto max-w-5xl w-full px-4 py-8 space-y-6 animate-fade-in">
+    <PageWrapper>
+      <div className="space-y-6 animate-fade-in">
 
-      {/* Page header */}
+      {/* ── Page header ──────────────────────────────────────────────────── */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <div className="flex items-center gap-2 mb-1">
             <History className="w-5 h-5 text-primary" />
             <h1 className="text-2xl font-bold text-foreground tracking-tight">
-              Practice History
+              History
             </h1>
           </div>
           <p className="text-sm text-subtle">
@@ -43,31 +55,67 @@ export function HistoryPage() {
           </p>
         </div>
 
-        {/* Skill filter */}
-        <HistoryFilterBar active={skill} onChange={handleSkillChange} />
+        {/* ── View toggle (Practice / Mock Exams) ── */}
+        <div
+          role="tablist"
+          className="inline-flex items-center gap-1 rounded-xl border border-border bg-surface p-1"
+        >
+          {VIEW_TABS.map(({ label, value, icon }) => {
+            const isActive = view === value;
+            return (
+              <button
+                key={value}
+                role="tab"
+                aria-selected={isActive}
+                onClick={() => handleViewChange(value)}
+                className={`
+                  flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm font-medium
+                  transition-all duration-150
+                  ${isActive
+                    ? "bg-primary text-white shadow-sm"
+                    : "text-subtle hover:text-white hover:bg-white/5"
+                  }
+                `}
+              >
+                <span>{icon}</span> {label}
+              </button>
+            );
+          })}
+        </div>
       </div>
 
-      {/* Summary stats bar — only shown when history is loaded */}
-      {history && history.total > 0 && (
-        <StatsSummary history={history} />
+      {/* ── Practice view ────────────────────────────────────────────────── */}
+      {view === "practice" && (
+        <>
+          {/* Skill filter + stats */}
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+            <HistoryFilterBar active={skill} onChange={handleSkillChange} />
+          </div>
+
+          {history && history.total > 0 && (
+            <StatsSummary history={history} />
+          )}
+
+          <HistoryTable
+            history={history}
+            isLoading={isLoading}
+            isError={isError}
+            page={page}
+            onPageChange={setPage}
+            activeSkill={skill}
+          />
+        </>
       )}
 
-      {/* History table */}
-      <HistoryTable
-        history={history}
-        isLoading={isLoading}
-        isError={isError}
-        page={page}
-        onPageChange={setPage}
-        activeSkill={skill}
-      />
-    </div>
+      {/* ── Mock exams view ───────────────────────────────────────────────── */}
+      {view === "mock" && <MockExamHistorySection />}
+
+      </div>
+    </PageWrapper>
   );
 }
 
 // ── Stats summary strip ────────────────────────────────────────────────────────
-
-import type { PaginatedHistory } from "@/lib/types";
 
 function StatsSummary({ history }: { history: PaginatedHistory }) {
   const completed = history.items.filter((a) => a.status === "complete");
