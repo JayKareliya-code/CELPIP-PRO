@@ -7,10 +7,11 @@ from slowapi.errors import RateLimitExceeded
 from slowapi.middleware import SlowAPIMiddleware
 
 from app.core.config import settings
-from app.core.deps import engine
+from app.core.deps import engine, get_redis_pool
 from app.core.rate_limit import limiter
 from app.core.logging_config import configure_logging
 from app.core.middleware import RequestIDMiddleware
+from app.core.pubsub import PlanEventBus
 from app.api.router import api_router
 from app.workers.celery_app import celery_app as _celery_app  # noqa: F401 — ensures shared_task binds to the configured broker
 
@@ -44,7 +45,20 @@ if _sentry_dsn:
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    # ── Startup ───────────────────────────────────────────────────────────────
+    # OTel tracing — no-op when OTEL_EXPORTER_OTLP_ENDPOINT is empty
+    from app.core.metrics import setup_otel
+    setup_otel(app)
+
+    # SSE pub/sub fan-out bus — single Redis subscriber per process
+    bus = PlanEventBus(get_redis_pool())
+    app.state.plan_event_bus = bus
+    await bus.start()
+
     yield
+
+    # ── Shutdown ──────────────────────────────────────────────────────────────
+    await bus.stop()
     await engine.dispose()
 
 
@@ -54,6 +68,14 @@ def create_app() -> FastAPI:
         version  = "1.0.0",
         docs_url = "/docs" if settings.DEBUG else None,
         lifespan = lifespan,
+    )
+
+    # ── Prometheus metrics: expose /metrics (hidden from OpenAPI schema) ───────
+    from prometheus_fastapi_instrumentator import Instrumentator
+    Instrumentator().instrument(app).expose(
+        app,
+        endpoint="/metrics",
+        include_in_schema=False,
     )
 
     # ── Request-ID: first middleware so the ID is available for all subsequent layers ──

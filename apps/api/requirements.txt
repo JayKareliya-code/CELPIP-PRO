@@ -41,6 +41,13 @@ psycopg2-binary>=2.9.9   # sync SQLAlchemy engine used by Celery workers (not Fa
 structlog>=24.1.0         # structured JSON logging (JSON in prod, console in dev)
 sentry-sdk[fastapi]>=2.3.0  # error tracking; SENTRY_DSN="" to disable
 
+# ── Prometheus + OpenTelemetry (S2-1) ─────────────────────────────────────────
+prometheus-fastapi-instrumentator>=0.9.0   # auto-instrument FastAPI for /metrics
+opentelemetry-sdk>=1.24.0                  # OTel SDK core
+opentelemetry-instrumentation-fastapi>=0.45b0  # FastAPI span instrumentation
+opentelemetry-instrumentation-sqlalchemy>=0.45b0  # SQLAlchemy query spans
+opentelemetry-exporter-otlp>=1.24.0        # OTLP gRPC exporter (→ Jaeger / collector)
+
 # ── Feature Flags (optional) ───────────────────────────────────────────────────
 # Uncomment to use self-hosted Unleash as the feature flag backend (S2-3).
 # The env-var JSON fallback (FEATURE_FLAGS_JSON) works without this package.

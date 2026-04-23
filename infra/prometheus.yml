@@ -1,0 +1,16 @@
+# ─── Prometheus scrape config for CELPIP platform ───────────────────────────
+# Usage: mounted into the prometheus container at /etc/prometheus/prometheus.yml
+# Grafana datasource points at http://prometheus:9090 (see datasources.yml).
+
+global:
+  scrape_interval:     15s   # how often to scrape targets
+  evaluation_interval: 15s   # how often to evaluate alerting rules
+
+scrape_configs:
+  # ── CELPIP FastAPI app ────────────────────────────────────────────────────
+  - job_name: celpip-api
+    static_configs:
+      - targets: ["api:8000"]
+    metrics_path: /metrics
+    # If METRICS_AUTH_TOKEN is set, add a bearer token header here.
+    # bearer_token: <token>

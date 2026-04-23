@@ -73,6 +73,14 @@ class Settings(BaseSettings):
         if not self.FRONTEND_URL:
             self.FRONTEND_URL = f"http://{self.HOST_IP}:3000"
 
+        # ── APP_ENV guard ─────────────────────────────────────────────────────
+        _valid_envs = ("development", "staging", "production")
+        if self.APP_ENV not in _valid_envs:
+            raise ValueError(
+                f"APP_ENV must be one of {_valid_envs!r}, got: {self.APP_ENV!r}. "
+                "Check your .env file."
+            )
+
         # ── Production guard ──────────────────────────────────────────────────
         if self.APP_ENV == "production":
             bad = [o for o in self.CORS_ORIGINS if "localhost" in o]
@@ -160,6 +168,15 @@ class Settings(BaseSettings):
     # Leave SENTRY_DSN empty to disable Sentry (default in dev).
     # In production, set to your project DSN: https://xxx@oyyy.ingest.sentry.io/zzz
     SENTRY_DSN: str = ""
+
+    # OpenTelemetry tracing (S2-1)
+    # Set to OTLP gRPC endpoint to enable distributed tracing.
+    # In docker-compose dev: OTEL_EXPORTER_OTLP_ENDPOINT=http://jaeger:4317
+    # Leave empty to disable (default).
+    OTEL_EXPORTER_OTLP_ENDPOINT: str = ""
+    # Optional bearer token to guard GET /metrics in non-dev deployments.
+    # When empty, /metrics is unprotected (fine inside a private VPC/subnet).
+    METRICS_AUTH_TOKEN: str = ""
 
     # ── Feature Flags ─────────────────────────────────────────────
     # Option A: self-hosted Unleash (optional dep: UnleashClient>=5.2.0)

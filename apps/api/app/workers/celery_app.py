@@ -13,6 +13,7 @@ celery_app = Celery(
         "app.workers.mock_exam_tasks",      # isolated speaking mock-exam scoring queue
         "app.workers.writing_mock_tasks",   # isolated writing mock-exam scoring queue
         "app.workers.reconciliation_tasks", # nightly Stripe ↔ DB reconciliation
+        "app.workers.metrics_polling",      # Prometheus queue-depth gauge sampler (S2-1)
     ],
 )
 
@@ -40,6 +41,11 @@ celery_app.conf.update(
         "reconcile-stripe-nightly": {
             "task": "app.workers.reconciliation_tasks.reconcile_stripe_plans",
             "schedule": crontab(hour=2, minute=0),
+        },
+        # Sample Celery queue depths every 30 s → updates celpip_queue_depth gauge.
+        "poll-queue-depths": {
+            "task": "app.workers.metrics_polling.poll_queue_depths",
+            "schedule": 30.0,  # seconds
         },
     },
 )
