@@ -11,6 +11,7 @@ from app.api.v1._utils import to_dict
 from app.core.security import require_admin
 from app.models.user import User
 from app.models.content_tag import ContentTag, ContentTagLink
+from app.services.admin_audit_service import log_action
 
 router = APIRouter()
 Admin = Annotated[User, Depends(require_admin)]
@@ -36,21 +37,26 @@ async def list_tags(db: DB, _: Admin) -> list[dict[str, Any]]:
 
 
 @router.post("/tags", status_code=201)
-async def create_tag(body: TagIn, db: DB, _: Admin) -> dict[str, Any]:
+async def create_tag(body: TagIn, db: DB, admin: Admin) -> dict[str, Any]:
     tag = ContentTag(**body.model_dump())
     db.add(tag)
     await db.flush()
+    await log_action(db, admin_user_id=admin.id, action_type="create",
+                     entity_type="content_tag", entity_id=tag.id,
+                     new_value=body.model_dump())
     await db.commit()
     await db.refresh(tag)
     return to_dict(tag)
 
 
 @router.delete("/tags/{tag_id}", status_code=204)
-async def delete_tag(tag_id: uuid.UUID, db: DB, _: Admin) -> None:
+async def delete_tag(tag_id: uuid.UUID, db: DB, admin: Admin) -> None:
     tag = await db.get(ContentTag, tag_id)
     if not tag:
         raise HTTPException(404, "Tag not found")
     await db.delete(tag)
+    await log_action(db, admin_user_id=admin.id, action_type="delete",
+                     entity_type="content_tag", entity_id=tag_id)
     await db.commit()
 
 
@@ -68,19 +74,24 @@ async def get_entity_tags(
 
 
 @router.post("/tags/link", status_code=201)
-async def link_tag(body: TagLinkIn, db: DB, _: Admin) -> dict[str, Any]:
+async def link_tag(body: TagLinkIn, db: DB, admin: Admin) -> dict[str, Any]:
     link = ContentTagLink(**body.model_dump())
     db.add(link)
     await db.flush()
+    await log_action(db, admin_user_id=admin.id, action_type="link",
+                     entity_type="content_tag_link", entity_id=link.id,
+                     new_value=body.model_dump(mode="json"))
     await db.commit()
     await db.refresh(link)
     return to_dict(link)
 
 
 @router.delete("/tags/link/{link_id}", status_code=204)
-async def unlink_tag(link_id: uuid.UUID, db: DB, _: Admin) -> None:
+async def unlink_tag(link_id: uuid.UUID, db: DB, admin: Admin) -> None:
     link = await db.get(ContentTagLink, link_id)
     if not link:
         raise HTTPException(404, "Tag link not found")
     await db.delete(link)
+    await log_action(db, admin_user_id=admin.id, action_type="unlink",
+                     entity_type="content_tag_link", entity_id=link_id)
     await db.commit()

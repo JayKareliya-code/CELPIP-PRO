@@ -81,6 +81,20 @@ class Settings(BaseSettings):
                     f"CORS_ORIGINS contains localhost in production: {bad}. "
                     "Set HOST_IP to your production domain, or set CORS_ORIGINS explicitly."
                 )
+            http_origins = [o for o in self.CORS_ORIGINS if o.startswith("http://")]
+            if http_origins:
+                raise ValueError(
+                    f"CORS_ORIGINS contains http:// origins in production: {http_origins}. "
+                    "Use https:// only."
+                )
+            if not self.STRIPE_WEBHOOK_SECRET:
+                raise ValueError(
+                    "STRIPE_WEBHOOK_SECRET is required in production."
+                )
+            if self.AWS_ACCESS_KEY_ID == "REPLACE_ME" or self.AWS_SECRET_ACCESS_KEY == "REPLACE_ME":
+                raise ValueError(
+                    "AWS credentials are not configured for production."
+                )
 
         return self
 
@@ -138,6 +152,37 @@ class Settings(BaseSettings):
     STRIPE_WEBHOOK_SECRET:    str = ""
     STRIPE_PRO_PRICE_ID:      str = ""
     STRIPE_ULTRA_PRICE_ID:    str = ""
+
+    # ── Compliance / Terms ────────────────────────────────────────────────────
+    TOS_CURRENT_VERSION: str = "2026-04-22"
+
+    # ── Observability ─────────────────────────────────────────────────────────
+    # Leave SENTRY_DSN empty to disable Sentry (default in dev).
+    # In production, set to your project DSN: https://xxx@oyyy.ingest.sentry.io/zzz
+    SENTRY_DSN: str = ""
+
+    # ── Feature Flags ─────────────────────────────────────────────
+    # Option A: self-hosted Unleash (optional dep: UnleashClient>=5.2.0)
+    #   Set both UNLEASH_URL and UNLEASH_TOKEN to activate.
+    # Option B: env-var JSON (no extra dep, works out of the box)
+    #   Set FEATURE_FLAGS_JSON to a JSON object, e.g.:
+    #     FEATURE_FLAGS_JSON='{"new_essay_prompt": true, "mock_exam_v2": false}'
+    # Unknown flags always default to False (safe / closed).
+    UNLEASH_URL:        str = ""    # e.g. https://unleash.internal/api
+    UNLEASH_TOKEN:      str = ""    # Unleash client API token
+    FEATURE_FLAGS_JSON: str = "{}"  # JSON dict[str, bool] for env-var fallback
+
+    # ── Upload limits ─────────────────────────────────────────────────────────
+    AUDIO_MAX_BYTES:       int  = 25 * 1024 * 1024   # 25 MB
+    AUDIO_MIN_BYTES:       int  = 1024               # 1 KB
+    ESSAY_MAX_CHARS:       int  = 8000
+    ESSAY_MIN_CHARS:       int  = 1
+
+    # ── Rate limits (per minute, per user) ────────────────────────────────────
+    RATE_LIMIT_ATTEMPTS_PER_MIN:   str = "10/minute"
+    RATE_LIMIT_SUBMISSIONS_PER_MIN: str = "10/minute"
+    RATE_LIMIT_CHECKOUT_PER_MIN:    str = "5/minute"
+    RATE_LIMIT_DEFAULT:             str = "120/minute"
 
 
 @lru_cache()

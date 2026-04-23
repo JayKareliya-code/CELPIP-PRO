@@ -1,0 +1,503 @@
+# CELPIP PRO — Sprint 2 Implementation Plan (P2 — First 30 Days)
+
+## Background
+
+Sprint 1 closed all P0 and P1 items from the production launch audit.
+The platform is now secure, observable, and billing-hardened.
+
+Sprint 2 targets **P2 items** from the original audit — quality-of-life,
+scalability headroom, compliance completeness, and UX polish that make the
+platform maintainable as it grows toward 1k–10k MAU.
+
+**Payment model confirmed:** One-time purchases; add-on bundles in future.  
+**P3 (not in scope):** Real Stripe recurring subscriptions, PgBouncer, Kubernetes, multi-region.
+
+---
+
+## Sprint 2 Items (Prioritized)
+
+| ID | Item | Effort | Dependency |
+|----|------|--------|-----------|
+| S2-1 | Prometheus metrics + OTel tracing | M | — |
+| S2-2 | Stripe ↔ DB reconciliation cron | S | — |
+| S2-3 | Feature flags (LaunchDarkly / Unleash) | S | — |
+| S2-4 | GDPR data export (`GET /users/me/export`) | M | — |
+| S2-5 | Stored-XSS review (admin markdown) | S | — |
+| S2-6 | Shared Redis pubsub for SSE (fan-out) | M | — |
+| S2-7 | Audio transcoding webm → m4a (iOS Safari) | M | — |
+| S2-8 | Read replica for history/progress queries | M | — |
+| S2-9 | Per-user AI cost dashboard in admin | S | — |
+| S2-10 | Admin audit panel wiring verification | S | — |
+| S2-11 | Staging environment scaffolding | M | — |
+| S2-12 | Prompt image signed URL caching | S | — |
+| S2-13 | Flower auth + prod hardening | S | — |
+
+---
+
+## Detailed Design
+
+---
+
+### S2-1 — Prometheus Metrics + OpenTelemetry Tracing
+
+**Why:** Without metrics we’re blind on API p99 latency, Celery queue depth, and AI cost per request.
+
+#### Backend
+
+**[NEW] `apps/api/app/core/metrics.py`**
+- `prometheus-fastapi-instrumentator` — auto-instruments all FastAPI routes.
+- Custom counters/histograms:
+  - `celpip_attempt_total{skill, status, plan}` — attempt outcomes
+  - `celpip_ai_cost_usd_total{model, operation}` — cumulative AI spend
+  - `celpip_queue_depth{queue}` — Celery queue lengths (polled every 30 s)
+- Expose `GET /metrics` (internal network / scrape token).
+
+**[MODIFY] `apps/api/app/main.py`**
+- Mount `PrometheusInstrumentator().instrument(app).expose(app)`.
+
+**[NEW] OTel tracing**
+- Add `opentelemetry-sdk`, `opentelemetry-instrumentation-fastapi`, `opentelemetry-exporter-otlp`.
+- Configure OTLP exporter (`OTEL_EXPORTER_OTLP_ENDPOINT` env; empty = disabled).
+- Auto-traces FastAPI requests and SQLAlchemy queries.
+
+**[MODIFY] `docker-compose.yml`**
+- Add Prometheus + Grafana containers + pre-loaded CELPIP dashboard JSON.
+
+---
+
+### S2-2 — Stripe ↔ DB Reconciliation Cron
+
+**Why:** Webhooks can be missed. A refunded user may retain Pro access forever without a reconciliation pass.
+
+**[MODIFY] `apps/api/app/workers/celery_app.py`**
+- Add Beat schedule: `reconcile_stripe_plans` nightly at 02:00 UTC.
+
+**[NEW] `apps/api/app/workers/reconciliation_tasks.py`**
+- `@shared_task` that:
+  1. Fetches all users where `plan != 'starter'`.
+  2. For each, calls `stripe.PaymentIntent.retrieve(stripe_payment_intent_id)`.
+  3. If PI status == `refunded` and `user.plan != 'starter'` → downgrade.
+  4. Logs discrepancies to structlog + Sentry.
+  5. Writes a row to `reconciliation_runs`.
+
+**[NEW] `alembic/versions/0011_reconciliation_log.py`**
+- `reconciliation_runs(id, run_at, users_checked, corrections_made, error_message)`.
+
+---
+
+### S2-3 — Feature Flags
+
+**Why:** Safe rollout of new prompt types, AI models, or plan tiers without code deploys.
+
+**Recommendation:** Self-hosted **Unleash** or env-var fallback for simplicity.
+
+**[NEW] `apps/api/app/core/feature_flags.py`**
+- `is_enabled(flag: str, context: dict) -> bool`
+- Reads Unleash if `UNLEASH_URL` set; falls back to `FEATURE_FLAGS_JSON` env var.
+
+**[NEW] `apps/api/app/api/v1/feature_flags.py`**
+- `GET /feature-flags` (authenticated) → `{ flags: { flag_name: bool } }`.
+
+**[NEW] `apps/web/lib/hooks/useFeatureFlags.ts`**
+- `isEnabled(flag: string): boolean` hook backed by `/feature-flags` query.
+
+---
+
+### S2-4 — GDPR Data Export (`GET /users/me/export`)
+
+**Why:** GDPR Article 20 — right to data portability. Required for EU users.
+
+**[NEW] `apps/api/app/api/v1/users/export.py`**
+- `POST /users/me/export` → 202 + `{ job_id }`
+- `GET /users/me/export/status/{job_id}` → `{ status, download_url }`
+
+**[NEW] `apps/api/app/workers/export_tasks.py`**
+- Celery task: fetch all user data → serialize to JSON → zip → upload to S3 `exports/{uid}/{ts}.zip` → generate 24 h presigned URL.
+
+**[NEW] `alembic/versions/0011_export_jobs.py`**
+- `export_jobs(id, user_id, status, s3_url, created_at, expires_at)`.
+
+**Frontend**
+- Account page: “Download my data” button → poll status → show download link.
+
+---
+
+### S2-5 — Stored-XSS Review (Admin Markdown)
+
+**Why:** Admin-authored `prompt_text` fields rendered in frontend. Any `dangerouslySetInnerHTML` without sanitization = stored XSS.
+
+**[AUDIT]** `grep -rn dangerouslySetInnerHTML apps/web/` — fix every hit.
+
+**[MODIFY] All identified render sites**
+```tsx
+import DOMPurify from "dompurify";
+dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(content) }}
+```
+
+**[MODIFY] Backend admin endpoints**
+- `bleach`-based server-side sanitizer strips `<script>`, `<iframe>`, `on*` attrs before persisting in `admin_prompts.py` and `admin_materials.py`.
+
+**New deps:** `bleach>=6.1.0` (backend), `dompurify` + `@types/dompurify` (frontend).
+
+---
+
+### S2-6 — Shared Redis Pub/Sub for SSE (Fan-out)
+
+**Why:** Current: 1 Redis pubsub client per SSE connection. At 10k users = 10k Redis connections → OOM.
+
+**[NEW] `apps/api/app/core/pubsub.py`**
+```python
+class PlanEventBus:
+    """Single Redis subscriber per process; fan-out to per-user asyncio queues."""
+    async def subscribe(self, user_id: str) -> asyncio.Queue: ...
+    async def unsubscribe(self, user_id: str, q: asyncio.Queue): ...
+    async def _run(self): ...  # background loop listening on Redis
+```
+
+**[MODIFY] `apps/api/app/main.py`**
+- Start `PlanEventBus._run()` as a FastAPI lifespan background task.
+
+**[MODIFY] `apps/api/app/api/v1/billing/routes/events.py`**
+- Replace per-connection `redis_pool.pubsub()` with `await bus.subscribe(user_id)`.
+
+**Result:** N SSE connections share 1 Redis subscriber per API process.
+
+---
+
+### S2-7 — Audio Transcoding webm → m4a (iOS Safari)
+
+**Why:** iOS Safari cannot play `.webm`. Users can’t review recordings on iPhone.
+
+**[NEW] `apps/api/app/workers/transcode_tasks.py`**
+```python
+@shared_task(queue="transcode")
+def transcode_audio_to_m4a(s3_key_webm: str) -> str:
+    # download webm → ffmpeg → upload m4a → return m4a key
+```
+
+**[MODIFY] `apps/api/app/workers/speaking_tasks.py` + `mock_exam_tasks.py`**
+- After scoring is enqueued, also enqueue `transcode_audio_to_m4a.delay(s3_key)`.
+
+**[MODIFY] `apps/api/app/models/attempt.py`**
+- Add `audio_m4a_s3_key: Mapped[str | None]` to `SpeakingAttempt`.
+
+**[NEW] `alembic/versions/0012_audio_m4a_key.py`**
+- Add `audio_m4a_s3_key VARCHAR NULL` to `speaking_attempts`.
+
+**[MODIFY] Report endpoint**
+- Return presigned URL for `.m4a` when available; fall back to `.webm`.
+
+**[MODIFY] `apps/api/Dockerfile`**
+- Add `RUN apt-get install -y ffmpeg` in the worker stage.
+
+---
+
+### S2-8 — Read Replica for History/Progress Queries
+
+**Why:** Heavy history + report queries share the same pool as writes, starving the write path at scale.
+
+**[MODIFY] `apps/api/app/core/deps.py`**
+- Add `get_read_db`: uses second `AsyncEngine` from `DATABASE_READ_URL` (falls back to primary if not set).
+
+**[MODIFY] Read-heavy routes:** `/history`, `/attempts/{id}/report`, `/attempts/{id}/status`, `/*/prompts`
+- Replace `get_db` with `get_read_db` dependency.
+
+**[MODIFY] `apps/api/app/core/config.py`**
+- Add `DATABASE_READ_URL: str = ""` (empty = use primary).
+
+> [!NOTE]
+> Actual read replica provisioning (RDS, Fly.io) is infrastructure work. Code change is non-breaking and backward-compatible.
+
+---
+
+### S2-9 — Per-User AI Cost Dashboard (Admin)
+
+**Why:** `ai_cost_log` table is already being written. Surface spend data in the admin panel.
+
+**[NEW] `apps/api/app/api/v1/admin/cost_report.py`**
+- `GET /admin/cost-report?from=YYYY-MM-DD&to=YYYY-MM-DD`
+- Returns: `{ total_usd, by_model, by_user, by_operation }`
+
+**[NEW] `apps/web/app/(admin)/cost-report/page.tsx`**
+- Table: User | Plan | Total tokens | Est. USD | Date range filter.
+- Bar chart: daily cost by model (Recharts).
+
+---
+
+### S2-10 — Admin Audit Panel Wiring Verification
+
+**Why:** `admin_audit_service.py` exists but it’s unclear every admin mutation calls it.
+
+**[AUDIT]** `grep -rn audit_service apps/api/app/api/v1/admin/` — find gaps.
+
+**[MODIFY]** Any missing audit call in: `admin_prompts.py`, `admin_materials.py`, `admin_users.py`.
+
+**[NEW] `apps/api/tests/test_admin_audit.py`**
+- Integration test: call each mutating admin endpoint → assert `admin_audit_log` row written.
+
+---
+
+### S2-11 — Staging Environment Scaffolding
+
+**[NEW] `apps/api/.env.staging.example`**
+```
+APP_ENV=staging
+DATABASE_URL=postgresql+asyncpg://...
+STRIPE_SECRET_KEY=sk_test_...
+CLERK_SECRET_KEY=sk_test_...
+SENTRY_DSN=https://...@sentry.io/...
+CORS_ORIGINS=["https://staging.celpippro.com"]
+```
+
+**[MODIFY] `.github/workflows/cd.yml`**
+- `deploy-staging` job: runs on `develop` branch merge.
+- `deploy-production` job: runs on `main` merge, requires `deploy-staging` success + manual approval gate.
+
+**[MODIFY] `apps/api/app/core/config.py`**
+- Validate `APP_ENV in ("development", "staging", "production")` at startup.
+
+---
+
+### S2-12 — Prompt Image Signed URL Caching
+
+**Why:** Every `GET /speaking/tasks` presigns every image URL — wasted crypto + round-trips.
+
+**[MODIFY] `apps/api/app/services/storage/presigner.py`**
+- Add `generate_presigned_get_cached(key, expires_in, redis)`: cache in Redis as `presign:{md5(key)}` with TTL = `expires_in - 5 min`.
+
+**[MODIFY] `apps/api/app/api/v1/speaking.py`**
+- Use cached presign in `_sign_prompt()`.
+
+---
+
+### S2-13 — Flower Auth + Production Hardening
+
+**[MODIFY] `docker-compose.yml`**
+- Add `--basic_auth=admin:${FLOWER_PASSWORD}` to Flower service command.
+
+**[NEW] `docs/ops.md`**
+- Document that Flower must be on an internal VPC endpoint, not publicly routable.
+
+---
+
+## 4-Week Execution Sequence
+
+```
+Week 1 (quick wins, zero new infra):
+  S2-5   XSS review + DOMPurify
+  S2-13  Flower auth
+  S2-12  Prompt image URL caching
+  S2-10  Admin audit wiring + tests
+
+Week 2 (billing + ops):
+  S2-2   Reconciliation cron
+  S2-9   AI cost dashboard
+  S2-3   Feature flags
+
+Week 3 (scalability + observability):
+  S2-1   Prometheus + OTel
+  S2-6   Shared Redis pubsub fan-out
+  S2-11  Staging environment + CD pipeline update
+
+Week 4 (new user-facing features):
+  S2-4   GDPR data export
+  S2-7   iOS audio transcoding
+  S2-8   Read replica wiring (code-only; infra separate)
+```
+
+---
+
+## New Files
+
+| File | Purpose |
+|------|---------|
+| `app/core/metrics.py` | Prometheus counters + OTel setup |
+| `app/core/pubsub.py` | Shared Redis pubsub fan-out bus |
+| `app/core/feature_flags.py` | Feature flag wrapper |
+| `app/workers/reconciliation_tasks.py` | Nightly Stripe↔DB reconciliation |
+| `app/workers/export_tasks.py` | GDPR data export zip |
+| `app/workers/transcode_tasks.py` | webm → m4a transcoding |
+| `app/api/v1/users/export.py` | Export endpoints |
+| `app/api/v1/feature_flags.py` | Feature flags endpoint |
+| `app/api/v1/admin/cost_report.py` | Admin AI cost report |
+| `alembic/versions/0011_reconciliation_log.py` | reconciliation_runs table |
+| `alembic/versions/0011_export_jobs.py` | export_jobs table |
+| `alembic/versions/0012_audio_m4a_key.py` | audio_m4a_s3_key column |
+| `.env.staging.example` | Staging env template |
+| `apps/web/lib/hooks/useFeatureFlags.ts` | Frontend feature flag hook |
+| `apps/web/app/(admin)/cost-report/page.tsx` | Admin cost dashboard |
+| `docs/ops.md` | Ops runbook |
+
+---
+
+## New Dependencies
+
+```
+# Backend (requirements.txt)
+prometheus-fastapi-instrumentator>=0.9.0
+opentelemetry-sdk>=1.24.0
+opentelemetry-instrumentation-fastapi>=0.45b0
+opentelemetry-exporter-otlp>=1.24.0
+bleach>=6.1.0
+UnleashClient>=5.2.0    # optional, only if Unleash chosen
+
+# Frontend (package.json)
+dompurify
+@types/dompurify
+```
+
+
+## Background
+
+The P0 and several P1 items from the original audit have already been implemented:
+billing idempotency, quota enforcement for mock exams, advisory locking, audio validation,
+essay prompt injection hardening, rate limiting, CORS tightening, GDPR deletion, and TOS accept endpoints.
+
+**What remains (from the "Still outstanding" list + audit items) is:**
+
+---
+
+## Remaining Items to Implement
+
+### P1-1 — Sentry + Structured Logging + Request IDs
+- Add `sentry-sdk[fastapi]` to the API; wire `SentryAsgiMiddleware` in `main.py`.
+- Add `X-Request-ID` middleware that generates/forwards a UUID per request and injects it into log records.
+- Replace `stdlib logging` with `structlog` JSON formatter so logs are machine-parseable in CloudWatch/Datadog.
+- The frontend should forward `X-Request-ID` in `api.ts` fetch wrapper for correlated tracing.
+
+### P1-2 — Subscription Table Semantics Refactor
+- The `Subscription` model has `current_period_end` and `canceled_at` columns that are never populated, and stores `payment_intent_id` in `stripe_subscription_id` (misleading for one-time payments).
+- **Decision**: Keep one-time payment model (no recurring). Add a migration to rename `stripe_subscription_id → stripe_payment_intent_id`, drop `current_period_end` / `canceled_at` columns (they are unused and confusing), and add a `payment_type: str` column (`"one_time"`).
+- Update `webhook.py` `_handle_checkout_completed` to write `stripe_payment_intent_id` and `payment_type`.
+- Update `_handle_charge_refunded` to look up by `stripe_payment_intent_id`.
+
+### P1-3 — Pipeline Creates Engine Per Task (P1 Scalability)
+- `speaking_pipeline.py:74` and `writing_pipeline.py:53` both call `create_async_engine(...)` inside the Celery task, creating a fresh connection pool per task.
+- Fix: move the engine to a **module-level cached factory** in each pipeline file using `functools.lru_cache`. The engine is created once per worker process, not once per task.
+- Same for `mock_exam_pipeline.py` and `writing_mock_pipeline.py`.
+
+### P1-8 — SSE Token in Query String (Logged by nginx/ALB)
+- `GET /billing/plan-events?token=<JWT>` exposes the Clerk JWT in access logs.
+- Fix: add a `POST /billing/sse-token` endpoint that issues a short-lived (60 s) opaque token stored in Redis (`sse_token:{uuid}` → user_id, TTL 60 s).
+- The SSE endpoint `GET /billing/plan-events?token=<sse_token>` looks up the Redis key to resolve the user, then discards the token.
+- Frontend `usePlanEvents.ts`: call `POST /billing/sse-token` first, then open EventSource with the opaque token.
+
+### P1-10 — CI/CD Pipeline (GitHub Actions)
+- Create `.github/workflows/ci.yml`: lint (`ruff`), type-check (`mypy`), tests (`pytest`), alembic heads check, build Docker image.
+- Create `.github/workflows/cd.yml`: on `main` merge, push image to registry (placeholder — user fills in registry secrets).
+
+### TOS Gate Modal on First Login (Frontend)
+- On first sign-in (or when `tos_accepted_at` is null/old), intercept at the main layout with a modal that:
+  - Shows T&C summary + link to `/terms`.
+  - Requires explicit checkbox acceptance.
+  - Calls `POST /api/v1/users/me/accept-tos` via `useAcceptTos()`.
+  - Blocks all navigation until accepted (modal is non-dismissable).
+- Create `TosGateModal.tsx` in `components/common/`.
+- Wire it into `app/(main)/layout.tsx` as a client component wrapper.
+
+### P1-4 — Failed Attempts Retry (Frontend UX)
+- The `status === "failed"` attempt already shows an error state. Add a **"Retry"** button on the report/status page that calls a new `POST /api/v1/attempts/{id}/retry` endpoint.
+- Backend: new route in `attempts.py` that resets status to `"pending"`, clears `error_message`, and re-enqueues the Celery task — **without** consuming quota.
+
+### Billing Page — Short-Poll Fallback After Stripe Redirect
+- The plan says: *"Add a short polling fallback (5s × 3) on the success page in case SSE is blocked by corp proxy."*
+- `SuccessHandler.tsx` already handles the toast. Augment it: after `success=true`, poll `GET /billing/status` every 5 s for up to 15 s (3 attempts) while plan remains `"starter"`, then stop.
+
+---
+
+## Proposed Changes
+
+### Backend — API
+
+#### [MODIFY] [main.py](file:///d:/Projects/CELPIP%20PRO/apps/api/app/main.py)
+- Add `SentryAsgiMiddleware` (conditional on `SENTRY_DSN` set).
+- Add `RequestIDMiddleware` (generates `X-Request-ID`, injects into log context).
+- Wire `structlog` processor in `logging.config`.
+
+#### [NEW] [apps/api/app/core/logging_config.py](file:///d:/Projects/CELPIP%20PRO/apps/api/app/core/logging_config.py)
+- `structlog` + stdlib bridge; JSON formatter; `request_id` context var.
+
+#### [NEW] [apps/api/app/core/middleware.py](file:///d:/Projects/CELPIP%20PRO/apps/api/app/core/middleware.py)
+- `RequestIDMiddleware`: reads or generates `X-Request-ID`, sets context var, adds header to response.
+- `SentryMiddleware` wiring helper.
+
+#### [NEW] [apps/api/app/api/v1/billing/routes/sse_token.py](file:///d:/Projects/CELPIP%20PRO/apps/api/app/api/v1/billing/routes/sse_token.py)
+- `POST /billing/sse-token`: mint a 60-second opaque token in Redis.
+
+#### [MODIFY] [events.py](file:///d:/Projects/CELPIP%20PRO/apps/api/app/api/v1/billing/routes/events.py)
+- Accept opaque SSE token; resolve via Redis key → user. Fall back gracefully if token expired.
+
+#### [NEW] Migration `0010_subscription_semantics.py`
+- Rename `stripe_subscription_id → stripe_payment_intent_id`.
+- Drop `current_period_end`, `canceled_at`.
+- Add `payment_type VARCHAR(32) DEFAULT 'one_time'`.
+
+#### [MODIFY] [subscription.py](file:///d:/Projects/CELPIP%20PRO/apps/api/app/models/subscription.py)
+- Reflect renamed/dropped columns.
+
+#### [MODIFY] [webhook.py](file:///d:/Projects/CELPIP%20PRO/apps/api/app/api/v1/billing/routes/webhook.py)
+- Write `stripe_payment_intent_id` and `payment_type`. Update refund handler lookup field.
+
+#### [MODIFY] [speaking_pipeline.py](file:///d:/Projects/CELPIP%20PRO/apps/api/app/services/ai/pipeline/speaking_pipeline.py)
+- Replace per-task `create_async_engine` with `lru_cache`-backed module-level factory.
+
+#### [MODIFY] [writing_pipeline.py](file:///d:/Projects/CELPIP%20PRO/apps/api/app/services/ai/pipeline/writing_pipeline.py)
+- Same engine caching fix.
+
+#### [MODIFY] [mock_exam_pipeline.py + writing_mock_pipeline.py](file:///d:/Projects/CELPIP%20PRO/apps/api/app/services/ai/pipeline/)
+- Same engine caching fix for all remaining pipeline files.
+
+#### [NEW] [apps/api/app/api/v1/attempts.py (retry endpoint)](file:///d:/Projects/CELPIP%20PRO/apps/api/app/api/v1/attempts.py)
+- `POST /attempts/{id}/retry`: reset status, re-enqueue, no quota charge.
+
+---
+
+### Frontend
+
+#### [NEW] [TosGateModal.tsx](file:///d:/Projects/CELPIP%20PRO/apps/web/components/common/TosGateModal.tsx)
+- Non-dismissable dialog; calls `useAcceptTos`; shows checkbox + link to `/terms`.
+
+#### [MODIFY] [layout.tsx (main)](file:///d:/Projects/CELPIP%20PRO/apps/web/app/(main)/layout.tsx)
+- Wrap children with a client component (`TosGateWrapper`) that reads `user.tos_accepted_at` and renders `TosGateModal` when needed.
+
+#### [MODIFY] [usePlanEvents.ts](file:///d:/Projects/CELPIP%20PRO/apps/web/lib/hooks/usePlanEvents.ts)
+- Mint SSE token via `POST /billing/sse-token` before opening EventSource.
+
+#### [MODIFY] [SuccessHandler.tsx](file:///d:/Projects/CELPIP%20PRO/apps/web/components/billing/SuccessHandler.tsx)
+- Add 5s × 3 polling fallback while `plan === "starter"` after redirect.
+
+#### [MODIFY] [api.ts](file:///d:/Projects/CELPIP%20PRO/apps/web/lib/api.ts)
+- Forward `X-Request-ID` from a client-side context or generate one per request.
+
+#### [NEW] CI/CD workflows
+- `.github/workflows/ci.yml` — lint, type-check, test, alembic check.
+- `.github/workflows/cd.yml` — Docker build + push (placeholder registry).
+
+---
+
+## Verification Plan
+
+### Automated
+- `pytest apps/api/` — existing test suite must still pass.
+- `alembic check` — confirms migration chain is clean.
+- `mypy apps/api/app/` — no new type errors.
+- `ruff check apps/api/` — no lint regressions.
+
+### Manual
+- After Stripe checkout success, observe plan badge updates <2s (SSE path) and within 20s (polling fallback).
+- First-login flow: TOS modal appears, cannot be dismissed, acceptance updates `tos_accepted_at`.
+- Worker logs show a single engine creation line per worker process (not per task).
+- `X-Request-ID` appears in both API response headers and structured log entries.
+
+---
+
+## Open Questions
+
+> [!IMPORTANT]
+> **Do you want to move to real Stripe Subscriptions (recurring)?** The current code and plan assumes one-time payments. Switching would require a much larger refactor of the webhook + subscription lifecycle. The migration above preserves one-time semantics — please confirm before I proceed.
+
+> [!NOTE]
+> **P1-11 (Staging environment)** involves infrastructure (separate Stripe/Clerk keys, DNS) — I'll create the config scaffolding but actual DNS and cloud provisioning is out of scope for code changes alone.
+
+> [!NOTE]
+> **P2 items** (Prometheus metrics, OTel tracing, Stripe↔DB reconciliation cron, iOS webm→m4a transcoding, read replica, feature flags) are NOT included in this plan. Confirm if you want any of those tackled in this pass.

@@ -12,6 +12,16 @@ from app.repositories.admin_material_repo import AdminMaterialRepo
 import app.services.admin_material_service as svc
 import app.services.admin_access_service as access_svc
 from app.api.v1._utils import to_dict
+from app.services.admin_audit_service import log_action
+from app.services.sanitizer import sanitize_dict
+
+
+_MATERIAL_RICH_KEYS = {"body_markdown"}
+_MATERIAL_PLAIN_KEYS = {"title", "summary"}
+
+
+def _clean_material_payload(data: dict) -> dict:
+    return sanitize_dict(data, rich_keys=_MATERIAL_RICH_KEYS, plain_keys=_MATERIAL_PLAIN_KEYS)
 
 router = APIRouter()
 Admin = Annotated[User, Depends(require_admin)]
@@ -64,7 +74,7 @@ async def list_materials(
 
 @router.post("/materials", status_code=201)
 async def create_material(body: MaterialIn, db: DB, admin: Admin) -> dict[str, Any]:
-    material = await svc.create_material(db, body.model_dump(exclude_none=True), admin.id)
+    material = await svc.create_material(db, _clean_material_payload(body.model_dump(exclude_none=True)), admin.id)
     await db.commit()
     await db.refresh(material)
     return to_dict(material)
@@ -87,7 +97,7 @@ async def update_material(
     material = await repo.get_by_id(material_id)
     if not material:
         raise HTTPException(404, "Material not found")
-    updated = await svc.update_material(db, material, body.model_dump(exclude_none=True), admin.id)
+    updated = await svc.update_material(db, material, _clean_material_payload(body.model_dump(exclude_none=True)), admin.id)
     await db.commit()
     await db.refresh(updated)
     return to_dict(updated)
@@ -135,5 +145,8 @@ async def set_access_rule(
     rule = await access_svc.upsert_rule(
         db, entity_type="learning_material", entity_id=material_id, **body.model_dump()
     )
+    await log_action(db, admin_user_id=admin.id, action_type="set_access_rule",
+                     entity_type="learning_material", entity_id=material_id,
+                     new_value=body.model_dump())
     await db.commit()
     return to_dict(rule)

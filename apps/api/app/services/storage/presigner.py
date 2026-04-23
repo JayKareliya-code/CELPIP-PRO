@@ -9,8 +9,10 @@ Public surface:
 """
 from __future__ import annotations
 
+import hashlib
 import logging
 from functools import lru_cache
+from typing import TYPE_CHECKING
 
 import boto3
 import httpx
@@ -18,7 +20,16 @@ from botocore.config import Config as BotoCoreConfig
 
 from app.core.config import settings
 
+if TYPE_CHECKING:
+    import redis.asyncio as aioredis
+
 logger = logging.getLogger(__name__)
+
+# Safety margin: cache for slightly less than the URL's lifetime so we never
+# hand out a near-expired URL to a client that may sit on it for a few seconds.
+_PRESIGN_CACHE_SAFETY_MARGIN_S = 300
+# Below this floor it isn't worth caching — and a negative TTL would be invalid.
+_PRESIGN_CACHE_MIN_TTL_S = 60
 
 
 @lru_cache(maxsize=1)
@@ -78,6 +89,47 @@ def generate_presigned_get(key: str, expires_in: int = 3600) -> str:
         Params={"Bucket": settings.S3_BUCKET_NAME, "Key": key},
         ExpiresIn=expires_in,
     )
+
+
+async def generate_presigned_get_cached(
+    key: str,
+    expires_in: int,
+    *,
+    redis: "aioredis.Redis",
+) -> str:
+    """Redis-cached variant of :func:`generate_presigned_get` (S2-12).
+
+    `GET /speaking/tasks` re-signs every prompt image on every request. The
+    presigning itself is local HMAC (cheap), but the per-request fan-out
+    inflates response time and CPU when the prompt list is long. Caching the
+    URL string for slightly less than its TTL lets repeated callers share one
+    signing pass.
+
+    On any Redis failure we silently fall back to direct presigning — image
+    delivery must never depend on Redis being healthy.
+    """
+    cache_ttl = expires_in - _PRESIGN_CACHE_SAFETY_MARGIN_S
+    if cache_ttl < _PRESIGN_CACHE_MIN_TTL_S:
+        return generate_presigned_get(key=key, expires_in=expires_in)
+
+    cache_key = f"presign:get:{expires_in}:{hashlib.md5(key.encode()).hexdigest()}"
+
+    try:
+        cached = await redis.get(cache_key)
+        if cached:
+            return cached
+    except Exception:
+        logger.debug("Redis GET failed for presign cache; falling back", exc_info=True)
+        return generate_presigned_get(key=key, expires_in=expires_in)
+
+    url = generate_presigned_get(key=key, expires_in=expires_in)
+
+    try:
+        await redis.set(cache_key, url, ex=cache_ttl)
+    except Exception:
+        logger.debug("Redis SET failed for presign cache; ignoring", exc_info=True)
+
+    return url
 
 
 def _generate_download_url(s3_key: str) -> str:

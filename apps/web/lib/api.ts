@@ -53,11 +53,27 @@ export function localDateHeader(): HeadersInit {
   return { "X-User-Date": `${yyyy}-${mm}-${dd}` };
 }
 
+/**
+ * Generate a short correlation ID for the request.
+ * Uses crypto.randomUUID() when available (all modern browsers + Node 19+);
+ * falls back to a simple timestamp+random string for older environments.
+ */
+function generateRequestId(): string {
+  if (typeof crypto !== "undefined" && typeof crypto.randomUUID === "function") {
+    return crypto.randomUUID();
+  }
+  return `${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
+}
+
 // ── Core Fetch Helper ─────────────────────────────────────────────────────────
 
 /**
  * Typed fetch wrapper. Automatically attaches JSON headers and base URL.
  * Throws ApiError on non-2xx responses.
+ *
+ * Every request carries:
+ *   X-Request-ID  — client-generated UUID correlated in backend structured logs
+ *   X-User-Date   — current local date for streak computation
  */
 export async function apiFetch<T>(
   path: string,
@@ -68,7 +84,8 @@ export async function apiFetch<T>(
   const response = await fetch(url, {
     ...options,
     headers: {
-      "Content-Type": "application/json",
+      "Content-Type":  "application/json",
+      "X-Request-ID":  generateRequestId(),
       ...localDateHeader(),
       ...(options.headers ?? {}),
     },
@@ -117,5 +134,13 @@ export const api = {
 
   delete<T>(path: string, init?: RequestInit): Promise<T> {
     return apiFetch<T>(path, { ...init, method: "DELETE" });
+  },
+
+  deleteWithBody<T>(path: string, body: unknown, init?: RequestInit): Promise<T> {
+    return apiFetch<T>(path, {
+      ...init,
+      method: "DELETE",
+      body: JSON.stringify(body),
+    });
   },
 };

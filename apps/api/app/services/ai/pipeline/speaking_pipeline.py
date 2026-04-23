@@ -27,6 +27,7 @@ from dataclasses import dataclass
 from uuid import UUID
 
 import sqlalchemy as sa
+from functools import lru_cache
 from sqlalchemy import update
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 
@@ -69,10 +70,28 @@ class PromptContext:
 
 # ── Session factory ───────────────────────────────────────────────────────────
 
+@lru_cache(maxsize=1)
+def _get_engine():
+    """Return the shared async engine for this worker process.
+
+    lru_cache(maxsize=1) ensures create_async_engine is called exactly once
+    per Celery worker process, not once per task.  This prevents the
+    connection-pool explosion that occurs at concurrency > ~50 tasks/min.
+    """
+    return create_async_engine(
+        settings.DATABASE_URL,
+        future=True,
+        pool_size=5,
+        max_overflow=5,
+        pool_pre_ping=True,   # detect stale connections after idle periods
+    )
+
+
 async def run_speaking_pipeline(attempt_id: str) -> None:
-    """Create a dedicated async session for this task's event loop and run the pipeline."""
-    engine = create_async_engine(settings.DATABASE_URL, future=True, pool_size=2)
-    session_maker = async_sessionmaker(engine, expire_on_commit=False, autoflush=False)
+    """Acquire a session from the process-wide engine and run the pipeline."""
+    session_maker = async_sessionmaker(
+        _get_engine(), expire_on_commit=False, autoflush=False
+    )
     async with session_maker() as db:
         try:
             await _pipeline(db, UUID(attempt_id))
@@ -80,8 +99,6 @@ async def run_speaking_pipeline(attempt_id: str) -> None:
         except Exception:
             await db.rollback()
             raise
-        finally:
-            await engine.dispose()
 
 
 # ── Orchestrator ──────────────────────────────────────────────────────────────

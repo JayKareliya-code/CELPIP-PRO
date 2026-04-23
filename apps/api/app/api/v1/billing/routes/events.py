@@ -4,11 +4,12 @@
 # Streams real-time plan-change notifications to the authenticated user's
 # browser tab over a persistent HTTP connection.
 #
-# Authentication flow:
-#   The EventSource browser API does not support custom request headers, so
-#   the Clerk JWT is passed via the ``?token=`` query parameter.
-#   The token travels only over HTTPS in production; we validate it identically
-#   to the standard ``get_current_user`` dependency.
+# Authentication flow (two-step — JWT never in URL):
+#   1. Client POSTs to /billing/sse-token with the Clerk JWT in the
+#      Authorization header → receives a 90 s opaque token.
+#   2. Client opens EventSource to /billing/plan-events?token=<opaque_token>.
+#      This endpoint looks up the opaque token in Redis to resolve the user.
+#      The full Clerk JWT never appears in any URL or access log.
 #
 # Pub/Sub flow:
 #   Stripe webhook → db.commit() → redis.publish("celpip:plan_updates:{uid}")
@@ -28,19 +29,21 @@ from __future__ import annotations
 
 import asyncio
 import logging
+import uuid
 
 from typing import Annotated, AsyncGenerator
-from fastapi import APIRouter, Depends, Query
+from fastapi import APIRouter, Depends, Query, HTTPException
 from fastapi.responses import StreamingResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.deps import get_db, get_redis_pool
+from app.models.user import User
 from app.api.v1.billing.constants import (
     PLAN_CHANNEL_PREFIX,
     SSE_KEEPALIVE_SECONDS,
     SSE_MAX_DURATION_SECONDS,
 )
-from app.api.v1.billing.helpers import resolve_user_from_token
+from app.api.v1.billing.routes.sse_token import SSE_TOKEN_PREFIX
 
 logger = logging.getLogger(__name__)
 router = APIRouter()
@@ -54,22 +57,61 @@ _SSE_HEADERS: dict[str, str] = {
 }
 
 
+# ── Token resolution ──────────────────────────────────────────────────────────
+
+async def _resolve_user_from_sse_token(
+    token: str,
+    db: AsyncSession,
+) -> User | None:
+    """Look up the opaque SSE token in Redis and return the User.
+
+    Returns None when:
+    - The token is not in Redis (expired or never existed).
+    - The stored user_id is not a valid UUID.
+    - The user is not found in the DB.
+
+    The token is single-use: it is deleted from Redis immediately after
+    resolution to prevent reuse past the 90 s TTL.
+    """
+    redis = get_redis_pool()
+    redis_key = f"{SSE_TOKEN_PREFIX}{token}"
+
+    # Atomic GET + DEL — consume token on first use.
+    # If another tab/request races here, only one wins; the other gets None.
+    user_id_str: str | None = await redis.getdel(redis_key)
+    if not user_id_str:
+        return None
+
+    try:
+        user_uuid = uuid.UUID(user_id_str)
+    except ValueError:
+        logger.warning("SSE token resolved to invalid UUID: %r", user_id_str)
+        return None
+
+    user = await db.get(User, user_uuid)
+    if user is None:
+        logger.warning("SSE token user not found in DB: %s", user_id_str)
+    return user
+
+
 # ── Route ─────────────────────────────────────────────────────────────────────
 
 
 @router.get("/billing/plan-events", include_in_schema=False)
 async def plan_events_stream(
-    token: Annotated[str, Query(description="Clerk JWT for SSE authentication")],
+    token: Annotated[str, Query(description="Short-lived opaque SSE token from POST /billing/sse-token")],
     db:    Annotated[AsyncSession, Depends(get_db)],
 ) -> StreamingResponse:
     """
     Server-Sent Events stream — delivers plan-change notifications in real time.
 
-    The client (``usePlanEvents`` hook) opens and manages this connection.
-    On receiving a ``plan-updated`` event the hook invalidates React Query
-    caches so the UI re-renders immediately with the new plan.
+    The client (``usePlanEvents`` hook) first calls POST /billing/sse-token
+    (with the full Clerk JWT in Authorization header), obtains a 90 s opaque
+    token, then opens this EventSource with that token in the URL.
+
+    This keeps the Clerk JWT out of access logs (nginx/ALB/CloudWatch) entirely.
     """
-    user = await resolve_user_from_token(token, db)
+    user = await _resolve_user_from_sse_token(token, db)
 
     if not user:
         return StreamingResponse(

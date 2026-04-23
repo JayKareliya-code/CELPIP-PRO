@@ -11,11 +11,12 @@ import logging
 import stripe
 
 from typing import Annotated
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Request
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.config import settings
 from app.core.deps import get_db
+from app.core.rate_limit import limiter
 from app.core.security import get_current_user
 from app.models.user import User
 from app.api.v1.billing.constants import PLAN_PRICE_IDS
@@ -27,7 +28,9 @@ router = APIRouter()
 
 
 @router.post("/billing/checkout", response_model=CheckoutResponse)
+@limiter.limit(settings.RATE_LIMIT_CHECKOUT_PER_MIN)
 async def create_checkout_session(
+    request: Request,
     body: CheckoutRequest,
     user: Annotated[User, Depends(get_current_user)],
     db:   Annotated[AsyncSession, Depends(get_db)],

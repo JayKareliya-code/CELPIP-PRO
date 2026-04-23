@@ -1,7 +1,10 @@
 // ─────────────────────────────────────────────────────────────────────────────
 // usePlanEvents.ts — Server-Sent Events hook for real-time plan upgrades
 //
-// Opens an authenticated SSE connection to GET /api/v1/billing/plan-events.
+// Two-step authentication (JWT never in URL):
+//   1. POST /billing/sse-token with Bearer JWT → receive 90 s opaque token.
+//   2. Open EventSource with ?token=<opaque_token> (safe in access logs).
+//
 // When the Stripe webhook fires and the backend upgrades the user's plan,
 // this hook receives a `plan-updated` event and immediately invalidates the
 // React Query caches for `current-user` and `billing-status`, causing every
@@ -19,11 +22,13 @@ import { useEffect, useRef } from "react";
 import { useAuth, useUser } from "@clerk/nextjs";
 import { useQueryClient }   from "@tanstack/react-query";
 import { billingStatusKey } from "@/lib/hooks/useBilling";
+import { API_V1, api, authHeaders } from "@/lib/api";
 
 const API_BASE_URL =
   process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
 
 const SSE_ENDPOINT = `${API_BASE_URL}/api/v1/billing/plan-events`;
+const SSE_TOKEN_ENDPOINT = `${API_V1}/billing/sse-token`;
 
 /** Reconnect delay after an unexpected connection drop (ms). */
 const RECONNECT_DELAY_MS = 3_000;
@@ -37,14 +42,9 @@ const MAX_RETRIES = 5;
  * Subscribes to the backend's SSE plan-events stream and invalidates React
  * Query caches when a `plan-updated` event is received.
  *
- * Design decisions:
- *  - Uses the native `EventSource` API for maximum browser compatibility.
- *  - The Clerk JWT is passed as `?token=` because EventSource does not
- *    support custom request headers. The token is short-lived and transmitted
- *    only over HTTPS in production.
- *  - Falls back gracefully when the user is not signed in (no-op).
- *  - Implements manual exponential-ish backoff so the server isn't hammered
- *    if the endpoint is temporarily unavailable.
+ * Security: mints a short-lived opaque token via POST /billing/sse-token
+ * before opening the EventSource, so the full Clerk JWT never appears in
+ * any URL or access log.
  */
 export function usePlanEvents(): void {
   const { getToken, isSignedIn } = useAuth();
@@ -64,6 +64,22 @@ export function usePlanEvents(): void {
 
     let cancelled = false; // guards against stale async closures
 
+    /** Mint a short-lived opaque SSE token via POST /billing/sse-token. */
+    async function mintSseToken(): Promise<string | null> {
+      try {
+        const token = await getToken();
+        const { token: sseToken } = await api.post<{ token: string; expires_in: number }>(
+          SSE_TOKEN_ENDPOINT,
+          {},
+          { headers: authHeaders(token) },
+        );
+        return sseToken;
+      } catch (err) {
+        console.warn("[usePlanEvents] Failed to mint SSE token:", err);
+        return null;
+      }
+    }
+
     /** Open (or re-open) the SSE connection. */
     async function connect(): Promise<void> {
       if (cancelled) return;
@@ -71,18 +87,15 @@ export function usePlanEvents(): void {
       // Tear down any existing connection before opening a new one.
       cleanup();
 
-      let token: string | null;
-      try {
-        token = await getToken();
-      } catch {
-        // Clerk not ready yet — retry after a delay.
+      // Step 1: mint the opaque SSE token (Clerk JWT in header, never in URL)
+      const sseToken = await mintSseToken();
+      if (!sseToken || cancelled) {
         scheduleReconnect();
         return;
       }
 
-      if (!token || cancelled) return;
-
-      const url = `${SSE_ENDPOINT}?token=${encodeURIComponent(token)}`;
+      // Step 2: open EventSource with the safe opaque token
+      const url = `${SSE_ENDPOINT}?token=${encodeURIComponent(sseToken)}`;
       const es  = new EventSource(url);
       esRef.current = es;
 
@@ -102,31 +115,26 @@ export function usePlanEvents(): void {
 
         // Immediately re-fetch both queries so the UI reflects the new plan
         // without the user needing to reload.
-        // Use userId-scoped keys so we only invalidate THIS user's cache.
         queryClient.invalidateQueries({ queryKey: ["current-user", userId] });
         queryClient.invalidateQueries({ queryKey: billingStatusKey(userId) });
       });
 
       // ── Event: server-side error ───────────────────────────────────────────
       es.addEventListener("error", (ev: Event) => {
-        // MessageEvent means the server sent an explicit `event: error` frame.
         if (ev instanceof MessageEvent) {
           try {
             const detail = JSON.parse(ev.data) as { detail: string };
             if (detail.detail === "Unauthorized") {
-              // Token expired or invalid — do NOT reconnect, let the user
-              // re-authenticate (Clerk will handle token refresh automatically
-              // on the next page interaction).
-              console.warn("[usePlanEvents] Unauthorized — not reconnecting.");
+              // Token expired or invalid — reconnect to mint a fresh token.
+              console.warn("[usePlanEvents] Unauthorized — reconnecting for fresh token.");
               cleanup();
+              scheduleReconnect();
               return;
             }
           } catch {
             // ignored
           }
         }
-
-        // Generic connection error or server restarted — reconnect with backoff.
         scheduleReconnect();
       });
 

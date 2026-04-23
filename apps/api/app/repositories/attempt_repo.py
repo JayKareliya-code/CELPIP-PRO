@@ -24,7 +24,7 @@ class AttemptRepository(BaseRepository[Attempt]):
             .where(Attempt.skill       == skill)
             .where(Attempt.task_number == task_number)
             .where(Attempt.is_mock_test == False)  # noqa: E712 – SQLAlchemy requires ==
-            .where(Attempt.status.not_in(["cancelled"]))
+            .where(Attempt.status.not_in(["cancelled", "failed"]))
         )
         return result.scalar_one()
 
@@ -41,7 +41,7 @@ class AttemptRepository(BaseRepository[Attempt]):
             .where(Attempt.user_id      == user_id)
             .where(Attempt.skill        == skill)
             .where(Attempt.is_mock_test == True)   # noqa: E712
-            .where(Attempt.status.not_in(["cancelled"]))
+            .where(Attempt.status.not_in(["cancelled", "failed"]))
             .where(Attempt.mock_exam_number.is_not(None))
         )
         return result.scalar_one() or 0
@@ -59,7 +59,7 @@ class AttemptRepository(BaseRepository[Attempt]):
             .where(Attempt.skill          == skill)
             .where(Attempt.is_mock_test   == True)   # noqa: E712
             .where(Attempt.mock_exam_number == mock_exam_number)
-            .where(Attempt.status.not_in(["cancelled"]))
+            .where(Attempt.status.not_in(["cancelled", "failed"]))
         )
         return (result.scalar_one() or 0) > 0
 
@@ -82,7 +82,7 @@ class AttemptRepository(BaseRepository[Attempt]):
             .where(Attempt.user_id     == user_id)
             .where(Attempt.skill       == skill)
             .where(Attempt.is_mock_test == False)  # noqa: E712
-            .where(Attempt.status.not_in(["cancelled"]))
+            .where(Attempt.status.not_in(["cancelled", "failed"]))
             .group_by(Attempt.task_number)
         )
         return {row[0]: row[1] for row in result.all()}
@@ -101,7 +101,7 @@ class AttemptRepository(BaseRepository[Attempt]):
             .where(Attempt.skill       == skill)
             .where(Attempt.task_number == task_number)
             .where(Attempt.is_mock_test == False)  # noqa: E712
-            .where(Attempt.status.not_in(["cancelled"]))
+            .where(Attempt.status.not_in(["cancelled", "failed"]))
             .distinct()
         )
         return {str(row[0]) for row in result.all()}

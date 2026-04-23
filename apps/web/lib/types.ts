@@ -120,6 +120,8 @@ export interface AppUser {
   streak_days: number;
   last_active_date: string | null;  // ISO 8601; null on first login
   target_band: number | null;       // 1–12; null until user sets it
+  tos_accepted_at?: string | null;  // ISO 8601; null until user accepts current T&C
+  tos_version?:     string | null;
 }
 
 /** Returned by GET /api/v1/users/me/quota */

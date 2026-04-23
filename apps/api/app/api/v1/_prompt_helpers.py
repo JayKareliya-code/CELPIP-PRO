@@ -2,7 +2,20 @@
 from urllib.parse import urlparse
 
 from app.core.config import settings
+from app.services.sanitizer import sanitize_rich_text, sanitize_plain_text
 from app.services.storage.presigner import generate_presigned_get
+
+
+_RICH_TEXT_KEYS = {
+    "prompt_text",
+    "sample_response_text",
+    "sample_response_band12",
+    "template_hint",
+    "intro_template",
+    "conclusion_template",
+}
+_PLAIN_TEXT_KEYS = {"title"}
+_LIST_OF_STRINGS_KEYS = {"vocabulary_tips", "connector_phrases", "idea_hints"}
 
 
 def extract_s3_key(stored_url: str) -> str:
@@ -75,6 +88,17 @@ def remap_prompt_data(data: dict) -> dict:
     if data.get("task_number") == 5:
         data["has_parts"] = True
         data["part_count"] = 2
+
+    # ── Sanitize admin-authored free-text fields (S2-5) ───────────────────────
+    for key in _RICH_TEXT_KEYS:
+        if key in data and isinstance(data[key], str):
+            data[key] = sanitize_rich_text(data[key])
+    for key in _PLAIN_TEXT_KEYS:
+        if key in data and isinstance(data[key], str):
+            data[key] = sanitize_plain_text(data[key])
+    for key in _LIST_OF_STRINGS_KEYS:
+        if key in data and isinstance(data[key], list):
+            data[key] = [sanitize_plain_text(v) if isinstance(v, str) else v for v in data[key]]
 
     return data
 

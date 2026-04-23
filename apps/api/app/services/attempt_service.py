@@ -5,12 +5,14 @@ from fastapi import HTTPException
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.core.config import settings
 from app.core.quota import enforce_quota
 from app.models.user import User
 from app.models.attempt import Attempt, SpeakingAttempt, WritingAttempt
 from app.repositories.attempt_repo import AttemptRepository
 from app.repositories.prompt_repo import SpeakingPromptRepository, WritingPromptRepository
 from app.schemas.attempt import StartAttemptResponse
+from app.services.storage_service import validate_uploaded_audio
 
 logger = logging.getLogger(__name__)
 
@@ -80,6 +82,14 @@ async def confirm_speaking_upload(
         raise HTTPException(status_code=404, detail="Attempt not found")
     if attempt.status != "pending":
         raise HTTPException(status_code=409, detail=f"Attempt already in status '{attempt.status}'")
+
+    # Ownership check — client must only reference its own upload path.
+    expected_prefix = f"{settings.S3_AUDIO_PREFIX}{user.id}/"
+    if not s3_key.startswith(expected_prefix):
+        raise HTTPException(status_code=400, detail="s3_key does not belong to this user.")
+
+    # Validate the uploaded audio before spending Celery + AI resources.
+    validate_uploaded_audio(s3_key)
 
     # Update the speaking child row
     row = (await db.execute(

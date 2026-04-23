@@ -1,0 +1,32 @@
+Backend
+Billing hardening
+
+New stripe_event.py model + migration 0009_stripe_events_and_tos.py — idempotency key on every webhook delivery.
+Rewrote webhook.py: idempotency guard, returns 500 on processing errors (Stripe retries), 400 on bad signatures, race-safe INSERT, added charge.refunded handler that downgrades to starter.
+config.py: in APP_ENV=production, now fails startup if STRIPE_WEBHOOK_SECRET is missing, CORS contains http:// or localhost, or AWS keys are placeholders.
+Quota + race fixes
+
+quota.py: per-user Postgres advisory lock (pg_advisory_xact_lock) serializes concurrent attempt creation; new enforce_mock_exam_session_quota helper wired into mock_exam.py (was completely unguarded — free-tier abuse vector closed).
+attempt_repo.py: failed attempts no longer count against quota.
+Audio + essay hardening
+
+storage_service.py: new validate_uploaded_audio does head_object + size window (1 KB–25 MB) + content-type check. Called from both speaking practice confirm-upload and mock-exam confirm.
+Session-ID UUID validation + s3_key ownership check in mock_exam (path-traversal + cross-user upload hijack closed).
+openai_provider.py: essay now fenced with <<<ESSAY … ESSAY>>>, system prompt hardened against injection, hard 8 000-char cap.
+Pydantic bounds on essay_text, s3_key, audio_duration_ms in attempt.py.
+Rate limiting
+
+slowapi wired in main.py + rate_limit.py, keyed per JWT, stored in Redis; limits applied to /attempts/start, /submit, /confirm-upload, /upload-url, /billing/checkout.
+CORS
+
+Explicit method/header whitelist in place of ["*"].
+GDPR / compliance
+
+New DELETE /users/me with {confirm:"DELETE"} guard: deletes Stripe customer, S3 audio (both prefixes), then cascades User row.
+POST /users/me/accept-tos + TOS_CURRENT_VERSION setting; tos_accepted_at/tos_version columns on users.
+Frontend
+useAccount.ts — useAcceptTos, useDeleteAccount (calls backend, then Clerk user.delete(), then signOut).
+account/page.tsx — danger-zone delete with typed DELETE confirmation.
+api.deleteWithBody helper + tos_* fields on AppUser.
+Still outstanding (P1/P2 from original plan)
+Sentry/structured logs, Subscription table semantics refactor (real Stripe subs vs one-time), get_db auto-commit refactor, SSE token-in-query fix, CI/CD + staging, metrics/tracing, Stripe↔DB reconciliation cron, iOS webm→m4a transcoding, TOS gate modal on first login.

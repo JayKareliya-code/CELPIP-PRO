@@ -1,5 +1,6 @@
 from dataclasses import dataclass
 from fastapi import HTTPException
+from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.models.user import User
 from app.repositories.attempt_repo import AttemptRepository
@@ -29,6 +30,21 @@ def get_plan_limits(plan: str, skill: str) -> PlanLimits:
         )
     return PlanLimits(per_task=None, mock_tests=0)
 
+
+async def _acquire_user_lock(db: AsyncSession, user_id) -> None:
+    """Take a Postgres transaction-scoped advisory lock keyed to this user.
+
+    Guarantees serialization of concurrent quota checks from the same user so
+    the ``count → insert`` pattern cannot race two attempts past the limit.
+    The lock is released automatically on COMMIT or ROLLBACK.
+    """
+    # hashtextextended returns a bigint deterministically derived from the string.
+    await db.execute(
+        text("SELECT pg_advisory_xact_lock(hashtextextended(:uid, 0))"),
+        {"uid": str(user_id)},
+    )
+
+
 async def enforce_quota(
     user: User,
     skill: str,
@@ -45,6 +61,10 @@ async def enforce_quota(
     - mock_exam_number is the test slot (1, 2, 3 …).
     - Re-doing a slot the user has already started is always allowed (redo = free).
     - Only NEW slots (never started before) count against the limit.
+
+    Concurrency:
+    - Acquires a per-user Postgres advisory lock so two concurrent attempts
+      cannot both pass the count check and insert past the limit.
     """
     repo = AttemptRepository(db)
     limits = get_plan_limits(user.plan, skill)
@@ -58,6 +78,13 @@ async def enforce_quota(
                 "upgrade_url": "/billing",
             },
         )
+
+    # Serialize against concurrent inserts for this user before we count.
+    try:
+        await _acquire_user_lock(db, user.id)
+    except Exception:
+        # Advisory locks are Postgres-only; under SQLite (tests) silently skip.
+        pass
 
     if is_mock_test and limits.mock_tests is not None:
         # ── Slot-aware redo check ─────────────────────────────────────────────
@@ -83,3 +110,58 @@ async def enforce_quota(
                 "used": used, "limit": limits.per_task,
             })
 
+
+async def enforce_mock_exam_session_quota(
+    *,
+    user: User,
+    session_id: str,
+    db: AsyncSession,
+) -> None:
+    """
+    Per-SESSION quota for speaking mock exams.
+
+    One CELPIP speaking mock = 8 audio recordings (tasks 1–8) sharing a
+    client-generated ``session_id``. This helper enforces that a new session
+    counts against the user's speaking-mock limit and that re-doing an
+    already-started session is always free.
+
+    Must be called inside the transaction that inserts the MockExamTaskAttempt.
+    """
+    from sqlalchemy import func, select
+    from app.models.mock_exam_attempt import MockExamTaskAttempt
+
+    limits = get_plan_limits(user.plan, "speaking")
+    if limits.mock_tests is None:
+        return
+
+    try:
+        await _acquire_user_lock(db, user.id)
+    except Exception:
+        pass
+
+    # Redo check — has the user already uploaded anything for this session?
+    row = await db.execute(
+        select(func.count(MockExamTaskAttempt.id))
+        .where(MockExamTaskAttempt.user_id == user.id)
+        .where(MockExamTaskAttempt.session_id == session_id)
+        .where(MockExamTaskAttempt.status.not_in(["cancelled"]))
+    )
+    if (row.scalar_one() or 0) > 0:
+        return  # existing session → redo/continuation, no quota charge
+
+    # New session — count distinct existing sessions.
+    row = await db.execute(
+        select(func.count(func.distinct(MockExamTaskAttempt.session_id)))
+        .where(MockExamTaskAttempt.user_id == user.id)
+        .where(MockExamTaskAttempt.status.not_in(["cancelled"]))
+    )
+    used = row.scalar_one() or 0
+    if used >= limits.mock_tests:
+        raise HTTPException(
+            status_code=402,
+            detail={
+                "code": "QUOTA_EXCEEDED",
+                "used": used,
+                "limit": limits.mock_tests,
+            },
+        )

@@ -1,12 +1,14 @@
 """Writing routes — tasks listing and attempt lifecycle."""
 import uuid
 from typing import Annotated
-from fastapi import APIRouter, Depends, Query
+from fastapi import APIRouter, Depends, Query, Request
 from pydantic import BaseModel
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.core.config import settings
 from app.core.deps import get_db
+from app.core.rate_limit import limiter
 from app.core.security import get_current_user
 from app.models.attempt import Attempt
 from app.models.score_report import ScoreReport
@@ -110,7 +112,9 @@ async def get_writing_task(
 
 
 @router.post("/attempts/start", response_model=StartAttemptResponse, status_code=201)
+@limiter.limit(settings.RATE_LIMIT_ATTEMPTS_PER_MIN)
 async def start_writing_attempt(
+    request: Request,
     body: StartWritingAttemptRequest,
     user: Annotated[User, Depends(get_current_user)],
     db: Annotated[AsyncSession, Depends(get_db)],
@@ -134,7 +138,9 @@ async def start_writing_attempt(
 
 
 @router.post("/attempts/{attempt_id}/submit", response_model=StartAttemptResponse)
+@limiter.limit(settings.RATE_LIMIT_SUBMISSIONS_PER_MIN)
 async def submit_writing(
+    request: Request,
     attempt_id: uuid.UUID,
     body: SubmitWritingRequest,
     user: Annotated[User, Depends(get_current_user)],

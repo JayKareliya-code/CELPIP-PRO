@@ -15,6 +15,10 @@ from app.models.feedback_report import FeedbackReport
 # Mock exam
 from app.models.mock_exam_attempt import MockExamTaskAttempt
 
+# Billing
+from app.models.stripe_event import StripeEvent
+from app.models.reconciliation_run import ReconciliationRun
+
 __all__ = [
     # Phase 1
     "Base", "User", "Subscription",
@@ -28,4 +32,8 @@ __all__ = [
     "FeedbackReport",
     # Mock exam
     "MockExamTaskAttempt",
+    # Billing
+    "StripeEvent",
+    # Ops
+    "ReconciliationRun",
 ]

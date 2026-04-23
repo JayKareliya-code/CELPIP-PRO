@@ -13,6 +13,8 @@ class UserMeResponse(BaseModel):
     streak_days:      int
     last_active_date: str | None
     target_band:      float | None
+    tos_accepted_at:  str | None = None
+    tos_version:      str | None = None
 
 class SetTargetScoreRequest(BaseModel):
     target_band: float = Field(ge=1, le=12)

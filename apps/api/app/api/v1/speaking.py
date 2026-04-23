@@ -2,10 +2,13 @@
 import uuid
 import logging
 from typing import Annotated
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Request
 from sqlalchemy.ext.asyncio import AsyncSession
+import redis.asyncio as aioredis
 
-from app.core.deps import get_db
+from app.core.config import settings
+from app.core.deps import get_db, get_redis_pool
+from app.core.rate_limit import limiter
 from app.core.security import get_current_user
 from app.models.user import User
 from app.models.prompt import SpeakingPrompt
@@ -18,20 +21,24 @@ from app.schemas.attempt import (
 )
 from app.services import prompt_service, attempt_service
 from app.services.storage_service import generate_upload_url
-from app.services.storage.presigner import generate_presigned_get
+from app.services.storage.presigner import generate_presigned_get_cached
 from app.api.v1._prompt_helpers import extract_s3_key as _extract_s3_key  # shared robust extractor
 
 logger = logging.getLogger(__name__)
 router = APIRouter()
 
-# ── S3 key extraction ─────────────────────────────────────────────────────────
+# Image presign TTL — long enough for an entire practice session, short enough
+# that a leaked URL doesn't grant indefinite access.
+_IMAGE_PRESIGN_TTL_S = 7200
 
 
-def _sign_option_image(image_url: str, prompt_id: str) -> str:
+async def _sign_option_image(image_url: str, prompt_id: str, redis: aioredis.Redis) -> str:
     """Return a presigned GET URL for an option card image, or the original on failure."""
     try:
         s3_key = _extract_s3_key(image_url)
-        return generate_presigned_get(key=s3_key, expires_in=7200)
+        return await generate_presigned_get_cached(
+            key=s3_key, expires_in=_IMAGE_PRESIGN_TTL_S, redis=redis,
+        )
     except Exception:
         logger.warning(
             "Could not presign option image for prompt %s — serving raw URL.", prompt_id
@@ -39,7 +46,7 @@ def _sign_option_image(image_url: str, prompt_id: str) -> str:
         return image_url
 
 
-def _sign_prompt(prompt: SpeakingPrompt) -> SpeakingTaskResponse:
+async def _sign_prompt(prompt: SpeakingPrompt, redis: aioredis.Redis) -> SpeakingTaskResponse:
     """
     Build a SpeakingTaskResponse, replacing every stored S3 URL with a
     2-hour presigned GET URL so the browser can display images without needing
@@ -58,7 +65,9 @@ def _sign_prompt(prompt: SpeakingPrompt) -> SpeakingTaskResponse:
     if data.context_image_url:
         try:
             s3_key = _extract_s3_key(data.context_image_url)
-            data.context_image_url = generate_presigned_get(key=s3_key, expires_in=7200)
+            data.context_image_url = await generate_presigned_get_cached(
+                key=s3_key, expires_in=_IMAGE_PRESIGN_TTL_S, redis=redis,
+            )
         except Exception:
             logger.warning(
                 "Could not generate presigned URL for prompt %s — serving raw URL. "
@@ -74,13 +83,15 @@ def _sign_prompt(prompt: SpeakingPrompt) -> SpeakingTaskResponse:
         for opt in data.choice_options:
             # After model_validate, opt is a ChoiceOption Pydantic object (not a dict)
             if opt.image_url:
-                opt = opt.model_copy(update={"image_url": _sign_option_image(opt.image_url, pid)})
+                signed_url = await _sign_option_image(opt.image_url, pid, redis)
+                opt = opt.model_copy(update={"image_url": signed_url})
             signed_options.append(opt)
         data.choice_options = signed_options
 
     if data.curveball_option and data.curveball_option.image_url:
+        signed_url = await _sign_option_image(data.curveball_option.image_url, pid, redis)
         data.curveball_option = data.curveball_option.model_copy(
-            update={"image_url": _sign_option_image(data.curveball_option.image_url, pid)}
+            update={"image_url": signed_url}
         )
 
     return data
@@ -92,10 +103,11 @@ def _sign_prompt(prompt: SpeakingPrompt) -> SpeakingTaskResponse:
 async def list_speaking_tasks(
     db: Annotated[AsyncSession, Depends(get_db)],
     _user: Annotated[User, Depends(get_current_user)],
+    redis: Annotated[aioredis.Redis, Depends(get_redis_pool)],
 ) -> list[SpeakingTaskResponse]:
     """Return all active speaking prompts with presigned image URLs."""
     prompts = await prompt_service.get_speaking_tasks(db)
-    return [_sign_prompt(p) for p in prompts]
+    return [await _sign_prompt(p, redis) for p in prompts]
 
 
 @router.get("/tasks/by-id/{prompt_id}", response_model=SpeakingTaskResponse)
@@ -103,10 +115,11 @@ async def get_speaking_task_by_id(
     prompt_id: uuid.UUID,
     db: Annotated[AsyncSession, Depends(get_db)],
     _user: Annotated[User, Depends(get_current_user)],
+    redis: Annotated[aioredis.Redis, Depends(get_redis_pool)],
 ) -> SpeakingTaskResponse:
     """Return a single active speaking prompt by UUID with a presigned image URL."""
     prompt = await prompt_service.get_speaking_prompt_by_id(db, prompt_id)
-    return _sign_prompt(prompt)
+    return await _sign_prompt(prompt, redis)
 
 
 @router.get("/tasks/{task_number}/attempted-prompts", response_model=list[str])
@@ -132,15 +145,18 @@ async def get_speaking_task(
     task_number: int,
     db: Annotated[AsyncSession, Depends(get_db)],
     _user: Annotated[User, Depends(get_current_user)],
+    redis: Annotated[aioredis.Redis, Depends(get_redis_pool)],
 ) -> SpeakingTaskResponse:
     """Return a single active speaking prompt by task number with a presigned image URL."""
     prompt = await prompt_service.get_speaking_task(db, task_number)
-    return _sign_prompt(prompt)
+    return await _sign_prompt(prompt, redis)
 
 
 
 @router.post("/attempts/start", response_model=StartAttemptResponse, status_code=201)
+@limiter.limit(settings.RATE_LIMIT_ATTEMPTS_PER_MIN)
 async def start_speaking_attempt(
+    request: Request,
     body: StartSpeakingAttemptRequest,
     user: Annotated[User, Depends(get_current_user)],
     db: Annotated[AsyncSession, Depends(get_db)],
@@ -159,7 +175,9 @@ async def start_speaking_attempt(
 
 
 @router.post("/attempts/{attempt_id}/upload-url", response_model=UploadUrlResponse)
+@limiter.limit(settings.RATE_LIMIT_SUBMISSIONS_PER_MIN)
 async def get_upload_url(
+    request: Request,
     attempt_id: uuid.UUID,
     user: Annotated[User, Depends(get_current_user)],
     db: Annotated[AsyncSession, Depends(get_db)],
@@ -183,7 +201,9 @@ async def get_upload_url(
 
 
 @router.post("/attempts/{attempt_id}/confirm-upload", response_model=StartAttemptResponse)
+@limiter.limit(settings.RATE_LIMIT_SUBMISSIONS_PER_MIN)
 async def confirm_upload(
+    request: Request,
     attempt_id: uuid.UUID,
     body: ConfirmUploadRequest,
     user: Annotated[User, Depends(get_current_user)],

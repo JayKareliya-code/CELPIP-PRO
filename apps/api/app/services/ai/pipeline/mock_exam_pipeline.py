@@ -24,6 +24,7 @@ from urllib.parse import urlparse
 from uuid import UUID
 
 import sqlalchemy as sa
+from functools import lru_cache
 from sqlalchemy import update
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 
@@ -40,10 +41,26 @@ IMAGE_TASKS = frozenset({3, 4, 8})
 
 # ── Session factory ────────────────────────────────────────────────────────────
 
+@lru_cache(maxsize=1)
+def _get_engine():
+    """Return the shared async engine for this worker process.
+
+    Created once per Celery worker — not once per scoring task.
+    """
+    return create_async_engine(
+        settings.DATABASE_URL,
+        future=True,
+        pool_size=5,
+        max_overflow=5,
+        pool_pre_ping=True,
+    )
+
+
 async def run_mock_exam_pipeline(attempt_id: str) -> None:
-    """Create a dedicated async engine + session for this worker's event loop."""
-    engine = create_async_engine(settings.DATABASE_URL, future=True, pool_size=2)
-    session_maker = async_sessionmaker(engine, expire_on_commit=False, autoflush=False)
+    """Acquire a session from the process-wide engine and run the pipeline."""
+    session_maker = async_sessionmaker(
+        _get_engine(), expire_on_commit=False, autoflush=False
+    )
     async with session_maker() as db:
         try:
             await _pipeline(db, UUID(attempt_id))
@@ -51,8 +68,6 @@ async def run_mock_exam_pipeline(attempt_id: str) -> None:
         except Exception:
             await db.rollback()
             raise
-        finally:
-            await engine.dispose()
 
 
 # ── Orchestrator ───────────────────────────────────────────────────────────────

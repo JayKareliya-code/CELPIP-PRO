@@ -1,6 +1,8 @@
 from uuid import UUID
 from datetime import datetime
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
+
+from app.core.config import settings
 
 class StartSpeakingAttemptRequest(BaseModel):
     """Body for POST /speaking/attempts/start."""
@@ -18,8 +20,8 @@ class UploadUrlResponse(BaseModel):
     expires_in_seconds: int
 
 class ConfirmUploadRequest(BaseModel):
-    s3_key:            str
-    audio_duration_ms: int
+    s3_key:            str = Field(..., max_length=512)
+    audio_duration_ms: int = Field(..., ge=0, le=30 * 60 * 1000)  # ≤30 min
 
 class StartWritingAttemptRequest(BaseModel):
     """Body for POST /writing/attempts/start."""
@@ -28,7 +30,11 @@ class StartWritingAttemptRequest(BaseModel):
     mock_exam_number: int | None = None   # test slot (1–N); required when is_mock_test=True
 
 class SubmitWritingRequest(BaseModel):
-    essay_text:     str
+    essay_text: str = Field(
+        ...,
+        min_length=settings.ESSAY_MIN_CHARS,
+        max_length=settings.ESSAY_MAX_CHARS,
+    )
     auto_submitted: bool = False
 
 class AttemptStatusResponse(BaseModel):

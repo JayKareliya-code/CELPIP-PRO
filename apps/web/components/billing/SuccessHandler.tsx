@@ -2,13 +2,21 @@
 
 // ─────────────────────────────────────────────────────────────────────────────
 // SuccessHandler.tsx — Handles ?success=true and ?canceled=true query params
-// on mount: invalidates react-query cache and shows a toast.
+//
+// After Stripe redirects back with ?success=true:
+//   1. Invalidates React Query billing + user caches immediately.
+//   2. Shows success toast.
+//   3. Polls GET /billing/status every 5 s for up to 15 s as a fallback for
+//      corporate proxies that block SSE connections.  Stops polling once the
+//      plan is no longer 'starter' (the SSE push has already landed) or after
+//      3 polls (15 s), whichever comes first.
 // ─────────────────────────────────────────────────────────────────────────────
 
-import { useEffect } from "react";
-import { useRouter } from "next/navigation";
-import { toast } from "sonner";
-import { useBilling } from "@/lib/hooks/useBilling";
+import { useEffect, useRef } from "react";
+import { useRouter }         from "next/navigation";
+import { toast }             from "sonner";
+import { useBilling }        from "@/lib/hooks/useBilling";
+import { useCurrentUser }    from "@/lib/hooks/useCurrentUser";
 
 interface SuccessHandlerProps {
   success:  boolean;
@@ -16,9 +24,52 @@ interface SuccessHandlerProps {
   plan?:    string;
 }
 
+const POLL_INTERVAL_MS = 5_000;
+const MAX_POLLS        = 3;
+
 export function SuccessHandler({ success, canceled, plan }: SuccessHandlerProps) {
-  const router                 = useRouter();
+  const router                  = useRouter();
   const { refreshAfterPayment } = useBilling();
+  const { user }                = useCurrentUser();
+
+  // Keep a ref to the polling interval so we can clear it
+  const pollTimer = useRef<ReturnType<typeof setInterval> | null>(null);
+  const pollCount = useRef(0);
+
+  // Clear polling when component unmounts
+  useEffect(() => {
+    return () => {
+      if (pollTimer.current) clearInterval(pollTimer.current);
+    };
+  }, []);
+
+  // Kick off polling when plan is still 'starter' after redirect
+  useEffect(() => {
+    if (!success) return;
+    if (!user) return;
+    // If SSE already delivered the update, plan won't be 'starter' — stop here.
+    if (user.plan !== "starter") {
+      if (pollTimer.current) clearInterval(pollTimer.current);
+      return;
+    }
+
+    if (pollTimer.current) return; // already polling
+
+    pollTimer.current = setInterval(() => {
+      pollCount.current += 1;
+      refreshAfterPayment();
+
+      if (pollCount.current >= MAX_POLLS) {
+        clearInterval(pollTimer.current!);
+        pollTimer.current = null;
+      }
+    }, POLL_INTERVAL_MS);
+
+    return () => {
+      if (pollTimer.current) clearInterval(pollTimer.current);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [success, user?.plan]);
 
   useEffect(() => {
     if (success) {

@@ -62,3 +62,55 @@ def generate_download_url(s3_key: str) -> str:
         ExpiresIn=settings.S3_DOWNLOAD_EXPIRY_SECS,
     )
     return url
+
+
+def validate_uploaded_audio(s3_key: str) -> dict:
+    """HEAD the uploaded audio object and assert it is present, within the
+    allowed size window, and has an audio content-type.
+
+    Raises ``fastapi.HTTPException`` with a descriptive message when the object
+    is missing, too small, too large, or the wrong type. Callers should invoke
+    this before enqueueing expensive AI scoring work.
+
+    Returns the HEAD response dict (ContentLength, ContentType, etc.).
+    """
+    from fastapi import HTTPException
+    from botocore.exceptions import ClientError
+
+    client = _get_s3_client()
+    try:
+        head = client.head_object(Bucket=settings.S3_BUCKET_NAME, Key=s3_key)
+    except ClientError as exc:
+        code = (exc.response or {}).get("Error", {}).get("Code") if hasattr(exc, "response") else ""
+        if code in ("404", "NoSuchKey", "NotFound"):
+            raise HTTPException(
+                status_code=400,
+                detail="Audio upload not found. Please re-upload and try again.",
+            )
+        raise HTTPException(
+            status_code=502, detail="Could not verify audio upload."
+        ) from exc
+
+    size = int(head.get("ContentLength") or 0)
+    if size < settings.AUDIO_MIN_BYTES:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Audio file is too small ({size} bytes).",
+        )
+    if size > settings.AUDIO_MAX_BYTES:
+        raise HTTPException(
+            status_code=413,
+            detail=(
+                f"Audio file exceeds the {settings.AUDIO_MAX_BYTES // (1024 * 1024)} MB "
+                "limit. Please record a shorter response."
+            ),
+        )
+
+    content_type = (head.get("ContentType") or "").lower()
+    if content_type and not content_type.startswith("audio/"):
+        raise HTTPException(
+            status_code=400,
+            detail=f"Unsupported audio content-type: {content_type!r}.",
+        )
+
+    return head
