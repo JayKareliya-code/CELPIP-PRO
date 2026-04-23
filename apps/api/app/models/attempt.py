@@ -45,6 +45,7 @@ class SpeakingAttempt(Base, TimestampMixin):
         ForeignKey("attempts.id", ondelete="CASCADE"), primary_key=True
     )
     audio_s3_key: Mapped[str | None] = mapped_column(Text)
+    audio_m4a_s3_key: Mapped[str | None] = mapped_column(Text)  # populated by transcode_audio_to_m4a (S2-7)
     audio_duration_ms: Mapped[int | None] = mapped_column(Integer)
     upload_completed: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
 

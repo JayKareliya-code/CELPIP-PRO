@@ -38,6 +38,8 @@ class MockExamTaskAttempt(Base, TimestampMixin):
     # ── Audio ────────────────────────────────────────────────────────────────
     audio_s3_key: Mapped[str] = mapped_column(Text, nullable=False)
     """S3 key: mock-tests/{user_id}/{session_id}/task-{N}.webm"""
+    audio_m4a_s3_key: Mapped[str | None] = mapped_column(Text)
+    """S3 key for transcoded .m4a file — populated by transcode_audio_to_m4a (S2-7)."""
     audio_duration_ms: Mapped[int | None] = mapped_column(Integer)
 
     # ── Scoring state ────────────────────────────────────────────────────────

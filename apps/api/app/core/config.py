@@ -108,6 +108,9 @@ class Settings(BaseSettings):
 
     # ── Database ──────────────────────────────────────────────────────────────
     DATABASE_URL: str = "postgresql+asyncpg://celpip:celpip@localhost:5432/celpip_dev"
+    # Read replica (S2-8): when set, read-only routes use this engine instead of primary.
+    # Leave empty to fall back to the primary (default — safe in dev/single-node).
+    DATABASE_READ_URL: str = ""
 
     # ── Redis / Celery ────────────────────────────────────────────────────────
     REDIS_URL: str = "redis://localhost:6379/0"

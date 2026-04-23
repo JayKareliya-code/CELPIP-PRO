@@ -11,7 +11,7 @@ from __future__ import annotations
 from fastapi import APIRouter, Depends, Query
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.core.deps import get_db
+from app.core.deps import get_read_db
 from app.core.security import get_current_user
 from app.models.user import User
 from app.schemas.history import PaginatedHistory, PaginatedMockExamHistory
@@ -29,7 +29,7 @@ async def list_history(
     ),
     page: int = Query(default=1, ge=1, description="Page number (1-indexed)."),
     limit: int = Query(default=10, ge=1, le=50, description="Results per page (max 50)."),
-    db: AsyncSession = Depends(get_db),
+    db: AsyncSession = Depends(get_read_db),
     current_user: User = Depends(get_current_user),
 ) -> PaginatedHistory:
     """
@@ -50,7 +50,7 @@ async def list_history(
 async def list_mock_exam_history(
     page:  int = Query(default=1, ge=1),
     limit: int = Query(default=10, ge=1, le=50),
-    db: AsyncSession = Depends(get_db),
+    db: AsyncSession = Depends(get_read_db),
     current_user: User = Depends(get_current_user),
 ) -> PaginatedMockExamHistory:
     """Return a paginated list of completed mock exam sessions, newest first."""

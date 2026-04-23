@@ -4,6 +4,7 @@ import redis.asyncio as aioredis
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 from app.core.config import settings
 
+# ── Primary (read-write) engine ───────────────────────────────────────────────
 engine = create_async_engine(
     settings.DATABASE_URL,
     echo=settings.DEBUG,
@@ -16,9 +17,25 @@ async_session_maker = async_sessionmaker(
     engine, expire_on_commit=False, autoflush=False
 )
 
+# ── Read-replica engine (S2-8) ────────────────────────────────────────────────
+# When DATABASE_READ_URL is set, read-only routes use this engine.
+# Falls back to the primary engine when empty (dev / single-node).
+_read_url = settings.DATABASE_READ_URL or settings.DATABASE_URL
+read_engine = create_async_engine(
+    _read_url,
+    echo=False,         # never echo read queries — too noisy
+    future=True,
+    pool_size=10,
+    max_overflow=20,
+)
+
+read_session_maker = async_sessionmaker(
+    read_engine, expire_on_commit=False, autoflush=False
+)
+
 
 async def get_db() -> AsyncGenerator[AsyncSession, None]:
-    """Yield a transactional database session; rolls back on exception."""
+    """Yield a transactional (read-write) database session; rolls back on exception."""
     async with async_session_maker() as session:
         try:
             yield session
@@ -26,6 +43,26 @@ async def get_db() -> AsyncGenerator[AsyncSession, None]:
         except Exception:
             await session.rollback()
             raise
+
+
+async def get_read_db() -> AsyncGenerator[AsyncSession, None]:
+    """
+    Yield a read-only database session from the read-replica engine.
+
+    Uses the replica URL when DATABASE_READ_URL is configured; falls back to
+    the primary engine in development / single-node deployments.
+
+    IMPORTANT: Never issue writes (INSERT/UPDATE/DELETE) through this session.
+    On Aurora/RDS read replicas, write attempts raise an error at the DB level.
+    """
+    async with read_session_maker() as session:
+        try:
+            yield session
+            # no commit — read sessions never write
+        except Exception:
+            await session.rollback()
+            raise
+
 
 
 @lru_cache(maxsize=1)

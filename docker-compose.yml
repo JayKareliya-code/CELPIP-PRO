@@ -95,7 +95,7 @@ services:
     command: >
       celery -A app.workers.celery_app worker
       --loglevel=info
-      -Q speaking,writing,mock_exam,writing_mock,reconciliation,celery
+      -Q speaking,writing,mock_exam,writing_mock,reconciliation,celery,export,transcode
       --concurrency=2
     env_file: ./apps/api/.env
     environment:
@@ -175,7 +175,7 @@ services:
       GF_USERS_ALLOW_SIGN_UP:     "false"
     volumes:
       - ./infra/grafana/datasources.yml:/etc/grafana/provisioning/datasources/datasources.yml:ro
-      - ./infra/grafana/dashboards.yml:/etc/grafana/provisioning/dashboards/dashboards.yml:ro
+      - ./infra/grafana/dashboards.yml:/etc/grafana/provisioning/dashboards-config/dashboards.yml:ro
       - ./infra/grafana/dashboards:/etc/grafana/provisioning/dashboards:ro
       - grafana_data:/var/lib/grafana
     depends_on:
