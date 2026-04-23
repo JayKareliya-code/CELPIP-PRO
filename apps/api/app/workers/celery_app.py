@@ -14,6 +14,8 @@ celery_app = Celery(
         "app.workers.writing_mock_tasks",   # isolated writing mock-exam scoring queue
         "app.workers.reconciliation_tasks", # nightly Stripe ↔ DB reconciliation
         "app.workers.metrics_polling",      # Prometheus queue-depth gauge sampler (S2-1)
+        "app.workers.export_tasks",         # GDPR data export (S2-4)
+        "app.workers.transcode_tasks",      # audio webm → m4a transcoding (S2-7)
     ],
 )
 
@@ -29,6 +31,8 @@ celery_app.conf.update(
         "app.workers.mock_exam_tasks.*":        {"queue": "mock_exam"},
         "app.workers.writing_mock_tasks.*":     {"queue": "writing_mock"},
         "app.workers.reconciliation_tasks.*":   {"queue": "reconciliation"},
+        "app.workers.export_tasks.*":           {"queue": "export"},
+        "app.workers.transcode_tasks.*":        {"queue": "transcode"},
     },
     task_acks_late=True,              # acknowledge after completion — safe retries
     task_reject_on_worker_lost=True,  # requeue if worker dies mid-task
