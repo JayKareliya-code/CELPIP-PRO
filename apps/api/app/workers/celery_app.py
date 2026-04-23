@@ -1,5 +1,6 @@
 """Celery application factory for CELPIP async workers."""
 from celery import Celery
+from celery.schedules import crontab
 from app.core.config import settings
 
 celery_app = Celery(
@@ -11,6 +12,7 @@ celery_app = Celery(
         "app.workers.writing_tasks",
         "app.workers.mock_exam_tasks",      # isolated speaking mock-exam scoring queue
         "app.workers.writing_mock_tasks",   # isolated writing mock-exam scoring queue
+        "app.workers.reconciliation_tasks", # nightly Stripe ↔ DB reconciliation
     ],
 )
 
@@ -21,14 +23,23 @@ celery_app.conf.update(
     timezone="UTC",
     enable_utc=True,
     task_routes={
-        "app.workers.speaking_tasks.*":      {"queue": "speaking"},
-        "app.workers.writing_tasks.*":       {"queue": "writing"},
-        "app.workers.mock_exam_tasks.*":     {"queue": "mock_exam"},
-        "app.workers.writing_mock_tasks.*":  {"queue": "writing_mock"},
+        "app.workers.speaking_tasks.*":         {"queue": "speaking"},
+        "app.workers.writing_tasks.*":          {"queue": "writing"},
+        "app.workers.mock_exam_tasks.*":        {"queue": "mock_exam"},
+        "app.workers.writing_mock_tasks.*":     {"queue": "writing_mock"},
+        "app.workers.reconciliation_tasks.*":   {"queue": "reconciliation"},
     },
     task_acks_late=True,              # acknowledge after completion — safe retries
     task_reject_on_worker_lost=True,  # requeue if worker dies mid-task
     worker_prefetch_multiplier=1,     # one task at a time per worker process
     task_track_started=True,
     result_expires=86_400,            # results expire after 24 h
+    beat_schedule={
+        # Run reconciliation every night at 02:00 UTC.
+        # The beat service must be running (see docker-compose.yml: celery-beat).
+        "reconcile-stripe-nightly": {
+            "task": "app.workers.reconciliation_tasks.reconcile_stripe_plans",
+            "schedule": crontab(hour=2, minute=0),
+        },
+    },
 )

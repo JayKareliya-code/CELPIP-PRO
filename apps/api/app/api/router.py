@@ -1,12 +1,14 @@
 from fastapi import APIRouter
 from app.api.v1 import health, users, speaking, writing, attempts, admin, mock_exam, billing
 from app.api.v1 import reports, history          # Phase 2
-from app.api.v1 import (                         # Phase CMS
+from app.api.v1 import (
     admin_prompts,
     admin_materials,
     admin_assets,
     admin_tags,
     admin_audit,
+    admin_cost_report,
+    feature_flags,
 )
 
 api_router = APIRouter()
@@ -34,3 +36,9 @@ api_router.include_router(mock_exam.router, tags=["Mock Exam"])
 
 # Billing — Stripe one-time payments
 api_router.include_router(billing.router, prefix="", tags=["Billing"])
+
+# Feature flags (authenticated, any user)
+api_router.include_router(feature_flags.router, tags=["Feature Flags"])
+
+# Admin — AI cost report
+api_router.include_router(admin_cost_report.router, prefix="/admin", tags=["Admin CMS — Cost Report"])

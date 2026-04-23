@@ -3,7 +3,7 @@
 
 import type { Metadata } from "next";
 import Link from "next/link";
-import { BookCopy, Sliders, Mic, PenLine, ArrowRight, BookOpen, Image, Tag, ClipboardList } from "lucide-react";
+import { BookCopy, Sliders, Mic, PenLine, ArrowRight, BookOpen, Image, Tag, ClipboardList, DollarSign } from "lucide-react";
 import { Navbar }       from "@/components/layout/Navbar";
 import { Footer }       from "@/components/layout/Footer";
 import { AdminSidebar } from "@/components/admin/AdminSidebar";
@@ -92,6 +92,7 @@ export default function AdminHomePage() {
               <QuickLink href={ROUTES.adminTags}        icon={Tag}         title="Tags"               description="Create and manage reusable content tags by topic, grammar, vocabulary, etc." />
               <QuickLink href={ROUTES.adminCalibration} icon={Sliders}     title="Calibration"        description="Manage reference samples used to calibrate AI scoring models." />
               <QuickLink href={ROUTES.adminAudit}       icon={ClipboardList} title="Audit Log"        description="Track every admin content change with timestamps and before/after snapshots." />
+              <QuickLink href={ROUTES.adminCostReport}  icon={DollarSign}  title="Cost Report"        description="View AI spend by user, model, and operation across any date range." />
             </div>
           </section>
         </main>

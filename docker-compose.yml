@@ -70,7 +70,7 @@ services:
     command: >
       celery -A app.workers.celery_app worker
       --loglevel=info
-      -Q speaking,writing,mock_exam,writing_mock
+      -Q speaking,writing,mock_exam,writing_mock,reconciliation
       --concurrency=2
     env_file: ./apps/api/.env
     environment:
@@ -82,16 +82,40 @@ services:
       - api
 
   # ── Flower (Celery Monitor) ───────────────────────────────────────────────────
+  # Basic auth required (S2-13). Set FLOWER_PASSWORD in .env.
+  # In production, bind to internal VPC only — never expose 5555 publicly.
   flower:
     build:
       context:    ./apps/api
       dockerfile: Dockerfile
-    command: celery -A app.workers.celery_app flower --port=5555
+    command: >
+      celery -A app.workers.celery_app flower
+      --port=5555
+      --basic_auth=admin:${FLOWER_PASSWORD:-changeme}
     ports:
       - "5555:5555"
     environment:
-      REDIS_URL: redis://redis:6379/0
+      REDIS_URL:       redis://redis:6379/0
+      FLOWER_PASSWORD: ${FLOWER_PASSWORD:-changeme}
     depends_on:
+      - redis
+
+  # ── Celery Beat (periodic scheduler) ──────────────────────────────────────
+  # Runs the Beat scheduler for cron-style tasks (e.g. nightly reconciliation).
+  # Only one Beat instance must run at a time — do not scale this service.
+  celery-beat:
+    build:
+      context:    ./apps/api
+      dockerfile: Dockerfile
+    command: celery -A app.workers.celery_app beat --loglevel=info
+    env_file: ./apps/api/.env
+    environment:
+      DATABASE_URL: postgresql+asyncpg://celpip:celpip@db:5432/celpip_dev
+      REDIS_URL:    redis://redis:6379/0
+    volumes:
+      - ./apps/api:/app
+    depends_on:
+      - db
       - redis
 
 volumes:

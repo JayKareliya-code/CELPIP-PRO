@@ -4,7 +4,7 @@ import Link            from "next/link";
 import { usePathname } from "next/navigation";
 import {
   LayoutDashboard, BookCopy, Sliders, Image, BookOpen,
-  Tag, ClipboardList, ChevronRight,
+  Tag, ClipboardList, ChevronRight, DollarSign,
 } from "lucide-react";
 import { cn }     from "@/lib/utils";
 import { ROUTES } from "@/lib/constants";
@@ -19,6 +19,7 @@ const NAV_ITEMS: NavItem[] = [
   { href: ROUTES.adminTags,        label: "Tags",        icon: Tag             },
   { href: ROUTES.adminCalibration, label: "Calibration", icon: Sliders         },
   { href: ROUTES.adminAudit,       label: "Audit Log",   icon: ClipboardList   },
+  { href: ROUTES.adminCostReport,  label: "Cost Report", icon: DollarSign      },
 ];
 
 /**
