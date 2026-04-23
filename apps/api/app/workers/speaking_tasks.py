@@ -6,7 +6,7 @@ This file is intentionally thin: receive task_id, run pipeline, handle retry.
 """
 from __future__ import annotations
 
-import asyncio
+from app.core.async_worker import run_async
 import logging
 from uuid import UUID
 
@@ -70,7 +70,7 @@ def score_speaking_attempt(self, attempt_id: str) -> dict:
     """Full AI scoring pipeline for a speaking attempt."""
     logger.info("Speaking pipeline started: attempt=%s", attempt_id)
     try:
-        asyncio.run(run_speaking_pipeline(attempt_id))
+        run_async(run_speaking_pipeline(attempt_id))
 
         # S2-7: enqueue audio transcoding (webm → m4a) for iOS compatibility.
         # Fire-and-forget — don't block the scoring result on transcoding.

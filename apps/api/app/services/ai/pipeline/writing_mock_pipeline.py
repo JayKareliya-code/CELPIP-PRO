@@ -27,8 +27,8 @@ import logging
 from uuid import UUID
 
 import sqlalchemy as sa
-from functools import lru_cache
 from sqlalchemy import update
+from functools import lru_cache
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 
 from app.core.config import settings
@@ -44,22 +44,24 @@ logger = logging.getLogger(__name__)
 def _get_engine():
     """Return the shared async engine for this worker process.
 
-    Created once per Celery worker — not once per scoring task.
+    @lru_cache is safe here because each Celery ForkPoolWorker runs on a
+    single persistent event loop (see app.core.async_worker).  The engine is
+    created once per worker process and reused across tasks, which avoids
+    both the per-task connection overhead and the 'Future attached to a
+    different loop' error that occurs when asyncio.run() creates a new loop.
     """
     return create_async_engine(
         settings.DATABASE_URL,
         future=True,
-        pool_size=5,
-        max_overflow=5,
+        pool_size=2,
+        max_overflow=2,
         pool_pre_ping=True,
     )
 
 
 async def run_writing_mock_pipeline(attempt_id: str) -> None:
     """Acquire a session from the process-wide engine and run the pipeline."""
-    session_maker = async_sessionmaker(
-        _get_engine(), expire_on_commit=False, autoflush=False
-    )
+    session_maker = async_sessionmaker(_get_engine(), expire_on_commit=False, autoflush=False)
     async with session_maker() as db:
         try:
             await _pipeline(db, UUID(attempt_id))

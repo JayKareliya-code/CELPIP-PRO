@@ -68,30 +68,28 @@ class PromptContext:
         )
 
 
-# ── Session factory ───────────────────────────────────────────────────────────
+# ── Session factory ─────────────────────────────────────────────────────────
 
 @lru_cache(maxsize=1)
 def _get_engine():
     """Return the shared async engine for this worker process.
 
-    lru_cache(maxsize=1) ensures create_async_engine is called exactly once
-    per Celery worker process, not once per task.  This prevents the
-    connection-pool explosion that occurs at concurrency > ~50 tasks/min.
+    @lru_cache is safe here because each Celery ForkPoolWorker runs on a
+    single persistent event loop (see app.core.async_worker).  The engine is
+    created once per worker process and reused across tasks.
     """
     return create_async_engine(
         settings.DATABASE_URL,
         future=True,
-        pool_size=5,
-        max_overflow=5,
-        pool_pre_ping=True,   # detect stale connections after idle periods
+        pool_size=2,
+        max_overflow=2,
+        pool_pre_ping=True,
     )
 
 
 async def run_speaking_pipeline(attempt_id: str) -> None:
     """Acquire a session from the process-wide engine and run the pipeline."""
-    session_maker = async_sessionmaker(
-        _get_engine(), expire_on_commit=False, autoflush=False
-    )
+    session_maker = async_sessionmaker(_get_engine(), expire_on_commit=False, autoflush=False)
     async with session_maker() as db:
         try:
             await _pipeline(db, UUID(attempt_id))

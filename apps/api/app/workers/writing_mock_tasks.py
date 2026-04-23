@@ -8,7 +8,7 @@ Queue: writing_mock  (separate from the 'writing' queue used for practice attemp
 """
 from __future__ import annotations
 
-import asyncio
+from app.core.async_worker import run_async
 import logging
 from uuid import UUID
 
@@ -63,7 +63,7 @@ def score_writing_mock_task(self, attempt_id: str) -> dict:
     """Estimate band score for a single writing mock exam task."""
     logger.info("Writing mock scoring started: attempt=%s", attempt_id)
     try:
-        asyncio.run(run_writing_mock_pipeline(attempt_id))
+        run_async(run_writing_mock_pipeline(attempt_id))
         return {"status": "complete", "attempt_id": attempt_id}
     except Exception as exc:
         logger.exception("Writing mock scoring failed: attempt=%s", attempt_id)

@@ -21,7 +21,7 @@ from typing import Annotated
 
 import boto3
 from botocore.config import Config as BotoCoreConfig
-from fastapi import APIRouter, Depends, HTTPException, Path, Request
+from fastapi import APIRouter, Depends, HTTPException, Path, Request, Response
 from pydantic import BaseModel, Field
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -129,6 +129,7 @@ async def list_mock_exam_prompts(
 @limiter.limit(settings.RATE_LIMIT_SUBMISSIONS_PER_MIN)
 async def get_mock_task_upload_url(
     request: Request,
+    response: Response,
     db:          DB,
     session_id:  str = Path(..., description="Exam session UUID from client"),
     task_number: int = Path(..., ge=1, le=8),
@@ -174,6 +175,7 @@ async def get_mock_task_upload_url(
 @limiter.limit(settings.RATE_LIMIT_SUBMISSIONS_PER_MIN)
 async def confirm_mock_task_upload(
     request: Request,
+    response: Response,
     db:          DB,
     session_id:  str = Path(...),
     task_number: int = Path(..., ge=1, le=8),

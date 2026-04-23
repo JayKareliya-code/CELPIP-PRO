@@ -6,7 +6,7 @@ This file is intentionally thin: receive task_id, run pipeline, handle retry.
 """
 from __future__ import annotations
 
-import asyncio
+from app.core.async_worker import run_async
 import logging
 from uuid import UUID
 
@@ -60,7 +60,7 @@ def score_writing_attempt(self, attempt_id: str) -> dict:
     """Full AI scoring pipeline for a writing attempt."""
     logger.info("Writing pipeline started: attempt=%s", attempt_id)
     try:
-        asyncio.run(run_writing_pipeline(attempt_id))
+        run_async(run_writing_pipeline(attempt_id))
         return {"status": "complete", "attempt_id": attempt_id}
     except Exception as exc:
         logger.exception("Writing pipeline failed: attempt=%s", attempt_id)

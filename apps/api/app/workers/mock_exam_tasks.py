@@ -8,7 +8,7 @@ Queue: mock_exam  (separate from the 'speaking' queue used for practice attempts
 """
 from __future__ import annotations
 
-import asyncio
+from app.core.async_worker import run_async
 import logging
 
 import sqlalchemy as sa
@@ -72,7 +72,7 @@ def score_mock_exam_task(self, attempt_id: str) -> dict:
     """Estimate band score for a single mock exam task recording."""
     logger.info("Mock exam scoring started: attempt=%s", attempt_id)
     try:
-        asyncio.run(run_mock_exam_pipeline(attempt_id))
+        run_async(run_mock_exam_pipeline(attempt_id))
 
         # S2-7: enqueue audio transcoding (webm → m4a) for iOS compatibility.
         s3_key = _get_audio_s3_key(attempt_id)

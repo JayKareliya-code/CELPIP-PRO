@@ -14,22 +14,22 @@
 
 import { useState } from "react";
 import { toast } from "sonner";
-import { PageWrapper }        from "@/components/layout/PageWrapper";
-import { CurrentPlanBanner }  from "@/components/billing/CurrentPlanBanner";
-import { PlanGrid }           from "@/components/billing/PlanGrid";
-import { BillingFAQ }         from "@/components/billing/BillingFAQ";
-import { SuccessHandler }     from "@/components/billing/SuccessHandler";
-import { useCurrentUser }     from "@/lib/hooks/useCurrentUser";
-import { useBilling }         from "@/lib/hooks/useBilling";
-import { usePlanEvents }      from "@/lib/hooks/usePlanEvents";
-import type { BillingPlan }   from "@/lib/hooks/useBilling";
-import type { UserPlan }      from "@/lib/types";
-import { Loader2 }            from "lucide-react";
+import { PageWrapper } from "@/components/layout/PageWrapper";
+import { CurrentPlanBanner } from "@/components/billing/CurrentPlanBanner";
+import { PlanGrid } from "@/components/billing/PlanGrid";
+import { BillingFAQ } from "@/components/billing/BillingFAQ";
+import { SuccessHandler } from "@/components/billing/SuccessHandler";
+import { useCurrentUser } from "@/lib/hooks/useCurrentUser";
+import { useBilling } from "@/lib/hooks/useBilling";
+import { usePlanEvents } from "@/lib/hooks/usePlanEvents";
+import type { BillingPlan } from "@/lib/hooks/useBilling";
+import type { UserPlan } from "@/lib/types";
+import { Loader2, CreditCard } from "lucide-react";
 
 // ── Props from server page ────────────────────────────────────────────────────
 
 interface BillingPageClientProps {
-  success:  boolean;
+  success: boolean;
   canceled: boolean;
   planParam?: string;
 }
@@ -86,15 +86,17 @@ export function BillingPageClient({ success, canceled, planParam }: BillingPageC
       {/* Handles ?success=true / ?canceled=true on mount */}
       <SuccessHandler success={success} canceled={canceled} plan={planParam} />
 
-      <div className="max-w-5xl mx-auto space-y-10">
+      <div className="space-y-6 animate-fade-in">
 
         {/* ── Page header ─────────────────────────────────────────────────── */}
         <div>
-          <p className="text-xs font-semibold text-primary uppercase tracking-widest mb-1">
-            Billing &amp; Plans
-          </p>
-          <h1 className="text-3xl font-bold text-foreground">Manage Your Plan</h1>
-          <p className="mt-2 text-subtle max-w-xl">
+          <div className="flex items-center gap-2 mb-1">
+            <CreditCard className="w-5 h-5 text-primary" />
+            <h1 className="text-2xl font-bold text-foreground tracking-tight">
+              Billing &amp; Plans
+            </h1>
+          </div>
+          <p className="text-sm text-subtle">
             One-time payments. No subscriptions, no renewals. Your attempts never expire.
           </p>
         </div>
@@ -109,7 +111,7 @@ export function BillingPageClient({ success, canceled, planParam }: BillingPageC
 
         {/* ── Section title ─────────────────────────────────────────────── */}
         <div>
-          <h2 className="text-xl font-bold text-foreground mb-1">Choose Your Plan</h2>
+          <h2 className="text-xl font-semibold text-foreground mb-1">Choose Your Plan</h2>
           <p className="text-sm text-subtle">
             Upgrade any time. Attempts from previous plans are preserved.
           </p>
@@ -126,8 +128,8 @@ export function BillingPageClient({ success, canceled, planParam }: BillingPageC
         <div className="rounded-2xl border border-border bg-surface/60 p-5 grid grid-cols-1 sm:grid-cols-3 gap-4 text-center">
           {[
             { label: "Payment Security", text: "Processed by Stripe — PCI DSS Level 1 certified." },
-            { label: "One-Time Only",     text: "No subscription. No renewal. Pay once, use forever." },
-            { label: "Never Expires",     text: "Your attempts stay in your account until you use them." },
+            { label: "One-Time Only", text: "No subscription. No renewal. Pay once, use forever." },
+            { label: "Never Expires", text: "Your attempts stay in your account until you use them." },
           ].map(({ label, text }) => (
             <div key={label} className="space-y-1">
               <p className="text-xs font-semibold text-primary uppercase tracking-wider">{label}</p>

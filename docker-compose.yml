@@ -71,6 +71,7 @@ services:
       DATABASE_URL:                postgresql+asyncpg://celpip:celpip@db:5432/celpip_dev
       REDIS_URL:                   redis://redis:6379/0
       OTEL_EXPORTER_OTLP_ENDPOINT: http://jaeger:4317
+      HOST_IP:                     ${HOST_IP:-192.168.0.14}
     volumes:
       - ./apps/api:/app
     depends_on:
@@ -101,6 +102,7 @@ services:
     environment:
       DATABASE_URL: postgresql+asyncpg://celpip:celpip@db:5432/celpip_dev
       REDIS_URL:    redis://redis:6379/0
+      HOST_IP:      ${HOST_IP:-192.168.0.14}
     volumes:
       - ./apps/api:/app
     depends_on:

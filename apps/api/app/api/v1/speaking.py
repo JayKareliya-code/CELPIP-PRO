@@ -2,7 +2,7 @@
 import uuid
 import logging
 from typing import Annotated
-from fastapi import APIRouter, Depends, HTTPException, Request
+from fastapi import APIRouter, Depends, HTTPException, Request, Response
 from sqlalchemy.ext.asyncio import AsyncSession
 import redis.asyncio as aioredis
 
@@ -157,6 +157,7 @@ async def get_speaking_task(
 @limiter.limit(settings.RATE_LIMIT_ATTEMPTS_PER_MIN)
 async def start_speaking_attempt(
     request: Request,
+    response: Response,
     body: StartSpeakingAttemptRequest,
     user: Annotated[User, Depends(get_current_user)],
     db: Annotated[AsyncSession, Depends(get_db)],
@@ -178,6 +179,7 @@ async def start_speaking_attempt(
 @limiter.limit(settings.RATE_LIMIT_SUBMISSIONS_PER_MIN)
 async def get_upload_url(
     request: Request,
+    response: Response,
     attempt_id: uuid.UUID,
     user: Annotated[User, Depends(get_current_user)],
     db: Annotated[AsyncSession, Depends(get_db)],
@@ -204,6 +206,7 @@ async def get_upload_url(
 @limiter.limit(settings.RATE_LIMIT_SUBMISSIONS_PER_MIN)
 async def confirm_upload(
     request: Request,
+    response: Response,
     attempt_id: uuid.UUID,
     body: ConfirmUploadRequest,
     user: Annotated[User, Depends(get_current_user)],

@@ -16,7 +16,7 @@ import uuid
 from datetime import datetime, timedelta, timezone
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, HTTPException, Request, status
+from fastapi import APIRouter, Depends, HTTPException, Request, Response, status
 from pydantic import BaseModel
 from sqlalchemy import select, func, text
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -72,6 +72,7 @@ async def _recent_export_count(db: AsyncSession, user_id: uuid.UUID) -> int:
 @limiter.limit("5/minute")   # global safety guard; the 1/24h logic is handled in-handler
 async def request_data_export(
     request: Request,
+    response: Response,
     user: Annotated[User, Depends(get_current_user)],
     db:   Annotated[AsyncSession, Depends(get_db)],
 ) -> ExportStartResponse:

@@ -11,7 +11,7 @@ import logging
 import stripe
 
 from typing import Annotated
-from fastapi import APIRouter, Depends, HTTPException, Request
+from fastapi import APIRouter, Depends, HTTPException, Request, Response
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.config import settings
@@ -31,6 +31,7 @@ router = APIRouter()
 @limiter.limit(settings.RATE_LIMIT_CHECKOUT_PER_MIN)
 async def create_checkout_session(
     request: Request,
+    response: Response,
     body: CheckoutRequest,
     user: Annotated[User, Depends(get_current_user)],
     db:   Annotated[AsyncSession, Depends(get_db)],
