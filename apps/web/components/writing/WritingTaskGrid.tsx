@@ -15,7 +15,12 @@ import { useMemo }          from "react";
 import { WritingTaskCard }  from "@/components/writing/WritingTaskCard";
 import type { WritingTask } from "@/lib/types";
 
-// ── Task descriptions (shown on cards) ────────────────────────────────────────
+// ── Task titles + descriptions (shown on cards) ───────────────────────────────
+
+const TASK_TITLES: Record<number, string> = {
+  1: "Task 1 — Email",
+  2: "Task 2 — Opinion Essay",
+};
 
 const TASK_DESCRIPTIONS: Record<number, string> = {
   1: "Write a formal or informal email responding to a situation. Match the tone to the context and fulfill all the required points.",
@@ -90,7 +95,7 @@ export function WritingTaskGrid({
           <WritingTaskCard
             key={taskNum}
             taskNumber={taskNum}
-            title={task?.title ?? `Task ${taskNum}`}
+            title={TASK_TITLES[taskNum] ?? `Task ${taskNum}`}
             taskType={task?.task_type ?? (taskNum === 1 ? "email" : "opinion_essay")}
             timeLimitSecs={task?.time_limit_seconds ?? (taskNum === 1 ? 1620 : 1800)}
             minWords={task?.min_words ?? 150}

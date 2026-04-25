@@ -6,7 +6,7 @@
 // Layout:
 //   • Header strip with module title + plan badge
 //   • Starter plan upgrade banner (when plan === "starter")
-//   • 3-col grid of SpeakingTaskCard components (Practice + Tasks 1–8)
+//   • 2-col grid of SpeakingTaskCard components (Practice + Tasks 1–8)
 //
 // Data:
 //   • tasks: fetched server-side (one row per task_number, or multiple prompts)
@@ -178,7 +178,7 @@ export function SpeakingModuleHome({ tasks }: SpeakingModuleHomeProps) {
       )}
 
       {/* ── Task grid ─────────────────────────────────────────────────────── */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         {taskNumbers.map((taskNum) => {
           const task = uniqueTasks.find((t) => t.task_number === taskNum);
           const promptCount = promptCountByTask[taskNum] ?? 0;

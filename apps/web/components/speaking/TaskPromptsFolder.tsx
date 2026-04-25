@@ -157,7 +157,7 @@ function PromptCard({
                       {diffCfg.label}
                     </span>
                     {isAlreadyAttempted && (
-                      <span className={cn(BADGE_BASE, "bg-indigo-900/30 text-indigo-400 border-indigo-700/40")}>
+                      <span className={cn(BADGE_BASE, "bg-amber-900/30 text-amber-400 border-amber-700/40")}>
                         Attempted
                       </span>
                     )}
@@ -213,7 +213,7 @@ function PromptCard({
                     {diffCfg.label}
                   </span>
                   {isAlreadyAttempted && (
-                    <span className={cn(BADGE_BASE, "bg-indigo-900/30 text-indigo-400 border-indigo-700/40")}>
+                    <span className={cn(BADGE_BASE, "bg-amber-900/30 text-amber-400 border-amber-700/40")}>
                       Attempted
                     </span>
                   )}
@@ -303,8 +303,8 @@ function CtaButton({
     <div className={cn(
       "w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg",
       "text-sm font-semibold transition-all duration-150",
-      "bg-indigo-600/70 group-hover:bg-indigo-600/90",
-      "text-indigo-100 border border-indigo-500/40 group-hover:border-indigo-400/60",
+      "bg-primary/80 group-hover:bg-primary",
+      "text-primary-foreground border border-amber-500/40 group-hover:border-amber-400/60",
     )}>
       <PlayCircle className="w-4 h-4" />
       Start Practice
@@ -412,11 +412,11 @@ export function TaskPromptsFolder({ taskNumber, prompts }: TaskPromptsFolderProp
             "w-12 h-12 rounded-xl border flex items-center justify-center shrink-0",
             isImageTask
               ? "bg-teal-600/20 border-teal-500/30"
-              : "bg-indigo-600/20 border-indigo-500/30"
+              : "bg-amber-600/20 border-amber-500/30"
           )}>
             {isImageTask
               ? <ImageIcon className="w-6 h-6 text-teal-400" />
-              : <Mic className="w-6 h-6 text-indigo-400" />}
+              : <Mic className="w-6 h-6 text-amber-400" />}
           </div>
           <div className="flex-1 min-w-0">
             <h1 className="text-2xl font-bold text-foreground">{taskLabel}</h1>
@@ -434,18 +434,18 @@ export function TaskPromptsFolder({ taskNumber, prompts }: TaskPromptsFolderProp
 
       {/* ── Locked banner for Starter ──────────────────────────────────────── */}
       {isStarter && (
-        <div className="rounded-xl border border-indigo-700/30 bg-indigo-950/40 p-4 flex items-center gap-4">
-          <Lock className="w-5 h-5 text-indigo-400 shrink-0" />
+        <div className="rounded-xl border border-amber-700/30 bg-amber-950/40 p-4 flex items-center gap-4">
+          <Lock className="w-5 h-5 text-amber-400 shrink-0" />
           <div className="flex-1">
-            <p className="text-sm font-semibold text-indigo-200">Task practice is locked</p>
-            <p className="text-xs text-indigo-300/70 mt-0.5">
+            <p className="text-sm font-semibold text-amber-200">Task practice is locked</p>
+            <p className="text-xs text-amber-300/70 mt-0.5">
               Your Starter plan includes 1 speaking mock test. Upgrade to Pro or Ultra to
               practice individual tasks with AI scoring.
             </p>
           </div>
           <Link
             href="/billing"
-            className="shrink-0 flex items-center gap-1.5 px-4 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-semibold transition-colors"
+            className="shrink-0 flex items-center gap-1.5 px-4 py-2 rounded-lg bg-primary hover:bg-primary/90 text-primary-foreground text-sm font-semibold transition-colors border border-amber-400/30"
           >
             Upgrade
           </Link>
@@ -478,7 +478,7 @@ export function TaskPromptsFolder({ taskNumber, prompts }: TaskPromptsFolderProp
                   "h-full rounded-full transition-all duration-500",
                   isBonusRetry
                     ? "bg-amber-500"
-                    : "bg-indigo-500"
+                    : "bg-primary"
                 )}
                 style={{
                   width: attemptsLimit

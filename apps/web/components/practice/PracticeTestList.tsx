@@ -3,8 +3,11 @@
 // ─────────────────────────────────────────────────────────────────────────────
 // PracticeTestList — /practice/[skill]
 //
-// Orchestrator only — no business logic or inline styles.
-// Composes: PracticeQuotaBar, PracticeTestSlot, PracticeUpgradeCTA.
+// Layout mirrors SpeakingModuleHome / WritingModuleHome:
+//   • Icon header + skill title + subtitle
+//   • Stats strip (non-starter)
+//   • Section label + slot list
+//   • Upgrade CTA when below Ultra limit
 // ─────────────────────────────────────────────────────────────────────────────
 
 import { useRouter }         from "next/navigation";
@@ -22,19 +25,13 @@ import type { AppUser, Skill }            from "@/lib/types";
 
 // ── Slot builder ──────────────────────────────────────────────────────────────
 
-/**
- * Derives the full list of PracticeTestSlotData from quota numbers.
- * Up to MAX_PRACTICE_SLOTS rows are always shown so users can see what
- * unlocking more tests would give them.
- */
 function buildSlots(limit: number, used: number): PracticeTestSlotData[] {
   return Array.from({ length: MAX_PRACTICE_SLOTS }, (_, i) => {
     const n = i + 1;
     return {
-      slotNumber:  n,
-      isUsed:      n <= used,
-      isLocked:    n > limit,
-      // TODO: populate estimatedBand and attemptId from history API (Phase 2)
+      slotNumber:    n,
+      isUsed:        n <= used,
+      isLocked:      n > limit,
       estimatedBand: undefined,
       attemptId:     undefined,
     };
@@ -53,7 +50,6 @@ function SkeletonSlot() {
 
 interface PracticeTestListProps {
   skill: Skill;
-  /** Server-fetched user — may be null on API failure. */
   user:  AppUser | null;
 }
 
@@ -65,9 +61,9 @@ export function PracticeTestList({ skill, user: serverUser }: PracticeTestListPr
 
   const { quota, isLoading } = usePracticeQuota(skill);
 
-  const meta       = SKILL_META[skill];
-  const Icon       = meta.icon;
-  const planLabel  = `${plan.charAt(0).toUpperCase() + plan.slice(1)} plan`;
+  const meta      = SKILL_META[skill];
+  const Icon      = meta.icon;
+  const planLabel = `${plan.charAt(0).toUpperCase() + plan.slice(1)} plan`;
 
   const slots       = quota ? buildSlots(quota.limit, quota.used) : [];
   const showUpgrade = quota ? quota.limit < MAX_PRACTICE_SLOTS : false;
@@ -76,8 +72,8 @@ export function PracticeTestList({ skill, user: serverUser }: PracticeTestListPr
     <div className="space-y-6">
       <BreadcrumbNav />
 
-      {/* ── Back button + header ─────────────────────────────────────────────── */}
-      <div className="space-y-3">
+      {/* ── Back + Header ─────────────────────────────────────────────────── */}
+      <div className="space-y-4">
         <button
           onClick={() => router.back()}
           className="flex items-center gap-1.5 text-sm text-subtle hover:text-foreground transition-colors"
@@ -86,21 +82,23 @@ export function PracticeTestList({ skill, user: serverUser }: PracticeTestListPr
           Back to Practice
         </button>
 
-        <div className="flex items-start gap-4">
-          <div className={cn(
-            "w-12 h-12 rounded-xl border flex items-center justify-center shrink-0",
-            meta.color.bg, meta.color.border, meta.color.text,
-          )}>
-            <Icon className="w-6 h-6" />
+        <div className="flex items-center gap-3">
+          <div
+            className={cn(
+              "w-11 h-11 rounded-xl border flex items-center justify-center shrink-0",
+              meta.color.bg, meta.color.border, meta.color.text,
+            )}
+          >
+            <Icon className="w-5 h-5" />
           </div>
           <div>
             <h1 className="text-2xl font-bold text-foreground">{meta.label}</h1>
-            <p className="text-sm text-subtle mt-1">{meta.description}</p>
+            <p className="text-sm text-subtle mt-0.5">{meta.description}</p>
           </div>
         </div>
       </div>
 
-      {/* ── Quota progress bar ───────────────────────────────────────────────── */}
+      {/* ── Quota progress bar ────────────────────────────────────────────── */}
       {isLoading || !quota ? (
         <div className="rounded-xl border border-white/[0.06] bg-surface h-14 animate-pulse" />
       ) : (
@@ -112,9 +110,9 @@ export function PracticeTestList({ skill, user: serverUser }: PracticeTestListPr
         />
       )}
 
-      {/* ── Test slot list ───────────────────────────────────────────────────── */}
+      {/* ── Test slot list ────────────────────────────────────────────────── */}
       <div className="space-y-3">
-        <h2 className="text-sm font-semibold uppercase tracking-wide text-foreground/70">
+        <h2 className="text-sm font-semibold uppercase tracking-wide text-foreground/50">
           Your practice tests
         </h2>
 

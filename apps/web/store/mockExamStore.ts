@@ -15,12 +15,12 @@
 //   • practiceSessionStore is NOT used — we keep state fully isolated.
 // ─────────────────────────────────────────────────────────────────────────────
 
-import { create }   from "zustand";
+import { create } from "zustand";
 import type {
   MockExamTask,
   MockExamPrompt,
   ChoiceOption,
-}                   from "@/lib/types";
+} from "@/lib/types";
 import { MOCK_EXAM_BREAK_SECONDS } from "@/lib/practice/config";
 
 // ── Phase type ────────────────────────────────────────────────────────────────
@@ -41,34 +41,34 @@ export type MockExamPhase =
 // ── State shape ───────────────────────────────────────────────────────────────
 
 export interface MockExamState {
-  phase:            MockExamPhase;
+  phase: MockExamPhase;
   /** All 8 task slots. Populated after LOADING. */
-  tasks:            MockExamTask[];
+  tasks: MockExamTask[];
   /** 0-based index of the currently active task. */
-  currentIndex:     number;
+  currentIndex: number;
   /** Stable UUID shared across all 8 tasks — used as the S3 folder key. */
-  examSessionId:    string;
+  examSessionId: string;
   /** Seconds remaining in the current task phase (PREP / RECORDING / RECORDING_PART2). */
-  secondsLeft:      number;
+  secondsLeft: number;
   /** Seconds remaining in the inter-task break. */
   breakSecondsLeft: number;
   /** Upload progress 0–100 for the current task. */
-  uploadProgress:   number;
+  uploadProgress: number;
   /** Raw audio blob from MediaRecorder for the current in-progress task. */
-  recordingBlob:    Blob | null;
+  recordingBlob: Blob | null;
   /** Task 5 user choice (cleared on each new task). */
-  selectedChoice:   ChoiceOption | null;
+  selectedChoice: ChoiceOption | null;
   /** Error message when phase === "ERROR". */
-  errorMessage:     string | null;
+  errorMessage: string | null;
 
   // ── Actions ──────────────────────────────────────────────────────────────
 
   /** Enter LOADING — called before the prompt fetch begins. */
-  beginLoading:     () => void;
+  beginLoading: () => void;
   /** Populate tasks and enter READY (intro screen). */
-  loadExam:         (prompts: MockExamPrompt[]) => void;
+  loadExam: (prompts: MockExamPrompt[]) => void;
   /** User pressed "Begin Exam" — enter TASK_COUNTDOWN for task 0. */
-  startExam:        () => void;
+  startExam: () => void;
   /** Advance within the current task's phase sequence. */
   advanceTaskPhase: () => void;
   /** Called by the hook when the current task upload finishes. */
@@ -76,9 +76,9 @@ export interface MockExamState {
   /** Called when the inter-task break countdown reaches zero. */
   advanceToNextTask: () => void;
   /** Decrement secondsLeft by 1 tick. */
-  tickTask:         () => void;
+  tickTask: () => void;
   /** Decrement breakSecondsLeft by 1 tick. */
-  tickBreak:        () => void;
+  tickBreak: () => void;
   /** Set upload progress for the current task (0–100). */
   setUploadProgress: (pct: number) => void;
   /** Store raw audio blob captured during recording. */
@@ -86,24 +86,24 @@ export interface MockExamState {
   /** Task 5: store the user's selection made during TASK_PREP. */
   setSelectedChoice: (choice: ChoiceOption) => void;
   /** Mark current task as error without stopping the whole exam. */
-  setTaskError:     () => void;
+  setTaskError: () => void;
   /** Store estimated band for a completed task (after scoring). */
-  setTaskBand:      (taskNumber: number, band: number) => void;
+  setTaskBand: (taskNumber: number, band: number) => void;
   /** Enter ERROR state with a message. */
-  setError:         (message: string) => void;
+  setError: (message: string) => void;
   /** Hard reset — use when navigating away. */
-  reset:            () => void;
+  reset: () => void;
 }
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
 function makeTaskSlots(prompts: MockExamPrompt[]): MockExamTask[] {
   return prompts.map((p) => ({
-    taskNumber:    p.task_number,
-    prompt:        p,
-    attemptId:     null,
+    taskNumber: p.task_number,
+    prompt: p,
+    attemptId: null,
     estimatedBand: null,
-    status:        "pending" as const,
+    status: "pending" as const,
   }));
 }
 
@@ -128,7 +128,7 @@ function nextTaskPhase(
 ): MockExamPhase {
   switch (current) {
     case "TASK_COUNTDOWN": return "TASK_PREP";
-    case "TASK_PREP":      return "TASK_RECORDING";
+    case "TASK_PREP": return "TASK_RECORDING";
     case "TASK_RECORDING":
       // Task 5: RECORDING is silent curveball-prep, so advance to PART2
       if (prompt.task_number === 5 && prompt.curveball_option) {
@@ -152,16 +152,16 @@ const INITIAL: Pick<
   | "breakSecondsLeft" | "uploadProgress" | "recordingBlob"
   | "selectedChoice" | "errorMessage"
 > = {
-  phase:            "IDLE",
-  tasks:            [],
-  currentIndex:     0,
-  examSessionId:    "",
-  secondsLeft:      0,
+  phase: "IDLE",
+  tasks: [],
+  currentIndex: 0,
+  examSessionId: "",
+  secondsLeft: 0,
   breakSecondsLeft: 0,
-  uploadProgress:   0,
-  recordingBlob:    null,
-  selectedChoice:   null,
-  errorMessage:     null,
+  uploadProgress: 0,
+  recordingBlob: null,
+  selectedChoice: null,
+  errorMessage: null,
 };
 
 // ── Store ─────────────────────────────────────────────────────────────────────
@@ -175,9 +175,9 @@ export const useMockExamStore = create<MockExamState>((set, get) => ({
 
   loadExam: (prompts) => {
     set({
-      tasks:        makeTaskSlots(prompts),
+      tasks: makeTaskSlots(prompts),
       currentIndex: 0,
-      phase:        "READY",
+      phase: "READY",
     });
   },
 
@@ -188,14 +188,24 @@ export const useMockExamStore = create<MockExamState>((set, get) => ({
       i === 0 ? { ...t, status: "active" as const } : t
     );
     set({
-      tasks:          updatedTasks,
-      currentIndex:   0,
-      phase:          "TASK_COUNTDOWN",
+      tasks: updatedTasks,
+      currentIndex: 0,
+      phase: "TASK_COUNTDOWN",
       // Generate a stable UUID for this exam session — shared by all 8 task uploads
-      examSessionId:  crypto.randomUUID(),
-      secondsLeft:    0,
+      examSessionId: (() => {
+        // crypto.randomUUID() requires a secure context (HTTPS / localhost).
+        // Fall back to a Math.random UUID for plain HTTP LAN dev access.
+        if (typeof crypto !== "undefined" && typeof crypto.randomUUID === "function") {
+          return crypto.randomUUID();
+        }
+        return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, (c) => {
+          const r = (Math.random() * 16) | 0;
+          return (c === "x" ? r : (r & 0x3) | 0x8).toString(16);
+        });
+      })(),
+      secondsLeft: 0,
       selectedChoice: null,
-      recordingBlob:  null,
+      recordingBlob: null,
     });
   },
 
@@ -223,12 +233,12 @@ export const useMockExamStore = create<MockExamState>((set, get) => ({
         : t
     );
     set({
-      tasks:            updated,
-      phase:            "INTER_TASK_BREAK",
+      tasks: updated,
+      phase: "INTER_TASK_BREAK",
       breakSecondsLeft: MOCK_EXAM_BREAK_SECONDS,
-      uploadProgress:   0,
-      recordingBlob:    null,
-      selectedChoice:   null,
+      uploadProgress: 0,
+      recordingBlob: null,
+      selectedChoice: null,
     });
   },
 
@@ -247,12 +257,12 @@ export const useMockExamStore = create<MockExamState>((set, get) => ({
     );
 
     set({
-      tasks:          updated,
-      currentIndex:   nextIndex,
-      phase:          "TASK_COUNTDOWN",
-      secondsLeft:    0,
+      tasks: updated,
+      currentIndex: nextIndex,
+      phase: "TASK_COUNTDOWN",
+      secondsLeft: 0,
       selectedChoice: null,
-      recordingBlob:  null,
+      recordingBlob: null,
     });
   },
 
@@ -283,10 +293,10 @@ export const useMockExamStore = create<MockExamState>((set, get) => ({
     );
     // Mark task as error but continue to the break/next task
     set({
-      tasks:            updated,
-      phase:            "INTER_TASK_BREAK",
+      tasks: updated,
+      phase: "INTER_TASK_BREAK",
       breakSecondsLeft: MOCK_EXAM_BREAK_SECONDS,
-      recordingBlob:    null,
+      recordingBlob: null,
     });
   },
 

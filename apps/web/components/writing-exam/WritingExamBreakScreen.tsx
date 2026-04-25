@@ -2,14 +2,11 @@
 
 // ─────────────────────────────────────────────────────────────────────────────
 // WritingExamBreakScreen — 30-second break shown between Task 1 and Task 2.
-//
-// Auto-advances when countdown reaches zero.
-// "Start Task 2 Now" button skips the countdown.
-// Mirrors InterTaskBreakScreen from the speaking exam.
 // ─────────────────────────────────────────────────────────────────────────────
 
 import { useState, useEffect } from "react";
-import { CheckCircle2, Clock, ArrowRight } from "lucide-react";
+import { CheckCircle2, ArrowRight } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 const BREAK_SECONDS = 30;
 
@@ -26,38 +23,81 @@ export function WritingExamBreakScreen({ onContinue }: WritingExamBreakScreenPro
     return () => clearTimeout(t);
   }, [secs, onContinue]);
 
-  const mm = String(Math.floor(secs / 60)).padStart(2, "0");
-  const ss = String(secs % 60).padStart(2, "0");
+  const pct = Math.max(0, secs / BREAK_SECONDS);
+  const radius = 52;
+  const circumference = 2 * Math.PI * radius;
+  const dashOffset = circumference * (1 - pct);
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-canvas gap-8 px-6 text-center">
+    <div className="min-h-screen bg-muted flex flex-col items-center justify-center px-4 py-12 gap-8">
 
-      <div className="w-16 h-16 rounded-2xl bg-emerald-600/15 border border-emerald-500/30 flex items-center justify-center">
-        <CheckCircle2 className="w-8 h-8 text-emerald-400" />
+      {/* Completed badge */}
+      <div className="flex flex-col items-center gap-3">
+        <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-emerald-900/40 border border-emerald-700/40">
+          <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+          <span className="text-sm font-semibold text-emerald-300">Task 1 Complete</span>
+        </div>
+        <p className="text-subtle text-sm">Take a breath — Task 2 begins shortly.</p>
       </div>
 
-      <div className="space-y-2">
-        <h1 className="text-2xl font-bold text-foreground">Task 1 Complete!</h1>
-        <p className="text-subtle text-sm max-w-sm">
-          Great work! Task 2 — Opinion Essay starts in{" "}
-          <span className="font-semibold text-foreground">{secs} second{secs !== 1 ? "s" : ""}</span>.
-        </p>
+      {/* SVG countdown ring */}
+      <div className="relative w-36 h-36 flex items-center justify-center">
+        <svg className="absolute inset-0 -rotate-90" width="144" height="144" viewBox="0 0 144 144">
+          <circle cx="72" cy="72" r={radius} fill="none" stroke="rgba(255,255,255,0.06)" strokeWidth="8" />
+          <circle
+            cx="72" cy="72" r={radius}
+            fill="none"
+            stroke={pct > 0.3 ? "#f59e0b" : "#ef4444"}
+            strokeWidth="8"
+            strokeLinecap="round"
+            strokeDasharray={circumference}
+            strokeDashoffset={dashOffset}
+            style={{ transition: "stroke-dashoffset 0.9s linear, stroke 0.5s" }}
+          />
+        </svg>
+        <div className="text-center z-10">
+          <p className="text-4xl font-bold tabular-nums text-foreground">{secs}</p>
+          <p className="text-xs text-subtle mt-0.5">seconds</p>
+        </div>
       </div>
 
-      {/* Countdown display */}
-      <div className="flex items-center gap-2 text-3xl font-mono font-bold text-emerald-400">
-        <Clock className="w-7 h-7" />
-        {mm}:{ss}
+      {/* Next task preview */}
+      <div className="w-full max-w-sm rounded-2xl border border-white/[0.08] bg-surface overflow-hidden">
+        <div className="px-4 pt-4 pb-3 border-b border-white/[0.06] flex items-center gap-3">
+          <div className="w-9 h-9 rounded-lg bg-amber-600/20 border border-amber-500/30 flex items-center justify-center shrink-0">
+            <span className="text-xs font-bold text-amber-400">2</span>
+          </div>
+          <div>
+            <p className="text-[10px] text-subtle uppercase tracking-wide font-semibold">Up next</p>
+            <p className="text-sm font-bold text-foreground">Task 2 — Opinion Essay</p>
+          </div>
+        </div>
+        <div className="px-4 py-3">
+          <p className="text-[10px] text-amber-400 font-semibold uppercase tracking-wide mb-1">Quick tip</p>
+          <p className="text-xs text-subtle leading-relaxed">
+            State your opinion clearly in the first sentence. Support with two strong reasons and finish with a brief conclusion.
+          </p>
+        </div>
       </div>
 
+      {/* Skip button */}
       <button
         onClick={onContinue}
-        className="flex items-center gap-2 px-6 py-3 rounded-xl
-                   bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-sm transition-colors"
+        className={cn(
+          "flex items-center gap-2 px-6 py-3 rounded-xl",
+          "bg-primary hover:bg-primary/90 active:scale-[0.98]",
+          "text-primary-foreground font-semibold text-sm",
+          "border border-amber-400/30",
+          "transition-all duration-150"
+        )}
       >
         Start Task 2 Now
         <ArrowRight className="w-4 h-4" />
       </button>
+
+      <p className="text-xs text-subtle/40 text-center">
+        Task 2 begins automatically when the timer reaches 0.
+      </p>
     </div>
   );
 }

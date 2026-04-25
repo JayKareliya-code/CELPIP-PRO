@@ -38,7 +38,7 @@ export function ExamProgressRail({ tasks, currentTaskIndex }: ExamProgressRailPr
       <div className="max-w-5xl mx-auto px-4 py-2.5 flex items-center gap-4">
 
         {/* Brand label */}
-        <span className="text-xs font-bold text-indigo-400 shrink-0 hidden sm:block">
+        <span className="text-xs font-bold text-amber-400 shrink-0 hidden sm:block">
           CELPIP Mock
         </span>
 
@@ -59,7 +59,7 @@ export function ExamProgressRail({ tasks, currentTaskIndex }: ExamProgressRailPr
                     : isError
                     ? "bg-red-900/40 border border-red-700/40 text-red-400"
                     : isActive
-                    ? "bg-indigo-600/30 border border-indigo-500/50 text-indigo-300 shadow-[0_0_8px_rgba(99,102,241,0.3)]"
+                    ? "bg-amber-600/30 border border-amber-500/50 text-amber-300 shadow-[0_0_8px_rgba(245,158,11,0.3)]"
                     : "bg-white/[0.04] border border-white/[0.08] text-white/30"
                 )}
               >
@@ -72,7 +72,7 @@ export function ExamProgressRail({ tasks, currentTaskIndex }: ExamProgressRailPr
                     className={cn(
                       "w-3 h-3 rounded-full",
                       isActive
-                        ? "bg-indigo-400 animate-pulse"
+                        ? "bg-amber-400 animate-pulse"
                         : "bg-white/20"
                     )}
                   />

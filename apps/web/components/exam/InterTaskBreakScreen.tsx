@@ -65,7 +65,7 @@ function CountdownRing({
         <circle
           cx="72" cy="72" r={radius}
           fill="none"
-          stroke={pct > 0.3 ? "#6366f1" : "#f59e0b"}
+          stroke={pct > 0.3 ? "#f59e0b" : "#ef4444"}
           strokeWidth="8"
           strokeLinecap="round"
           strokeDasharray={circumference}
@@ -120,8 +120,8 @@ export function InterTaskBreakScreen({
       {nextTask && (
         <div className="w-full max-w-sm rounded-2xl border border-white/[0.08] bg-surface overflow-hidden">
           <div className="px-4 pt-4 pb-3 border-b border-white/[0.06] flex items-center gap-3">
-            <div className="w-9 h-9 rounded-lg bg-indigo-600/20 border border-indigo-500/30 flex items-center justify-center shrink-0">
-              <Mic className="w-4 h-4 text-indigo-400" />
+            <div className="w-9 h-9 rounded-lg bg-amber-600/20 border border-amber-500/30 flex items-center justify-center shrink-0">
+              <Mic className="w-4 h-4 text-amber-400" />
             </div>
             <div>
               <p className="text-[10px] text-subtle uppercase tracking-wide font-semibold">Up next</p>
@@ -138,7 +138,7 @@ export function InterTaskBreakScreen({
           {/* Coaching tip */}
           {tip && (
             <div className="px-4 py-3">
-              <p className="text-[10px] text-indigo-400 font-semibold uppercase tracking-wide mb-1">
+              <p className="text-[10px] text-amber-400 font-semibold uppercase tracking-wide mb-1">
                 Quick tip
               </p>
               <p className="text-xs text-subtle leading-relaxed">{tip}</p>

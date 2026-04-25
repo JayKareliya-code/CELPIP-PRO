@@ -15,14 +15,16 @@ interface PageWrapperProps {
  */
 export function PageWrapper({ children, fullWidth = false, className }: PageWrapperProps) {
   return (
-    <main
-      className={cn(
-        "flex-1 py-5 px-4 sm:px-5",
-        !fullWidth && "w-full",
-        className
-      )}
-    >
-      {children}
+    <main className="flex-1 py-6">
+      <div
+        className={cn(
+          "mx-auto w-full px-4 sm:px-6 lg:px-8",
+          !fullWidth && "max-w-7xl",
+          className
+        )}
+      >
+        {children}
+      </div>
     </main>
   );
 }

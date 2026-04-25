@@ -1,37 +1,30 @@
 // ─────────────────────────────────────────────────────────────────────────────
-// PracticeSkillCard — Large card on /practice hub for one skill.
+// PracticeSkillCard — One card in the /practice hub grid.
 //
-// Progress design: full-card translucent background fill (same system as
-// SpeakingTaskCard and PracticeTestSlot). Ring and progress bar removed.
-//
-// Displays:
-//   • Skill icon (top-left) + used/limit chip (top-right)
-//   • Title + description
-//   • CTA footer with remaining count or locked state
+// Visual language mirrors SpeakingTaskCard / WritingTaskCard exactly:
+//   • Coloured gradient splash at the top
+//   • Full-card translucent progress fill (left→right) based on tests used
+//   • Badge row: skill label + tests chip (or lock icon)
+//   • Body: title + meta badges + description + prompt count + chevron
+//   • Locked overlay variant
 // ─────────────────────────────────────────────────────────────────────────────
 
-import Link           from "next/link";
-import { Lock, ChevronRight } from "lucide-react";
-import { cn }                from "@/lib/utils";
-import { SKILL_META }         from "@/lib/practice/config";
-import type { PracticeQuota } from "@/lib/practice/types";
+import Link                   from "next/link";
+import { Clock, Lock, ChevronRight, AlignLeft } from "lucide-react";
+import { cn }                  from "@/lib/utils";
+import { SKILL_META }          from "@/lib/practice/config";
+import type { PracticeQuota }  from "@/lib/practice/types";
 import type { Skill }          from "@/lib/types";
 
 interface PracticeSkillCardProps {
   skill:      Skill;
   quota:      PracticeQuota;
   planLabel:  string;
-  /** When true the card renders in a locked/dimmed state. */
   isLocked?:  boolean;
 }
 
-// Convert a hex colour to an rgba() string with the given opacity
-function hexFill(hex: string, alpha: number): string {
-  const r = parseInt(hex.slice(1, 3), 16);
-  const g = parseInt(hex.slice(3, 5), 16);
-  const b = parseInt(hex.slice(5, 7), 16);
-  return `rgba(${r},${g},${b},${alpha})`;
-}
+const BADGE_BASE =
+  "inline-flex items-center rounded-full border px-2 py-0.5 text-xs font-medium leading-none select-none";
 
 export function PracticeSkillCard({
   skill,
@@ -39,116 +32,131 @@ export function PracticeSkillCard({
   planLabel,
   isLocked = false,
 }: PracticeSkillCardProps) {
-  const meta      = SKILL_META[skill];
-  const Icon      = meta.icon;
-  const { color } = meta;
+  const meta = SKILL_META[skill];
+  const Icon = meta.icon;
 
-  // ── Fill percentage ───────────────────────────────────────────────────────
-  const fillPct   = quota.limit > 0 ? Math.min((quota.used / quota.limit) * 100, 100) : 0;
-  const fillColor = isLocked ? "rgba(255,255,255,0.04)" : hexFill(color.ring, 0.10);
+  // ── Progress fill ──────────────────────────────────────────────────────────
+  const fillPct   = isLocked ? 0 : quota.limit > 0
+    ? Math.min((quota.used / quota.limit) * 100, 100)
+    : 0;
+  const fillColor = fillPct >= 100
+    ? "rgba(245,158,11,0.12)"  // amber wash when all used (bonus-retry state)
+    : skill === "speaking"
+      ? "rgba(99,102,241,0.10)"
+      : "rgba(16,185,129,0.10)";
 
-  // ── Chip label ────────────────────────────────────────────────────────────
-  const chipLabel = isLocked
-    ? null
-    : `${quota.used}/${quota.limit}`;
+  // ── Attempts chip label ────────────────────────────────────────────────────
+  const chipLabel = isLocked ? null : `${quota.used}/${quota.limit}`;
 
   const inner = (
     <div
       className={cn(
-        "group relative rounded-2xl border border-white/[0.08] bg-surface overflow-hidden",
-        "flex flex-col transition-all duration-200",
+        "group relative rounded-xl border border-white/[0.08] bg-surface overflow-hidden",
+        "flex flex-col h-full min-h-[190px] transition-all duration-200",
         isLocked
           ? "opacity-60 cursor-not-allowed"
-          : "hover:border-white/[0.2] hover:shadow-[0_8px_32px_rgba(0,0,0,0.5)] cursor-pointer",
+          : "hover:border-white/[0.16] hover:shadow-[0_4px_24px_rgba(0,0,0,0.4)] cursor-pointer"
       )}
     >
-      {/* ── Layer 0: gradient accent splash (top) ─────────────────────────── */}
+      {/* ── Layer 0: gradient splash (top) ────────────────────────────────── */}
       <div
         className={cn(
-          "absolute inset-x-0 top-0 h-32 bg-gradient-to-b opacity-80 pointer-events-none",
-          color.grad,
+          "absolute inset-x-0 top-0 h-24 bg-gradient-to-b opacity-80 pointer-events-none",
+          meta.color.grad,
         )}
       />
 
-      {/* ── Layer 1: full-card background fill (progress) ─────────────────── */}
+      {/* ── Layer 1: full-card progress fill ──────────────────────────────── */}
       {fillPct > 0 && (
         <div
           aria-hidden="true"
           className="absolute inset-y-0 left-0 pointer-events-none transition-all duration-700 ease-out"
-          style={{ width: `${fillPct}%`, background: fillColor }}
-        />
+          style={{ width: `${fillPct}%` }}
+        >
+          <div className="absolute inset-0" style={{ background: fillColor }} />
+        </div>
       )}
 
       {/* ── Layer 2: card content ─────────────────────────────────────────── */}
 
-      {/* Top row: icon + usage chip */}
-      <div className="relative flex items-start justify-between gap-4 px-6 pt-6 pb-0">
-        <div className={cn(
-          "w-12 h-12 rounded-xl border flex items-center justify-center shrink-0",
-          color.bg, color.border, color.text,
-        )}>
-          <Icon className="w-6 h-6" />
+      {/* Top row: skill label + chip */}
+      <div className="relative flex items-start justify-between gap-2 px-4 pt-4 pb-0">
+        <div className="flex items-center gap-1.5 flex-wrap">
+          <span className={cn(BADGE_BASE, "bg-white/[0.07] text-white/50 border-white/[0.10]")}>
+            {skill === "speaking" ? "Speaking" : "Writing"}
+          </span>
+          <span className={cn(BADGE_BASE, meta.color.bg, meta.color.border, meta.color.text)}>
+            {skill === "speaking" ? "Mock Exam" : "Mock Exam"}
+          </span>
         </div>
 
-        {/* Usage chip (replaces the quota ring) */}
+        {/* Tests counter chip */}
         {chipLabel && (
-          <span className={cn(
-            "inline-flex items-center rounded-full border px-2.5 py-1",
-            "text-xs font-semibold tabular-nums select-none",
-            fillPct >= 100
-              ? "bg-white/[0.07] border-white/[0.12] text-white/50"
-              : "bg-white/[0.05] border-white/[0.09] text-white/40",
-          )}>
+          <span
+            className={cn(
+              "shrink-0 inline-flex items-center rounded-full border px-2.5 py-1",
+              "text-xs font-semibold tabular-nums select-none",
+              fillPct >= 100
+                ? "bg-amber-900/30 border-amber-700/40 text-amber-300"
+                : "bg-white/[0.06] border-white/[0.10] text-white/40",
+            )}
+          >
             {chipLabel}
           </span>
         )}
 
+        {/* Locked icon chip */}
         {isLocked && (
-          <div className="w-9 h-9 rounded-full bg-white/5 border border-white/10 flex items-center justify-center shrink-0">
-            <Lock className="w-4 h-4 text-white/25" />
+          <div className="w-8 h-8 rounded-full bg-white/5 border border-white/10 flex items-center justify-center shrink-0">
+            <Lock className="w-3.5 h-3.5 text-white/25" />
           </div>
         )}
       </div>
 
-      {/* Body */}
-      <div className="relative px-6 pt-4 pb-6 flex flex-col gap-3 flex-1">
-        <div>
-          <h2 className="text-xl font-bold text-foreground">{meta.label}</h2>
-          <p className="text-sm text-subtle mt-1 leading-relaxed">{meta.description}</p>
-        </div>
+      {/* Card body */}
+      <div className="relative px-4 pt-3 pb-4 flex flex-col gap-3 flex-1">
+        {/* Title */}
+        <h3 className="text-base font-semibold text-foreground leading-snug">{meta.label}</h3>
 
-        {/* Usage label row */}
-        <div className="flex items-center justify-between text-xs text-subtle">
-          <span>
-            {isLocked ? "Upgrade to access" : `${quota.used} of ${quota.limit} used`}
+        {/* Meta badges: duration + task count */}
+        <div className="flex items-center gap-3 text-xs text-subtle/80">
+          <span className="flex items-center gap-1">
+            <Clock className="w-3 h-3" />
+            {meta.duration}
           </span>
-          <span className="font-medium text-foreground/60">{planLabel}</span>
+          <span className="w-px h-3 bg-white/10 self-center" />
+          <span className="flex items-center gap-1">
+            <AlignLeft className="w-3 h-3" />
+            {meta.taskSummary}
+          </span>
         </div>
 
-        {/* Footer */}
-        <div className="mt-auto flex items-center justify-between pt-3 border-t border-white/[0.06]">
-          {isLocked ? (
-            <span className="flex items-center gap-1.5 text-sm text-white/30 font-medium">
-              <Lock className="w-3.5 h-3.5" />
-              Requires paid plan
-            </span>
-          ) : (
-            <span className="text-sm font-semibold text-foreground">
-              {quota.remaining > 0
-                ? `${quota.remaining} test${quota.remaining === 1 ? "" : "s"} remaining`
-                : "All tests used"}
-            </span>
-          )}
-          <ChevronRight className="w-5 h-5 text-white/30 group-hover:text-white/70 transition-colors" />
-        </div>
+        {/* Description */}
+        <p className="text-sm text-subtle leading-relaxed line-clamp-3">{meta.description}</p>
+
+        {/* Remaining count */}
+        {!isLocked && (
+          <p className="text-[11px] text-white/30">
+            {quota.remaining > 0
+              ? `${quota.remaining} test${quota.remaining === 1 ? "" : "s"} remaining`
+              : "All tests used · Bonus retries available"}
+          </p>
+        )}
+
+        {/* Chevron */}
+        {!isLocked && (
+          <div className="flex justify-end mt-auto pt-2 border-t border-white/[0.06]">
+            <ChevronRight className="w-4 h-4 text-white/30 group-hover:text-white/60 transition-colors" />
+          </div>
+        )}
       </div>
 
       {/* Locked overlay */}
       {isLocked && (
-        <div className="absolute inset-0 flex items-center justify-center">
-          <div className="px-4 py-2 rounded-full bg-black/40 border border-white/10 text-xs text-white/40 font-medium backdrop-blur-sm flex items-center gap-1.5">
+        <div className="absolute inset-0 bg-black/20 flex items-end justify-center pb-4 rounded-xl">
+          <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-black/50 border border-white/10 text-xs text-white/40 font-medium backdrop-blur-sm">
             <Lock className="w-3 h-3" />
-            Upgrade to unlock
+            Requires Pro or Ultra
           </div>
         </div>
       )}

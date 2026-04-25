@@ -35,8 +35,8 @@ function BandChip({ band }: { band: number | null }) {
   if (band === null) return null;
   const color =
     band >= 9   ? "text-emerald-400 border-emerald-700/40 bg-emerald-900/30" :
-    band >= 7   ? "text-indigo-400  border-indigo-700/40  bg-indigo-900/30"  :
-    band >= 5   ? "text-amber-400   border-amber-700/40   bg-amber-900/30"   :
+    band >= 7   ? "text-amber-400   border-amber-700/40   bg-amber-900/30"   :
+    band >= 5   ? "text-amber-300   border-amber-700/30   bg-amber-900/20"   :
                   "text-red-400     border-red-700/40     bg-red-900/30";
 
   return (
@@ -98,7 +98,7 @@ export function WritingExamCompleteScreen({ attempt1Id, attempt2Id }: WritingExa
   const avgBand = bands.length ? bands.reduce((a, b) => a + b, 0) / bands.length : null;
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-canvas gap-8 px-6 text-center">
+    <div className="flex flex-col items-center justify-center min-h-screen bg-muted gap-8 px-6 text-center">
 
       {/* Icon */}
       <div className="w-16 h-16 rounded-2xl bg-emerald-600/15 border border-emerald-500/30 flex items-center justify-center">
@@ -159,7 +159,7 @@ export function WritingExamCompleteScreen({ attempt1Id, attempt2Id }: WritingExa
                 {/* Link to full attempt report */}
                 <button
                   onClick={() => router.push(`/attempts/${r.attempt_id}/status`)}
-                  className="text-xs text-indigo-400 hover:text-indigo-300 transition-colors underline"
+                  className="text-xs text-amber-400 hover:text-amber-300 transition-colors underline"
                 >
                   Details
                 </button>
@@ -190,8 +190,8 @@ export function WritingExamCompleteScreen({ attempt1Id, attempt2Id }: WritingExa
         </button>
         <button
           onClick={() => router.push("/history")}
-          className="px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500
-                     text-white text-sm font-semibold transition-colors"
+          className="px-5 py-2.5 rounded-xl bg-primary hover:bg-primary/90
+                     text-primary-foreground text-sm font-semibold transition-colors border border-amber-400/30"
         >
           View History
         </button>

@@ -135,7 +135,7 @@ export function MockExamShell() {
           <p className="text-sm text-subtle max-w-xs">{promptsError.message}</p>
           <button
             onClick={() => window.location.reload()}
-            className="mt-2 px-5 py-2.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-semibold"
+            className="mt-2 px-5 py-2.5 rounded-lg bg-primary hover:bg-primary/90 text-primary-foreground text-sm font-semibold transition-colors"
           >
             Try again
           </button>
@@ -269,7 +269,7 @@ export function MockExamShell() {
           </p>
           <button
             onClick={() => window.location.href = "/practice/speaking"}
-            className="mt-2 px-5 py-2.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-semibold"
+            className="mt-2 px-5 py-2.5 rounded-lg bg-primary hover:bg-primary/90 text-primary-foreground text-sm font-semibold transition-colors"
           >
             Back to Practice
           </button>

@@ -120,7 +120,7 @@ export function ExamCompleteScreen({ tasks, sessionId }: ExamCompleteScreenProps
                 {/* Band */}
                 <div className="text-right shrink-0">
                   {task.estimatedBand != null ? (
-                    <span className="text-lg font-bold text-indigo-400 tabular-nums">
+                    <span className="text-lg font-bold text-amber-400 tabular-nums">
                       {task.estimatedBand}
                     </span>
                   ) : isError ? (
@@ -155,10 +155,10 @@ export function ExamCompleteScreen({ tasks, sessionId }: ExamCompleteScreenProps
             id="exam-complete-dashboard-btn"
             className={cn(
               "flex-1 flex items-center justify-center gap-2 px-5 py-3.5 rounded-xl",
-              "bg-indigo-600 hover:bg-indigo-500 active:scale-[0.98]",
-              "text-white font-semibold text-sm",
-              "border border-indigo-400/30",
-              "shadow-lg shadow-indigo-900/30",
+              "bg-primary hover:bg-primary/90 active:scale-[0.98]",
+              "text-primary-foreground font-semibold text-sm",
+              "border border-amber-400/30",
+              "shadow-lg shadow-amber-900/30 btn-glow",
               "transition-all duration-150"
             )}
           >
