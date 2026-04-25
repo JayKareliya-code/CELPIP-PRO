@@ -1,6 +1,7 @@
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, Request
+from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 from slowapi import Limiter, _rate_limit_exceeded_handler
 from slowapi.errors import RateLimitExceeded
@@ -109,6 +110,28 @@ def create_app() -> FastAPI:
     )
 
     app.include_router(api_router, prefix=settings.API_V1_PREFIX)
+
+    # ── Global 500 handler: re-attach CORS headers so the browser can read the
+    # error body instead of surfacing a misleading "No Access-Control-Allow-Origin"
+    # message. FastAPI's CORSMiddleware doesn't add headers to unhandled exceptions.
+    import logging as _logging
+    _err_log = _logging.getLogger("app.unhandled")
+
+    @app.exception_handler(Exception)
+    async def _unhandled_exception_handler(request: Request, exc: Exception):
+        _err_log.exception("Unhandled exception on %s %s", request.method, request.url.path)
+        origin = request.headers.get("origin", "")
+        allowed = settings.CORS_ORIGINS
+        headers = {}
+        if origin in allowed or "*" in allowed:
+            headers["Access-Control-Allow-Origin"] = origin
+            headers["Access-Control-Allow-Credentials"] = "true"
+        return JSONResponse(
+            status_code=500,
+            content={"detail": "Internal server error", "error": str(exc)},
+            headers=headers,
+        )
+
     return app
 
 

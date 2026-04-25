@@ -20,6 +20,7 @@ import uuid
 from typing import Annotated
 
 import boto3
+import redis.asyncio as aioredis
 from botocore.config import Config as BotoCoreConfig
 from fastapi import APIRouter, Depends, HTTPException, Path, Request, Response
 from pydantic import BaseModel, Field
@@ -27,7 +28,7 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.config import settings
-from app.core.deps import get_db
+from app.core.deps import get_db, get_redis_pool
 from app.core.quota import enforce_mock_exam_session_quota
 from app.core.rate_limit import limiter
 from app.core.security import get_current_user
@@ -116,10 +117,11 @@ def _get_s3_client():
 async def list_mock_exam_prompts(
     db: DB,
     _user: CurrentUser,
+    redis: Annotated[aioredis.Redis, Depends(get_redis_pool)],
 ) -> list[SpeakingTaskResponse]:
     """Return all published+active speaking prompts tagged 'mock', in task order."""
     prompts = await prompt_service.get_mock_exam_prompts(db)
-    return [_sign_prompt(p) for p in prompts]
+    return [await _sign_prompt(p, redis) for p in prompts]
 
 
 @router.post(
