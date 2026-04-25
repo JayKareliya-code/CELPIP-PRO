@@ -70,8 +70,8 @@ function CtaButton({ isAttempted, isBonusRetry }: { isAttempted: boolean; isBonu
       <div className={cn(
         "w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg",
         "text-sm font-semibold transition-all duration-150",
-        "bg-emerald-700/60 group-hover:bg-emerald-700/80",
-        "text-emerald-100 border border-emerald-600/40 group-hover:border-emerald-500/60",
+        "bg-amber-700/60 group-hover:bg-amber-700/80",
+        "text-amber-100 border border-amber-600/40 group-hover:border-amber-500/60",
       )}>
         <RotateCcw className="w-4 h-4" />
         Redo
@@ -147,11 +147,11 @@ function PromptCard({
   const diffCfg = DIFFICULTY_CONFIG[(prompt as WritingTask & { difficulty?: Difficulty }).difficulty ?? "medium"];
 
   return (
-    <Link href={`/writing/${prompt.task_number}/${prompt.id}/practice`} className="group block">
-      <div className="rounded-xl border border-white/[0.08] bg-surface hover:border-white/[0.18] hover:shadow-[0_4px_24px_rgba(0,0,0,0.35)] transition-all duration-200 overflow-hidden">
+    <Link href={`/writing/${prompt.task_number}/${prompt.id}/practice`} className="group flex h-full">
+      <div className="flex flex-col h-full w-full rounded-xl border border-border bg-surface hover:border-white/[0.18] hover:shadow-[0_4px_24px_rgba(0,0,0,0.35)] transition-all duration-200 overflow-hidden">
 
         {/* Header */}
-        <div className="px-4 pt-4 pb-3 border-b border-white/[0.06]">
+        <div className="px-4 pt-4 pb-3 border-b border-white/[0.06] shrink-0">
           <div className="flex items-center justify-between gap-2 flex-wrap">
             <div className="flex items-center gap-2">
               <span className={cn(BADGE_BASE, "bg-white/[0.06] text-white/40 border-white/[0.08]")}>
@@ -164,7 +164,7 @@ function PromptCard({
                 {prompt.task_type}
               </span>
               {isAttempted && !isBonusRetry && (
-                <span className={cn(BADGE_BASE, "bg-emerald-900/30 text-emerald-400 border-emerald-700/40")}>
+                <span className={cn(BADGE_BASE, "bg-amber-900/30 text-amber-400 border-amber-700/40")}>
                   Attempted
                 </span>
               )}
@@ -190,15 +190,15 @@ function PromptCard({
           </div>
         </div>
 
-        {/* Prompt excerpt */}
-        <div className="px-4 py-3">
-          <p className="text-sm text-foreground/80 leading-relaxed line-clamp-3">
+        {/* Prompt excerpt — flex-1 so it expands to fill remaining space */}
+        <div className="px-4 py-3 flex-1">
+          <p className="text-sm text-foreground/80 leading-relaxed">
             {prompt.prompt_text}
           </p>
         </div>
 
-        {/* CTA */}
-        <div className="px-4 pb-4 pt-1">
+        {/* CTA — always pinned to bottom */}
+        <div className="px-4 pb-4 pt-1 shrink-0">
           <CtaButton isAttempted={isAttempted} isBonusRetry={isBonusRetry} />
         </div>
 

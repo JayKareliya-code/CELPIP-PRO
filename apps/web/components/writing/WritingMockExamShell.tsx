@@ -124,7 +124,7 @@ export function WritingMockExamShell({ examNumber }: { examNumber: number }) {
   if (phase === "LOADING" || isLoading) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-canvas">
-        <Loader2 className="w-8 h-8 text-emerald-400 animate-spin" />
+        <Loader2 className="w-8 h-8 text-amber-400 animate-spin" />
       </div>
     );
   }
@@ -137,7 +137,7 @@ export function WritingMockExamShell({ examNumber }: { examNumber: number }) {
         <p className="text-sm text-subtle max-w-xs">{errMsg}</p>
         <button
           onClick={() => router.push("/practice/writing")}
-          className="mt-2 px-5 py-2.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-semibold"
+          className="mt-2 px-5 py-2.5 rounded-lg bg-amber-600 hover:bg-amber-500 text-white text-sm font-semibold"
         >
           Back to Practice
         </button>

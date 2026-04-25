@@ -53,7 +53,7 @@ export function WritingPromptCard({
                 {task.task_type}
               </span>
               {isAlreadyAttempted && (
-                <span className={cn(BADGE_BASE, "bg-emerald-900/30 text-emerald-400 border-emerald-700/40")}>
+                <span className={cn(BADGE_BASE, "bg-amber-900/30 text-amber-400 border-amber-700/40")}>
                   Attempted
                 </span>
               )}

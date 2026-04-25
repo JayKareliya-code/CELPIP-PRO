@@ -30,6 +30,18 @@ import type { SpeakingTask } from "@/lib/types";
 
 // ── Task metadata (descriptions shown on cards) ───────────────────────────────
 
+const TASK_TITLES: Record<number, string> = {
+  0: "Practice Task",
+  1: "Giving Advice",
+  2: "Talking about a Personal Experience",
+  3: "Describing a Scene",
+  4: "Making Predictions",
+  5: "Comparing and Persuading",
+  6: "Dealing with a Difficult Situation",
+  7: "Expressing Opinions",
+  8: "Describing an Unusual Situation",
+};
+
 const TASK_DESCRIPTIONS: Record<number, string> = {
   0: "Warm-up. Describe your daily routine or a familiar topic. No scoring.",
   1: "Give advice to a friend or colleague about a personal or professional situation.",
@@ -107,8 +119,8 @@ export function SpeakingModuleHome({ tasks }: SpeakingModuleHomeProps) {
       {/* ── Header ────────────────────────────────────────────────────────── */}
       <div className="flex items-center justify-between gap-4 flex-wrap">
         <div className="flex items-center gap-3">
-          <div className="w-11 h-11 rounded-xl bg-indigo-600/20 border border-indigo-500/30 flex items-center justify-center shrink-0">
-            <Mic className="w-5 h-5 text-indigo-400" />
+          <div className="w-11 h-11 rounded-xl bg-amber-600/20 border border-amber-500/30 flex items-center justify-center shrink-0">
+            <Mic className="w-5 h-5 text-amber-400" />
           </div>
           <div>
             <h1 className="text-2xl font-bold text-foreground">Speaking Module</h1>
@@ -122,22 +134,22 @@ export function SpeakingModuleHome({ tasks }: SpeakingModuleHomeProps) {
 
       {/* ── Starter upgrade banner ─────────────────────────────────────────── */}
       {isStarter && (
-        <div className="relative overflow-hidden rounded-xl border border-indigo-700/40 bg-gradient-to-r from-indigo-950/60 via-indigo-950/40 to-violet-950/40 p-4 flex items-center gap-4 flex-wrap">
-          <div className="w-9 h-9 rounded-lg bg-indigo-600/20 border border-indigo-500/30 flex items-center justify-center shrink-0">
-            <BookOpen className="w-4.5 h-4.5 text-indigo-400" />
+        <div className="relative overflow-hidden rounded-xl border border-amber-700/40 bg-gradient-to-r from-amber-950/60 via-amber-950/40 to-yellow-950/40 p-4 flex items-center gap-4 flex-wrap">
+          <div className="w-9 h-9 rounded-lg bg-amber-600/20 border border-amber-500/30 flex items-center justify-center shrink-0">
+            <BookOpen className="w-4.5 h-4.5 text-amber-400" />
           </div>
           <div className="flex-1 min-w-0">
-            <p className="text-sm font-semibold text-indigo-200">
+            <p className="text-sm font-semibold text-amber-200">
               Unlock individual task practice
             </p>
-            <p className="text-xs text-indigo-300/70 mt-0.5">
+            <p className="text-xs text-amber-300/70 mt-0.5">
               Starter plan includes 1 full speaking mock test. Upgrade to Pro or Ultra to
               practice each task individually and get AI scoring.
             </p>
           </div>
           <Link
             href="/billing"
-            className="shrink-0 flex items-center gap-1.5 px-4 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-semibold transition-colors"
+            className="shrink-0 flex items-center gap-1.5 px-4 py-2 rounded-lg bg-amber-600 hover:bg-amber-500 text-white text-sm font-semibold transition-colors"
           >
             Upgrade
             <ArrowRight className="w-3.5 h-3.5" />
@@ -190,14 +202,13 @@ export function SpeakingModuleHome({ tasks }: SpeakingModuleHomeProps) {
             <SpeakingTaskCard
               key={taskNum}
               taskNumber={taskNum === 0 ? "practice" : taskNum}
-              title={task?.title ?? (taskNum === 0 ? "Practice Task" : `Task ${taskNum}`)}
+              title={TASK_TITLES[taskNum] ?? (taskNum === 0 ? "Practice Task" : `Task ${taskNum}`)}
               description={TASK_DESCRIPTIONS[taskNum] ?? ""}
               prepTimeSecs={task?.prep_time_seconds ?? 30}
               responseTimeSecs={task?.response_time_seconds ?? 60}
               difficulty={task?.difficulty ?? "medium"}
               hasParts={task?.has_parts ?? false}
               promptCount={promptCount}
-              promptLimit={attemptsLimit ?? 0}
               attemptsUsed={used}
               attemptsLimit={isStarter ? 0 : attemptsLimit}
               isBonusRetryMode={isBonusRetry}

@@ -37,7 +37,7 @@ export function TaskMetaBadges({
 
       {/* 2-parts indicator — only for Task 5 */}
       {hasParts && (
-        <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full border border-indigo-800/50 bg-indigo-900/40 text-indigo-300 text-xs font-medium">
+        <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full border border-amber-700/50 bg-amber-900/30 text-amber-300 text-xs font-medium">
           <Layers className="w-3 h-3" />
           2 parts
         </span>

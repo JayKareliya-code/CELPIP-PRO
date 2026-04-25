@@ -28,11 +28,11 @@ export const SKILL_META: Record<Skill, PracticeSkillConfig & { icon: typeof Mic 
     taskSummary: "9 Tasks",
     icon:        Mic,
     color: {
-      ring:   "#6366f1",
-      bg:     "bg-indigo-600/15",
-      border: "border-indigo-500/30",
-      text:   "text-indigo-400",
-      grad:   "from-indigo-600/20 to-indigo-900/5",
+      ring:   "#C8963E",
+      bg:     "bg-amber-600/15",
+      border: "border-amber-500/30",
+      text:   "text-amber-400",
+      grad:   "from-amber-600/20 to-amber-900/5",
     },
   },
   writing: {
@@ -42,11 +42,11 @@ export const SKILL_META: Record<Skill, PracticeSkillConfig & { icon: typeof Mic 
     taskSummary: "2 Tasks",
     icon:        PenLine,
     color: {
-      ring:   "#10b981",
-      bg:     "bg-emerald-600/15",
-      border: "border-emerald-500/30",
-      text:   "text-emerald-400",
-      grad:   "from-emerald-600/20 to-emerald-900/5",
+      ring:   "#D4A853",
+      bg:     "bg-yellow-600/15",
+      border: "border-yellow-500/30",
+      text:   "text-yellow-400",
+      grad:   "from-yellow-600/20 to-yellow-900/5",
     },
   },
 };

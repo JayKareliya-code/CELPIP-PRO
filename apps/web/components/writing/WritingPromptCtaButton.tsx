@@ -26,8 +26,8 @@ export function WritingPromptCtaButton({
     return (
       <div className={cn(
         base,
-        "bg-emerald-700/60 group-hover:bg-emerald-700/80",
-        "text-emerald-100 border border-emerald-600/40 group-hover:border-emerald-500/60",
+        "bg-amber-700/60 group-hover:bg-amber-700/80",
+        "text-amber-100 border border-amber-600/40 group-hover:border-amber-500/60",
       )}>
         <RotateCcw className="w-4 h-4" />
         Redo
@@ -51,8 +51,8 @@ export function WritingPromptCtaButton({
   return (
     <div className={cn(
       base,
-      "bg-emerald-600/70 group-hover:bg-emerald-600/90",
-      "text-emerald-100 border border-emerald-500/40 group-hover:border-emerald-400/60",
+      "bg-amber-600/70 group-hover:bg-amber-600/90",
+      "text-amber-100 border border-amber-500/40 group-hover:border-amber-400/60",
     )}>
       <PlayCircle className="w-4 h-4" />
       Start Writing

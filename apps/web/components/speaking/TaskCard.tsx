@@ -95,7 +95,7 @@ export function TaskCard({
           "text-sm font-semibold transition-all duration-150",
           isLocked
             ? "bg-white/5 text-white/25 cursor-not-allowed border border-white/[0.10]"
-            : "bg-indigo-600/70 hover:bg-indigo-600/90 text-indigo-100 border border-indigo-500/40 hover:border-indigo-400/60"
+            : "bg-amber-600/70 hover:bg-amber-600/90 text-amber-100 border border-amber-500/40 hover:border-amber-400/60"
         )}
       >
         {isLocked ? (

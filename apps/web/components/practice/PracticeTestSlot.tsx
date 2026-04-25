@@ -90,7 +90,7 @@ export function PracticeTestSlot({ slot, skill, href }: PracticeTestSlotProps) {
           <span className="text-sm font-semibold text-foreground">{label}</span>
 
           {isUsed && !isLocked && (
-            <span className="inline-flex items-center gap-1 text-xs text-emerald-400">
+            <span className="inline-flex items-center gap-1 text-xs text-amber-400">
               <CheckCircle2 className="w-3 h-3" />
               {estimatedBand != null ? `Band ${estimatedBand}` : "Completed"}
             </span>

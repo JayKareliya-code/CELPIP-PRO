@@ -45,10 +45,10 @@ function OptionDetailCard({
   variant?: "curveball" | "selected" | "default";
 }) {
   const headerColour =
-    variant === "selected" ? "text-indigo-300" : "text-foreground";
+    variant === "selected" ? "text-amber-300" : "text-foreground";
 
   const borderColour =
-    variant === "selected" ? "border-indigo-500/30 bg-indigo-500/5" :
+    variant === "selected" ? "border-amber-500/30 bg-amber-500/5" :
     "border-white/[0.08] bg-white/[0.03]";
 
   return (

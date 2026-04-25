@@ -51,9 +51,9 @@ function OptionCard({
         // flex-1 min-w-0: equal-width in the sm:flex-row; no flex-col so no vertical growth
         "relative flex-1 min-w-0 rounded-2xl border-2 overflow-hidden",
         "text-left transition-all duration-200",
-        "focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500",
+        "focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-500",
         isSelected
-          ? "border-indigo-500 bg-indigo-500/10 shadow-[0_0_24px_rgba(99,102,241,0.25)]"
+          ? "border-amber-500 bg-amber-500/10 shadow-[0_0_24px_rgba(245,158,11,0.25)]"
           : "border-white/[0.10] bg-white/[0.03] hover:border-white/[0.20] hover:bg-white/[0.06]"
       )}
     >
@@ -72,13 +72,13 @@ function OptionCard({
         {/* Selected checkmark — inside the text zone, not overlapping the image */}
         {isSelected && (
           <span className="absolute top-2 right-2">
-            <CheckCircle2 className="w-4 h-4 text-indigo-400" />
+            <CheckCircle2 className="w-4 h-4 text-amber-400" />
           </span>
         )}
 
         <h3 className={cn(
           "text-base font-bold underline underline-offset-2 pr-6",
-          isSelected ? "text-indigo-200" : "text-foreground"
+          isSelected ? "text-amber-200" : "text-foreground"
         )}>
           {option.name}
         </h3>
@@ -95,7 +95,7 @@ function OptionCard({
         {/* Letter badge */}
         <div className={cn(
           "absolute bottom-2 right-2 w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold",
-          isSelected ? "bg-indigo-500 text-white" : "bg-white/[0.06] text-white/40"
+          isSelected ? "bg-amber-500 text-white" : "bg-white/[0.06] text-white/40"
         )}>
           {index === 0 ? "A" : "B"}
         </div>

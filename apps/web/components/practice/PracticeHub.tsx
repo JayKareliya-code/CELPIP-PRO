@@ -59,8 +59,8 @@ export function PracticeHub({ user: serverUser }: PracticeHubProps) {
       {/* ── Header ────────────────────────────────────────────────────────── */}
       <div className="flex items-center justify-between gap-4 flex-wrap">
         <div className="flex items-center gap-3">
-          <div className="w-11 h-11 rounded-xl bg-violet-600/20 border border-violet-500/30 flex items-center justify-center shrink-0">
-            <PlayCircle className="w-5 h-5 text-violet-400" />
+          <div className="w-11 h-11 rounded-xl bg-amber-600/20 border border-amber-500/30 flex items-center justify-center shrink-0">
+            <PlayCircle className="w-5 h-5 text-amber-400" />
           </div>
           <div>
             <h1 className="text-2xl font-bold text-foreground">Practice Tests</h1>
@@ -73,22 +73,22 @@ export function PracticeHub({ user: serverUser }: PracticeHubProps) {
 
       {/* ── Starter upgrade banner ─────────────────────────────────────────── */}
       {isStarter && (
-        <div className="relative overflow-hidden rounded-xl border border-violet-700/40 bg-gradient-to-r from-violet-950/60 via-violet-950/40 to-purple-950/40 p-4 flex items-center gap-4 flex-wrap">
-          <div className="w-9 h-9 rounded-lg bg-violet-600/20 border border-violet-500/30 flex items-center justify-center shrink-0">
-            <BookOpen className="w-4.5 h-4.5 text-violet-400" />
+        <div className="relative overflow-hidden rounded-xl border border-amber-700/40 bg-gradient-to-r from-amber-950/60 via-amber-950/40 to-yellow-950/40 p-4 flex items-center gap-4 flex-wrap">
+          <div className="w-9 h-9 rounded-lg bg-amber-600/20 border border-amber-500/30 flex items-center justify-center shrink-0">
+            <BookOpen className="w-4.5 h-4.5 text-amber-400" />
           </div>
           <div className="flex-1 min-w-0">
-            <p className="text-sm font-semibold text-violet-200">
+            <p className="text-sm font-semibold text-amber-200">
               Unlock more practice tests
             </p>
-            <p className="text-xs text-violet-300/70 mt-0.5">
+            <p className="text-xs text-amber-300/70 mt-0.5">
               Starter plan includes 1 practice test per skill. Upgrade to Pro or Ultra
               for up to 5 full-length timed tests with AI scoring.
             </p>
           </div>
           <Link
             href="/billing"
-            className="shrink-0 flex items-center gap-1.5 px-4 py-2 rounded-lg bg-violet-600 hover:bg-violet-500 text-white text-sm font-semibold transition-colors"
+            className="shrink-0 flex items-center gap-1.5 px-4 py-2 rounded-lg bg-amber-600 hover:bg-amber-500 text-white text-sm font-semibold transition-colors"
           >
             Upgrade
             <ArrowRight className="w-3.5 h-3.5" />

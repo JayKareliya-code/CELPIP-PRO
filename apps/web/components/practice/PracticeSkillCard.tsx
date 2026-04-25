@@ -1,16 +1,19 @@
 // ─────────────────────────────────────────────────────────────────────────────
 // PracticeSkillCard — One card in the /practice hub grid.
 //
-// Visual language mirrors SpeakingTaskCard / WritingTaskCard exactly:
-//   • Coloured gradient splash at the top
-//   • Full-card translucent progress fill (left→right) based on tests used
-//   • Badge row: skill label + tests chip (or lock icon)
-//   • Body: title + meta badges + description + prompt count + chevron
-//   • Locked overlay variant
+// Unified layout (identical structure to SpeakingTaskCard & WritingTaskCard):
+//   • Layer 0: gradient splash (top, h-20)
+//   • Layer 1: progress fill wash (left→right)
+//   • Layer 2: content
+//       ┌─ badge row (skill label + "Mock Exam" + tests chip / lock)
+//       ├─ icon + title
+//       ├─ meta row (duration · task summary)
+//       ├─ description (line-clamp-2, flex-1)
+//       └─ footer (remaining tests · chevron)  pinned to bottom
 // ─────────────────────────────────────────────────────────────────────────────
 
 import Link                   from "next/link";
-import { Clock, Lock, ChevronRight, AlignLeft } from "lucide-react";
+import { Clock, AlignLeft, Lock, ChevronRight } from "lucide-react";
 import { cn }                  from "@/lib/utils";
 import { SKILL_META }          from "@/lib/practice/config";
 import type { PracticeQuota }  from "@/lib/practice/types";
@@ -40,33 +43,33 @@ export function PracticeSkillCard({
     ? Math.min((quota.used / quota.limit) * 100, 100)
     : 0;
   const fillColor = fillPct >= 100
-    ? "rgba(245,158,11,0.12)"  // amber wash when all used (bonus-retry state)
+    ? "rgba(245,158,11,0.12)"  // amber wash when all used
     : skill === "speaking"
-      ? "rgba(99,102,241,0.10)"
-      : "rgba(16,185,129,0.10)";
+      ? "rgba(200,150,62,0.10)"
+      : "rgba(212,168,83,0.10)";
 
-  // ── Attempts chip label ────────────────────────────────────────────────────
+  // ── Tests chip label ───────────────────────────────────────────────────────
   const chipLabel = isLocked ? null : `${quota.used}/${quota.limit}`;
 
   const inner = (
     <div
       className={cn(
-        "group relative rounded-xl border border-white/[0.08] bg-surface overflow-hidden",
-        "flex flex-col h-full min-h-[190px] transition-all duration-200",
+        "group relative rounded-xl border border-border bg-surface overflow-hidden",
+        "flex flex-col h-full min-h-[220px] transition-all duration-200",
         isLocked
           ? "opacity-60 cursor-not-allowed"
-          : "hover:border-white/[0.16] hover:shadow-[0_4px_24px_rgba(0,0,0,0.4)] cursor-pointer"
+          : "hover:border-white/[0.18] hover:shadow-[0_4px_20px_rgba(0,0,0,0.35)] cursor-pointer"
       )}
     >
-      {/* ── Layer 0: gradient splash (top) ────────────────────────────────── */}
+      {/* ── Layer 0: gradient splash (top) ──────────────────────────────── */}
       <div
         className={cn(
-          "absolute inset-x-0 top-0 h-24 bg-gradient-to-b opacity-80 pointer-events-none",
+          "absolute inset-x-0 top-0 h-20 bg-gradient-to-b opacity-80 pointer-events-none",
           meta.color.grad,
         )}
       />
 
-      {/* ── Layer 1: full-card progress fill ──────────────────────────────── */}
+      {/* ── Layer 1: progress fill wash ──────────────────────────────────── */}
       {fillPct > 0 && (
         <div
           aria-hidden="true"
@@ -78,48 +81,55 @@ export function PracticeSkillCard({
       )}
 
       {/* ── Layer 2: card content ─────────────────────────────────────────── */}
+      <div className="relative flex flex-col h-full px-4 pt-4 pb-4 gap-0">
 
-      {/* Top row: skill label + chip */}
-      <div className="relative flex items-start justify-between gap-2 px-4 pt-4 pb-0">
-        <div className="flex items-center gap-1.5 flex-wrap">
-          <span className={cn(BADGE_BASE, "bg-white/[0.07] text-white/50 border-white/[0.10]")}>
-            {skill === "speaking" ? "Speaking" : "Writing"}
-          </span>
-          <span className={cn(BADGE_BASE, meta.color.bg, meta.color.border, meta.color.text)}>
-            {skill === "speaking" ? "Mock Exam" : "Mock Exam"}
-          </span>
+        {/* ── Row 1: badge strip ─────────────────────────────────────────── */}
+        <div className="flex items-center justify-between gap-2 mb-3">
+          <div className="flex items-center gap-1.5 flex-wrap">
+            <span className={cn(BADGE_BASE, "bg-white/[0.07] text-white/50 border-white/[0.10]")}>
+              {skill === "speaking" ? "Speaking" : "Writing"}
+            </span>
+            <span className={cn(BADGE_BASE, meta.color.bg, meta.color.border, meta.color.text)}>
+              Mock Exam
+            </span>
+          </div>
+
+          {/* Tests chip */}
+          {chipLabel && (
+            <span
+              className={cn(
+                "shrink-0 inline-flex items-center rounded-full border px-2.5 py-1",
+                "text-xs font-semibold tabular-nums select-none",
+                fillPct >= 100
+                  ? "bg-amber-900/30 border-amber-700/40 text-amber-300"
+                  : "bg-white/[0.06] border-white/[0.10] text-white/40",
+              )}
+            >
+              {chipLabel}
+            </span>
+          )}
+
+          {/* Locked icon */}
+          {isLocked && (
+            <div className="w-8 h-8 rounded-full bg-white/5 border border-white/10 flex items-center justify-center shrink-0">
+              <Lock className="w-3.5 h-3.5 text-white/25" />
+            </div>
+          )}
         </div>
 
-        {/* Tests counter chip */}
-        {chipLabel && (
-          <span
-            className={cn(
-              "shrink-0 inline-flex items-center rounded-full border px-2.5 py-1",
-              "text-xs font-semibold tabular-nums select-none",
-              fillPct >= 100
-                ? "bg-amber-900/30 border-amber-700/40 text-amber-300"
-                : "bg-white/[0.06] border-white/[0.10] text-white/40",
-            )}
-          >
-            {chipLabel}
-          </span>
-        )}
-
-        {/* Locked icon chip */}
-        {isLocked && (
-          <div className="w-8 h-8 rounded-full bg-white/5 border border-white/10 flex items-center justify-center shrink-0">
-            <Lock className="w-3.5 h-3.5 text-white/25" />
+        {/* ── Row 2: icon + title ────────────────────────────────────────── */}
+        <div className="flex items-center gap-2.5 mb-2">
+          <div className={cn(
+            "w-8 h-8 rounded-lg border flex items-center justify-center shrink-0",
+            meta.color.bg, meta.color.border,
+          )}>
+            <Icon className={cn("w-4 h-4", meta.color.text)} />
           </div>
-        )}
-      </div>
+          <h3 className="text-sm font-semibold text-foreground leading-snug">{meta.label}</h3>
+        </div>
 
-      {/* Card body */}
-      <div className="relative px-4 pt-3 pb-4 flex flex-col gap-3 flex-1">
-        {/* Title */}
-        <h3 className="text-base font-semibold text-foreground leading-snug">{meta.label}</h3>
-
-        {/* Meta badges: duration + task count */}
-        <div className="flex items-center gap-3 text-xs text-subtle/80">
+        {/* ── Row 3: meta row ────────────────────────────────────────────── */}
+        <div className="flex items-center gap-3 text-xs text-subtle/80 mb-3">
           <span className="flex items-center gap-1">
             <Clock className="w-3 h-3" />
             {meta.duration}
@@ -131,22 +141,18 @@ export function PracticeSkillCard({
           </span>
         </div>
 
-        {/* Description */}
-        <p className="text-sm text-subtle leading-relaxed line-clamp-3">{meta.description}</p>
+        {/* ── Row 4: description (flex-1, pushes footer down) ──────────── */}
+        <p className="text-sm text-subtle leading-relaxed line-clamp-2 flex-1">{meta.description}</p>
 
-        {/* Remaining count */}
+        {/* ── Row 5: footer ─────────────────────────────────────────────── */}
         {!isLocked && (
-          <p className="text-[11px] text-white/30">
-            {quota.remaining > 0
-              ? `${quota.remaining} test${quota.remaining === 1 ? "" : "s"} remaining`
-              : "All tests used · Bonus retries available"}
-          </p>
-        )}
-
-        {/* Chevron */}
-        {!isLocked && (
-          <div className="flex justify-end mt-auto pt-2 border-t border-white/[0.06]">
-            <ChevronRight className="w-4 h-4 text-white/30 group-hover:text-white/60 transition-colors" />
+          <div className="flex items-center justify-between mt-3 pt-2.5 border-t border-white/[0.06]">
+            <span className="text-[11px] text-white/30">
+              {quota.remaining > 0
+                ? `${quota.remaining} test${quota.remaining === 1 ? "" : "s"} remaining`
+                : "All tests used · retries available"}
+            </span>
+            <ChevronRight className="w-4 h-4 text-white/30 group-hover:text-amber-400/70 transition-colors" />
           </div>
         )}
       </div>
