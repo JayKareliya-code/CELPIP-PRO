@@ -24,7 +24,6 @@ import { useQuota } from "@/lib/hooks/useQuota";
 import {
   PRO_PLAN_LIMITS,
   ULTRA_PLAN_LIMITS,
-  STARTER_PLAN_LIMITS,
 } from "@/lib/constants";
 import type { SpeakingTask } from "@/lib/types";
 

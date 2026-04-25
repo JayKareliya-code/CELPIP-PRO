@@ -50,7 +50,7 @@ interface SpeakingPracticeSessionProps {
  * All timer, upload, and navigation logic lives in useSpeakingAttempt.
  */
 export function SpeakingPracticeSession({ task }: SpeakingPracticeSessionProps) {
-  const { phase, secondsLeft, uploadProgress, start, exit, selectedChoice } = useSpeakingAttempt();
+  const { phase, secondsLeft, uploadProgress, start, selectedChoice } = useSpeakingAttempt();
   // Needed for Task 5 selection screen — passed as explicit props now that
   // Task5SelectionScreen no longer reads from the store directly.
   const { setSelectedChoice } = usePracticeSessionStore();

@@ -52,7 +52,7 @@ export function useSpeakingAttempt(): UseSpeakingAttemptReturn {
   const {
     phase, secondsLeft, uploadProgress, attemptId, task,
     startSession, advancePhase, tick,
-    setUploadProgress, setRecordingBlob,
+    setRecordingBlob,
     selectedChoice,
     reset,
   } = usePracticeSessionStore();

@@ -16,7 +16,7 @@ interface PageProps {
 
 // ── Metadata ──────────────────────────────────────────────────────────────────
 
-export function generateMetadata({ params }: PageProps): Metadata {
+export function generateMetadata(): Metadata {
   return {
     title:       `Attempt Report — CELPIP Prep`,
     description: "View your AI-generated feedback, band score estimate, and dimension breakdown for this CELPIP practice attempt.",

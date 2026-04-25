@@ -50,8 +50,6 @@ export function ScoreSummaryCard({ estimatedBand, skill, taskTitle, completedAt 
   // SVG arc gauge
   const radius      = 60;
   const circumference = 2 * Math.PI * radius;
-  const arcRatio    = (estimatedBand / 12) * 0.75; // 75% of circle = full scale
-  const dashOffset  = circumference * (1 - arcRatio);
 
   return (
     <div className="relative overflow-hidden rounded-2xl border border-border bg-surface p-6 shadow-panel">

@@ -21,7 +21,7 @@ async function fetchTask(taskId: string, token: string | null): Promise<Speaking
   }
 }
 
-export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
+export async function generateMetadata(): Promise<Metadata> {
   return {
     title: "Speaking Practice — CELPIP Prep",
     description: "Timed speaking practice: countdown, prep, and recording phases.",

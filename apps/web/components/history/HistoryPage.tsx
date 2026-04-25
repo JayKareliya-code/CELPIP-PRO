@@ -5,7 +5,7 @@
 // ─────────────────────────────────────────────────────────────────────────────
 
 import { useState }                    from "react";
-import { History, ClipboardList }      from "lucide-react";
+import { History }                     from "lucide-react";
 import { PageWrapper }                 from "@/components/layout/PageWrapper";
 import { useHistory }                  from "@/lib/hooks/useHistory";
 import { HistoryFilterBar }            from "./HistoryFilterBar";

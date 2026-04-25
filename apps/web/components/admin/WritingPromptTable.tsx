@@ -64,8 +64,11 @@ export function WritingPromptTable() {
 
   function handleSave(data: FormData) {
     const payload = toPayload(data);
-    editTarget ? update.mutate({ id: editTarget.id, payload }, { onSuccess: closeModal })
-               : create.mutate(payload, { onSuccess: closeModal });
+    if (editTarget) {
+      update.mutate({ id: editTarget.id, payload }, { onSuccess: closeModal });
+    } else {
+      create.mutate(payload, { onSuccess: closeModal });
+    }
   }
 
   if (isLoading) return <div className="flex items-center justify-center h-40 gap-2 text-subtle text-sm"><Loader2 className="w-4 h-4 animate-spin" />Loading…</div>;

@@ -11,7 +11,6 @@
 // ─────────────────────────────────────────────────────────────────────────────
 
 import { CheckCircle2, Mic, Clock } from "lucide-react";
-import { cn }                       from "@/lib/utils";
 import { MOCK_EXAM_BREAK_SECONDS }  from "@/lib/practice/config";
 import type { MockExamTask }        from "@/lib/types";
 

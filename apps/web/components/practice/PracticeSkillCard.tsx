@@ -22,7 +22,7 @@ import type { Skill }          from "@/lib/types";
 interface PracticeSkillCardProps {
   skill:      Skill;
   quota:      PracticeQuota;
-  planLabel:  string;
+  planLabel?:  string;
   isLocked?:  boolean;
 }
 
@@ -32,7 +32,6 @@ const BADGE_BASE =
 export function PracticeSkillCard({
   skill,
   quota,
-  planLabel,
   isLocked = false,
 }: PracticeSkillCardProps) {
   const meta = SKILL_META[skill];

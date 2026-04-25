@@ -28,7 +28,6 @@ interface SpeakingTaskCardProps {
   difficulty: Difficulty;
   hasParts?: boolean;
   promptCount: number;
-  promptLimit: number;
   attemptsUsed: number;
   attemptsLimit: number | null;
   isBonusRetryMode: boolean;

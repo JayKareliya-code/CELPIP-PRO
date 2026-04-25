@@ -63,11 +63,11 @@ export function useMockExamSession(): UseMockExamSessionReturn {
 
   const {
     phase, tasks, currentIndex, secondsLeft, breakSecondsLeft,
-    uploadProgress, selectedChoice, recordingBlob, examSessionId,
+    uploadProgress, selectedChoice, examSessionId,
     beginLoading, loadExam, startExam: storeStartExam,
     advanceTaskPhase, finishTaskUpload, advanceToNextTask,
     tickTask, tickBreak, setUploadProgress, setRecordingBlob,
-    setSelectedChoice, setTaskError, setError, reset,
+    setSelectedChoice, setTaskError, reset,
   } = useMockExamStore();
 
   const currentTask = tasks[currentIndex] ?? null;

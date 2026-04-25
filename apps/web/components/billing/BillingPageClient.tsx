@@ -41,7 +41,6 @@ export function BillingPageClient({ success, canceled, planParam }: BillingPageC
   const {
     billingStatus,
     startCheckout,
-    isCheckingOut,
     openPortal,
     isOpeningPortal,
   } = useBilling();

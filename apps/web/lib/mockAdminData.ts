@@ -72,6 +72,8 @@ export const MOCK_WRITING_PROMPTS: WritingPrompt[] = [
     prompt_text:
       "You bought a laptop from a store but it stopped working after two weeks. " +
       "Write an email to the store manager describing the problem and requesting a refund.",
+    task_type:           "email",
+    difficulty:          "medium",
     time_limit_seconds:  27 * 60,
     min_words:           150,
     max_words:           200,
@@ -86,6 +88,8 @@ export const MOCK_WRITING_PROMPTS: WritingPrompt[] = [
       "Some people think working from home is better than working in an office. " +
       "Do you think working from home is a positive or negative development? " +
       "Use specific reasons and examples to support your opinion.",
+    task_type:           "essay",
+    difficulty:          "hard",
     time_limit_seconds:  26 * 60,
     min_words:           150,
     max_words:           200,

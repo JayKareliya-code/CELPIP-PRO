@@ -33,7 +33,7 @@ async function fetchTask(taskId: string, token: string | null): Promise<Speaking
 
 // ── Metadata ──────────────────────────────────────────────────────────────────
 
-export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
+export async function generateMetadata(): Promise<Metadata> {
   return {
     title: "Speaking Tips — CELPIP Prep",
     description: "Key vocabulary, connector phrases, and structural response templates. Study before your timed CELPIP speaking practice.",
