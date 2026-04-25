@@ -45,7 +45,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const taskKey = taskNum === 0 ? "practice" : `task-${taskNum}`;
   const taskName = SPEAKING_TASK_NAMES[taskKey] ?? `Task ${taskNum}`;
   return {
-    title: `${taskName} — Speaking | CELPIP PRO`,
+    title: `${taskName} — Speaking | CELPIPBro`,
     description: `Choose a prompt for ${taskName} and start your timed speaking practice session.`,
   };
 }

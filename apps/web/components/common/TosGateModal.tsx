@@ -81,7 +81,7 @@ export function TosGateModal({ tosVersion, tosAcceptedAt }: TosGateModalProps) {
             <strong className="text-white">What you&rsquo;re agreeing to:</strong>
           </p>
           <ul className="list-disc pl-5 space-y-1">
-            <li>Use CELPIP PRO for personal study purposes only.</li>
+            <li>Use CELPIPBro for personal study purposes only.</li>
             <li>Not share, resell, or redistribute AI-generated feedback.</li>
             <li>Understand that scores are AI-estimated and not official CELPIP results.</li>
             <li>Our collection and use of usage data as described in our Privacy Policy.</li>
@@ -149,7 +149,7 @@ export function TosGateModal({ tosVersion, tosAcceptedAt }: TosGateModalProps) {
               Saving…
             </>
           ) : (
-            "I Agree — Continue to CELPIP PRO"
+            "I Agree — Continue to CELPIPBro"
           )}
         </button>
 

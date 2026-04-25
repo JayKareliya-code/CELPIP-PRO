@@ -23,7 +23,7 @@ interface PageProps {
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { testNumber } = await params;
   return {
-    title:       `Writing Mock Exam #${testNumber} — CELPIP PRO`,
+    title:       `Writing Mock Exam #${testNumber} — CELPIPBro`,
     description: `Full CELPIP writing mock exam — Task 1 (Email) and Task 2 (Opinion Essay), timed and AI-scored.`,
   };
 }

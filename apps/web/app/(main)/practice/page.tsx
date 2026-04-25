@@ -5,7 +5,7 @@ import { PracticeHub }  from "@/components/practice/PracticeHub";
 import type { AppUser } from "@/lib/types";
 
 export const metadata: Metadata = {
-  title: "Practice Tests — CELPIP PRO",
+  title: "Practice Tests — CELPIPBro",
   description:
     "Take timed full-length speaking and writing practice tests. Your quota depends on your plan.",
 };

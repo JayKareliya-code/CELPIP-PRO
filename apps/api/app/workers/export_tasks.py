@@ -191,7 +191,7 @@ def build_user_export(self, job_id: str, user_id: str) -> None:  # noqa: ANN001
                 zf.writestr(
                     "README.txt",
                     (
-                        f"CELPIP PRO — Data Export\n"
+                        f"CELPIPBro — Data Export\n"
                         f"User ID:    {user_id}\n"
                         f"Job ID:     {job_id}\n"
                         f"Generated:  {datetime.now(timezone.utc).isoformat()}\n\n"

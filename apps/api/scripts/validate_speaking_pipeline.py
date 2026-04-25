@@ -316,7 +316,7 @@ async def stage3_scoring(transcript: str) -> dict:
 
 async def main() -> None:
     print("=" * 50)
-    print("  CELPIP PRO - Speaking Pipeline Validation")
+    print("  CELPIPBro - Speaking Pipeline Validation")
     print("=" * 50)
 
     test_id  = str(uuid.uuid4())

@@ -31,7 +31,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const { task: taskId } = await params;
   const label = taskId.includes("1") ? "Task 1 — Writing an Email" : "Task 2 — Opinion Essay";
   return {
-    title: `Practice — ${label} | CELPIP PRO`,
+    title: `Practice — ${label} | CELPIPBro`,
     description: `Timed writing session for ${label}. Compose your response, track your word count, and submit before time runs out.`,
   };
 }
