@@ -8,6 +8,9 @@ const isPublicRoute = createRouteMatcher([
   "/",
   "/sign-in(.*)",
   "/sign-up(.*)",
+  "/terms",
+  "/privacy",
+  "/contact",
   // Add future public marketing pages here, e.g. "/about", "/pricing"
 ]);
 
