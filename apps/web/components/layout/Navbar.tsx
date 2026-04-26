@@ -305,6 +305,24 @@ export function Navbar() {
             {showPublicNav && (
               <>
                 <Link
+                  href="/terms"
+                  className="hidden sm:inline text-xs text-white/35 hover:text-amber-400 transition-colors"
+                >
+                  Terms
+                </Link>
+                <Link
+                  href="/privacy"
+                  className="hidden sm:inline text-xs text-white/35 hover:text-amber-400 transition-colors"
+                >
+                  Privacy
+                </Link>
+                <Link
+                  href="/contact"
+                  className="hidden sm:inline text-xs text-white/35 hover:text-amber-400 transition-colors"
+                >
+                  Contact
+                </Link>
+                <Link
                   href="/sign-in"
                   className="text-sm font-medium text-white/55 hover:text-white/90 transition-colors"
                 >
