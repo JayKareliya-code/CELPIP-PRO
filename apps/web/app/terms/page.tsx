@@ -62,7 +62,7 @@ export default function TermsOfServicePage() {
         <Section title="1. Acceptance of Terms">
           <p>
             By creating an account or using any part of CELPIPBRO (
-            <strong className="text-white">"CELPIPBRO," "we," "us," or "our"</strong>
+            <strong className="text-white">&ldquo;CELPIPBRO,&rdquo; &ldquo;we,&rdquo; &ldquo;us,&rdquo; or &ldquo;our&rdquo;</strong>
             ), you agree to be bound by these Terms of Service and our{" "}
             <Link href="/privacy" className="text-amber-400 underline hover:text-amber-300 transition-colors">
               Privacy Policy
@@ -240,7 +240,7 @@ export default function TermsOfServicePage() {
         <Section title="12. Disclaimer of Warranties">
           <p>
             CELPIPBRO is provided on an{" "}
-            <strong className="text-white">"as is" and "as available"</strong>{" "}
+            <strong className="text-white">&ldquo;as is&rdquo; and &ldquo;as available&rdquo;</strong>{" "}
             basis without warranties of any kind, express or implied, including
             but not limited to implied warranties of merchantability, fitness
             for a particular purpose, or non-infringement. We do not warrant

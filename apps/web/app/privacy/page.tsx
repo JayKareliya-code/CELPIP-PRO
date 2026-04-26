@@ -288,8 +288,8 @@ export default function PrivacyPolicyPage() {
             We may update this Privacy Policy periodically to reflect changes
             in our practices or for legal, operational, or regulatory reasons.
             When we make material changes, we will notify you via email or
-            through the platform before the changes take effect. The "Last
-            updated" date at the top of this page will always reflect the most
+            through the platform before the changes take effect. The &ldquo;Last
+            updated&rdquo; date at the top of this page will always reflect the most
             recent revision.
           </p>
         </Section>

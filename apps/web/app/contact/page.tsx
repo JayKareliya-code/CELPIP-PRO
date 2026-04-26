@@ -50,7 +50,7 @@ export default function ContactPage() {
           </div>
           <h1 className="text-4xl font-black tracking-tight mb-3">Contact Us</h1>
           <p className="text-white/50 text-sm max-w-sm mx-auto leading-relaxed">
-            Have a question or need help? We're here for you. Check the FAQ below or send us a message.
+            Have a question or need help? We&apos;re here for you. Check the FAQ below or send us a message.
           </p>
         </div>
       </div>
