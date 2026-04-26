@@ -15,6 +15,38 @@ from app.models.user import User
 from app.services.user_service import get_or_create_user
 
 logger = logging.getLogger(__name__)
+
+# ── Clerk Backend API — user metadata cache ────────────────────────────────────
+# Caches publicMetadata.role per clerk_user_id for 60 s to avoid hammering the
+# Clerk API on every admin request while staying fresh enough for role changes.
+_clerk_role_cache: dict[str, tuple[str | None, float]] = {}  # {clerk_id: (role, fetched_at)}
+_CLERK_ROLE_TTL = 60.0  # seconds
+
+
+async def _get_clerk_role(clerk_user_id: str) -> str | None:
+    """Fetch publicMetadata.role from Clerk Backend API with a 60-second TTL cache."""
+    cached = _clerk_role_cache.get(clerk_user_id)
+    if cached and (time.monotonic() - cached[1]) < _CLERK_ROLE_TTL:
+        return cached[0]
+
+    try:
+        async with httpx.AsyncClient(timeout=5.0) as client:
+            resp = await client.get(
+                f"https://api.clerk.com/v1/users/{clerk_user_id}",
+                headers={"Authorization": f"Bearer {settings.CLERK_SECRET_KEY}"},
+            )
+            resp.raise_for_status()
+            data = resp.json()
+            role: str | None = (data.get("public_metadata") or {}).get("role")
+    except Exception:
+        logger.warning("Failed to fetch Clerk user metadata for %s", clerk_user_id, exc_info=True)
+        # On failure, fall back to whatever is cached (even stale), or None
+        return cached[0] if cached else None
+
+    _clerk_role_cache[clerk_user_id] = (role, time.monotonic())
+    return role
+
+
 security = HTTPBearer()
 
 _DEV_TOKEN_PREFIX = "test_token_"
@@ -111,8 +143,37 @@ async def get_current_user(
     return await get_or_create_user(db, clerk_user_id, email, full_name, user_date=user_date)
 
 
-async def require_admin(user: Annotated[User, Depends(get_current_user)]) -> User:
-    """Dependency that raises 403 for non-admin users."""
-    if not user.is_admin:
+async def require_admin(
+    user: Annotated[User, Depends(get_current_user)],
+    db:   Annotated[AsyncSession, Depends(get_db)],
+) -> User:
+    """Dependency that raises 403 for non-admin users.
+
+    Authority order (first match wins):
+      1. Clerk publicMetadata.role == "admin"  (live, fetched via Backend API, 60-s cache)
+      2. Local DB user.is_admin == True         (fallback / dev-token path)
+
+    When Clerk grants admin, the DB flag is synced automatically so that
+    subsequent queries and audit logs see the correct value without an
+    extra round-trip.
+    """
+    # ── 1. Check Clerk Backend API for the live role ───────────────────────────
+    clerk_role = await _get_clerk_role(user.clerk_user_id)
+    is_clerk_admin = clerk_role == "admin"
+
+    # ── 2. Sync DB flag if it drifted from Clerk truth ─────────────────────────
+    if is_clerk_admin and not user.is_admin:
+        user.is_admin = True
+        await db.flush()
+        logger.info("Synced is_admin=True from Clerk for user %s", user.clerk_user_id)
+    elif not is_clerk_admin and user.is_admin:
+        # Clerk role was revoked — honour that immediately
+        user.is_admin = False
+        await db.flush()
+        logger.info("Synced is_admin=False from Clerk for user %s", user.clerk_user_id)
+
+    # ── 3. Gate ────────────────────────────────────────────────────────────────
+    if not (is_clerk_admin or user.is_admin):
         raise HTTPException(status_code=403, detail="Admin only")
+
     return user
