@@ -163,15 +163,15 @@ async def _handle_checkout_completed(
 ) -> None:
     """Process a ``checkout.session.completed`` event."""
     try:
-        # stripe>=9: session.metadata is a StripeObject, NOT a plain dict.
-        # dict() converts it so that .get() works correctly.
+        # stripe>=9: metadata is a StripeObject, NOT a plain dict.
+        # dict(StripeObject) iterates it as a sequence → KeyError(0).
+        # Use getattr() directly — the correct v9 idiom for metadata fields.
         raw_metadata = getattr(session_obj, "metadata", None)
-        metadata_obj: dict = dict(raw_metadata) if raw_metadata else {}
-        user_id_str = metadata_obj.get("celpipbro_user_id")
-        plan        = metadata_obj.get("plan")
+        user_id_str = getattr(raw_metadata, "celpipbro_user_id", None)
+        plan        = getattr(raw_metadata, "plan", None)
         customer_id       = getattr(session_obj, "customer", None)
         payment_intent_id = getattr(session_obj, "payment_intent", None)
-    except (AttributeError, TypeError) as parse_err:
+    except (AttributeError, TypeError, KeyError) as parse_err:
         logger.error(
             "Webhook: could not parse session fields — %s | session=%s",
             parse_err,
