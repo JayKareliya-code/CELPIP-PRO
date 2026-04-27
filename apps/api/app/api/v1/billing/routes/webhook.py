@@ -163,9 +163,10 @@ async def _handle_checkout_completed(
 ) -> None:
     """Process a ``checkout.session.completed`` event."""
     try:
-        # stripe>=5: StripeObject uses attribute access, not dict subscript.
-        metadata_obj = getattr(session_obj, "metadata", None) or {}
-        # metadata is a plain dict in the Stripe SDK, so .get() is fine here.
+        # stripe>=9: session.metadata is a StripeObject, NOT a plain dict.
+        # dict() converts it so that .get() works correctly.
+        raw_metadata = getattr(session_obj, "metadata", None)
+        metadata_obj: dict = dict(raw_metadata) if raw_metadata else {}
         user_id_str = metadata_obj.get("celpipbro_user_id")
         plan        = metadata_obj.get("plan")
         customer_id       = getattr(session_obj, "customer", None)
