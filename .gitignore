@@ -120,3 +120,11 @@ temp/
 # Alembic — keep migrations, ignore env files auto-generated
 # ---------------------------------------------------------------------------
 # (migrations themselves SHOULD be committed)
+
+# ---------------------------------------------------------------------------
+# Celery Beat
+# ---------------------------------------------------------------------------
+celerybeat-schedule
+celerybeat-schedule.db
+celerybeat.pid
+

@@ -39,6 +39,9 @@ celery_app.conf.update(
     worker_prefetch_multiplier=1,     # one task at a time per worker process
     task_track_started=True,
     result_expires=86_400,            # results expire after 24 h
+    # Write the beat schedule DB to /tmp so the non-root container user
+    # (appuser) has write permission on Render and other locked-down hosts.
+    beat_schedule_filename="/tmp/celerybeat-schedule",
     beat_schedule={
         # Run reconciliation every night at 02:00 UTC.
         # The beat service must be running (see docker-compose.yml: celery-beat).
