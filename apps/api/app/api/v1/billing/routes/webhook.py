@@ -76,10 +76,11 @@ async def stripe_webhook(
             "STRIPE_WEBHOOK_SECRET is not set — skipping signature verification. "
             "This is ONLY acceptable in local development."
         )
-        event = stripe.Event.construct_from(json.loads(payload), stripe.api_key)
+        event = stripe.Event.construct_from(json.loads(payload), stripe.api_key)  # type: ignore[attr-defined]
 
-    event_id = event.get("id")
-    event_type = event.get("type")
+    # stripe>=5: StripeObject no longer inherits dict — use attribute access.
+    event_id   = getattr(event, "id", None)
+    event_type = getattr(event, "type", None)
     if not event_id or not event_type:
         raise HTTPException(status_code=400, detail="Malformed Stripe event.")
 
@@ -109,18 +110,24 @@ async def stripe_webhook(
         logger.info("Race-duplicate Stripe webhook ignored: id=%s", event_id)
         return JSONResponse({"status": "duplicate"})
 
+    # Non-fatal Redis guard: plan upgrade must succeed even if Redis is down.
+    try:
+        redis_client = get_redis_pool()
+    except Exception as redis_err:
+        logger.warning("Redis pool unavailable — SSE push disabled: %s", redis_err)
+        redis_client = None  # type: ignore[assignment]
+
     try:
         if event_type == "checkout.session.completed":
-            redis_client = get_redis_pool()
+            # stripe>=5: attribute access instead of dict-style
             await _handle_checkout_completed(
-                session_obj=event["data"]["object"],
+                session_obj=event.data.object,
                 db=db,
                 redis_client=redis_client,
             )
         elif event_type == "charge.refunded":
-            redis_client = get_redis_pool()
             await _handle_charge_refunded(
-                charge_obj=event["data"]["object"],
+                charge_obj=event.data.object,
                 db=db,
                 redis_client=redis_client,
             )
@@ -156,16 +163,18 @@ async def _handle_checkout_completed(
 ) -> None:
     """Process a ``checkout.session.completed`` event."""
     try:
-        metadata_obj = session_obj["metadata"] or {}
+        # stripe>=5: StripeObject uses attribute access, not dict subscript.
+        metadata_obj = getattr(session_obj, "metadata", None) or {}
+        # metadata is a plain dict in the Stripe SDK, so .get() is fine here.
         user_id_str = metadata_obj.get("celpipbro_user_id")
-        plan = metadata_obj.get("plan")
-        customer_id = session_obj.get("customer")
-        payment_intent_id = session_obj.get("payment_intent")
-    except (KeyError, TypeError) as parse_err:
+        plan        = metadata_obj.get("plan")
+        customer_id       = getattr(session_obj, "customer", None)
+        payment_intent_id = getattr(session_obj, "payment_intent", None)
+    except (AttributeError, TypeError) as parse_err:
         logger.error(
             "Webhook: could not parse session fields — %s | session=%s",
             parse_err,
-            session_obj.get("id", "unknown"),
+            getattr(session_obj, "id", "unknown"),
         )
         return
 
@@ -234,13 +243,16 @@ async def _handle_checkout_completed(
     await db.flush()
 
     # Publish Redis plan-update — SSE listeners push the change to the browser.
-    channel = f"{PLAN_CHANNEL_PREFIX}{user_id_str}"
-    payload = json.dumps({"plan": str(plan), "user_id": user_id_str})
-    try:
-        await redis_client.publish(channel, payload)
-    except Exception as pub_exc:
-        # Redis hiccup should not block a committed plan upgrade.
-        logger.warning("Redis publish failed for %s: %s", channel, pub_exc)
+    if redis_client is not None:
+        channel = f"{PLAN_CHANNEL_PREFIX}{user_id_str}"
+        pub_payload = json.dumps({"plan": str(plan), "user_id": user_id_str})
+        try:
+            await redis_client.publish(channel, pub_payload)
+        except Exception as pub_exc:
+            # Redis hiccup should not block a committed plan upgrade.
+            logger.warning("Redis publish failed for %s: %s", channel, pub_exc)
+    else:
+        logger.warning("Redis unavailable — skipping SSE push for user=%s", user_id_str)
 
 
 async def _handle_charge_refunded(
@@ -249,7 +261,8 @@ async def _handle_charge_refunded(
     redis_client: aioredis.Redis,
 ) -> None:
     """Downgrade the user's plan back to starter when a charge is refunded."""
-    payment_intent_id = charge_obj.get("payment_intent")
+    # stripe>=5: attribute access, not dict-style .get()
+    payment_intent_id = getattr(charge_obj, "payment_intent", None)
     if not payment_intent_id:
         logger.warning("charge.refunded without payment_intent — skipping.")
         return
@@ -279,8 +292,11 @@ async def _handle_charge_refunded(
     await db.flush()
 
     channel = f"{PLAN_CHANNEL_PREFIX}{str(user.id)}"
-    payload = json.dumps({"plan": "starter", "user_id": str(user.id)})
-    try:
-        await redis_client.publish(channel, payload)
-    except Exception as pub_exc:
-        logger.warning("Redis publish failed for %s: %s", channel, pub_exc)
+    pub_payload = json.dumps({"plan": "starter", "user_id": str(user.id)})
+    if redis_client is not None:
+        try:
+            await redis_client.publish(channel, pub_payload)
+        except Exception as pub_exc:
+            logger.warning("Redis publish failed for %s: %s", channel, pub_exc)
+    else:
+        logger.warning("Redis unavailable — skipping SSE push for user=%s", user.id)
