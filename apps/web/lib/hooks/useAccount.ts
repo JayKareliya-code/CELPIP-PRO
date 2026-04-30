@@ -29,6 +29,26 @@ export function useAcceptTos() {
   });
 }
 
+export function useSetTargetBand() {
+  const { getToken } = useAuth();
+  const queryClient = useQueryClient();
+
+  return useMutation<AppUser, Error, { target_band: number }>({
+    mutationFn: async ({ target_band }) => {
+      const token = await getToken();
+      return api.patch<AppUser>(
+        `${API_V1}/users/me/target-score`,
+        { target_band },
+        { headers: authHeaders(token) },
+      );
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["current-user"] });
+    },
+  });
+}
+
+
 export function useDeleteAccount() {
   const { getToken, signOut } = useAuth();
   const clerk = useClerk();

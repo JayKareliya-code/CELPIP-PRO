@@ -4,7 +4,8 @@
 // DimensionBreakdown.tsx — Progress bars per rubric dimension
 // ─────────────────────────────────────────────────────────────────────────────
 
-import { useEffect, useState } from "react";
+import { useEffect, useState }      from "react";
+import { formatBand, roundBand }    from "@/lib/utils";
 import type { ReportDimensionScore } from "@/lib/types";
 
 interface Props {
@@ -32,7 +33,8 @@ export function DimensionBreakdown({ dimensions }: Props) {
       setTimeout(() => {
         setWidths((prev) => {
           const next = [...prev];
-          next[i] = (dimensions[i].score / dimensions[i].max_score) * 100;
+          // Use rounded score so bar width matches the displayed number
+          next[i] = (roundBand(dimensions[i].score) / dimensions[i].max_score) * 100;
           return next;
         });
       }, i * 80)
@@ -51,7 +53,7 @@ export function DimensionBreakdown({ dimensions }: Props) {
             <div className="flex items-center justify-between">
               <span className="text-sm font-medium text-white/90">{dim.label}</span>
               <span className={`text-sm font-bold tabular-nums ${scoreTextColor(dim.score)}`}>
-                {dim.score}<span className="text-subtle font-normal">/{dim.max_score}</span>
+                {formatBand(dim.score)}<span className="text-subtle font-normal">/{dim.max_score}</span>
               </span>
             </div>
             {/* Track */}

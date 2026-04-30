@@ -66,6 +66,7 @@ const PLANS: PlanCardConfig[] = [
     icon:        <Trophy className="w-5 h-5 text-warning" />,
     iconBg:      "bg-warning/15",
     highlighted: false,
+    comingSoon:  true,
     badge:       "Best Results",
     badgeColor:  "bg-warning/90",
     features: [

@@ -4,13 +4,13 @@
 // ScoreSummaryCard.tsx — Overall band score with SVG arc gauge
 // ─────────────────────────────────────────────────────────────────────────────
 
-import { useEffect, useRef, useState } from "react";
-import type { Skill } from "@/lib/types";
+import { useEffect, useState } from "react";
+import { formatBand, roundBand }        from "@/lib/utils";
+import type { Skill }                   from "@/lib/types";
 
 interface Props {
   estimatedBand: number;
   skill: Skill;
-  taskTitle: string;
   completedAt: string;
 }
 
@@ -28,24 +28,30 @@ function formatDate(iso: string) {
   });
 }
 
-export function ScoreSummaryCard({ estimatedBand, skill, taskTitle, completedAt }: Props) {
+export function ScoreSummaryCard({ estimatedBand, skill, completedAt }: Props) {
   const palette = bandPalette(estimatedBand);
   const [animated, setAnimated] = useState(0);
-  const animRef = useRef<number | null>(null);
 
-  // Animate band number counting up on mount
+  // Round to nearest 0.5 once — used for gauge target and all labels
+  const displayBand = roundBand(estimatedBand);
+
+  // Animate the arc from 0 → displayBand on mount.
+  // Pure rAF cubic ease-out — no CSS transition on the SVG element
+  // (CSS transition + rAF fighting each other causes jitter/stutter).
   useEffect(() => {
+    setAnimated(0);                       // always reset before animating
+    let rafId: number;
     const start = performance.now();
-    const duration = 1000;
+    const duration = 1200;               // ms — longer feels more satisfying
     const step = (now: number) => {
       const progress = Math.min((now - start) / duration, 1);
-      const eased = 1 - Math.pow(1 - progress, 3); // ease-out cubic
-      setAnimated(eased * estimatedBand);
-      if (progress < 1) animRef.current = requestAnimationFrame(step);
+      const eased    = 1 - Math.pow(1 - progress, 3); // ease-out cubic
+      setAnimated(eased * displayBand);
+      if (progress < 1) rafId = requestAnimationFrame(step);
     };
-    animRef.current = requestAnimationFrame(step);
-    return () => { if (animRef.current) cancelAnimationFrame(animRef.current); };
-  }, [estimatedBand]);
+    rafId = requestAnimationFrame(step);
+    return () => cancelAnimationFrame(rafId);
+  }, [displayBand]);
 
   // SVG arc gauge
   const radius      = 60;
@@ -56,10 +62,10 @@ export function ScoreSummaryCard({ estimatedBand, skill, taskTitle, completedAt 
       {/* Ambient glow */}
       <div className={`absolute -top-16 -right-16 h-48 w-48 rounded-full blur-3xl opacity-20 ${palette.bg}`} />
 
-      <div className="relative flex flex-col items-center gap-6 sm:flex-row sm:items-start sm:gap-8">
+      <div className="relative flex flex-col items-center gap-6 sm:flex-row sm:items-center sm:gap-8">
         {/* SVG Arc Gauge */}
         <div className="relative flex-shrink-0">
-          <svg width="152" height="152" viewBox="0 0 152 152" className="-rotate-[135deg]">
+          <svg width="140" height="140" viewBox="0 0 152 152" className="-rotate-[135deg]">
             {/* Track */}
             <circle
               cx="76" cy="76" r={radius}
@@ -75,33 +81,32 @@ export function ScoreSummaryCard({ estimatedBand, skill, taskTitle, completedAt 
               strokeDasharray={circumference * 0.75}
               strokeDashoffset={circumference * 0.75 * (1 - animated / 12)}
               strokeLinecap="round"
-              style={{ transition: "stroke-dashoffset 0.05s linear", filter: `drop-shadow(0 0 6px ${palette.stroke}80)` }}
+              style={{ filter: `drop-shadow(0 0 6px ${palette.stroke}80)` }}
             />
           </svg>
           {/* Center label */}
           <div className="absolute inset-0 flex flex-col items-center justify-center">
             <span className={`text-4xl font-bold tabular-nums ${palette.text}`}>
-              {animated.toFixed(1)}
+              {formatBand(animated)}
             </span>
             <span className="text-xs text-subtle uppercase tracking-widest mt-0.5">/ 12</span>
           </div>
         </div>
 
         {/* Text info */}
-        <div className="flex-1 space-y-2 text-center sm:text-left">
+        <div className="flex-1 min-w-0 space-y-2 text-center sm:text-left">
           <div className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-xs font-medium ${palette.badge}`}>
             {skill === "speaking" ? "🎤" : "✍️"} {skill.charAt(0).toUpperCase() + skill.slice(1)}
           </div>
-          <h2 className="text-xl font-semibold text-white leading-snug">{taskTitle}</h2>
-          <p className="text-sm text-subtle">Completed {formatDate(completedAt)}</p>
+          <p className="text-sm text-white/50">Completed {formatDate(completedAt)}</p>
 
           {/* Band label */}
-          <div className={`mt-3 rounded-xl px-4 py-2 text-sm font-medium ${palette.bg} ${palette.text} border border-current/20`}>
-            {estimatedBand >= 9
-              ? "🏆 Excellent — Band " + estimatedBand.toFixed(1)
-              : estimatedBand >= 6
-              ? "✅ Competent — Band " + estimatedBand.toFixed(1)
-              : "📈 Developing — Band " + estimatedBand.toFixed(1)}
+          <div className={`mt-1 rounded-xl px-4 py-2.5 text-sm font-semibold ${palette.bg} ${palette.text} border border-current/20`}>
+            {displayBand >= 9
+              ? "🏆 Excellent — Band " + formatBand(displayBand)
+              : displayBand >= 6
+              ? "✅ Competent — Band " + formatBand(displayBand)
+              : "📈 Developing — Band " + formatBand(displayBand)}
           </div>
         </div>
       </div>

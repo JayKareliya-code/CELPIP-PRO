@@ -1,4 +1,4 @@
-import { cn } from "@/lib/utils";
+import { cn, formatBand } from "@/lib/utils";
 import { BAND_LABELS } from "@/lib/constants";
 
 interface ScoreBadgeProps {
@@ -40,7 +40,7 @@ export function ScoreBadge({
         className
       )}
     >
-      {isEmpty ? "—" : band}
+      {isEmpty ? "—" : formatBand(band)}
       {!isEmpty && showLabel && band in BAND_LABELS && (
         <span className="font-normal opacity-80">{BAND_LABELS[band]}</span>
       )}

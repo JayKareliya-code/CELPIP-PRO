@@ -1,61 +1,48 @@
-import Link from "next/link";
+// ─────────────────────────────────────────────────────────────────────────────
+// QuickStartCard.tsx — Speaking & Writing navigation cards
+// Pure server component — no interactivity needed.
+// ─────────────────────────────────────────────────────────────────────────────
+
+import Link         from "next/link";
 import { Mic, PenLine, ArrowRight } from "lucide-react";
 
-interface QuickStartAction {
-  label: string;
-  sublabel: string;
-  href: string;
-  icon: React.ElementType;
-  colorClasses: string;
-}
-
-const actions: QuickStartAction[] = [
+const ACTIONS = [
   {
-    label: "Speaking Practice",
+    id:       "quick-start-speaking",
+    label:    "Speaking",
     sublabel: "Tasks 1–8 · up to 90 sec",
-    href: "/speaking",
-    icon: Mic,
-    colorClasses:
-      "bg-primary-light hover:bg-primary/10 border-primary/20 text-primary",
+    href:     "/speaking",
+    Icon:     Mic,
   },
   {
-    label: "Writing Practice",
+    id:       "quick-start-writing",
+    label:    "Writing",
     sublabel: "Tasks 1–2 · up to 27 min",
-    href: "/writing",
-    icon: PenLine,
-    colorClasses:
-      "bg-success-light hover:bg-success/10 border-success/30 text-success",
+    href:     "/writing",
+    Icon:     PenLine,
   },
-];
+] as const;
 
-/**
- * Two large CTA cards on the dashboard — one for speaking, one for writing.
- * Pure server component (no interactivity needed).
- */
 export function QuickStartCard() {
   return (
-    <div className="rounded-xl border border-border bg-surface shadow-card p-5">
-      <h2 className="text-base font-semibold text-foreground mb-4">
-        Quick Start
-      </h2>
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-        {actions.map(({ label, sublabel, href, icon: Icon, colorClasses }) => (
-          <Link
-            key={href}
-            href={href}
-            className={`group flex items-center justify-between rounded-lg border p-4 transition-all duration-150 hover:shadow-card ${colorClasses}`}
-          >
-            <div className="flex items-center gap-3">
-              <Icon className="w-5 h-5 shrink-0" />
-              <div>
-                <p className="font-semibold text-sm">{label}</p>
-                <p className="text-xs opacity-70 mt-0.5">{sublabel}</p>
-              </div>
+    <div className="grid grid-cols-2 gap-3">
+      {ACTIONS.map(({ id, label, sublabel, href, Icon }) => (
+        <Link
+          key={href}
+          id={id}
+          href={href}
+          className="group flex items-center justify-between rounded-xl border border-border bg-surface px-3 py-3 sm:px-5 sm:py-4 transition-colors hover:border-primary/40"
+        >
+          <div className="flex items-center gap-2 sm:gap-3 min-w-0">
+            <Icon className="h-4 w-4 text-subtle group-hover:text-primary transition-colors shrink-0" />
+            <div className="min-w-0">
+              <p className="text-sm font-semibold text-foreground truncate">{label}</p>
+              <p className="text-[10px] sm:text-xs text-subtle mt-0.5 truncate">{sublabel}</p>
             </div>
-            <ArrowRight className="w-4 h-4 opacity-0 -translate-x-1 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-150" />
-          </Link>
-        ))}
-      </div>
+          </div>
+          <ArrowRight className="h-4 w-4 text-subtle shrink-0 opacity-0 -translate-x-1 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-150 hidden sm:block" />
+        </Link>
+      ))}
     </div>
   );
 }

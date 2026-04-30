@@ -5,12 +5,13 @@ import { usePathname } from "next/navigation";
 import { useAuth, useUser, useClerk } from "@clerk/nextjs";
 import { useCurrentUser } from "@/lib/hooks/useCurrentUser";
 import {
-  ChevronDown, LogOut, LayoutDashboard, User2,
-  Settings, Zap, CreditCard, Mic, PenLine, PlayCircle,
-  History, TrendingUp, Menu, X,
+  ChevronDown, LogOut, User2,
+  Settings, Zap, Menu,
 } from "lucide-react";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { cn } from "@/lib/utils";
+import { Sidebar } from "@/components/layout/Sidebar";
+import { NAV_LINKS } from "@/lib/nav-links";
 
 // ── Plan badge ────────────────────────────────────────────────────────────────
 
@@ -57,17 +58,6 @@ function Brand() {
   );
 }
 
-// ── Nav links (shown in center for authenticated users) ───────────────────────
-
-const NAV_LINKS = [
-  { href: "/dashboard", label: "Dashboard",  icon: LayoutDashboard },
-  { href: "/speaking",  label: "Speaking",   icon: Mic            },
-  { href: "/writing",   label: "Writing",    icon: PenLine        },
-  { href: "/practice",  label: "Practice",   icon: PlayCircle     },
-  { href: "/history",   label: "History",    icon: History        },
-  { href: "/progress",  label: "Progress",   icon: TrendingUp     },
-  { href: "/billing",   label: "Billing",    icon: CreditCard     },
-];
 
 function NavLinks({ pathname, onClick }: { pathname: string; onClick?: () => void }) {
   return (
@@ -220,135 +210,79 @@ function ProfileDropdown() {
   );
 }
 
-// ── Mobile menu ───────────────────────────────────────────────────────────────
-
-function MobileMenu({ pathname }: { pathname: string }) {
-  const [open, setOpen] = useState(false);
-
-  // Close on route change
-  useEffect(() => { setOpen(false); }, [pathname]);
-
-  return (
-    <>
-      <button
-        id="mobile-menu-trigger"
-        onClick={() => setOpen((p) => !p)}
-        className="flex items-center justify-center w-9 h-9 rounded-lg border border-white/[0.08] hover:border-white/[0.14] hover:bg-white/[0.04] transition-colors"
-        aria-label="Toggle menu"
-      >
-        {open ? <X className="w-4 h-4 text-white/70" /> : <Menu className="w-4 h-4 text-white/70" />}
-      </button>
-
-      {open && (
-        <div className="absolute top-full left-0 right-0 z-40 bg-[#0D0F17]/98 backdrop-blur-xl border-b border-white/[0.07] px-4 py-3 flex flex-col gap-1">
-          {NAV_LINKS.map(({ href, label, icon: Icon }) => {
-            const active = pathname.startsWith(href);
-            return (
-              <Link
-                key={href}
-                href={href}
-                onClick={() => setOpen(false)}
-                className={cn(
-                  "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors",
-                  active
-                    ? "bg-amber-500/10 text-amber-400 border border-amber-500/20"
-                    : "text-white/55 hover:text-white/90 hover:bg-white/[0.04]",
-                )}
-              >
-                <Icon className="w-4 h-4 shrink-0" />
-                {label}
-              </Link>
-            );
-          })}
-        </div>
-      )}
-    </>
-  );
-}
-
 // ── Navbar ────────────────────────────────────────────────────────────────────
 
 export function Navbar() {
   const pathname                 = usePathname();
   const { isSignedIn, isLoaded } = useAuth();
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  // Stable callback — safe to pass as prop and include in useEffect deps
+  const closeSidebar = useCallback(() => setSidebarOpen(false), []);
 
-  const showAuthNav   = !isLoaded || !!isSignedIn;
+  const showAuthNav   = isLoaded && !!isSignedIn;
   const showPublicNav = !showAuthNav;
 
   return (
-    <header
-      className={cn(
-        "sticky top-0 z-50 w-full transition-all duration-300",
-        "bg-[#0D0F17]/95 backdrop-blur-md border-b border-white/[0.06]",
+    <>
+      {/* Mobile slide-in drawer */}
+      {showAuthNav && (
+        <Sidebar open={sidebarOpen} onClose={closeSidebar} />
       )}
-    >
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center h-14 gap-6">
 
-          {/* Brand — always left */}
-          <Brand />
+      <header
+        className={cn(
+          "sticky top-0 z-50 w-full transition-all duration-300",
+          "bg-[#0D0F17]/95 backdrop-blur-md border-b border-white/[0.06]",
+        )}
+      >
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center h-14 gap-6">
 
-          {/* Spacer — pushes everything else to the right */}
-          <div className="flex-1" />
+            {/* Brand — always left */}
+            <Brand />
 
-          {/* Right side — nav links + profile (desktop) */}
-          <div className="flex items-center gap-6 shrink-0">
+            {/* Spacer — pushes everything else to the right */}
+            <div className="flex-1" />
 
-            {/* Nav links — desktop only, auth users */}
-            {showAuthNav && (
-              <nav className="hidden lg:flex items-center gap-5">
-                <NavLinks pathname={pathname} />
-              </nav>
-            )}
+            {/* Right side — nav links + profile (desktop) */}
+            <div className="flex items-center gap-6 shrink-0">
 
-            {/* Public nav links */}
-            {showPublicNav && (
-              <>
-                <Link
-                  href="/terms"
-                  className="hidden sm:inline text-xs text-white/35 hover:text-amber-400 transition-colors"
+              {/* Nav links — desktop only, auth users */}
+              {showAuthNav && (
+                <nav className="hidden lg:flex items-center gap-5">
+                  <NavLinks pathname={pathname} />
+                </nav>
+              )}
+
+              {/* Public nav links */}
+              {showPublicNav && (
+                <>
+                  <Link href="/terms"   className="hidden sm:inline text-xs text-white/35 hover:text-amber-400 transition-colors">Terms</Link>
+                  <Link href="/privacy" className="hidden sm:inline text-xs text-white/35 hover:text-amber-400 transition-colors">Privacy</Link>
+                  <Link href="/contact" className="hidden sm:inline text-xs text-white/35 hover:text-amber-400 transition-colors">Contact</Link>
+                  <Link href="/sign-in" className="text-sm font-medium text-white/55 hover:text-white/90 transition-colors">Sign In</Link>
+                  <Link href="/sign-up" className="text-sm font-semibold bg-amber-500 hover:bg-amber-400 text-black px-4 py-1.5 rounded-lg transition-colors">Get Started</Link>
+                </>
+              )}
+
+              {showAuthNav && <ProfileDropdown />}
+
+              {/* Hamburger — mobile only, opens the slide-in Sidebar */}
+              {showAuthNav && (
+                <button
+                  id="mobile-menu-trigger"
+                  onClick={() => setSidebarOpen(true)}
+                  className="lg:hidden flex items-center justify-center w-9 h-9 rounded-lg border border-white/[0.08] hover:border-white/[0.14] hover:bg-white/[0.04] transition-colors"
+                  aria-label="Open navigation menu"
                 >
-                  Terms
-                </Link>
-                <Link
-                  href="/privacy"
-                  className="hidden sm:inline text-xs text-white/35 hover:text-amber-400 transition-colors"
-                >
-                  Privacy
-                </Link>
-                <Link
-                  href="/contact"
-                  className="hidden sm:inline text-xs text-white/35 hover:text-amber-400 transition-colors"
-                >
-                  Contact
-                </Link>
-                <Link
-                  href="/sign-in"
-                  className="text-sm font-medium text-white/55 hover:text-white/90 transition-colors"
-                >
-                  Sign In
-                </Link>
-                <Link
-                  href="/sign-up"
-                  className="text-sm font-semibold bg-amber-500 hover:bg-amber-400 text-black px-4 py-1.5 rounded-lg transition-colors"
-                >
-                  Get Started
-                </Link>
-              </>
-            )}
+                  <Menu className="w-4 h-4 text-white/70" />
+                </button>
+              )}
 
-            {showAuthNav && <ProfileDropdown />}
-
-            {/* Mobile hamburger — auth only, hidden on lg+ */}
-            {showAuthNav && (
-              <div className="relative lg:hidden">
-                <MobileMenu pathname={pathname} />
-              </div>
-            )}
+            </div>
           </div>
-
         </div>
-      </div>
-    </header>
+      </header>
+    </>
   );
 }

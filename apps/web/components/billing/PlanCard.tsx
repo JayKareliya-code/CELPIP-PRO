@@ -18,17 +18,19 @@ export interface PlanFeature {
 }
 
 export interface PlanCardConfig {
-  id:         "starter" | BillingPlan;
-  name:       string;
-  tagline:    string;
-  priceLabel: string;
-  priceNote:  string;
-  icon:       React.ReactNode;
-  iconBg:     string;
-  features:   PlanFeature[];
-  badge?:     string;
+  id:          "starter" | BillingPlan;
+  name:        string;
+  tagline:     string;
+  priceLabel:  string;
+  priceNote:   string;
+  icon:        React.ReactNode;
+  iconBg:      string;
+  features:    PlanFeature[];
+  badge?:      string;
   badgeColor?: string;
   highlighted: boolean;
+  /** If true, renders a non-clickable "Coming Soon" state instead of a checkout button */
+  comingSoon?: boolean;
 }
 
 interface PlanCardProps {
@@ -69,6 +71,12 @@ export function PlanCard({ plan, currentPlan, isCheckingOut, onUpgrade }: PlanCa
             Current Plan
           </div>
         </div>
+      ) : plan.comingSoon ? (
+        <div className="absolute top-0 right-0">
+          <div className="bg-warning/80 text-white text-[11px] font-bold px-3 py-1 rounded-bl-xl rounded-tr-xl tracking-wide">
+            Coming Soon
+          </div>
+        </div>
       ) : plan.badge ? (
         <div className="absolute top-0 right-0">
           <div className={cn(plan.badgeColor, "text-white text-[11px] font-bold px-3 py-1 rounded-bl-xl rounded-tr-xl tracking-wide")}>
@@ -87,13 +95,21 @@ export function PlanCard({ plan, currentPlan, isCheckingOut, onUpgrade }: PlanCa
           <p className="text-sm text-subtle">{plan.tagline}</p>
         </div>
         <div>
-          <div className="flex items-baseline gap-1.5">
-            <span className="text-4xl font-extrabold text-foreground">{plan.priceLabel}</span>
-            {plan.priceLabel !== "Free" && (
-              <span className="text-subtle text-sm">CAD</span>
-            )}
-          </div>
-          <p className="text-xs text-subtle mt-0.5">{plan.priceNote}</p>
+          {plan.comingSoon ? (
+            <div className="flex items-baseline gap-1.5">
+              <span className="text-4xl font-extrabold text-foreground/30">—</span>
+            </div>
+          ) : (
+            <div className="flex items-baseline gap-1.5">
+              <span className="text-4xl font-extrabold text-foreground">{plan.priceLabel}</span>
+              {plan.priceLabel !== "Free" && (
+                <span className="text-subtle text-sm">CAD</span>
+              )}
+            </div>
+          )}
+          <p className="text-xs text-subtle mt-0.5">
+            {plan.comingSoon ? "Pricing will be announced soon" : plan.priceNote}
+          </p>
         </div>
       </div>
 
@@ -125,7 +141,15 @@ export function PlanCard({ plan, currentPlan, isCheckingOut, onUpgrade }: PlanCa
       </ul>
 
       {/* ── CTA ───────────────────────────────────────────────────────────── */}
-      {isCurrent ? (
+      {plan.comingSoon ? (
+        <div
+          id={`billing-plan-${plan.id}-coming-soon`}
+          className="inline-flex items-center justify-center gap-2 w-full py-3.5 rounded-xl bg-warning/5 border border-warning/25 text-warning/60 text-sm font-semibold cursor-not-allowed select-none"
+          aria-disabled="true"
+        >
+          🔒 Coming Soon
+        </div>
+      ) : isCurrent ? (
         <div className="inline-flex items-center justify-center gap-2 w-full py-3.5 rounded-xl bg-success/10 border border-success/30 text-success text-sm font-semibold cursor-default select-none">
           ✓ Active Plan
         </div>

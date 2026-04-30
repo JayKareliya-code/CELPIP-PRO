@@ -7,12 +7,13 @@
 import { useState } from "react";
 import {
   ChevronDown, ChevronUp,
-  ChevronLeft, ChevronRight,
-  Loader2, ClipboardList,
+  ClipboardList,
   CheckCircle2, XCircle, Clock,
+  Loader2,
 } from "lucide-react";
 import { ScoreBadge }         from "@/components/common/ScoreBadge";
 import { EmptyState }         from "@/components/common/EmptyState";
+import { PaginationFooter }   from "@/components/common/PaginationFooter";
 import { timeAgo }            from "@/lib/utils";
 import { useMockExamHistory } from "@/lib/hooks/useMockExamHistory";
 import type { MockExamSession, MockExamTaskResult } from "@/lib/hooks/useMockExamHistory";
@@ -227,31 +228,17 @@ export function MockExamHistorySection() {
 
       {/* Pagination */}
       {totalPages > 1 && (
-        <div className="flex items-center justify-between text-sm text-subtle">
-          <span>Showing {start}–{end} of {total} session{total !== 1 ? "s" : ""}</span>
-          <div className="flex items-center gap-2">
-            {isLoading && <Loader2 className="w-4 h-4 animate-spin text-primary" />}
-            <button
-              onClick={() => setPage((p) => Math.max(1, p - 1))}
-              disabled={page === 1 || isLoading}
-              aria-label="Previous page"
-              className="p-1.5 rounded-lg border border-border hover:bg-muted
-                         disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
-            >
-              <ChevronLeft className="w-4 h-4" />
-            </button>
-            <span className="tabular-nums min-w-[3rem] text-center">{page} / {totalPages}</span>
-            <button
-              onClick={() => setPage((p) => p + 1)}
-              disabled={!has_next || isLoading}
-              aria-label="Next page"
-              className="p-1.5 rounded-lg border border-border hover:bg-muted
-                         disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
-            >
-              <ChevronRight className="w-4 h-4" />
-            </button>
-          </div>
-        </div>
+        <PaginationFooter
+          page={page}
+          totalPages={totalPages}
+          total={total}
+          start={start}
+          end={end}
+          has_next={has_next}
+          isLoading={isLoading}
+          itemLabel="session"
+          onPageChange={setPage}
+        />
       )}
     </div>
   );

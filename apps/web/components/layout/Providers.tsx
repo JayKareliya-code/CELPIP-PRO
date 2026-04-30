@@ -4,6 +4,16 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Toaster }        from "sonner";
 import { useRef }         from "react";
 import { AuthCacheGuard } from "@/components/layout/AuthCacheGuard";
+import { usePlanEvents }  from "@/lib/hooks/usePlanEvents";
+
+/**
+ * Mounts the SSE plan-events listener globally so that plan upgrades
+ * are reflected in the UI from ANY page — not only when on /billing.
+ */
+function PlanEventsWatcher() {
+  usePlanEvents();
+  return null;
+}
 
 /**
  * Client-side providers wrapper.
@@ -47,6 +57,9 @@ export function Providers({ children }: { children: React.ReactNode }) {
         single most important guard against cross-user data leakage.
       */}
       <AuthCacheGuard />
+
+      {/* Global SSE listener — keeps plan badge in sync after purchase from any page */}
+      <PlanEventsWatcher />
 
       {children}
 

@@ -1,30 +1,48 @@
 "use client";
 
 // ─────────────────────────────────────────────────────────────────────────────
-// TosGateWrapper.tsx — Client boundary for the TOS gate in the server layout
+// TosGateWrapper.tsx — Client boundary for the TOS + onboarding gates
 //
-// The main layout is a Server Component (needed for auth() and redirect()).
-// This thin client wrapper fetches the current user and renders TosGateModal
-// when the user has not yet accepted the current ToS version.
+// Gate order (both are non-dismissable overlays):
+//   1. TosGateModal      — user must accept current TOS version
+//   2. TargetBandGateModal — user must set their target band (required for
+//                            personalised AI feedback and report labels)
+//
+// Once both are satisfied the children (full app) render normally.
 // ─────────────────────────────────────────────────────────────────────────────
 
-import { useCurrentUser } from "@/lib/hooks/useCurrentUser";
-import { TosGateModal }   from "@/components/common/TosGateModal";
+import { useCurrentUser }         from "@/lib/hooks/useCurrentUser";
+import { TosGateModal }           from "@/components/common/TosGateModal";
+import { TargetBandGateModal }    from "@/components/common/TargetBandGateModal";
+
+// Must match settings.TOS_CURRENT_VERSION on the backend.
+const TOS_CURRENT_VERSION = "2026-04-22";
 
 export function TosGateWrapper({ children }: { children: React.ReactNode }) {
   const { user, isLoading } = useCurrentUser();
 
+  const tosAccepted =
+    !!user?.tos_accepted_at && user?.tos_version === TOS_CURRENT_VERSION;
+
+  const needsTargetBand =
+    tosAccepted && user?.target_band === null;
+
   return (
     <>
-      {/* Render children regardless — the modal overlays everything */}
+      {/* Render children regardless — gates overlay everything */}
       {children}
 
-      {/* TOS gate: only shown when user data is loaded and acceptance is missing */}
+      {/* Gate 1: TOS acceptance */}
       {!isLoading && user && (
         <TosGateModal
           tosVersion={user.tos_version}
           tosAcceptedAt={user.tos_accepted_at}
         />
+      )}
+
+      {/* Gate 2: Target band (only shown once TOS is done) */}
+      {!isLoading && needsTargetBand && (
+        <TargetBandGateModal />
       )}
     </>
   );

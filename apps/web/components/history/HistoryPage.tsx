@@ -42,7 +42,7 @@ export function HistoryPage() {
       <div className="space-y-6 animate-fade-in">
 
       {/* ── Page header ──────────────────────────────────────────────────── */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         <div>
           <div className="flex items-center gap-2 mb-1">
             <History className="w-5 h-5 text-primary" />
@@ -58,7 +58,7 @@ export function HistoryPage() {
         {/* ── View toggle (Practice / Mock Exams) ── */}
         <div
           role="tablist"
-          className="inline-flex items-center gap-1 rounded-xl border border-border bg-surface p-1"
+          className="grid grid-cols-2 gap-1 sm:inline-grid rounded-xl border border-border bg-surface p-1"
         >
           {VIEW_TABS.map(({ label, value, icon }) => {
             const isActive = view === value;
@@ -68,14 +68,13 @@ export function HistoryPage() {
                 role="tab"
                 aria-selected={isActive}
                 onClick={() => handleViewChange(value)}
-                className={`
-                  flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm font-medium
-                  transition-all duration-150
-                  ${isActive
+                className={[
+                  "flex items-center justify-center gap-1.5 rounded-lg px-4 py-1.5 text-sm font-medium",
+                  "transition-all duration-150 whitespace-nowrap",
+                  isActive
                     ? "bg-primary text-white shadow-sm"
-                    : "text-subtle hover:text-white hover:bg-white/5"
-                  }
-                `}
+                    : "text-subtle hover:text-white hover:bg-white/5",
+                ].join(" ")}
               >
                 <span>{icon}</span> {label}
               </button>
@@ -139,9 +138,9 @@ function StatsSummary({ history }: { history: PaginatedHistory }) {
       ].map(({ label, value }) => (
         <div
           key={label}
-          className="rounded-xl border border-border bg-surface px-4 py-3 text-center shadow-card"
+          className="rounded-xl border border-border bg-surface px-3 py-2.5 sm:px-4 sm:py-3 text-center shadow-card"
         >
-          <p className="text-xl font-bold text-foreground tabular-nums">{value}</p>
+          <p className="text-lg sm:text-xl font-bold text-foreground tabular-nums">{value}</p>
           <p className="text-xs text-subtle mt-0.5">{label}</p>
         </div>
       ))}

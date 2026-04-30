@@ -25,6 +25,14 @@ export const metadata: Metadata = {
   description:
     "Practice CELPIP Speaking and Writing tasks with AI-powered feedback, rubric-based scoring, and personalized progress tracking. Achieve your target band score.",
   keywords: ["CELPIP", "CELPIP practice", "CELPIP speaking", "CELPIP writing", "Canadian English test"],
+  icons: {
+    icon: [
+      { url: "/favicon.ico" },
+      { url: "/icon.png",  type: "image/png" },
+    ],
+    shortcut: "/favicon.ico",
+    apple:    "/icon.png",
+  },
   openGraph: {
     type:        "website",
     locale:      "en_CA",

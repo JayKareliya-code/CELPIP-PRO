@@ -38,6 +38,27 @@ export function getBandColourClass(band: number): string {
 }
 
 /**
+ * Rounds a CELPIP band score to the nearest 0.5 increment.
+ * This is the single source of truth for score display rounding across the app.
+ *
+ * Examples: 7.3 → 7.5 | 7.2 → 7.0 | 8.76 → 9.0 | 6.0 → 6.0
+ *
+ * Use this on every score before rendering — never call .toFixed() directly
+ * on a raw band value without passing it through here first.
+ */
+export function roundBand(band: number): number {
+  return Math.round(band * 2) / 2;
+}
+
+/**
+ * Formats a band score for display: rounds to 0.5 then formats as "X.0" or "X.5".
+ * Always returns one decimal place so "8" becomes "8.0" and "7.5" stays "7.5".
+ */
+export function formatBand(band: number): string {
+  return roundBand(band).toFixed(1);
+}
+
+/**
  * Returns a friendly time-ago string.
  * e.g. "2 hours ago", "Yesterday"
  */

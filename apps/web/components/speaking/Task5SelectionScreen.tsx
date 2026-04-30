@@ -2,7 +2,7 @@
 // Task5SelectionScreen.tsx — PREP phase for Task 5 (Comparing & Persuading)
 //
 // Everything fits in one viewport — no scrolling required.
-// Layout (top → bottom, flex-col h-screen):
+// Layout (top → bottom, flex-col h-[calc(100vh-3.5rem)]):
 //   1. Compact header: timer ring + badge side by side
 //   2. Scenario prompt card (text-base, readable)
 //   3. Option cards row — flex-1 grows to fill remaining space
@@ -123,8 +123,8 @@ export function Task5SelectionScreen({
   const isUrgent    = secondsLeft <= 10;
 
   return (
-    // h-screen + overflow-hidden → the entire session lives in one viewport, no scroll
-    <div className="flex flex-col h-screen overflow-hidden bg-canvas px-4 pt-2 pb-3 gap-3 items-center">
+    // h-[calc(100vh-3.5rem)] + overflow-hidden → fills the viewport below the sticky navbar; no scroll
+    <div className="flex flex-col min-h-[calc(100vh-3.5rem)] overflow-y-auto bg-canvas px-5 py-4 gap-4 items-center justify-start sm:h-[calc(100vh-3.5rem)] sm:overflow-hidden sm:justify-center sm:px-6 sm:py-6">
 
       {/* ── 1. Compact header ─────────────────────────────────────────────── */}
       <div className="flex items-center gap-4 w-full max-w-3xl shrink-0">

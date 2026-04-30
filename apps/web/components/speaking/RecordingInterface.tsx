@@ -125,19 +125,19 @@ export function RecordingInterface({
     return (
       <div
         className={cn(
-          "flex flex-col items-center justify-start min-h-screen bg-canvas px-4 pt-3 pb-6 gap-6",
-          "lg:flex-row lg:items-start lg:justify-center lg:gap-8 lg:pt-5 lg:pb-10",
+          "flex flex-col items-center justify-center min-h-screen bg-canvas px-4 py-4 gap-6",
+          "lg:flex-row lg:items-center lg:justify-center lg:gap-10 lg:px-6 lg:py-10",
           className,
         )}
       >
         {/* ── Left: scene image + prompt reference ──────────────────────── */}
-        <div className="w-full lg:w-[440px] lg:shrink-0 lg:sticky lg:top-8 space-y-3">
+        <div className="w-full lg:w-[460px] lg:shrink-0 lg:sticky lg:top-14 space-y-3">
           <div className="rounded-2xl overflow-hidden border border-white/10 shadow-[0_8px_32px_rgba(0,0,0,0.45)]">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src={imageUrl!}
               alt="Task scene"
-              className="w-full object-cover max-h-[240px] lg:max-h-[300px]"
+              className="w-full object-cover max-h-[200px] lg:max-h-[300px]"
               draggable={false}
             />
           </div>
@@ -154,7 +154,7 @@ export function RecordingInterface({
         </div>
 
         {/* ── Right: recording controls ─────────────────────────────────── */}
-        <div className="w-full lg:w-80 flex flex-col items-center gap-6 lg:pt-8">
+        <div className="w-full lg:w-80 flex flex-col items-center gap-6">
           {recordingControls}
         </div>
       </div>
@@ -165,7 +165,7 @@ export function RecordingInterface({
   return (
     <div
       className={cn(
-        "flex flex-col items-center justify-center gap-8 min-h-screen bg-canvas px-6",
+        "flex flex-col items-center justify-center gap-6 sm:gap-8 min-h-screen bg-canvas px-4 sm:px-6 pt-4 pb-8",
         className,
       )}
     >

@@ -34,9 +34,5 @@ export function generateMetadata(): Metadata {
  * loading/error states, skeleton UI, and stale-while-revalidate caching.
  */
 export default function AttemptReportPage({ params }: PageProps) {
-  return (
-    <div className="flex-1 flex flex-col items-center px-4 py-10">
-      <ReportPage attemptId={params.id} />
-    </div>
-  );
+  return <ReportPage attemptId={params.id} />;
 }

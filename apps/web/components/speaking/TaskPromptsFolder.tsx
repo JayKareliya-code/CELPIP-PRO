@@ -93,6 +93,63 @@ interface TaskPromptsFolderProps {
   prompts: SpeakingTask[];
 }
 
+// ── Shared Card Header ──────────────────────────────────────────────────────
+// Extracted to eliminate the copy-paste between image-split and stacked layouts.
+// Any badge change only needs to happen here once.
+
+function CardHeader({
+  index,
+  prompt,
+  isAlreadyAttempted,
+  isBonusRetry,
+}: {
+  index:              number;
+  prompt:             SpeakingTask;
+  isAlreadyAttempted: boolean;
+  isBonusRetry:       boolean;
+}) {
+  const diffCfg = DIFFICULTY_CONFIG[prompt.difficulty];
+  return (
+    <div className="px-4 pt-4 pb-3 border-b border-white/[0.06] shrink-0">
+      <div className="flex items-center justify-between gap-2 flex-wrap">
+        <div className="flex items-center gap-2">
+          <span className={cn(BADGE_BASE, "bg-white/[0.06] text-white/40 border-white/[0.08]")}>
+            Prompt {index + 1}
+          </span>
+          <span className={cn(BADGE_BASE, diffCfg.classes)}>
+            {diffCfg.label}
+          </span>
+          {isAlreadyAttempted && (
+            <span className={cn(BADGE_BASE, "bg-amber-900/30 text-amber-400 border-amber-700/40")}>
+              Attempted
+            </span>
+          )}
+          {isBonusRetry && (
+            <span className={cn(BADGE_BASE, "bg-amber-900/30 text-amber-400 border-amber-700/40")}>
+              Retry mode
+            </span>
+          )}
+        </div>
+        <div className="flex items-center gap-2 text-xs text-subtle/70">
+          <span className="flex items-center gap-1">
+            <Timer className="w-3 h-3" />
+            {formatTime(prompt.prep_time_seconds)} prep
+          </span>
+          <span className="flex items-center gap-1">
+            <Mic className="w-3 h-3" />
+            {formatTime(prompt.response_time_seconds)} speak
+          </span>
+          {prompt.has_parts && (
+            <span className={cn(BADGE_BASE, "bg-amber-900/30 text-amber-300 border-amber-700/40")}>
+              2 parts
+            </span>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // ── Prompt Card ───────────────────────────────────────────────────────────────
 
 function PromptCard({
@@ -108,13 +165,12 @@ function PromptCard({
   isAlreadyAttempted: boolean;
   isBonusRetry: boolean;
 }) {
-  const diffCfg = DIFFICULTY_CONFIG[prompt.difficulty];
   const isImageTask = IMAGE_TASKS.has(taskNumber);
   const imageUrl = prompt.context_image_url;
 
   return (
     <Link
-      href={`/speaking/${taskNumber}/${prompt.id}/practice`}
+      href={`/speaking/${prompt.id}/practice`}
       className="group flex h-full"
     >
       <div className="flex flex-col h-full w-full rounded-xl border border-border bg-surface hover:border-white/[0.18] hover:shadow-[0_4px_24px_rgba(0,0,0,0.35)] transition-all duration-200 overflow-hidden">
@@ -145,53 +201,15 @@ function PromptCard({
 
             {/* Right – content pane */}
             <div className="flex flex-col flex-1 min-w-0 border-l border-white/[0.06]">
-              {/* Card header */}
-              <div className="px-4 pt-4 pb-3 border-b border-white/[0.06] shrink-0">
-                <div className="flex items-center justify-between gap-2 flex-wrap">
-                  <div className="flex items-center gap-2">
-                    <span className={cn(BADGE_BASE, "bg-white/[0.06] text-white/40 border-white/[0.08]")}>
-                      Prompt {index + 1}
-                    </span>
-                    <span className={cn(BADGE_BASE, diffCfg.classes)}>
-                      {diffCfg.label}
-                    </span>
-                    {isAlreadyAttempted && (
-                      <span className={cn(BADGE_BASE, "bg-amber-900/30 text-amber-400 border-amber-700/40")}>
-                        Attempted
-                      </span>
-                    )}
-                    {isBonusRetry && (
-                      <span className={cn(BADGE_BASE, "bg-amber-900/30 text-amber-400 border-amber-700/40")}>
-                        Retry mode
-                      </span>
-                    )}
-                  </div>
-                  <div className="flex items-center gap-2 text-xs text-subtle/70">
-                    <span className="flex items-center gap-1">
-                      <Timer className="w-3 h-3" />
-                      {formatTime(prompt.prep_time_seconds)} prep
-                    </span>
-                    <span className="flex items-center gap-1">
-                      <Mic className="w-3 h-3" />
-                      {formatTime(prompt.response_time_seconds)} speak
-                    </span>
-                    {prompt.has_parts && (
-                      <span className={cn(BADGE_BASE, "bg-amber-900/30 text-amber-300 border-amber-700/40")}>
-                        2 parts
-                      </span>
-                    )}
-                  </div>
-                </div>
-              </div>
-
-              {/* Prompt excerpt — flex-1 */}
+              <CardHeader
+                index={index}
+                prompt={prompt}
+                isAlreadyAttempted={isAlreadyAttempted}
+                isBonusRetry={isBonusRetry}
+              />
               <div className="px-4 py-3 flex-1">
-                <p className="text-sm text-foreground/80 leading-relaxed">
-                  {prompt.prompt_text}
-                </p>
+                <p className="text-sm text-foreground/80 leading-relaxed">{prompt.prompt_text}</p>
               </div>
-
-              {/* CTA — pinned to bottom */}
               <div className="px-4 pb-4 pt-1 shrink-0">
                 <CtaButton isAlreadyAttempted={isAlreadyAttempted} isBonusRetry={isBonusRetry} />
               </div>
@@ -201,53 +219,15 @@ function PromptCard({
         ) : (
           /* ── Stacked layout for text-only tasks ── */
           <>
-            {/* Card header */}
-            <div className="px-4 pt-4 pb-3 border-b border-white/[0.06] shrink-0">
-              <div className="flex items-center justify-between gap-2">
-                <div className="flex items-center gap-2">
-                  <span className={cn(BADGE_BASE, "bg-white/[0.06] text-white/40 border-white/[0.08]")}>
-                    Prompt {index + 1}
-                  </span>
-                  <span className={cn(BADGE_BASE, diffCfg.classes)}>
-                    {diffCfg.label}
-                  </span>
-                  {isAlreadyAttempted && (
-                    <span className={cn(BADGE_BASE, "bg-amber-900/30 text-amber-400 border-amber-700/40")}>
-                      Attempted
-                    </span>
-                  )}
-                  {isBonusRetry && (
-                    <span className={cn(BADGE_BASE, "bg-amber-900/30 text-amber-400 border-amber-700/40")}>
-                      Retry mode
-                    </span>
-                  )}
-                </div>
-                <div className="flex items-center gap-2 text-xs text-subtle/70">
-                  <span className="flex items-center gap-1">
-                    <Timer className="w-3 h-3" />
-                    {formatTime(prompt.prep_time_seconds)} prep
-                  </span>
-                  <span className="flex items-center gap-1">
-                    <Mic className="w-3 h-3" />
-                    {formatTime(prompt.response_time_seconds)} speak
-                  </span>
-                  {prompt.has_parts && (
-                    <span className={cn(BADGE_BASE, "bg-amber-900/30 text-amber-300 border-amber-700/40")}>
-                      2 parts
-                    </span>
-                  )}
-                </div>
-              </div>
-            </div>
-
-            {/* Prompt excerpt — flex-1 */}
+            <CardHeader
+              index={index}
+              prompt={prompt}
+              isAlreadyAttempted={isAlreadyAttempted}
+              isBonusRetry={isBonusRetry}
+            />
             <div className="px-4 py-3 flex-1">
-              <p className="text-sm text-foreground/80 leading-relaxed">
-                {prompt.prompt_text}
-              </p>
+              <p className="text-sm text-foreground/80 leading-relaxed">{prompt.prompt_text}</p>
             </div>
-
-            {/* CTA — pinned to bottom */}
             <div className="px-4 pb-4 pt-1 shrink-0">
               <CtaButton isAlreadyAttempted={isAlreadyAttempted} isBonusRetry={isBonusRetry} />
             </div>
@@ -256,7 +236,6 @@ function PromptCard({
       </div>
     </Link>
   );
-
 }
 
 // ── CTA Button ───────────────────────────────────────────────────────────────

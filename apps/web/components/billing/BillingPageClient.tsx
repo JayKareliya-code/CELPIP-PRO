@@ -21,7 +21,6 @@ import { BillingFAQ } from "@/components/billing/BillingFAQ";
 import { SuccessHandler } from "@/components/billing/SuccessHandler";
 import { useCurrentUser } from "@/lib/hooks/useCurrentUser";
 import { useBilling } from "@/lib/hooks/useBilling";
-import { usePlanEvents } from "@/lib/hooks/usePlanEvents";
 import type { BillingPlan } from "@/lib/hooks/useBilling";
 import type { UserPlan } from "@/lib/types";
 import { Loader2, CreditCard } from "lucide-react";
@@ -44,10 +43,6 @@ export function BillingPageClient({ success, canceled, planParam }: BillingPageC
     openPortal,
     isOpeningPortal,
   } = useBilling();
-
-  // Subscribe to SSE plan-events stream — updates UI instantly when Stripe
-  // webhook fires, without requiring a page reload.
-  usePlanEvents();
 
   // Track which specific plan is mid-checkout to show spinner on that card only
   const [checkingOutPlan, setCheckingOutPlan] = useState<BillingPlan | null>(null);

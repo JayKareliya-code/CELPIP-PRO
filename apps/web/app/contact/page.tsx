@@ -13,7 +13,7 @@ const FAQS = [
   },
   {
     q: "Can I get a refund?",
-    a: "All purchases are final by default. If the platform failed to deliver the described service, reach out to support@celpipbro.com within 7 days of purchase and we'll review your case.",
+    a: "All purchases are final by default. If the platform failed to deliver the described service, reach out to support@celpipbro.ca within 7 days of purchase and we'll review your case.",
   },
   {
     q: "My audio recording isn't working. What should I do?",
@@ -25,11 +25,11 @@ const FAQS = [
   },
   {
     q: "How do I delete my account and data?",
-    a: "Email privacy@celpipbro.com with the subject line 'Account Deletion Request' and we will process it within 30 days.",
+    a: "Email support@celpipbro.ca with the subject line 'Account Deletion Request' and we will process it within 30 days.",
   },
   {
     q: "I found a bug or the app is broken. How do I report it?",
-    a: "Email support@celpipbro.com with a short description of the issue, your browser/device, and any screenshots or screen recordings if possible. We aim to respond within 1–2 business days.",
+    a: "Email support@celpipbro.ca with a short description of the issue, your browser/device, and any screenshots or screen recordings if possible. We aim to respond within 1–2 business days.",
   },
 ];
 
@@ -73,13 +73,13 @@ export default function ContactPage() {
             icon={<Mail className="h-5 w-5 text-amber-400" />}
             title="General Support"
             description="Questions about the platform, billing, or your account."
-            email="support@celpipbro.com"
+            email="support@celpipbro.ca"
           />
           <ContactCard
             icon={<ShieldCheck className="h-5 w-5 text-amber-400" />}
             title="Privacy & Data"
             description="Data deletion, export requests, or privacy concerns."
-            email="privacy@celpipbro.com"
+            email="support@celpipbro.ca"
           />
         </div>
 

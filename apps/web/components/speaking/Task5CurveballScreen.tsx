@@ -6,7 +6,7 @@
 //   isRecording=true  (RECORDING_PART2) → mic active, depleting bar, waveform
 //
 // Everything fits in one viewport — no scrolling.
-// Layout (flex-col h-screen):
+// Layout (flex-col h-[calc(100vh-3.5rem)]):
 //   1. Compact header: phase indicator + timer
 //   2. Instruction banner (amber)
 //   3. Option cards side-by-side, images capped at 20 vh
@@ -92,8 +92,8 @@ export function Task5CurveballScreen({
   const isLow = secondsLeft <= RESPONSE_PULSE_THRESHOLD_SECS;
 
   return (
-    // h-screen + overflow-hidden → no scrolling
-    <div className="flex flex-col h-screen overflow-hidden bg-canvas px-4 pt-2 pb-3 gap-3 items-center">
+    // h-[calc(100vh-3.5rem)] + overflow-hidden → fills usable viewport below the 3.5rem sticky navbar
+    <div className="flex flex-col min-h-[calc(100vh-3.5rem)] overflow-y-auto bg-canvas px-5 py-4 gap-4 items-center justify-start sm:h-[calc(100vh-3.5rem)] sm:overflow-hidden sm:justify-center sm:px-6 sm:py-6">
 
       {/* ── 1. Compact header ───────────────────────────────────────────────── */}
       <div className="flex items-center gap-4 w-full max-w-3xl shrink-0">
@@ -143,8 +143,8 @@ export function Task5CurveballScreen({
         </div>
       )}
 
-      {/* ── 3. Option cards — side-by-side, fill remaining space ────────────── */}
-      <div className="w-full max-w-3xl grid grid-cols-1 sm:grid-cols-2 gap-3 flex-1 min-h-0 items-start">
+      {/* ── 3. Option cards — side-by-side, natural height ────────────────────── */}
+      <div className="w-full max-w-3xl grid grid-cols-1 sm:grid-cols-2 gap-3 items-start shrink-0">
         <div className="flex flex-col gap-1">
           <p className="text-[10px] font-semibold tracking-[0.14em] uppercase text-canvas-subtle/50 select-none">
             New option

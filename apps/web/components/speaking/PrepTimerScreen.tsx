@@ -101,8 +101,8 @@ export function PrepTimerScreen({
     return (
       <div
         className={cn(
-          "flex flex-col items-center justify-center min-h-screen bg-canvas px-4 pt-3 pb-6 gap-5",
-          "lg:flex-row lg:items-start lg:justify-center lg:gap-8 lg:pt-5 lg:pb-10",
+          "flex flex-col items-center justify-center min-h-screen bg-canvas px-4 py-4 gap-5",
+          "lg:flex-row lg:items-center lg:justify-center lg:gap-10 lg:px-6 lg:py-10",
           className,
         )}
       >
@@ -110,13 +110,13 @@ export function PrepTimerScreen({
         <div className="lg:hidden"><PrepBadge /></div>
 
         {/* ── Left: scene image ─────────────────────────────────────────── */}
-        <div className="w-full lg:w-[480px] lg:shrink-0 lg:sticky lg:top-8">
+        <div className="w-full lg:w-[460px] lg:shrink-0 lg:sticky lg:top-14">
           <div className="rounded-2xl overflow-hidden border border-white/10 shadow-[0_8px_32px_rgba(0,0,0,0.5)]">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src={imageUrl!}
               alt="Task scene"
-              className="w-full object-cover max-h-[280px] lg:max-h-[340px]"
+              className="w-full object-cover max-h-[220px] lg:max-h-[340px]"
               draggable={false}
             />
           </div>
@@ -129,7 +129,7 @@ export function PrepTimerScreen({
         </div>
 
         {/* ── Right: phase badge + timer + prompt ───────────────────────── */}
-        <div className="w-full lg:w-80 flex flex-col items-center gap-5 lg:pt-2">
+        <div className="w-full lg:w-72 flex flex-col items-center gap-5">
           <div className="hidden lg:block"><PrepBadge /></div>
           {timerBlock}
           {promptCard}
@@ -148,18 +148,18 @@ export function PrepTimerScreen({
   return (
     <div
       className={cn(
-        "flex flex-col items-center justify-center gap-10 min-h-screen bg-canvas px-6",
+        "flex flex-col items-center justify-center gap-6 sm:gap-10 min-h-screen bg-canvas px-4 sm:px-6 pt-4 pb-8",
         className,
       )}
     >
       <PrepBadge />
       {timerBlock}
 
-      <div className="w-full max-w-2xl rounded-2xl border border-white/10 bg-white/5 p-8">
+      <div className="w-full max-w-2xl rounded-2xl border border-white/10 bg-white/5 p-5 sm:p-8">
         <p className="text-[10px] font-semibold tracking-[0.15em] uppercase text-canvas-subtle/60 mb-3 select-none">
           Your prompt
         </p>
-        <p className="text-canvas-text text-lg leading-relaxed whitespace-pre-line">
+        <p className="text-canvas-text text-base sm:text-lg leading-relaxed whitespace-pre-line">
           {promptText}
         </p>
       </div>

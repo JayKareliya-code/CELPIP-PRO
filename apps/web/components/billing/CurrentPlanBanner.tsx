@@ -28,9 +28,9 @@ const PLAN_META: Record<
     label:   "Pro",
     tagline: "You have 5 attempts per task, detailed AI feedback, and full progress tracking.",
     icon:    <Rocket className="w-5 h-5" />,
-    color:   "text-indigo-400",
-    bg:      "bg-indigo-500/10",
-    border:  "border-indigo-500/30",
+    color:   "text-amber-400",
+    bg:      "bg-amber-500/10",
+    border:  "border-amber-500/30",
   },
   ultra: {
     label:   "Ultra",

@@ -305,17 +305,38 @@ export interface ReportDimensionScore {
 
 /** Full report returned by GET /api/v1/attempts/{id}/report */
 export interface ReportResponse {
-  attempt_id:       string;
-  skill:            Skill;
-  task_title:       string;
-  estimated_band:   number;
-  dimensions:       ReportDimensionScore[];
-  strengths:        string[];
-  weaknesses:       string[];
-  improvement_tips: string[];
-  sample_response:  string;
-  transcript:       string | null;   // speaking only
-  completed_at:     string;          // ISO 8601
+  attempt_id:                 string;
+  prompt_id:                  string;
+  skill:                      Skill;
+  task_number:                number;
+  task_title:                 string;
+  prompt_text:                string;
+  instructions_text:          string | null;
+  context_image_url:          string | null;
+  // Task 5 — Comparing & Persuading
+  choice_options:             ChoiceOption[] | null;
+  curveball_option:           ChoiceOption | null;
+  curveball_instruction_text: string | null;
+  user_response_text:         string | null;
+  estimated_band:             number;
+  dimensions:                 ReportDimensionScore[];
+  strengths:                  string[];
+  weaknesses:                 string[];
+  improvement_tips:           string[];
+  sample_response:            string;
+  transcript:                 string | null;
+  completed_at:               string;
+}
+
+/**
+ * One aggregated weak-area row returned by GET /api/v1/users/me/weak-areas.
+ * Sorted ascending by avg_score (weakest first).
+ */
+export interface WeakAreaItem {
+  dimension:     string;   // snake_case key, e.g. "fluency"
+  label:         string;   // human-readable, e.g. "Fluency & Pronunciation"
+  avg_score:     number;   // 1.0–12.0
+  attempt_count: number;   // how many scored attempts contributed
 }
 
 // ── Phase 2: History API ──────────────────────────────────────────────────────
