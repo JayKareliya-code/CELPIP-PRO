@@ -64,17 +64,16 @@ class SpeakingPromptRepository(BaseRepository[SpeakingPrompt]):
         return result.scalar_one_or_none()
 
     async def get_active_by_id(self, prompt_id: uuid.UUID) -> SpeakingPrompt | None:
-        """Return a prompt by UUID only if it is published, active, and tagged 'practice'.
+        """Return a prompt by UUID only if it is published and active.
 
-        Used by the practice-page server fetch — prevents a candidate from
-        accessing an archived prompt or a mock-only prompt directly.
+        Intentionally does NOT filter by prompt_tag — both 'practice' and 'mock'
+        prompts should be accessible via the practice-again flow after any attempt.
         """
         result = await self.session.execute(
             select(SpeakingPrompt)
             .where(SpeakingPrompt.id == prompt_id)
             .where(SpeakingPrompt.is_active == True)   # noqa: E712
             .where(SpeakingPrompt.status == "published")
-            .where(SpeakingPrompt.prompt_tag == "practice")
         )
         return result.scalar_one_or_none()
 

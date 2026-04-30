@@ -15,8 +15,8 @@
 // The data is computed once on mount — no re-computation on re-renders.
 // ─────────────────────────────────────────────────────────────────────────────
 
-import { useMemo, useState }     from "react";
-import { ChevronDown }            from "lucide-react";
+import { useMemo, useState }            from "react";
+import { BarChart2, Check, ChevronDown } from "lucide-react";
 
 interface Props {
   transcript:    string;
@@ -170,7 +170,7 @@ export function TranscriptAnalysisCard({ transcript, taskDurationS }: Props) {
         aria-expanded={open}
       >
         <div className="flex items-center gap-2">
-          <span className="text-lg">📊</span>
+          <BarChart2 className="h-4 w-4 text-white/40" />
           <span className="text-sm font-semibold uppercase tracking-wider text-white/40">
             Speech Analytics
           </span>
@@ -251,9 +251,10 @@ export function TranscriptAnalysisCard({ transcript, taskDurationS }: Props) {
                 </p>
               </div>
             ) : (
-              <div className="rounded-xl border border-emerald-500/15 bg-emerald-500/[0.04] px-4 py-3">
+              <div className="rounded-xl border border-emerald-500/15 bg-emerald-500/[0.04] px-4 py-3 flex items-center gap-2">
+                <Check className="h-3.5 w-3.5 text-emerald-400 flex-shrink-0" />
                 <p className="text-xs text-emerald-300/70">
-                  ✓ No filler words detected — excellent fluency control.
+                  No filler words detected &mdash; excellent fluency control.
                 </p>
               </div>
             )}

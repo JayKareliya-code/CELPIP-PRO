@@ -10,6 +10,7 @@
 //   • Writing:             instructions (if any) + prompt text
 // ─────────────────────────────────────────────────────────────────────────────
 
+import { Mic, PenLine, Shuffle, Zap } from "lucide-react";
 import type { ChoiceOption, Skill } from "@/lib/types";
 
 interface Props {
@@ -102,7 +103,7 @@ export function ResponsePanel({
 }: Props) {
   const isWriting     = skill === "writing";
   const responseLabel = isWriting ? "Your Essay" : "Your Transcript";
-  const responseIcon  = isWriting ? "✍️" : "🎤";
+  const ResponseIcon  = isWriting ? PenLine : Mic;
   const hasTaskNumber = typeof taskNumber === "number" && !Number.isNaN(taskNumber);
   const isTask5       = skill === "speaking" && taskNumber === 5;
   const wordCount     = userResponseText
@@ -110,7 +111,7 @@ export function ResponsePanel({
     : 0;
 
   return (
-    <div className="flex flex-col gap-4 h-full">
+    <div className="flex flex-col gap-4">
 
       {/* ── Question Prompt card ─────────────────────────────────────────── */}
       <div className="rounded-2xl border border-amber-500/40 bg-amber-500/[0.06] p-5 flex flex-col gap-3 relative overflow-hidden">
@@ -124,7 +125,8 @@ export function ResponsePanel({
               ? "border-blue-500/30 bg-blue-500/10 text-blue-300"
               : "border-purple-500/30 bg-purple-500/10 text-purple-300",
           ].join(" ")}>
-            {isWriting ? "✍️" : "🎤"} {isWriting ? "Writing" : "Speaking"}
+            {isWriting ? <PenLine className="h-3 w-3" /> : <Mic className="h-3 w-3" />}
+            {isWriting ? "Writing" : "Speaking"}
           </span>
 
           {hasTaskNumber && (
@@ -178,14 +180,15 @@ export function ResponsePanel({
             {curveballOption && (
               <div className="flex flex-col gap-2">
                 {curveballInstructionText && (
-                  <p className="text-xs leading-relaxed text-rose-300/80 italic">
-                    🎲 {curveballInstructionText}
+                  <p className="text-xs leading-relaxed text-rose-300/80 italic flex items-start gap-1.5">
+                    <Shuffle className="h-3 w-3 mt-0.5 flex-shrink-0" />
+                    {curveballInstructionText}
                   </p>
                 )}
                 <OptionCard
                   option={curveballOption}
                   variant="curveball"
-                  label="⚡ Curveball Option"
+                  label="Curveball Option"
                 />
               </div>
             )}
@@ -197,7 +200,7 @@ export function ResponsePanel({
       <div className="rounded-2xl border border-white/[0.08] bg-white/[0.02] p-5 flex flex-col gap-3 lg:flex-1 lg:min-h-0">
         <div className="flex items-center justify-between flex-shrink-0">
           <div className="flex items-center gap-2">
-            <span className="text-base leading-none">{responseIcon}</span>
+            <ResponseIcon className="h-4 w-4 text-white/40" />
             <span className="text-[11px] font-bold uppercase tracking-widest text-white/40">
               {responseLabel}
             </span>
@@ -217,7 +220,7 @@ export function ResponsePanel({
           </div>
         ) : (
           <div className="flex-1 flex flex-col items-center justify-center gap-2 py-8 text-center">
-            <span className="text-3xl opacity-20">{responseIcon}</span>
+            <ResponseIcon className="h-8 w-8 opacity-20" />
             <p className="text-sm text-white/30">
               {isWriting
                 ? "Essay text not available."

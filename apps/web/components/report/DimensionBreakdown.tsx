@@ -1,12 +1,16 @@
 "use client";
 
 // ─────────────────────────────────────────────────────────────────────────────
-// DimensionBreakdown.tsx — Progress bars per rubric dimension
+// DimensionBreakdown.tsx — Rubric dimension cards
 //
-// P1 upgrade: each dimension row now shows a one-sentence commentary inline
-// directly below the bar — no tooltip, no hover needed.  The reason is always
-// visible so the user immediately understands why they got that score.
-// Commentary is empty ("") for legacy reports — the row just shows bar + score.
+// Hierarchy per card (top → bottom):
+//   1. Dimension label (left, semibold) | Score number (right, coloured, lg)
+//   2. Hairline progress bar — 1/4 width, aligned left
+//   3. Commentary — full width, readable body size
+//
+// Each dimension is visually contained in its own card so they are
+// immediately distinguishable from one another. Cards use a subtle
+// left-accent border in the score colour as the only colour signal.
 // ─────────────────────────────────────────────────────────────────────────────
 
 import { useEffect, useState }      from "react";
@@ -17,7 +21,7 @@ interface Props {
   dimensions: ReportDimensionScore[];
 }
 
-function scoreColor(score: number): string {
+function scoreBarColor(score: number): string {
   if (score >= 9) return "bg-emerald-400";
   if (score >= 6) return "bg-amber-400";
   return "bg-rose-400";
@@ -29,58 +33,69 @@ function scoreTextColor(score: number): string {
   return "text-rose-400";
 }
 
+function scoreAccent(score: number): string {
+  if (score >= 9) return "bg-emerald-400/50";
+  if (score >= 6) return "bg-amber-400/50";
+  return "bg-rose-400/50";
+}
+
 export function DimensionBreakdown({ dimensions }: Props) {
   const [widths, setWidths] = useState<number[]>(dimensions.map(() => 0));
 
-  // Stagger the bar animations on mount
+  // Stagger bar animations on mount
   useEffect(() => {
     const timers = dimensions.map((_, i) =>
       setTimeout(() => {
         setWidths((prev) => {
           const next = [...prev];
-          // Use rounded score so bar width matches the displayed number
           next[i] = (roundBand(dimensions[i].score) / dimensions[i].max_score) * 100;
           return next;
         });
-      }, i * 80)
+      }, i * 100)
     );
     return () => timers.forEach(clearTimeout);
   }, [dimensions]);
 
   return (
     <div className="rounded-2xl border border-border bg-surface p-6 shadow-card">
-      <h3 className="mb-5 text-sm font-semibold uppercase tracking-wider text-subtle">
+      <h3 className="mb-4 text-xs font-semibold uppercase tracking-wider text-white/30">
         Dimension Breakdown
       </h3>
-      <div className="space-y-5">
+
+      <div className="flex flex-col gap-3">
         {dimensions.map((dim, i) => (
-          <div key={dim.dimension} className="space-y-1.5">
-            {/* Score row */}
-            <div className="flex items-center justify-between">
-              <span className="text-sm font-medium text-white/90">{dim.label}</span>
-              <span className={`text-sm font-bold tabular-nums ${scoreTextColor(dim.score)}`}>
-                {formatBand(dim.score)}<span className="text-subtle font-normal">/{dim.max_score}</span>
+          <div
+            key={dim.dimension}
+            className="relative rounded-xl border border-border/60 bg-white/[0.02] px-4 py-3.5 pl-5 flex flex-col gap-2.5 animate-fade-in overflow-hidden"
+            style={{ animationDelay: `${i * 60}ms`, animationFillMode: "both" }}
+          >
+            {/* Left accent stripe — score colour, 2px */}
+            <span
+              className={`absolute left-0 top-3 bottom-3 w-0.5 rounded-full ${scoreAccent(dim.score)}`}
+            />
+
+            {/* ── Dimension label ── */}
+            <span className="text-sm font-semibold text-white/85 leading-snug">
+              {dim.label}
+            </span>
+
+            {/* ── Bar + score inline: score sits right at the bar end ── */}
+            <div className="flex items-center gap-3">
+              <div className="h-0.5 w-1/4 rounded-full bg-white/[0.08] overflow-hidden flex-shrink-0">
+                <div
+                  className={`h-full rounded-full transition-all duration-700 ease-out ${scoreBarColor(dim.score)}`}
+                  style={{ width: `${widths[i]}%` }}
+                />
+              </div>
+              <span className={`text-sm font-bold tabular-nums leading-none flex-shrink-0 ${scoreTextColor(dim.score)}`}>
+                {formatBand(dim.score)}
+                <span className="text-xs font-normal text-white/30 ml-0.5">/{dim.max_score}</span>
               </span>
             </div>
 
-            {/* Progress bar track */}
-            <div className="h-2 w-full rounded-full bg-border overflow-hidden">
-              <div
-                className={`h-full rounded-full transition-all duration-700 ease-out ${scoreColor(dim.score)}`}
-                style={{
-                  width: `${widths[i]}%`,
-                  boxShadow: dim.score >= 9
-                    ? "0 0 8px rgba(52,211,153,0.5)"
-                    : dim.score >= 6
-                    ? "0 0 8px rgba(251,191,36,0.4)"
-                    : "0 0 8px rgba(248,113,113,0.4)",
-                }}
-              />
-            </div>
-
-            {/* Inline commentary — shown directly below the bar when available */}
+            {/* ── Commentary — body text, clearly subordinate ── */}
             {dim.commentary && dim.commentary.trim().length > 0 && (
-              <p className="text-xs leading-relaxed text-white/45 pt-0.5">
+              <p className="text-sm leading-relaxed text-white/55">
                 {dim.commentary}
               </p>
             )}

@@ -8,7 +8,7 @@
 // ─────────────────────────────────────────────────────────────────────────────
 
 import { useState } from "react";
-import { ChevronDown, Copy, Check } from "lucide-react";
+import { ChevronDown, Copy, Check, Star } from "lucide-react";
 
 interface Props {
   sampleResponse: string;
@@ -41,7 +41,7 @@ export function SampleResponseCard({ sampleResponse, targetBand }: Props) {
         aria-expanded={open}
       >
         <div className="flex items-center gap-2">
-          <span className="text-lg">⭐</span>
+          <Star className="h-4 w-4 text-amber-400/60" />
           <span className="text-sm font-semibold uppercase tracking-wider text-white/40">
             {targetBand ? `Band ${targetBand}+ Sample Response` : "High-Band Sample Response"}
           </span>

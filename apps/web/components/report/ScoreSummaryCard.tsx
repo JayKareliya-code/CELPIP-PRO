@@ -8,7 +8,8 @@
 //   • wordCount / estimatedTime — compact stats row from the transcript
 // ─────────────────────────────────────────────────────────────────────────────
 
-import { useEffect, useState } from "react";
+import { useEffect, useState }          from "react";
+import { Mic, PenLine, Clock, Target }  from "lucide-react";
 import { formatBand, roundBand }        from "@/lib/utils";
 import type { Skill }                   from "@/lib/types";
 
@@ -77,13 +78,15 @@ export function ScoreSummaryCard({ estimatedBand, skill, completedAt, nextMilest
 
   return (
     <div className="relative overflow-hidden rounded-2xl border border-border bg-surface p-6 shadow-panel">
-      {/* Ambient glow */}
-      <div className={`absolute -top-16 -right-16 h-48 w-48 rounded-full blur-3xl opacity-20 ${palette.bg}`} />
+      {/* Ambient glow — primary top-right */}
+      <div className={`absolute -top-16 -right-16 h-56 w-56 rounded-full blur-3xl opacity-25 ${palette.bg}`} />
+      {/* Secondary glow near gauge */}
+      <div className={`absolute -bottom-12 -left-12 h-40 w-40 rounded-full blur-3xl opacity-15 ${palette.bg}`} />
 
-      <div className="relative flex flex-col items-center gap-6 sm:flex-row sm:items-center sm:gap-8">
+      <div className="relative flex flex-row items-center gap-8">
         {/* SVG Arc Gauge */}
         <div className="relative flex-shrink-0">
-          <svg width="140" height="140" viewBox="0 0 152 152" className="-rotate-[135deg]">
+          <svg width="180" height="180" viewBox="0 0 152 152" className="-rotate-[135deg]">
             {/* Track */}
             <circle
               cx="76" cy="76" r={radius}
@@ -111,32 +114,38 @@ export function ScoreSummaryCard({ estimatedBand, skill, completedAt, nextMilest
           </div>
         </div>
 
-        {/* Text info */}
-        <div className="flex-1 min-w-0 space-y-2 text-center sm:text-left">
+        {/* Text info — always left-aligned */}
+        <div className="flex-1 min-w-0 space-y-2">
           <div className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-xs font-medium ${palette.badge}`}>
-            {skill === "speaking" ? "🎤" : "✍️"} {skill.charAt(0).toUpperCase() + skill.slice(1)}
+            {skill === "speaking"
+              ? <Mic className="h-3 w-3" />
+              : <PenLine className="h-3 w-3" />}
+            {skill.charAt(0).toUpperCase() + skill.slice(1)}
           </div>
           <p className="text-sm text-white/50">Completed {formatDate(completedAt)}</p>
 
           {/* Band label */}
-          <div className={`mt-1 rounded-xl px-4 py-2.5 text-sm font-semibold ${palette.bg} ${palette.text} border border-current/20`}>
-            {displayBand >= 9
-              ? "🏆 Excellent — Band " + formatBand(displayBand)
-              : displayBand >= 6
-              ? "✅ Competent — Band " + formatBand(displayBand)
-              : "📈 Developing — Band " + formatBand(displayBand)}
+          {/* Band label — neutral background, no distracting fill */}
+          <div className="mt-1 flex items-center gap-2">
+            <span className={`h-4 w-0.5 rounded-full flex-shrink-0 ${palette.bg.replace("/10", "/60")}`} />
+            <span className={`text-sm font-semibold tabular-nums ${palette.text}`}>
+              {displayBand >= 9
+                ? "Excellent — Band " + formatBand(displayBand)
+                : displayBand >= 6
+                ? "Competent — Band " + formatBand(displayBand)
+                : "Developing — Band " + formatBand(displayBand)}
+            </span>
           </div>
 
           {/* Word count + estimated time (speaking only) */}
           {hasWords && (
             <div className="flex items-center gap-3 pt-0.5">
               <span className="inline-flex items-center gap-1 text-[11px] text-white/35">
-                <span className="text-white/20">📝</span>
                 {wordCount} words
               </span>
               <span className="text-white/15">·</span>
               <span className="inline-flex items-center gap-1 text-[11px] text-white/35">
-                <span className="text-white/20">⏱</span>
+                <Clock className="h-3 w-3 text-white/20" />
                 {estimatedSeconds(wordCount!)} est.
               </span>
             </div>
@@ -145,7 +154,7 @@ export function ScoreSummaryCard({ estimatedBand, skill, completedAt, nextMilest
           {/* Next milestone coaching pill */}
           {hasMilestone && (
             <div className="flex items-start gap-2 rounded-xl border border-amber-500/20 bg-amber-500/[0.06] px-3 py-2.5 mt-1">
-              <span className="flex-shrink-0 text-sm">🎯</span>
+              <Target className="flex-shrink-0 h-4 w-4 text-amber-400 mt-0.5" />
               <p className="text-xs leading-relaxed text-amber-200/85">{nextMilestone}</p>
             </div>
           )}

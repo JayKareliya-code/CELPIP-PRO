@@ -128,3 +128,8 @@ celerybeat-schedule
 celerybeat-schedule.db
 celerybeat.pid
 
+# ---------------------------------------------------------------------------
+# Google OAuth / Workspace credentials (NEVER commit these)
+# ---------------------------------------------------------------------------
+client_secret_*.json
+google_workspace_acc
