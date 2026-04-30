@@ -295,12 +295,29 @@ export interface PaginatedResponse<T> {
 
 // ── Phase 2: Report API ───────────────────────────────────────────────────────
 
+/** A single strength or weakness returned by the AI scorer (new rich format) */
+export interface ReportFeedbackItem {
+  label:       string;   // Dimension name: "Vocabulary Range"
+  observation: string;   // What was done well / what the gap is
+  quote:       string;   // Verbatim excerpt from the transcript
+  fix:         string;   // Weaknesses only: concrete action to fix it (empty string for strengths)
+}
+
+/** An actionable improvement tip with a drill and example (new rich format) */
+export interface ReportImprovementTip {
+  title:   string;   // Short label: "Reduce Filler Words"
+  why:     string;   // Why this hurts the score
+  how:     string;   // The practice drill / technique
+  example: string;   // A concrete before/after phrase
+}
+
 /** Per-rubric-dimension score returned by GET /attempts/{id}/report */
 export interface ReportDimensionScore {
-  dimension:  string;   // snake_case: "task_completion", "coherence", etc.
-  label:      string;   // "Task Completion", "Coherence & Cohesion", etc.
-  score:      number;   // 1–12
-  max_score:  number;   // always 12
+  dimension:   string;   // snake_case: "task_completion", "coherence", etc.
+  label:       string;   // "Task Completion", "Coherence & Cohesion", etc.
+  score:       number;   // 1–12
+  max_score:   number;   // always 12
+  commentary:  string;   // One-sentence explanation of why this score was given
 }
 
 /** Full report returned by GET /api/v1/attempts/{id}/report */
@@ -320,11 +337,12 @@ export interface ReportResponse {
   user_response_text:         string | null;
   estimated_band:             number;
   dimensions:                 ReportDimensionScore[];
-  strengths:                  string[];
-  weaknesses:                 string[];
-  improvement_tips:           string[];
+  strengths:                  ReportFeedbackItem[];
+  weaknesses:                 ReportFeedbackItem[];
+  improvement_tips:           ReportImprovementTip[];
   sample_response:            string;
   transcript:                 string | null;
+  next_milestone:             string;    // One-sentence next-step coaching note
   completed_at:               string;
 }
 
@@ -360,4 +378,20 @@ export interface PaginatedHistory {
   page:     number;
   limit:    number;
   has_next: boolean;
+}
+
+// ── P2: Task Score History ────────────────────────────────────────────────────
+
+/** One historical band score point for a skill+task_number */
+export interface TaskScorePoint {
+  attempt_id:     string;
+  estimated_band: number;
+  completed_at:   string;   // ISO 8601
+}
+
+/** Response from GET /api/v1/history/task-scores */
+export interface TaskScoreHistory {
+  skill:       string;
+  task_number: number;
+  scores:      TaskScorePoint[];  // ordered oldest → newest
 }

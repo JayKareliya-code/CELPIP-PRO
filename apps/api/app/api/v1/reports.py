@@ -34,7 +34,12 @@ async def get_report(
     Security: returns 404 (not 403) for attempts owned by other users to
     avoid leaking the existence of other users' data.
     """
-    report = await fetch_report(db, attempt_id=attempt_id, user_id=current_user.id)
+    report = await fetch_report(
+        db,
+        attempt_id=attempt_id,
+        user_id=current_user.id,
+        plan=current_user.plan,
+    )
     if report is None:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,

@@ -9,14 +9,16 @@ from __future__ import annotations
 import logging
 from uuid import UUID
 
-from sqlalchemy import select, text
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.models.attempt import Attempt
+from app.models.attempt import Attempt, WritingAttempt
 from app.models.feedback_report import FeedbackReport
+from app.models.prompt import SpeakingPrompt, WritingPrompt
 from app.models.score_report import ScoreReport, ScoreDimension
 from app.models.transcript import Transcript
-from app.schemas.report import DimensionScore, ReportResponse
+from app.schemas.report import DimensionScore, FeedbackItemSchema, ImprovementTipSchema, ReportResponse
+from app.api.v1._prompt_helpers import sign_prompt_dict
 
 logger = logging.getLogger(__name__)
 
@@ -37,6 +39,7 @@ async def fetch_report(
     db: AsyncSession,
     attempt_id: UUID,
     user_id: UUID,
+    plan: str = "starter",
 ) -> ReportResponse | None:
     """
     Fetch the full report for a completed attempt.
@@ -45,6 +48,10 @@ async def fetch_report(
         db:         Async SQLAlchemy session.
         attempt_id: UUID of the attempt.
         user_id:    UUID of the requesting user (enforces row-level isolation).
+        plan:       User's current plan ("starter" | "pro" | "ultra").
+                    Starter users receive band score only — rubric dimensions,
+                    strengths, weaknesses, improvement tips, sample response,
+                    and transcript are stripped before returning.
 
     Returns:
         ReportResponse if found and owned by user_id, else None.
@@ -71,25 +78,65 @@ async def fetch_report(
         .where(ScoreDimension.report_id == score_report.id)
         .order_by(ScoreDimension.dimension)
     )
+
+    # 4 — Load FeedbackReport (single query — reused for both dimensions and feedback)
+    feedback_result = await db.execute(
+        select(FeedbackReport).where(FeedbackReport.attempt_id == attempt_id)
+    )
+    feedback = feedback_result.scalar_one_or_none()
+
+    # dimension_commentary is populated for new reports; None/empty for legacy ones
+    dim_commentary: dict[str, str] = (
+        feedback.dimension_commentary or {}
+    ) if feedback and feedback.dimension_commentary else {}
+
     dimensions = [
         DimensionScore(
             dimension=d.dimension,
             label=_DIMENSION_LABELS.get(d.dimension, d.dimension.replace("_", " ").title()),
             score=d.score,
             max_score=d.max_score,
+            commentary=dim_commentary.get(d.dimension, ""),
         )
         for d in dims_result.scalars().all()
     ]
 
-    # 4 — Load FeedbackReport
-    feedback_result = await db.execute(
-        select(FeedbackReport).where(FeedbackReport.attempt_id == attempt_id)
-    )
-    feedback = feedback_result.scalar_one_or_none()
-    strengths:        list[str] = feedback.strengths if feedback else []
-    weaknesses:       list[str] = feedback.weaknesses if feedback else []
-    improvement_tips: list[str] = feedback.improvement_tips if feedback else []
-    sample_response:  str       = feedback.sample_response if feedback else ""
+    def _to_feedback_items(raw_list: list, with_fix: bool = False) -> list[FeedbackItemSchema]:
+        """Convert stored JSONB rows (dicts or legacy strings) to Pydantic schema."""
+        items: list[FeedbackItemSchema] = []
+        for item in (raw_list or []):
+            if isinstance(item, dict):
+                items.append(FeedbackItemSchema(
+                    label=item.get("label", ""),
+                    observation=item.get("observation", ""),
+                    quote=item.get("quote", ""),
+                    fix=item.get("fix", "") if with_fix else "",
+                ))
+            elif isinstance(item, str):
+                # Legacy plain-string row — degrade gracefully
+                items.append(FeedbackItemSchema(label="", observation=item, quote="", fix=""))
+        return items
+
+    def _to_tip_items(raw_list: list) -> list[ImprovementTipSchema]:
+        """Convert stored JSONB rows (dicts or legacy strings) to Pydantic schema."""
+        items: list[ImprovementTipSchema] = []
+        for item in (raw_list or []):
+            if isinstance(item, dict):
+                items.append(ImprovementTipSchema(
+                    title=item.get("title", ""),
+                    why=item.get("why", ""),
+                    how=item.get("how", ""),
+                    example=item.get("example", ""),
+                ))
+            elif isinstance(item, str):
+                items.append(ImprovementTipSchema(title=item, why="", how="", example=""))
+        return items
+
+    strengths        = _to_feedback_items(feedback.strengths if feedback else [], with_fix=False)
+    weaknesses       = _to_feedback_items(feedback.weaknesses if feedback else [], with_fix=True)
+    improvement_tips = _to_tip_items(feedback.improvement_tips if feedback else [])
+    sample_response  = feedback.sample_response if feedback else ""
+    next_milestone   = (feedback.next_milestone or "") if feedback else ""
 
     # 5 — Load Transcript (speaking only)
     transcript_text: str | None = None
@@ -101,25 +148,87 @@ async def fetch_report(
         if tx:
             transcript_text = tx.text
 
-    # 6 — Load prompt title
-    table = "speaking_prompts" if attempt.skill == "speaking" else "writing_prompts"
-    title_result = await db.execute(
-        text(f"SELECT title FROM {table} WHERE id = :pid"),
-        {"pid": attempt.prompt_id},
-    )
-    row = title_result.mappings().one_or_none()
-    task_title = row["title"] if row else f"Task {attempt.task_number}"
+    # 6 — Load full prompt via ORM to get all fields (including Task 5 / image fields)
+    task_title                 = f"Task {attempt.task_number}"
+    prompt_text                = ""
+    instructions_text          = None
+    context_image_url          = None
+    choice_options             = None
+    curveball_option           = None
+    curveball_instruction_text = None
+
+    if attempt.skill == "speaking":
+        sp_result = await db.execute(
+            select(SpeakingPrompt).where(SpeakingPrompt.id == attempt.prompt_id)
+        )
+        sp = sp_result.scalar_one_or_none()
+        if sp:
+            task_title                 = sp.title
+            prompt_text                = sp.prompt_text
+            instructions_text          = sp.instructions_text
+            context_image_url          = sp.context_image_url
+            choice_options             = sp.choice_options          # Task 5 only
+            curveball_option           = sp.curveball_option        # Task 5 only
+            curveball_instruction_text = sp.curveball_instruction_text  # Task 5 only
+    else:
+        wp_result = await db.execute(
+            select(WritingPrompt).where(WritingPrompt.id == attempt.prompt_id)
+        )
+        wp = wp_result.scalar_one_or_none()
+        if wp:
+            task_title        = wp.title
+            prompt_text       = wp.prompt_text
+            instructions_text = wp.instructions_text
+
+    # 7 — Pre-sign any S3 image URLs in the prompt data
+    # sign_prompt_dict handles context_image_url, choice_options[*].image_url
+    # and curveball_option.image_url — all stored as bare S3 keys in the DB.
+    prompt_image_data = sign_prompt_dict({
+        "context_image_url": context_image_url,
+        "choice_options":    choice_options,
+        "curveball_option":  curveball_option,
+    })
+    context_image_url = prompt_image_data.get("context_image_url")
+    choice_options    = prompt_image_data.get("choice_options")
+    curveball_option  = prompt_image_data.get("curveball_option")
+
+    # 8 — Fetch user_response_text (always returned — it's the user's own content)
+    user_response_text: str | None = None
+    if attempt.skill == "speaking":
+        if transcript_text:
+            user_response_text = transcript_text
+    else:
+        wa_result = await db.execute(
+            select(WritingAttempt).where(WritingAttempt.attempt_id == attempt_id)
+        )
+        wa = wa_result.scalar_one_or_none()
+        if wa:
+            user_response_text = wa.essay_text
+
+    # 9 — Determine whether to return Pro-only fields
+    is_pro = plan in ("pro", "ultra")
 
     return ReportResponse(
         attempt_id=attempt_id,
+        prompt_id=attempt.prompt_id,
         skill=attempt.skill,
+        task_number=attempt.task_number,
         task_title=task_title,
+        prompt_text=prompt_text,
+        instructions_text=instructions_text,
+        context_image_url=context_image_url,
+        choice_options=choice_options,
+        curveball_option=curveball_option,
+        curveball_instruction_text=curveball_instruction_text,
+        user_response_text=user_response_text,   # always returned (user's own data)
         estimated_band=float(score_report.estimated_band),
-        dimensions=dimensions,
-        strengths=strengths,
-        weaknesses=weaknesses,
-        improvement_tips=improvement_tips,
-        sample_response=sample_response,
-        transcript=transcript_text,
+        # Starter plan: empty lists/strings so the frontend renders a locked report
+        dimensions=dimensions             if is_pro else [],
+        strengths=strengths               if is_pro else [],
+        weaknesses=weaknesses             if is_pro else [],
+        improvement_tips=improvement_tips if is_pro else [],
+        sample_response=sample_response   if is_pro else "",
+        transcript=transcript_text        if is_pro else None,
+        next_milestone=next_milestone      if is_pro else "",
         completed_at=attempt.updated_at,
     )

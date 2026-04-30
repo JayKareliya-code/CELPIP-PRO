@@ -4,26 +4,55 @@
 // ProReport.tsx — Split-screen report layout for Pro / Ultra plan users
 //
 // LEFT  — Question prompt + user's response (essay or transcript)
-// RIGHT — Score gauge, dimension breakdown, strengths/weaknesses,
-//         improvement tips, sample response
+// RIGHT — Score gauge, score progress, dimension breakdown,
+//         strengths/weaknesses coaching cards, improvement drill tips,
+//         transcript analytics (speaking only), sample response
 // ─────────────────────────────────────────────────────────────────────────────
 
 import Link from "next/link";
 import { ResponsePanel }                  from "./ResponsePanel";
 import { ScoreSummaryCard }               from "./ScoreSummaryCard";
+import { ScoreProgressCard }              from "./ScoreProgressCard";
 import { DimensionBreakdown }             from "./DimensionBreakdown";
 import { StrengthsPanel, WeaknessesPanel } from "./FeedbackPanels";
 import { ImprovementTipsAccordion }       from "./ImprovementTipsAccordion";
+import { TranscriptAnalysisCard }         from "./TranscriptAnalysisCard";
 import { SampleResponseCard }             from "./SampleResponseCard";
 
 import type { ReportResponse }            from "@/lib/types";
+
+// ── CELPIP standard response durations per task number ────────────────────────
+// Task 0 = practice (open-ended, assume 60s); Tasks 1–8 per official spec.
+const TASK_DURATION_S: Record<number, number> = {
+  0: 60,
+  1: 90,
+  2: 60,
+  3: 60,
+  4: 60,
+  5: 60,   // final speaking phase
+  6: 60,
+  7: 60,
+  8: 60,
+};
 
 interface Props {
   report:     ReportResponse;
   targetBand: number | null;
 }
 
+/** Count words in a string (splits on whitespace). */
+function countWords(text: string | null | undefined): number {
+  if (!text) return 0;
+  return text.trim().split(/\s+/).filter(Boolean).length;
+}
+
 export function ProReport({ report, targetBand }: Props) {
+  const wordCount = report.skill === "speaking"
+    ? countWords(report.user_response_text)
+    : undefined;
+
+  const taskDurationS = TASK_DURATION_S[report.task_number] ?? 60;
+
   return (
     <div className="flex flex-col gap-5">
 
@@ -42,6 +71,16 @@ export function ProReport({ report, targetBand }: Props) {
             estimatedBand={report.estimated_band}
             skill={report.skill}
             completedAt={report.completed_at}
+            nextMilestone={report.next_milestone || undefined}
+            wordCount={wordCount}
+          />
+
+          {/* P2: Score progress vs previous attempt */}
+          <ScoreProgressCard
+            currentBand={report.estimated_band}
+            skill={report.skill as "speaking" | "writing"}
+            taskNumber={report.task_number}
+            currentAttemptId={report.attempt_id}
           />
 
           {/* Rubric dimension breakdown */}
@@ -49,17 +88,25 @@ export function ProReport({ report, targetBand }: Props) {
             <DimensionBreakdown dimensions={report.dimensions} />
           )}
 
-          {/* Strengths + Weaknesses — always 2-col for visual balance */}
+          {/* Strengths + Weaknesses — coaching cards */}
           {(report.strengths.length > 0 || report.weaknesses.length > 0) && (
-            <div className="grid grid-cols-2 gap-3 sm:gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
               <StrengthsPanel  items={report.strengths}  />
               <WeaknessesPanel items={report.weaknesses} />
             </div>
           )}
 
-          {/* Improvement tips */}
+          {/* Improvement drill tips */}
           {report.improvement_tips.length > 0 && (
             <ImprovementTipsAccordion tips={report.improvement_tips} />
+          )}
+
+          {/* P2: Client-side speech analytics (speaking only, needs transcript) */}
+          {report.skill === "speaking" && report.transcript && (
+            <TranscriptAnalysisCard
+              transcript={report.transcript}
+              taskDurationS={taskDurationS}
+            />
           )}
 
           {/* Band-targeted sample response */}

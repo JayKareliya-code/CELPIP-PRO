@@ -8,7 +8,7 @@ continues to work unchanged.
 New code should import from the package directly:
     from app.services.history import get_practice_history, get_mock_exam_history
 """
-from app.services.history import get_practice_history, get_mock_exam_history
+from app.services.history import get_practice_history, get_mock_exam_history, get_recent_task_scores
 
 # Legacy names used by the history API endpoint
 get_user_history = get_practice_history
@@ -17,4 +17,5 @@ __all__ = [
     "get_user_history",
     "get_practice_history",
     "get_mock_exam_history",
+    "get_recent_task_scores",
 ]

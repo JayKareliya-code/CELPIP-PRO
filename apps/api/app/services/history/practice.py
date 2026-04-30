@@ -15,7 +15,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.attempt import Attempt
 from app.models.score_report import ScoreReport
-from app.schemas.history import HistoryItem, PaginatedHistory
+from app.schemas.history import HistoryItem, PaginatedHistory, TaskScorePoint, TaskScoreHistory
 from ._helpers import build_task_title
 
 logger = logging.getLogger(__name__)
@@ -124,4 +124,52 @@ async def get_practice_history(
         page=page,
         limit=limit,
         has_next=(offset + limit) < total,
+    )
+
+
+async def get_recent_task_scores(
+    db: AsyncSession,
+    user_id: UUID,
+    skill: str,
+    task_number: int,
+    limit: int = 10,
+) -> TaskScoreHistory:
+    """
+    Return the last `limit` completed band scores for one skill+task_number.
+
+    Results are ordered oldest → newest so callers can render a trend line
+    without any extra sorting.  Only practice attempts are included (no mock
+    exam rows) and only those with status='complete' and a ScoreReport row.
+
+    This is intentionally a single JOIN query — no N+1, no pagination overhead.
+    """
+    stmt = (
+        select(Attempt.id, Attempt.updated_at, ScoreReport.estimated_band)
+        .join(ScoreReport, ScoreReport.attempt_id == Attempt.id)
+        .where(
+            Attempt.user_id == user_id,
+            Attempt.skill == skill,
+            Attempt.task_number == task_number,
+            Attempt.is_mock_test == False,   # noqa: E712
+            Attempt.status == "complete",
+        )
+        .order_by(Attempt.updated_at.desc())   # newest-first to apply limit...
+        .limit(limit)
+    )
+    rows = (await db.execute(stmt)).all()
+
+    # Reverse to oldest-first so the frontend renders a left-to-right trend
+    rows = list(reversed(rows))
+
+    return TaskScoreHistory(
+        skill=skill,
+        task_number=task_number,
+        scores=[
+            TaskScorePoint(
+                attempt_id=row.id,
+                estimated_band=float(row.estimated_band),
+                completed_at=row.updated_at,
+            )
+            for row in rows
+        ],
     )

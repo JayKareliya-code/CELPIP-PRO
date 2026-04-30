@@ -23,7 +23,7 @@ text-only tasks always use the cheaper GPT-4o-mini.
 from __future__ import annotations
 
 import logging
-from dataclasses import dataclass
+from dataclasses import asdict, dataclass
 from uuid import UUID
 
 import sqlalchemy as sa
@@ -252,10 +252,12 @@ async def _save_score(
 async def _save_feedback(db: AsyncSession, attempt_id: UUID, result: ScoringResult) -> None:
     db.add(FeedbackReport(
         attempt_id=attempt_id,
-        strengths=result.strengths,
-        weaknesses=result.weaknesses,
-        improvement_tips=result.improvement_tips,
+        strengths=[asdict(s) for s in result.strengths],
+        weaknesses=[asdict(w) for w in result.weaknesses],
+        improvement_tips=[asdict(t) for t in result.improvement_tips],
         sample_response=result.sample_response,
+        next_milestone=result.next_milestone or None,
+        dimension_commentary=result.dimension_commentary or None,
     ))
 
 

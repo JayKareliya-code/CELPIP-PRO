@@ -7,7 +7,7 @@ Protocol.  This file defines only data shapes and the Protocol — zero I/O.
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import Protocol, runtime_checkable
+from typing import Any, Protocol, runtime_checkable
 
 
 # ── Token Usage ──────────────────────────────────────────────────────────────
@@ -20,6 +20,26 @@ class TokenUsage:
     @property
     def total(self) -> int:
         return self.prompt_tokens + self.completion_tokens
+
+
+# ── Rich feedback item types ──────────────────────────────────────────────────
+
+@dataclass
+class FeedbackItem:
+    """A single strength or weakness entry with evidence from the transcript."""
+    label: str              # Dimension name: "Vocabulary Range", "Fluency & Pronunciation"
+    observation: str        # What was done well / what the gap is
+    quote: str              # 3–8 words verbatim from the candidate's transcript
+    fix: str = ""           # Weaknesses only: one concrete substitution / action
+
+
+@dataclass
+class ImprovementTip:
+    """An actionable coaching tip with a drill and concrete example."""
+    title: str              # Short label: "Reduce Filler Words"
+    why: str                # Why this hurts the band score
+    how: str                # The practice drill / technique
+    example: str            # One concrete before/after phrase
 
 
 # ── Scoring Result ────────────────────────────────────────────────────────────
@@ -42,10 +62,18 @@ class ScoringResult:
 
     # Shared fields
     estimated_band: float = 0.0
-    strengths: list[str] = field(default_factory=list)
-    weaknesses: list[str] = field(default_factory=list)
-    improvement_tips: list[str] = field(default_factory=list)
+
+    # Rich structured feedback (speaking — new format)
+    strengths: list[FeedbackItem] = field(default_factory=list)
+    weaknesses: list[FeedbackItem] = field(default_factory=list)
+    improvement_tips: list[ImprovementTip] = field(default_factory=list)
     sample_response: str = ""
+
+    # Per-dimension explanatory commentary (one sentence each)
+    dimension_commentary: dict[str, str] = field(default_factory=dict)
+
+    # Single sentence: what specific skill jump would move the user up 0.5 bands
+    next_milestone: str = ""
 
     # Raw JSON from the model (stored for debugging / re-scoring without re-calling)
     raw_json: dict = field(default_factory=dict)

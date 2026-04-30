@@ -10,16 +10,79 @@ from __future__ import annotations
 
 import json
 import logging
+from copy import deepcopy
+from dataclasses import asdict
 
 import httpx
 from tenacity import retry, stop_after_attempt, wait_exponential
 
 from app.core.config import settings
-from app.services.ai.base import ScoringProvider, ScoringResult, TokenUsage
+from app.services.ai.base import (
+    FeedbackItem,
+    ImprovementTip,
+    ScoringProvider,
+    ScoringResult,
+    TokenUsage,
+)
 
 logger = logging.getLogger(__name__)
 
 # ── JSON Schema: speaking ────────────────────────────────────────────────────
+
+# ── Shared sub-schemas ───────────────────────────────────────────────────────
+# NOTE: Never mutate these module-level dicts — they are shared by reference
+# across all scoring calls.  deepcopy is used when embedding in the schema.
+
+# Strengths: no 'fix' field required (GPT would fill it with nonsense)
+_STRENGTH_SCHEMA = {
+    "type": "object",
+    "properties": {
+        "label":       {"type": "string"},
+        "observation": {"type": "string"},
+        "quote":       {"type": "string"},
+        "fix":         {"type": "string"},   # present but always empty — schema simplicity
+    },
+    "required": ["label", "observation", "quote", "fix"],
+    "additionalProperties": False,
+}
+
+# Weaknesses: 'fix' is required and must be non-empty
+_WEAKNESS_SCHEMA = {
+    "type": "object",
+    "properties": {
+        "label":       {"type": "string"},
+        "observation": {"type": "string"},
+        "quote":       {"type": "string"},
+        "fix":         {"type": "string"},
+    },
+    "required": ["label", "observation", "quote", "fix"],
+    "additionalProperties": False,
+}
+
+_TIP_SCHEMA = {
+    "type": "object",
+    "properties": {
+        "title":   {"type": "string"},
+        "why":     {"type": "string"},
+        "how":     {"type": "string"},
+        "example": {"type": "string"},
+    },
+    "required": ["title", "why", "how", "example"],
+    "additionalProperties": False,
+}
+
+_DIM_COMMENTARY_SCHEMA = {
+    "type": "object",
+    "properties": {
+        "task_completion": {"type": "string"},
+        "coherence":       {"type": "string"},
+        "vocabulary":      {"type": "string"},
+        "fluency":         {"type": "string"},
+        "grammar":         {"type": "string"},
+    },
+    "required": ["task_completion", "coherence", "vocabulary", "fluency", "grammar"],
+    "additionalProperties": False,
+}
 
 _SPEAKING_SCHEMA = {
     "name": "celpip_speaking_score",
@@ -27,21 +90,23 @@ _SPEAKING_SCHEMA = {
     "schema": {
         "type": "object",
         "properties": {
-            "task_completion":  {"type": "integer", "minimum": 1, "maximum": 12},
-            "coherence":        {"type": "integer", "minimum": 1, "maximum": 12},
-            "vocabulary":       {"type": "integer", "minimum": 1, "maximum": 12},
-            "fluency":          {"type": "integer", "minimum": 1, "maximum": 12},
-            "grammar":          {"type": "integer", "minimum": 1, "maximum": 12},
-            "estimated_band":   {"type": "number",  "minimum": 1, "maximum": 12},
-            "strengths":        {"type": "array", "items": {"type": "string"}, "maxItems": 4},
-            "weaknesses":       {"type": "array", "items": {"type": "string"}, "maxItems": 4},
-            "improvement_tips": {"type": "array", "items": {"type": "string"}, "maxItems": 5},
-            "sample_response":  {"type": "string"},
+            "task_completion":       {"type": "integer", "minimum": 1, "maximum": 12},
+            "coherence":             {"type": "integer", "minimum": 1, "maximum": 12},
+            "vocabulary":            {"type": "integer", "minimum": 1, "maximum": 12},
+            "fluency":               {"type": "integer", "minimum": 1, "maximum": 12},
+            "grammar":               {"type": "integer", "minimum": 1, "maximum": 12},
+            "estimated_band":        {"type": "number",  "minimum": 1, "maximum": 12},
+            "strengths":             {"type": "array", "items": deepcopy(_STRENGTH_SCHEMA),  "minItems": 1, "maxItems": 3},
+            "weaknesses":            {"type": "array", "items": deepcopy(_WEAKNESS_SCHEMA), "minItems": 1, "maxItems": 3},
+            "improvement_tips":      {"type": "array", "items": deepcopy(_TIP_SCHEMA),      "minItems": 1, "maxItems": 4},
+            "sample_response":       {"type": "string"},
+            "dimension_commentary":  deepcopy(_DIM_COMMENTARY_SCHEMA),
+            "next_milestone":        {"type": "string"},
         },
         "required": [
             "task_completion", "coherence", "vocabulary", "fluency", "grammar",
             "estimated_band", "strengths", "weaknesses", "improvement_tips",
-            "sample_response",
+            "sample_response", "dimension_commentary", "next_milestone",
         ],
         "additionalProperties": False,
     },
@@ -74,6 +139,53 @@ _WRITING_SCHEMA = {
         "additionalProperties": False,
     },
 }
+
+
+# ── Parse helpers ─────────────────────────────────────────────────────────────
+
+def _parse_feedback_items(
+    raw_items: list,
+    with_fix: bool = False,
+) -> list[FeedbackItem]:
+    """
+    Convert raw LLM JSON objects into FeedbackItem dataclasses.
+
+    Tolerates both the new object format and any legacy plain-string format
+    so old reports in the DB don't crash on read.
+    """
+    result: list[FeedbackItem] = []
+    for item in raw_items:
+        if isinstance(item, dict):
+            result.append(FeedbackItem(
+                label=item.get("label", ""),
+                observation=item.get("observation", ""),
+                quote=item.get("quote", ""),
+                fix=item.get("fix", "") if with_fix else "",
+            ))
+        elif isinstance(item, str):
+            # Legacy plain-string fallback — wrap so the frontend never crashes
+            result.append(FeedbackItem(label="", observation=item, quote="", fix=""))
+    return result
+
+
+def _parse_tips(raw_items: list) -> list[ImprovementTip]:
+    """
+    Convert raw LLM JSON objects into ImprovementTip dataclasses.
+
+    Falls back gracefully if the model returns a plain string instead of an object.
+    """
+    result: list[ImprovementTip] = []
+    for item in raw_items:
+        if isinstance(item, dict):
+            result.append(ImprovementTip(
+                title=item.get("title", ""),
+                why=item.get("why", ""),
+                how=item.get("how", ""),
+                example=item.get("example", ""),
+            ))
+        elif isinstance(item, str):
+            result.append(ImprovementTip(title=item, why="", how="", example=""))
+    return result
 
 
 class OpenAIProvider:
@@ -199,7 +311,9 @@ class OpenAIProvider:
             prompt_tokens=body["usage"]["prompt_tokens"],
             completion_tokens=body["usage"]["completion_tokens"],
         )
-        # Map raw JSON keys into ScoringResult; unrecognised keys are ignored
+        # Map raw JSON keys into ScoringResult with typed helpers.
+        # _parse_feedback_items / _parse_tips are tolerant of unexpected shapes
+        # so a partial LLM response doesn't crash the pipeline.
         result = ScoringResult(
             task_completion=raw.get("task_completion", 0),
             coherence=raw.get("coherence", 0),
@@ -207,10 +321,12 @@ class OpenAIProvider:
             fluency=raw.get("fluency", 0),
             grammar=raw.get("grammar", 0),
             estimated_band=raw.get("estimated_band", 0.0),
-            strengths=raw.get("strengths", []),
-            weaknesses=raw.get("weaknesses", []),
-            improvement_tips=raw.get("improvement_tips", []),
+            strengths=_parse_feedback_items(raw.get("strengths", [])),
+            weaknesses=_parse_feedback_items(raw.get("weaknesses", []), with_fix=True),
+            improvement_tips=_parse_tips(raw.get("improvement_tips", [])),
             sample_response=raw.get("sample_response", ""),
+            dimension_commentary=raw.get("dimension_commentary") or {},
+            next_milestone=raw.get("next_milestone", ""),
             raw_json=raw,
             usage=usage,
         )
@@ -295,9 +411,11 @@ class OpenAIProvider:
             vocabulary=raw.get("vocabulary", 0),
             grammar=raw.get("grammar", 0),
             estimated_band=raw.get("estimated_band", 0.0),
-            strengths=raw.get("strengths", []),
-            weaknesses=raw.get("weaknesses", []),
-            improvement_tips=raw.get("improvement_tips", []),
+            # Writing scorer returns plain strings — parse through typed helpers
+            # so ScoringResult.strengths always holds list[FeedbackItem].
+            strengths=_parse_feedback_items(raw.get("strengths", [])),
+            weaknesses=_parse_feedback_items(raw.get("weaknesses", []), with_fix=True),
+            improvement_tips=_parse_tips(raw.get("improvement_tips", [])),
             sample_response=raw.get("sample_response", ""),
             raw_json=raw,
             usage=usage,

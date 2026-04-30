@@ -51,12 +51,58 @@ Do NOT add commentary, preamble, or any text outside the JSON object.
 - Score EACH dimension independently before computing estimated_band.
 - **estimated_band formula:** round to nearest 0.5:
   (task_completion×0.25 + coherence×0.20 + vocabulary×0.20 + fluency×0.20 + grammar×0.15)
-- **strengths / weaknesses:** max 3 items each; must be concrete and specific about
-  THIS response (never generic phrases like "good grammar" or "poor vocabulary").
-- **improvement_tips:** actionable, CELPIP-focused, max 4 items.
-- **sample_response:** A model answer to the SAME prompt, written at the candidate's target
-  band level (see ## Candidate Goal below). Length: **130 to 180 words exactly** — no shorter,
-  no longer.
+
+## Feedback Rules — READ CAREFULLY
+
+### strengths (max 3 items)
+Each strength MUST be a JSON object:
+{{
+  "label": "<exact dimension name from list above>",
+  "observation": "<specific explanation of what the candidate did well and WHY it is effective>",
+  "quote": "<3 to 8 consecutive words verbatim from the TRANSCRIPT that demonstrate this strength>"
+}}
+- observation must explain the effect on the listener/examiner, not just describe.
+- quote must be a real substring of the transcript. Never fabricate or paraphrase.
+
+### weaknesses (max 3 items)
+Each weakness MUST be a JSON object:
+{{
+  "label": "<exact dimension name from list above>",
+  "observation": "<specific gap and how it limits the band score>",
+  "quote": "<3 to 8 consecutive words verbatim from the TRANSCRIPT that reveal this gap>",
+  "fix": "<one direct, concrete action: what to say or do instead — e.g. 'Instead of X, say Y'>"
+}}
+- fix must be directly actionable and specific to this transcript. Never generic.
+
+### improvement_tips (max 4 items)
+Each tip MUST be a JSON object:
+{{
+  "title": "<short 3–5 word label, e.g. 'Reduce Filler Words'>",
+  "why": "<one sentence: how this specific gap lowers the band score>",
+  "how": "<a specific, concrete practice drill or technique — 2 to 3 sentences>",
+  "example": "<one concrete before/after phrase from or related to this response>"
+}}
+
+### dimension_commentary
+A JSON object with exactly 5 keys — one per dimension — each a single sentence
+explaining the REASON behind the score given:
+{{
+  "task_completion": "<sentence>",
+  "coherence": "<sentence>",
+  "vocabulary": "<sentence>",
+  "fluency": "<sentence>",
+  "grammar": "<sentence>"
+}}
+- Reference specific content from the transcript in at least 3 of the 5 sentences.
+
+### next_milestone
+A single sentence identifying the ONE most impactful skill improvement that would
+push the candidate's estimated_band up by 0.5. Be specific and actionable.
+Example: "Adding one concrete example per argument would demonstrate fuller Task Completion and lift your band to 8.5."
+
+### sample_response
+A model answer to the SAME prompt, written at the candidate's target band level.
+Length: **130 to 180 words exactly** — no shorter, no longer.
 """.strip()
 
 # ── Target-band addendum ─────────────────────────────────────────────────────
@@ -161,4 +207,3 @@ def build_speaking_system_prompt(
         base = base + "\n\n" + _TASK5_ADDENDUM
 
     return base
-

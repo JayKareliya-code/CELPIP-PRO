@@ -3,6 +3,7 @@ Pydantic schemas for the history API response.
 
 GET /api/v1/history              → PaginatedHistory
 GET /api/v1/history/mock-exams  → PaginatedMockExamHistory
+GET /api/v1/history/task-scores → TaskScoreHistory
 """
 from __future__ import annotations
 
@@ -60,3 +61,19 @@ class PaginatedMockExamHistory(BaseModel):
     page:     int
     limit:    int
     has_next: bool
+
+
+# ── Task score history (for score-progress card) ──────────────────────────────
+
+class TaskScorePoint(BaseModel):
+    """One historical band score for a specific skill + task_number."""
+    attempt_id:     UUID
+    estimated_band: float
+    completed_at:   datetime
+
+
+class TaskScoreHistory(BaseModel):
+    """Recent scores for one skill+task combination — used to render a score-trend card."""
+    skill:        str
+    task_number:  int
+    scores:       list[TaskScorePoint]   # ordered oldest → newest, max 10 items

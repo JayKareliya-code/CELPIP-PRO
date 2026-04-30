@@ -2,6 +2,10 @@
 
 // ─────────────────────────────────────────────────────────────────────────────
 // ScoreSummaryCard.tsx — Overall band score with SVG arc gauge
+//
+// P1 upgrade:
+//   • next_milestone — amber coaching pill shown below the band label
+//   • wordCount / estimatedTime — compact stats row from the transcript
 // ─────────────────────────────────────────────────────────────────────────────
 
 import { useEffect, useState } from "react";
@@ -9,9 +13,11 @@ import { formatBand, roundBand }        from "@/lib/utils";
 import type { Skill }                   from "@/lib/types";
 
 interface Props {
-  estimatedBand: number;
-  skill: Skill;
-  completedAt: string;
+  estimatedBand:  number;
+  skill:          Skill;
+  completedAt:    string;
+  nextMilestone?: string;      // AI coaching note: "Do X to reach Band N+0.5"
+  wordCount?:     number;      // Transcript word count (speaking)
 }
 
 /** Returns Tailwind colour classes keyed by band range */
@@ -28,7 +34,16 @@ function formatDate(iso: string) {
   });
 }
 
-export function ScoreSummaryCard({ estimatedBand, skill, completedAt }: Props) {
+/** Estimate speaking time in seconds at ~130 WPM */
+function estimatedSeconds(words: number): string {
+  const secs = Math.round((words / 130) * 60);
+  if (secs < 60) return `~${secs}s`;
+  const m = Math.floor(secs / 60);
+  const s = secs % 60;
+  return s > 0 ? `~${m}m ${s}s` : `~${m}m`;
+}
+
+export function ScoreSummaryCard({ estimatedBand, skill, completedAt, nextMilestone, wordCount }: Props) {
   const palette = bandPalette(estimatedBand);
   const [animated, setAnimated] = useState(0);
 
@@ -56,6 +71,9 @@ export function ScoreSummaryCard({ estimatedBand, skill, completedAt }: Props) {
   // SVG arc gauge
   const radius      = 60;
   const circumference = 2 * Math.PI * radius;
+
+  const hasWords     = typeof wordCount === "number" && wordCount > 0;
+  const hasMilestone = typeof nextMilestone === "string" && nextMilestone.trim().length > 0;
 
   return (
     <div className="relative overflow-hidden rounded-2xl border border-border bg-surface p-6 shadow-panel">
@@ -108,6 +126,29 @@ export function ScoreSummaryCard({ estimatedBand, skill, completedAt }: Props) {
               ? "✅ Competent — Band " + formatBand(displayBand)
               : "📈 Developing — Band " + formatBand(displayBand)}
           </div>
+
+          {/* Word count + estimated time (speaking only) */}
+          {hasWords && (
+            <div className="flex items-center gap-3 pt-0.5">
+              <span className="inline-flex items-center gap-1 text-[11px] text-white/35">
+                <span className="text-white/20">📝</span>
+                {wordCount} words
+              </span>
+              <span className="text-white/15">·</span>
+              <span className="inline-flex items-center gap-1 text-[11px] text-white/35">
+                <span className="text-white/20">⏱</span>
+                {estimatedSeconds(wordCount!)} est.
+              </span>
+            </div>
+          )}
+
+          {/* Next milestone coaching pill */}
+          {hasMilestone && (
+            <div className="flex items-start gap-2 rounded-xl border border-amber-500/20 bg-amber-500/[0.06] px-3 py-2.5 mt-1">
+              <span className="flex-shrink-0 text-sm">🎯</span>
+              <p className="text-xs leading-relaxed text-amber-200/85">{nextMilestone}</p>
+            </div>
+          )}
         </div>
       </div>
     </div>
