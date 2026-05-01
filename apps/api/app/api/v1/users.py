@@ -119,12 +119,17 @@ async def get_my_quota(
     user: Annotated[User, Depends(get_current_user)],
     db:   Annotated[AsyncSession, Depends(get_db)],
 ) -> QuotaStatusResponse:
-    """Return per-task quota usage for the authenticated user (single GROUP BY per skill)."""
+    """Return per-task quota usage for the authenticated user.
+
+    Counts DISTINCT prompts attempted per task — not total attempts.
+    This matches enforce_quota: retrying the same prompt is always free and
+    must not inflate the displayed count or trigger a false can_attempt=False.
+    """
     repo = AttemptRepository(db)
 
-    # Per-task individual practice counts
-    s_used_raw = await repo.count_per_task(user.id, "speaking")
-    w_used_raw = await repo.count_per_task(user.id, "writing")
+    # Per-task DISTINCT prompt counts — one query per skill (mirrors enforce_quota logic)
+    s_used_raw = await repo.count_distinct_prompts_per_skill(user.id, "speaking")
+    w_used_raw = await repo.count_distinct_prompts_per_skill(user.id, "writing")
 
     # Normalise to full task number ranges expected by the frontend
     s_used_per_task: dict[int, int] = {i: s_used_raw.get(i, 0) for i in range(9)}

@@ -3,7 +3,7 @@ import { BillingPageClient } from "@/components/billing/BillingPageClient";
 
 export const metadata: Metadata = {
   title: "Billing & Plans",
-  description: "View and manage your CELPIPBro plan. One-time payments — no subscriptions.",
+  description: "View and manage your CELPIPBRO plan. One-time payments — no subscriptions.",
 };
 
 /**

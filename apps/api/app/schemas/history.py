@@ -65,11 +65,19 @@ class PaginatedMockExamHistory(BaseModel):
 
 # ── Task score history (for score-progress card) ──────────────────────────────
 
+class DimensionScorePoint(BaseModel):
+    """Per-rubric dimension score attached to one score history point."""
+    dimension: str   # snake_case key matching ScoreDimension.dimension
+    score:     int
+    max_score: int
+
+
 class TaskScorePoint(BaseModel):
     """One historical band score for a specific skill + task_number."""
     attempt_id:     UUID
     estimated_band: float
     completed_at:   datetime
+    dimensions:     list[DimensionScorePoint] = []   # empty for legacy rows
 
 
 class TaskScoreHistory(BaseModel):

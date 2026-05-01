@@ -7,7 +7,7 @@ import { RecentAttemptsCompact }  from "@/components/dashboard/RecentAttemptsCom
 import { WeakAreasCompact }       from "@/components/dashboard/WeakAreasCompact";
 
 export const metadata: Metadata = {
-  title: "Dashboard — CELPIPBro",
+  title: "Dashboard — CELPIPBRO",
   description: "Your CELPIP practice hub — scores, streak, and quick access to all modules.",
 };
 

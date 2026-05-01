@@ -38,7 +38,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const taskNum = Number(task);
   const taskLabel = taskNum === 0 ? "Practice Task" : `Task ${taskNum}`;
   return {
-    title: `${taskLabel} — Speaking Practice | CELPIPBro`,
+    title: `${taskLabel} — Speaking Practice | CELPIPBRO`,
     description: "Timed speaking practice: countdown, prep timer, and recording phases.",
   };
 }

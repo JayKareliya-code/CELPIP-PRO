@@ -212,8 +212,25 @@ export function useWritingAttempt(): UseWritingAttemptReturn {
         body:   JSON.stringify({ prompt_id: task.id, is_mock_test: false }),
       });
       if (!startRes.ok) {
-        const err = await startRes.json().catch(() => ({}));
-        throw new Error((err as { detail?: string }).detail ?? `start failed: ${startRes.status}`);
+        const body = await startRes.json().catch(() => ({})) as Record<string, unknown>;
+        if (startRes.status === 402) {
+          // Structured quota/plan error from enforce_quota
+          const detail = body.detail as Record<string, string> | string | undefined;
+          const msg = typeof detail === "object" && detail?.message
+            ? detail.message
+            : "Task practice requires a Pro or Ultra plan.";
+          const upgradeUrl = typeof detail === "object" && detail?.upgrade_url
+            ? detail.upgrade_url as string
+            : "/billing";
+          // Navigate to billing instead of showing a dead error banner
+          router.push(upgradeUrl);
+          throw new Error(msg);
+        }
+        if (startRes.status === 429) {
+          throw new Error("Too many attempts — please wait a moment before trying again.");
+        }
+        const err = body as Record<string, string>;
+        throw new Error(err.detail ?? err.error ?? `start failed: ${startRes.status}`);
       }
       const { attempt_id } = await startRes.json() as { attempt_id: string };
       attemptIdRef.current = attempt_id;
@@ -228,8 +245,11 @@ export function useWritingAttempt(): UseWritingAttemptReturn {
         }),
       });
       if (!submitRes.ok) {
-        const err = await submitRes.json().catch(() => ({}));
-        throw new Error((err as { detail?: string }).detail ?? `submit failed: ${submitRes.status}`);
+        const err = await submitRes.json().catch(() => ({})) as Record<string, string>;
+        if (submitRes.status === 429) {
+          throw new Error("Too many submissions — please wait a moment before trying again.");
+        }
+        throw new Error(err.detail ?? err.error ?? `submit failed: ${submitRes.status}`);
       }
 
       // Step 3 — advance to PROCESSING (triggers navigation)

@@ -5,7 +5,7 @@ import type { Metadata } from "next";
 
 export const metadata: Metadata = {
   title: "Sign In",
-  description: "Sign in to your CELPIPBro account to continue practising.",
+  description: "Sign in to your CELPIPBRO account to continue practising.",
 };
 
 export default function SignInPage() {
@@ -17,7 +17,7 @@ export default function SignInPage() {
         className="flex items-center gap-2 font-bold text-lg text-primary mb-8 hover:opacity-80 transition-opacity"
       >
         <BookOpen className="w-5 h-5" />
-        <span>CELPIPBro</span>
+        <span>CELPIPBRO</span>
       </Link>
 
       {/* Clerk sign-in */}

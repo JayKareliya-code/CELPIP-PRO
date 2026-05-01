@@ -17,7 +17,7 @@ export function Footer() {
           <Link
             href="/"
             className="flex items-center select-none group shrink-0"
-            aria-label="CELPIPBro home"
+            aria-label="CELPIPBRO home"
           >
             <span className="text-lg font-black tracking-tight text-white group-hover:text-white/90 transition-colors">
               CELPIP
@@ -29,7 +29,7 @@ export function Footer() {
 
           {/* Copyright */}
           <p className="text-xs text-white/35 text-center">
-            © {new Date().getFullYear()} CELPIPBro · Not affiliated with Paragon Testing Enterprises.
+            © {new Date().getFullYear()} CELPIPBRO · Not affiliated with Paragon Testing Enterprises.
           </p>
 
           {/* Legal links */}

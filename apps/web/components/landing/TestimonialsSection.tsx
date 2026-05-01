@@ -1,165 +1,128 @@
-import { Star, Quote } from "lucide-react";
-import { PLAN_PRICING } from "@/lib/constants";
-import { cn } from "@/lib/utils";
+import { CheckCircle2, ExternalLink, FileText, Mic, Timer } from "lucide-react";
+import { ULTRA_PLAN_LIMITS } from "@/lib/constants";
 
-interface Testimonial {
-  id: string;
-  name: string;
-  initial: string;
-  location: string;
-  plan: string;         // which plan they used
-  planColor: string;    // Tailwind text color for the plan pill
-  targetBand: number;
-  achievedBand: number;
-  practiceWeeks: number;
-  quote: string;
-  accentColor: string;
-}
+const SPEAKING_TASK_COUNT = 8;
+const WRITING_TASK_COUNT = 2;
 
-const TESTIMONIALS: Testimonial[] = [
+const PROOF_CARDS = [
   {
-    id: "t1",
-    name: "Priya S.",
-    initial: "P",
-    location: "Toronto, ON",
-    plan: PLAN_PRICING.ultra.name,       // Band Achiever
-    planColor: "text-warning",
-    targetBand: 9,
-    achievedBand: 10,
-    practiceWeeks: 3,
-    quote:
-      "I needed a 9 for my permanent residency and I was consistently falling short on Speaking. " +
-      "With the Ultra plan's 15 attempts per task and the advanced AI rewrites, I could see exactly " +
-      "what I was doing wrong. Scored a 10 in 3 weeks. The detailed weak-area feedback is worth every penny.",
-    accentColor: "from-warning/15 to-yellow-900/10",
+    icon: <Mic className="w-5 h-5 text-primary" />,
+    title: "Speaking Coverage",
+    stat: `${SPEAKING_TASK_COUNT} task types`,
+    description:
+      "Tackle all 8 Speaking task types — each with timed prep, timed recording, an AI-estimated band score, and dimension-level feedback so you know exactly what to improve.",
   },
   {
-    id: "t2",
-    name: "Marcos L.",
-    initial: "M",
-    location: "Vancouver, BC",
-    plan: PLAN_PRICING.pro.name,         // Score Booster
-    planColor: "text-primary",
-    targetBand: 8,
-    achievedBand: 9,
-    practiceWeeks: 4,
-    quote:
-      "The Pro plan was exactly what I needed — 5 attempts per Writing task and 2 full mock tests " +
-      "at a price I could actually afford. The improved sample responses after each attempt showed " +
-      "me how a 9-band answer looks compared to mine. My Writing went from 7 to 9 in a month.",
-    accentColor: "from-primary/15 to-indigo-900/10",
+    icon: <FileText className="w-5 h-5 text-success" />,
+    title: "Writing Coverage",
+    stat: `${WRITING_TASK_COUNT} task types`,
+    description:
+      "Practise both Writing tasks: composing an email and responding to an opinion prompt — in a timed editor with a live word counter.",
   },
   {
-    id: "t3",
-    name: "Anjali K.",
-    initial: "A",
-    location: "Calgary, AB",
-    plan: PLAN_PRICING.starter.name,     // Starter → upgraded to Pro
-    planColor: "text-subtle",
-    targetBand: 7,
-    achievedBand: 8,
-    practiceWeeks: 2,
-    quote:
-      "I almost didn't sign up because I thought it would be another subscription. " +
-      "The free mock test convinced me — I got my first AI band score in 10 minutes. " +
-      "I upgraded to Pro the same day. Two weeks later, I had my 8. " +
-      "One-time payment, zero regrets.",
-    accentColor: "from-success/15 to-emerald-900/10",
+    icon: <Timer className="w-5 h-5 text-warning" />,
+    title: "Practice Volume",
+    stat: `${SPEAKING_TASK_COUNT * ULTRA_PLAN_LIMITS.speaking_attempts_per_task} speaking + ${WRITING_TASK_COUNT * ULTRA_PLAN_LIMITS.writing_attempts_per_task} writing`,
+    description:
+      "Up to 120 Speaking and 30 Writing practice sessions across every task type — plus full mock tests.",
   },
 ];
 
-/**
- * TestimonialsSection — 3 social proof cards.
- * Each story is tied to a specific plan to reinforce the upsell journey.
- */
+const FEEDBACK_POINTS = [
+  "Estimated practice band score",
+  "Strengths and weaknesses",
+  "Dimension-level feedback",
+  "Improved sample response",
+  "Attempt history and progress tracking",
+];
+
 export function TestimonialsSection() {
   return (
-    <section id="testimonials" className="py-20 sm:py-28 bg-muted">
+    <section id="testimonials" className="py-16 sm:py-28 bg-muted">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-
-        {/* Header */}
         <div className="text-center max-w-2xl mx-auto mb-14">
           <p className="text-sm font-semibold text-primary uppercase tracking-widest mb-3">
-            Success Stories
+            Practice Coverage
           </p>
           <h2 className="text-3xl sm:text-4xl font-bold text-foreground">
-            Real Learners, Real Band Score Gains
+            Everything You Need to Practise Speaking and Writing
           </h2>
           <p className="mt-4 text-subtle text-lg leading-relaxed">
-            From Starter to Band Achiever — every plan has helped candidates
-            hit their target and move forward with their Canadian journey.
+            Build confidence through timed practice, targeted feedback, and
+            a clear path from your first mock test to your target band score.
           </p>
         </div>
 
-        {/* Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {TESTIMONIALS.map((t) => (
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+          {PROOF_CARDS.map((card) => (
             <div
-              key={t.id}
-              className={`relative rounded-2xl bg-gradient-to-br ${t.accentColor} border border-border p-7 flex flex-col gap-5 hover:border-primary/30 transition-all duration-200`}
+              key={card.title}
+              className="relative rounded-2xl bg-surface border border-border p-5 sm:p-7 flex flex-col gap-4 hover:border-primary/30 transition-all duration-200"
             >
-              {/* Quote icon */}
-              <Quote
-                className="w-8 h-8 text-primary/25 absolute top-5 right-5"
-                aria-hidden="true"
-              />
-
-              {/* Stars + plan pill */}
-              <div className="flex items-center justify-between gap-2">
-                <div className="flex gap-1">
-                  {[...Array(5)].map((_, i) => (
-                    <Star key={i} className="w-4 h-4 fill-warning text-warning" />
-                  ))}
-                </div>
-                <span className={`text-[10px] font-semibold uppercase tracking-wide px-2 py-0.5 rounded-full bg-surface/60 border border-border ${t.planColor}`}>
-                  {t.plan}
-                </span>
+              <div className="w-11 h-11 rounded-xl bg-primary/10 flex items-center justify-center">
+                {card.icon}
               </div>
-
-              {/* Quote */}
-              <p className="text-sm text-foreground/90 leading-relaxed flex-1 italic">
-                &ldquo;{t.quote}&rdquo;
+              <div>
+                <p className="text-xs font-semibold text-primary uppercase tracking-wider">
+                  {card.title}
+                </p>
+                <h3 className="mt-1 text-2xl font-bold text-foreground">
+                  {card.stat}
+                </h3>
+              </div>
+              <p className="text-sm text-subtle leading-relaxed">
+                {card.description}
               </p>
-
-              {/* Stats row */}
-              <div className="flex items-center gap-4 py-3 border-y border-border/50">
-                <div className="text-center flex-1">
-                  <p className="text-lg font-bold text-foreground">{t.achievedBand}</p>
-                  <p className="text-xs text-subtle">Band Achieved</p>
-                </div>
-                <div className="h-8 w-px bg-border/50" />
-                <div className="text-center flex-1">
-                  <p className="text-lg font-bold text-foreground">{t.practiceWeeks}w</p>
-                  <p className="text-xs text-subtle">To Improve</p>
-                </div>
-                <div className="h-8 w-px bg-border/50" />
-                <div className="text-center flex-1">
-                  {(() => {
-                    const gain = t.achievedBand - t.targetBand;
-                    return (
-                      <>
-                        <p className={cn("text-lg font-bold", gain >= 0 ? "text-success" : "text-danger")}>
-                          {gain >= 0 ? "+" : ""}{gain}
-                        </p>
-                        <p className="text-xs text-subtle">Bands Gained</p>
-                      </>
-                    );
-                  })()}
-                </div>
-              </div>
-
-              {/* Author */}
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center text-primary font-semibold flex-shrink-0">
-                  {t.initial}
-                </div>
-                <div>
-                  <p className="text-sm font-semibold text-foreground">{t.name}</p>
-                  <p className="text-xs text-subtle">{t.location}</p>
-                </div>
-              </div>
             </div>
           ))}
+        </div>
+
+        <div className="mt-8 grid grid-cols-1 lg:grid-cols-[1.2fr_0.8fr] gap-5">
+          <div className="rounded-2xl bg-surface border border-border p-6">
+            <h3 className="text-lg font-bold text-foreground">
+              What Feedback Includes
+            </h3>
+            <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-3">
+              {FEEDBACK_POINTS.map((point) => (
+                <div key={point} className="flex items-start gap-2.5">
+                  <CheckCircle2 className="w-4 h-4 text-success mt-0.5 flex-shrink-0" />
+                  <span className="text-sm text-foreground/85">{point}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="rounded-2xl bg-surface border border-border p-6">
+            <h3 className="text-lg font-bold text-foreground">
+              Grounded in Public CELPIP Information
+            </h3>
+            <p className="mt-3 text-sm text-subtle leading-relaxed">
+              Practice prompts, scoring dimensions, and sample responses are
+              structured around the same Speaking and Writing criteria used in
+              the real exam — so your feedback is always exam-relevant, not
+              generic.
+            </p>
+            <div className="mt-4 flex flex-col gap-2">
+              <a
+                href="https://www.celpip.ca/celpip-general/"
+                target="_blank"
+                rel="noreferrer"
+                className="inline-flex items-center gap-2 text-sm font-semibold text-primary hover:text-primary-hover"
+              >
+                CELPIP General test format
+                <ExternalLink className="w-3.5 h-3.5" />
+              </a>
+              <a
+                href="https://www.celpip.ca/take-celpip/test-results/"
+                target="_blank"
+                rel="noreferrer"
+                className="inline-flex items-center gap-2 text-sm font-semibold text-primary hover:text-primary-hover"
+              >
+                CELPIP performance standards
+                <ExternalLink className="w-3.5 h-3.5" />
+              </a>
+            </div>
+          </div>
         </div>
       </div>
     </section>

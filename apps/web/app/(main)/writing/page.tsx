@@ -5,7 +5,7 @@ import { WritingModuleHome } from "@/components/writing/WritingModuleHome";
 import type { WritingTask }  from "@/lib/types";
 
 export const metadata: Metadata = {
-  title: "Writing Module — CELPIPBro",
+  title: "Writing Module — CELPIPBRO",
   description:
     "Practice both CELPIP writing tasks (Email and Opinion Essay) with timed sessions, live word counts, and AI-powered feedback.",
 };

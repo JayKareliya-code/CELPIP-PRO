@@ -1,56 +1,46 @@
 "use client";
 
-// ─────────────────────────────────────────────────────────────────────────────
-// PlanCard.tsx — Individual plan card for the billing page
-// Mirrors landing PricingPreview but with live checkout integration.
-// ─────────────────────────────────────────────────────────────────────────────
-
-import { Check, X, ArrowRight, Loader2 } from "lucide-react";
+import { ArrowRight, Check, Loader2, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { BillingPlan } from "@/lib/hooks/useBilling";
 
-// ── Types ─────────────────────────────────────────────────────────────────────
-
 export interface PlanFeature {
-  text:       string;
-  included:   boolean;
+  text: string;
+  included: boolean;
   highlight?: boolean;
 }
 
 export interface PlanCardConfig {
-  id:          "starter" | BillingPlan;
-  name:        string;
-  tagline:     string;
-  priceLabel:  string;
-  priceNote:   string;
-  icon:        React.ReactNode;
-  iconBg:      string;
-  features:    PlanFeature[];
-  badge?:      string;
+  id: "starter" | BillingPlan;
+  name: string;
+  tagline: string;
+  priceLabel: string;
+  priceNote: string;
+  icon: React.ReactNode;
+  iconBg: string;
+  features: PlanFeature[];
+  badge?: string;
   badgeColor?: string;
   highlighted: boolean;
-  /** If true, renders a non-clickable "Coming Soon" state instead of a checkout button */
   comingSoon?: boolean;
 }
 
 interface PlanCardProps {
-  plan:         PlanCardConfig;
-  /** User's current plan key */
-  currentPlan:  string;
-  /** Is a checkout in-flight for this specific plan? */
+  plan: PlanCardConfig;
+  currentPlan: string;
   isCheckingOut: boolean;
-  /** Trigger Stripe Checkout for this plan */
-  onUpgrade:    (plan: BillingPlan) => void;
+  onUpgrade: (plan: BillingPlan) => void;
 }
 
-// ── Component ─────────────────────────────────────────────────────────────────
-
 export function PlanCard({ plan, currentPlan, isCheckingOut, onUpgrade }: PlanCardProps) {
-  const isCurrent  = plan.id === currentPlan;
-  const isStarter  = plan.id === "starter";
-  // Allow upgrade only to a higher plan
-  const planOrder  = { starter: 0, pro: 1, ultra: 2 } as Record<string, number>;
-  const canUpgrade = !isStarter && !isCurrent && (planOrder[plan.id] ?? 0) > (planOrder[currentPlan] ?? 0);
+  const isCurrent = plan.id === currentPlan;
+  const isStarter = plan.id === "starter";
+  const planOrder = { starter: 0, pro: 1, ultra: 2 } as Record<string, number>;
+  const canUpgrade =
+    !plan.comingSoon &&
+    !isStarter &&
+    !isCurrent &&
+    (planOrder[plan.id] ?? 0) > (planOrder[currentPlan] ?? 0);
 
   return (
     <div
@@ -62,9 +52,9 @@ export function PlanCard({ plan, currentPlan, isCheckingOut, onUpgrade }: PlanCa
           : isCurrent
             ? "bg-surface border-success/30 shadow-[0_0_30px_rgba(34,197,94,0.08)]"
             : "bg-surface border-border hover:border-primary/25",
+        plan.comingSoon && "opacity-90",
       )}
     >
-      {/* ── Badge ─────────────────────────────────────────────────────────── */}
       {isCurrent ? (
         <div className="absolute top-0 right-0">
           <div className="bg-success text-white text-[11px] font-bold px-3 py-1 rounded-bl-xl rounded-tr-xl tracking-wide">
@@ -85,7 +75,6 @@ export function PlanCard({ plan, currentPlan, isCheckingOut, onUpgrade }: PlanCa
         </div>
       ) : null}
 
-      {/* ── Header ────────────────────────────────────────────────────────── */}
       <div className="space-y-3">
         <div className={cn("w-10 h-10 rounded-xl flex items-center justify-center", plan.iconBg)}>
           {plan.icon}
@@ -95,28 +84,20 @@ export function PlanCard({ plan, currentPlan, isCheckingOut, onUpgrade }: PlanCa
           <p className="text-sm text-subtle">{plan.tagline}</p>
         </div>
         <div>
-          {plan.comingSoon ? (
-            <div className="flex items-baseline gap-1.5">
-              <span className="text-4xl font-extrabold text-foreground/30">—</span>
-            </div>
-          ) : (
-            <div className="flex items-baseline gap-1.5">
-              <span className="text-4xl font-extrabold text-foreground">{plan.priceLabel}</span>
-              {plan.priceLabel !== "Free" && (
-                <span className="text-subtle text-sm">CAD</span>
-              )}
-            </div>
-          )}
-          <p className="text-xs text-subtle mt-0.5">
-            {plan.comingSoon ? "Pricing will be announced soon" : plan.priceNote}
-          </p>
+          <div className="flex items-baseline gap-1.5">
+            <span className={cn("text-4xl font-extrabold", plan.comingSoon ? "text-foreground/70" : "text-foreground")}>
+              {plan.priceLabel}
+            </span>
+            {plan.priceLabel !== "Free" && (
+              <span className="text-subtle text-sm">CAD</span>
+            )}
+          </div>
+          <p className="text-xs text-subtle mt-0.5">{plan.priceNote}</p>
         </div>
       </div>
 
-      {/* ── Divider ───────────────────────────────────────────────────────── */}
       <div className="border-t border-border" />
 
-      {/* ── Features ──────────────────────────────────────────────────────── */}
       <ul className="space-y-2.5 flex-1">
         {plan.features.map((feat) => (
           <li
@@ -140,18 +121,17 @@ export function PlanCard({ plan, currentPlan, isCheckingOut, onUpgrade }: PlanCa
         ))}
       </ul>
 
-      {/* ── CTA ───────────────────────────────────────────────────────────── */}
       {plan.comingSoon ? (
         <div
           id={`billing-plan-${plan.id}-coming-soon`}
-          className="inline-flex items-center justify-center gap-2 w-full py-3.5 rounded-xl bg-warning/5 border border-warning/25 text-warning/60 text-sm font-semibold cursor-not-allowed select-none"
+          className="inline-flex items-center justify-center gap-2 w-full py-3.5 rounded-xl bg-warning/5 border border-warning/25 text-warning/70 text-sm font-semibold cursor-not-allowed select-none"
           aria-disabled="true"
         >
-          🔒 Coming Soon
+          Coming Soon
         </div>
       ) : isCurrent ? (
         <div className="inline-flex items-center justify-center gap-2 w-full py-3.5 rounded-xl bg-success/10 border border-success/30 text-success text-sm font-semibold cursor-default select-none">
-          ✓ Active Plan
+          Active Plan
         </div>
       ) : isStarter ? (
         <div className="inline-flex items-center justify-center w-full py-3.5 rounded-xl bg-surface border border-border text-subtle text-sm font-medium cursor-default select-none">
@@ -170,9 +150,15 @@ export function PlanCard({ plan, currentPlan, isCheckingOut, onUpgrade }: PlanCa
           )}
         >
           {isCheckingOut ? (
-            <><Loader2 className="w-4 h-4 animate-spin" /> Processing…</>
+            <>
+              <Loader2 className="w-4 h-4 animate-spin" />
+              Processing...
+            </>
           ) : (
-            <>Upgrade to {plan.name} <ArrowRight className="w-4 h-4" /></>
+            <>
+              Upgrade to {plan.name}
+              <ArrowRight className="w-4 h-4" />
+            </>
           )}
         </button>
       ) : (

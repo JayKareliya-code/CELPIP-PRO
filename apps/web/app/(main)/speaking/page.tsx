@@ -5,7 +5,7 @@ import { SpeakingModuleHome } from "@/components/speaking/SpeakingModuleHome";
 import type { SpeakingTask }  from "@/lib/types";
 
 export const metadata: Metadata = {
-  title: "Speaking Module — CELPIPBro",
+  title: "Speaking Module — CELPIPBRO",
   description:
     "Practice all 9 CELPIP speaking tasks. Each task has multiple prompts — earn a new prompt with every attempt up to your plan limit. Unlimited free retries after.",
 };

@@ -12,7 +12,7 @@ import { MOCK_CALIBRATION_SAMPLES } from "@/lib/mockData";
 import { MOCK_SPEAKING_PROMPTS, MOCK_WRITING_PROMPTS } from "@/lib/mockAdminData";
 
 export const metadata: Metadata = {
-  title: "Admin — CELPIPBro",
+  title: "Admin — CELPIPBRO",
   description: "Platform administration dashboard.",
 };
 

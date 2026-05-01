@@ -45,6 +45,7 @@ async def start_speaking(
         task_number=prompt.task_number,
         is_mock_test=is_mock_test,
         db=db,
+        prompt_id=prompt_id,
     )
 
     repo = AttemptRepository(db)
@@ -156,6 +157,7 @@ async def start_writing(
         is_mock_test=is_mock_test,
         db=db,
         mock_exam_number=mock_exam_number,
+        prompt_id=prompt_id,
     )
 
     repo = AttemptRepository(db)

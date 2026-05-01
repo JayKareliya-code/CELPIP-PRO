@@ -12,8 +12,8 @@
 //   📝 My Response
 //      Original prompt + full transcript/essay — clean reading view
 //
-//   📈 Analytics  (speaking only)
-//      Score trend (ScoreProgressCard) + Speech analytics
+//   📈 Analytics
+//      Score trend (ScoreProgressCard) + Speech analytics (speaking only)
 //
 // The tab nav is sticky so users can switch context without scrolling back up.
 // All tab content is conditionally rendered (not hidden) so network requests
@@ -33,6 +33,7 @@ import { DimensionBreakdown }              from "./DimensionBreakdown";
 import { StrengthsPanel, WeaknessesPanel, FeedbackToggle } from "./FeedbackPanels";
 import { ImprovementTipsAccordion }        from "./ImprovementTipsAccordion";
 import { TranscriptAnalysisCard }          from "./TranscriptAnalysisCard";
+import { EssayAnalysisCard }              from "./EssayAnalysisCard";
 import { SampleResponseCard }              from "./SampleResponseCard";
 
 import type { ReportResponse }             from "@/lib/types";
@@ -69,6 +70,7 @@ export function ProReport({ report, targetBand }: Props) {
   const wordCount     = isSpeak ? countWords(report.user_response_text) : undefined;
   const taskDurationS = TASK_DURATION_S[report.task_number] ?? 60;
   const hasTranscript = isSpeak && !!report.transcript;
+  const hasEssay      = !isSpeak && !!report.user_response_text;
 
   // Weakest dimension — drives personalized footer CTA
   const weakestDim = report.dimensions.length > 0
@@ -79,7 +81,7 @@ export function ProReport({ report, targetBand }: Props) {
   const tabs: ReportTab[] = [
     { id: "coaching",  label: "Coaching Report" },
     { id: "response",  label: "My Response"     },
-    ...(isSpeak ? [{ id: "analytics", label: "Analytics" }] : []),
+    { id: "analytics", label: "Analytics" },
   ];
 
   return (
@@ -140,6 +142,7 @@ export function ProReport({ report, targetBand }: Props) {
               <SampleResponseCard
                 sampleResponse={report.sample_response}
                 targetBand={targetBand}
+                taskNumber={report.task_number}
               />
             )}
 
@@ -177,8 +180,8 @@ export function ProReport({ report, targetBand }: Props) {
           </div>
         )}
 
-        {/* ── ANALYTICS (speaking only) ────────────────────────────────────── */}
-        {activeTab === "analytics" && isSpeak && (
+        {/* ── ANALYTICS ────────────────────────────────────────────────── */}
+        {activeTab === "analytics" && (
           <div
             id="report-panel-analytics"
             role="tabpanel"
@@ -192,13 +195,22 @@ export function ProReport({ report, targetBand }: Props) {
               skill={report.skill as "speaking" | "writing"}
               taskNumber={report.task_number}
               currentAttemptId={report.attempt_id}
+              currentDimensions={report.dimensions}
             />
 
-            {/* Client-side transcript analysis — zero network calls */}
+            {/* Speaking: transcript analysis */}
             {hasTranscript && (
               <TranscriptAnalysisCard
                 transcript={report.transcript!}
                 taskDurationS={taskDurationS}
+              />
+            )}
+
+            {/* Writing: essay analysis */}
+            {hasEssay && (
+              <EssayAnalysisCard
+                essayText={report.user_response_text!}
+                taskNumber={report.task_number}
               />
             )}
 

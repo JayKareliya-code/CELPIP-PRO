@@ -54,7 +54,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const taskNumber = Number(task);
   const label = TASK_LABELS[taskNumber] ?? `Writing Task ${taskNumber}`;
   return {
-    title: `${label} — Writing | CELPIPBro`,
+    title: `${label} — Writing | CELPIPBRO`,
     description: `Choose a prompt for ${label} and start your timed writing session.`,
   };
 }

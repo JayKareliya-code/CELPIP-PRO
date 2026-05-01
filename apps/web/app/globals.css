@@ -84,6 +84,10 @@
   .animation-delay-150 { animation-delay: 150ms; }
   .animation-delay-300 { animation-delay: 300ms; }
   .animation-delay-500 { animation-delay: 500ms; }
+
+  /* Hide scrollbar while keeping scroll functionality */
+  .no-scrollbar::-webkit-scrollbar { display: none; }
+  .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 }
 
 /* ── Writing editor — contenteditable placeholder ─────────────────────────── */

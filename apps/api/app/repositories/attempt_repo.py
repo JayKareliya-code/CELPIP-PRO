@@ -28,6 +28,63 @@ class AttemptRepository(BaseRepository[Attempt]):
         )
         return result.scalar_one()
 
+    async def has_used_prompt(
+        self, user_id: uuid.UUID, skill: str, prompt_id: uuid.UUID
+    ) -> bool:
+        """Return True if the user has ANY non-cancelled/failed attempt for this prompt.
+
+        Used by enforce_quota to allow unlimited retries on already-attempted
+        prompts without consuming additional quota slots.
+        """
+        result = await self.session.execute(
+            select(func.count(Attempt.id))
+            .where(Attempt.user_id     == user_id)
+            .where(Attempt.skill       == skill)
+            .where(Attempt.prompt_id   == prompt_id)
+            .where(Attempt.is_mock_test == False)   # noqa: E712
+            .where(Attempt.status.not_in(["cancelled", "failed"]))
+        )
+        return (result.scalar_one() or 0) > 0
+
+    async def count_distinct_prompts(
+        self, user_id: uuid.UUID, skill: str, task_number: int
+    ) -> int:
+        """Count DISTINCT prompts the user has attempted for a task.
+
+        Retrying the same prompt never increments this count — only a first
+        attempt on a new prompt does. This enforces the 'unlimited retries,
+        quota per unique prompt' contract.
+        """
+        result = await self.session.execute(
+            select(func.count(func.distinct(Attempt.prompt_id)))
+            .where(Attempt.user_id     == user_id)
+            .where(Attempt.skill       == skill)
+            .where(Attempt.task_number == task_number)
+            .where(Attempt.is_mock_test == False)   # noqa: E712
+            .where(Attempt.status.not_in(["cancelled", "failed"]))
+            .where(Attempt.prompt_id.is_not(None))
+        )
+        return result.scalar_one() or 0
+
+    async def count_distinct_prompts_per_skill(
+        self, user_id: uuid.UUID, skill: str
+    ) -> dict[int, int]:
+        """Return {task_number: distinct_prompt_count} for all tasks in ONE query.
+
+        Used by the /me/quota endpoint so it issues a single GROUP BY instead
+        of N sequential counts. Mirrors count_distinct_prompts semantics.
+        """
+        result = await self.session.execute(
+            select(Attempt.task_number, func.count(func.distinct(Attempt.prompt_id)))
+            .where(Attempt.user_id      == user_id)
+            .where(Attempt.skill        == skill)
+            .where(Attempt.is_mock_test == False)   # noqa: E712
+            .where(Attempt.status.not_in(["cancelled", "failed"]))
+            .where(Attempt.prompt_id.is_not(None))
+            .group_by(Attempt.task_number)
+        )
+        return {row[0]: row[1] for row in result.all()}
+
     async def count_distinct_mock_slots(
         self, user_id: uuid.UUID, skill: str
     ) -> int:

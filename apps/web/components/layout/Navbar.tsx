@@ -46,7 +46,7 @@ function Brand() {
     <Link
       href="/"
       className="flex items-center select-none group shrink-0"
-      aria-label="CELPIPBro home"
+      aria-label="CELPIPBRO home"
     >
       <span className="text-3xl font-black tracking-tight text-white group-hover:text-white/90 transition-colors">
         CELPIP

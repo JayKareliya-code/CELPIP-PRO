@@ -69,10 +69,10 @@ export default function PrivacyPolicyPage() {
           <p className="mt-3">
             For privacy inquiries, contact us at:{" "}
             <a
-              href="mailto:support@celpipbro.ca"
+              href="mailto:support@CELPIPBRO.ca"
               className="text-amber-400 hover:text-amber-300 transition-colors underline"
             >
-              support@celpipbro.ca
+              support@CELPIPBRO.ca
             </a>
           </p>
         </Section>
@@ -232,10 +232,10 @@ export default function PrivacyPolicyPage() {
           <p className="mt-3">
             To exercise any of these rights, contact us at{" "}
             <a
-              href="mailto:support@celpipbro.ca"
+              href="mailto:support@CELPIPBRO.ca"
               className="text-amber-400 hover:text-amber-300 transition-colors underline"
             >
-              support@celpipbro.ca
+              support@CELPIPBRO.ca
             </a>
             . We will respond within 30 days.
           </p>
@@ -304,10 +304,10 @@ export default function PrivacyPolicyPage() {
             <p className="mt-1">
               Email:{" "}
               <a
-                href="mailto:support@celpipbro.ca"
+                href="mailto:support@CELPIPBRO.ca"
                 className="text-amber-400 hover:text-amber-300 transition-colors"
               >
-                support@celpipbro.ca
+                support@CELPIPBRO.ca
               </a>
             </p>
           </div>

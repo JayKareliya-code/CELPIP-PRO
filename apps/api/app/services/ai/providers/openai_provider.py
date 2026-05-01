@@ -90,15 +90,15 @@ _SPEAKING_SCHEMA = {
     "schema": {
         "type": "object",
         "properties": {
-            "task_completion":       {"type": "integer", "minimum": 1, "maximum": 12},
-            "coherence":             {"type": "integer", "minimum": 1, "maximum": 12},
-            "vocabulary":            {"type": "integer", "minimum": 1, "maximum": 12},
-            "fluency":               {"type": "integer", "minimum": 1, "maximum": 12},
-            "grammar":               {"type": "integer", "minimum": 1, "maximum": 12},
-            "estimated_band":        {"type": "number",  "minimum": 1, "maximum": 12},
-            "strengths":             {"type": "array", "items": deepcopy(_STRENGTH_SCHEMA),  "minItems": 1, "maxItems": 3},
-            "weaknesses":            {"type": "array", "items": deepcopy(_WEAKNESS_SCHEMA), "minItems": 1, "maxItems": 3},
-            "improvement_tips":      {"type": "array", "items": deepcopy(_TIP_SCHEMA),      "minItems": 1, "maxItems": 4},
+            "task_completion":       {"type": "integer"},
+            "coherence":             {"type": "integer"},
+            "vocabulary":            {"type": "integer"},
+            "fluency":               {"type": "integer"},
+            "grammar":               {"type": "integer"},
+            "estimated_band":        {"type": "number"},
+            "strengths":             {"type": "array", "items": deepcopy(_STRENGTH_SCHEMA)},
+            "weaknesses":            {"type": "array", "items": deepcopy(_WEAKNESS_SCHEMA)},
+            "improvement_tips":      {"type": "array", "items": deepcopy(_TIP_SCHEMA)},
             "sample_response":       {"type": "string"},
             "dimension_commentary":  deepcopy(_DIM_COMMENTARY_SCHEMA),
             "next_milestone":        {"type": "string"},
@@ -114,27 +114,42 @@ _SPEAKING_SCHEMA = {
 
 # ── JSON Schema: writing ─────────────────────────────────────────────────────
 
+_WRITING_DIM_COMMENTARY_SCHEMA = {
+    "type": "object",
+    "properties": {
+        "task_fulfillment": {"type": "string"},
+        "organization":     {"type": "string"},
+        "tone_register":    {"type": "string"},
+        "vocabulary":       {"type": "string"},
+        "grammar":          {"type": "string"},
+    },
+    "required": ["task_fulfillment", "organization", "tone_register", "vocabulary", "grammar"],
+    "additionalProperties": False,
+}
+
 _WRITING_SCHEMA = {
     "name": "celpip_writing_score",
     "strict": True,
     "schema": {
         "type": "object",
         "properties": {
-            "task_fulfillment": {"type": "integer", "minimum": 1, "maximum": 12},
-            "organization":     {"type": "integer", "minimum": 1, "maximum": 12},
-            "tone_register":    {"type": "integer", "minimum": 1, "maximum": 12},
-            "vocabulary":       {"type": "integer", "minimum": 1, "maximum": 12},
-            "grammar":          {"type": "integer", "minimum": 1, "maximum": 12},
-            "estimated_band":   {"type": "number",  "minimum": 1, "maximum": 12},
-            "strengths":        {"type": "array", "items": {"type": "string"}, "maxItems": 4},
-            "weaknesses":       {"type": "array", "items": {"type": "string"}, "maxItems": 4},
-            "improvement_tips": {"type": "array", "items": {"type": "string"}, "maxItems": 5},
-            "sample_response":  {"type": "string"},
+            "task_fulfillment":      {"type": "integer"},
+            "organization":          {"type": "integer"},
+            "tone_register":         {"type": "integer"},
+            "vocabulary":            {"type": "integer"},
+            "grammar":               {"type": "integer"},
+            "estimated_band":        {"type": "number"},
+            "strengths":             {"type": "array", "items": deepcopy(_STRENGTH_SCHEMA)},
+            "weaknesses":            {"type": "array", "items": deepcopy(_WEAKNESS_SCHEMA)},
+            "improvement_tips":      {"type": "array", "items": deepcopy(_TIP_SCHEMA)},
+            "sample_response":       {"type": "string"},
+            "dimension_commentary":  deepcopy(_WRITING_DIM_COMMENTARY_SCHEMA),
+            "next_milestone":        {"type": "string"},
         },
         "required": [
             "task_fulfillment", "organization", "tone_register", "vocabulary", "grammar",
             "estimated_band", "strengths", "weaknesses", "improvement_tips",
-            "sample_response",
+            "sample_response", "dimension_commentary", "next_milestone",
         ],
         "additionalProperties": False,
     },
@@ -186,6 +201,23 @@ def _parse_tips(raw_items: list) -> list[ImprovementTip]:
         elif isinstance(item, str):
             result.append(ImprovementTip(title=item, why="", how="", example=""))
     return result
+
+
+def _clamp_score(value: int | float, lo: int = 1, hi: int = 12) -> int:
+    """
+    Clamp a raw LLM score to the valid 1–12 CELPIP band range.
+
+    JSON Schema strict mode does not support minimum/maximum constraints, so
+    we enforce the bounds here in Python instead.  An out-of-range value is
+    a model hallucination — clamp it and log a warning so we never persist
+    a corrupt score silently.
+    """
+    clamped = int(max(lo, min(hi, int(value))))
+    if clamped != int(value):
+        logger.warning(
+            "LLM returned out-of-range score %s — clamped to %d", value, clamped
+        )
+    return clamped
 
 
 class OpenAIProvider:
@@ -315,12 +347,12 @@ class OpenAIProvider:
         # _parse_feedback_items / _parse_tips are tolerant of unexpected shapes
         # so a partial LLM response doesn't crash the pipeline.
         result = ScoringResult(
-            task_completion=raw.get("task_completion", 0),
-            coherence=raw.get("coherence", 0),
-            vocabulary=raw.get("vocabulary", 0),
-            fluency=raw.get("fluency", 0),
-            grammar=raw.get("grammar", 0),
-            estimated_band=raw.get("estimated_band", 0.0),
+            task_completion=_clamp_score(raw.get("task_completion", 6)),
+            coherence=_clamp_score(raw.get("coherence", 6)),
+            vocabulary=_clamp_score(raw.get("vocabulary", 6)),
+            fluency=_clamp_score(raw.get("fluency", 6)),
+            grammar=_clamp_score(raw.get("grammar", 6)),
+            estimated_band=max(1.0, min(12.0, float(raw.get("estimated_band", 0.0)))),
             strengths=_parse_feedback_items(raw.get("strengths", [])),
             weaknesses=_parse_feedback_items(raw.get("weaknesses", []), with_fix=True),
             improvement_tips=_parse_tips(raw.get("improvement_tips", [])),
@@ -367,6 +399,12 @@ class OpenAIProvider:
         """
         MAX_ESSAY_CHARS = 8000
         if len(essay_text) > MAX_ESSAY_CHARS:
+            logger.warning(
+                "Essay text truncated before scoring: original=%d chars → %d chars. "
+                "Scored text may differ from DB-stored essay_text.",
+                len(essay_text),
+                MAX_ESSAY_CHARS,
+            )
             essay_text = essay_text[:MAX_ESSAY_CHARS]
 
         # Replace any stray essay-fence delimiters the candidate may have
@@ -405,18 +443,18 @@ class OpenAIProvider:
             completion_tokens=body["usage"]["completion_tokens"],
         )
         result = ScoringResult(
-            task_fulfillment=raw.get("task_fulfillment", 0),
-            organization=raw.get("organization", 0),
-            tone_register=raw.get("tone_register", 0),
-            vocabulary=raw.get("vocabulary", 0),
-            grammar=raw.get("grammar", 0),
-            estimated_band=raw.get("estimated_band", 0.0),
-            # Writing scorer returns plain strings — parse through typed helpers
-            # so ScoringResult.strengths always holds list[FeedbackItem].
+            task_fulfillment=_clamp_score(raw.get("task_fulfillment", 6)),
+            organization=_clamp_score(raw.get("organization", 6)),
+            tone_register=_clamp_score(raw.get("tone_register", 6)),
+            vocabulary=_clamp_score(raw.get("vocabulary", 6)),
+            grammar=_clamp_score(raw.get("grammar", 6)),
+            estimated_band=max(1.0, min(12.0, float(raw.get("estimated_band", 0.0)))),
             strengths=_parse_feedback_items(raw.get("strengths", [])),
             weaknesses=_parse_feedback_items(raw.get("weaknesses", []), with_fix=True),
             improvement_tips=_parse_tips(raw.get("improvement_tips", [])),
             sample_response=raw.get("sample_response", ""),
+            dimension_commentary=raw.get("dimension_commentary") or {},
+            next_milestone=raw.get("next_milestone", ""),
             raw_json=raw,
             usage=usage,
         )

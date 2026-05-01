@@ -23,10 +23,20 @@ function buildMockScoreHistory(skill: Skill, taskNumber: number): TaskScoreHisto
     skill,
     task_number: taskNumber,
     scores: [
-      { attempt_id: "mock-h1", estimated_band: 6.5, completed_at: new Date(now - day * 6).toISOString() },
-      { attempt_id: "mock-h2", estimated_band: 7.0, completed_at: new Date(now - day * 4).toISOString() },
-      { attempt_id: "mock-h3", estimated_band: 7.0, completed_at: new Date(now - day * 2).toISOString() },
-      { attempt_id: "mock-h4", estimated_band: 7.5, completed_at: new Date(now - day * 1).toISOString() },
+      { attempt_id: "mock-h1", estimated_band: 6.5, completed_at: new Date(now - day * 6).toISOString(), dimensions: [
+        { dimension: "coherence",    score: 7,  max_score: 12 },
+        { dimension: "fluency",      score: 6,  max_score: 12 },
+        { dimension: "grammar",      score: 6,  max_score: 12 },
+        { dimension: "task",         score: 7,  max_score: 12 },
+        { dimension: "vocabulary",   score: 7,  max_score: 12 },
+      ]},
+      { attempt_id: "mock-h2", estimated_band: 7.0, completed_at: new Date(now - day * 4).toISOString(), dimensions: [
+        { dimension: "coherence",    score: 7,  max_score: 12 },
+        { dimension: "fluency",      score: 7,  max_score: 12 },
+        { dimension: "grammar",      score: 6,  max_score: 12 },
+        { dimension: "task",         score: 8,  max_score: 12 },
+        { dimension: "vocabulary",   score: 7,  max_score: 12 },
+      ]},
     ],
   };
 }

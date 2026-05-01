@@ -19,6 +19,7 @@ from the Phase 1 submission (submit_writing in attempt_service.py).
 from __future__ import annotations
 
 import logging
+from dataclasses import asdict
 from uuid import UUID
 
 import sqlalchemy as sa
@@ -87,7 +88,7 @@ async def _pipeline(db: AsyncSession, attempt_id: UUID) -> None:
     target_band         = await _load_user_target_band(db, attempt.user_id)
     system_prompt       = await _build_prompt(db, task_number, target_band)
     result              = await _score(db, attempt_id, w_attempt.essay_text, prompt_text, system_prompt)
-    await _save_score(db, attempt_id, result)
+    await _save_score(db, attempt_id, result, actual_model=settings.AI_SCORING_MODEL)
     await _save_feedback(db, attempt_id, result)
     await _mark_complete(db, attempt_id, result)
 
@@ -175,11 +176,17 @@ async def _score(
     return result
 
 
-async def _save_score(db: AsyncSession, attempt_id: UUID, result: ScoringResult) -> None:
+async def _save_score(
+    db: AsyncSession,
+    attempt_id: UUID,
+    result: ScoringResult,
+    actual_model: str,
+) -> None:
+    """Persist ScoreReport using the model that was *actually* used for this call."""
     report = ScoreReport(
         attempt_id=attempt_id,
         estimated_band=result.estimated_band,
-        scoring_model=settings.AI_SCORING_MODEL,
+        scoring_model=actual_model,
         raw_rubric_json=result.raw_json,
     )
     db.add(report)
@@ -196,10 +203,12 @@ async def _save_score(db: AsyncSession, attempt_id: UUID, result: ScoringResult)
 async def _save_feedback(db: AsyncSession, attempt_id: UUID, result: ScoringResult) -> None:
     db.add(FeedbackReport(
         attempt_id=attempt_id,
-        strengths=result.strengths,
-        weaknesses=result.weaknesses,
-        improvement_tips=result.improvement_tips,
+        strengths=[asdict(s) for s in result.strengths],
+        weaknesses=[asdict(w) for w in result.weaknesses],
+        improvement_tips=[asdict(t) for t in result.improvement_tips],
         sample_response=result.sample_response,
+        next_milestone=result.next_milestone or None,
+        dimension_commentary=result.dimension_commentary or None,
     ))
 
 

@@ -8,7 +8,7 @@
 //   • wordCount / estimatedTime — compact stats row from the transcript
 // ─────────────────────────────────────────────────────────────────────────────
 
-import { useEffect, useState }          from "react";
+import { useEffect, useLayoutEffect, useState } from "react";
 import { Mic, PenLine, Clock, Target }  from "lucide-react";
 import { formatBand, roundBand }        from "@/lib/utils";
 import type { Skill }                   from "@/lib/types";
@@ -54,11 +54,20 @@ export function ScoreSummaryCard({ estimatedBand, skill, completedAt, nextMilest
   // Animate the arc from 0 → displayBand on mount.
   // Pure rAF cubic ease-out — no CSS transition on the SVG element
   // (CSS transition + rAF fighting each other causes jitter/stutter).
+  // Phase 1 — reset arc to 0 BEFORE the browser paints.
+  // useLayoutEffect fires synchronously after DOM mutations but before paint,
+  // so the arc is guaranteed to be invisible on the very first frame.
+  useLayoutEffect(() => {
+    setAnimated(0);
+  }, [displayBand]);
+
+  // Phase 2 — drive the rAF animation after the 0-state has been painted.
+  // Keeping this in useEffect (post-paint) means the rAF loop starts only
+  // after the browser has committed the reset render to screen.
   useEffect(() => {
-    setAnimated(0);                       // always reset before animating
     let rafId: number;
-    const start = performance.now();
-    const duration = 1200;               // ms — longer feels more satisfying
+    const start    = performance.now();
+    const duration = 1200;
     const step = (now: number) => {
       const progress = Math.min((now - start) / duration, 1);
       const eased    = 1 - Math.pow(1 - progress, 3); // ease-out cubic

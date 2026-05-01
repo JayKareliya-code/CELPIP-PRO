@@ -132,7 +132,7 @@ export function Sidebar({ open, onClose }: MobileSidebarProps) {
           })}
 
           <p className="text-[10px] text-white/20 text-center pt-3">
-            CELPIPBro · AI-Powered CELPIP Practice
+            CELPIPBRO · AI-Powered CELPIP Practice
           </p>
         </div>
 

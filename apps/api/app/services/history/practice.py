@@ -8,14 +8,15 @@ batch query per skill to avoid N+1.
 from __future__ import annotations
 
 import logging
+from collections import defaultdict
 from uuid import UUID
 
 from sqlalchemy import func, select, text
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.attempt import Attempt
-from app.models.score_report import ScoreReport
-from app.schemas.history import HistoryItem, PaginatedHistory, TaskScorePoint, TaskScoreHistory
+from app.models.score_report import ScoreReport, ScoreDimension
+from app.schemas.history import HistoryItem, PaginatedHistory, TaskScorePoint, TaskScoreHistory, DimensionScorePoint
 from ._helpers import build_task_title
 
 logger = logging.getLogger(__name__)
@@ -144,7 +145,12 @@ async def get_recent_task_scores(
     This is intentionally a single JOIN query — no N+1, no pagination overhead.
     """
     stmt = (
-        select(Attempt.id, Attempt.updated_at, ScoreReport.estimated_band)
+        select(
+            Attempt.id,
+            Attempt.updated_at,
+            ScoreReport.id.label("report_id"),
+            ScoreReport.estimated_band,
+        )
         .join(ScoreReport, ScoreReport.attempt_id == Attempt.id)
         .where(
             Attempt.user_id == user_id,
@@ -157,9 +163,22 @@ async def get_recent_task_scores(
         .limit(limit)
     )
     rows = (await db.execute(stmt)).all()
+    rows = list(reversed(rows))   # oldest-first for the chart
 
-    # Reverse to oldest-first so the frontend renders a left-to-right trend
-    rows = list(reversed(rows))
+    if not rows:
+        return TaskScoreHistory(skill=skill, task_number=task_number, scores=[])
+
+    # Batch-fetch all dimension scores for these report IDs (1 extra query, no N+1)
+    report_ids = [row.report_id for row in rows]
+    dim_rows = (
+        await db.execute(
+            select(ScoreDimension).where(ScoreDimension.report_id.in_(report_ids))
+        )
+    ).scalars().all()
+
+    dims_by_report: dict[UUID, list[ScoreDimension]] = defaultdict(list)
+    for d in dim_rows:
+        dims_by_report[d.report_id].append(d)
 
     return TaskScoreHistory(
         skill=skill,
@@ -169,6 +188,14 @@ async def get_recent_task_scores(
                 attempt_id=row.id,
                 estimated_band=float(row.estimated_band),
                 completed_at=row.updated_at,
+                dimensions=[
+                    DimensionScorePoint(
+                        dimension=d.dimension,
+                        score=d.score,
+                        max_score=d.max_score,
+                    )
+                    for d in dims_by_report.get(row.report_id, [])
+                ],
             )
             for row in rows
         ],

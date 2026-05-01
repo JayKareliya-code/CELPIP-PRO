@@ -102,16 +102,49 @@ function TipCard({ tip, index, total, defaultOpen }: {
                 </div>
               )}
 
-              {/* EXAMPLE — concrete reference: medium prominence */}
-              {tip.example && (
-                <div className="flex items-start gap-3 px-4 py-3">
-                  <div className="flex items-center gap-1.5 flex-shrink-0 w-20 pt-0.5">
-                    <BookOpen className="h-3 w-3 text-white/50" />
-                    <span className="text-[10px] font-bold uppercase tracking-widest text-white/50">Example</span>
+              {/* EXAMPLE — BEFORE → AFTER rewrite block */}
+              {tip.example && (() => {
+                // Parse "BEFORE: ... → AFTER: ..." format
+                const arrowIdx = tip.example.indexOf(" → ");
+                const hasBefore = tip.example.toUpperCase().startsWith("BEFORE:");
+                const hasAfter  = arrowIdx !== -1 && tip.example.toUpperCase().includes("AFTER:");
+
+                if (hasBefore && hasAfter) {
+                  const beforeRaw = tip.example.slice(0, arrowIdx).replace(/^BEFORE:\s*/i, "").trim();
+                  const afterRaw  = tip.example.slice(arrowIdx + 3).replace(/^AFTER:\s*/i, "").trim();
+                  return (
+                    <div className="flex items-start gap-3 px-4 py-3">
+                      <div className="flex items-center gap-1.5 flex-shrink-0 w-20 pt-0.5">
+                        <BookOpen className="h-3 w-3 text-white/50" />
+                        <span className="text-[10px] font-bold uppercase tracking-widest text-white/50">Rewrite</span>
+                      </div>
+                      <div className="flex flex-col gap-1.5 min-w-0">
+                        {/* BEFORE */}
+                        <div className="flex items-start gap-2">
+                          <span className="flex-shrink-0 mt-[3px] text-[9px] font-bold uppercase tracking-widest text-rose-400/70 w-10">Before</span>
+                          <p className="text-sm leading-relaxed text-rose-300/80 italic line-through decoration-rose-400/30">{beforeRaw}</p>
+                        </div>
+                        {/* AFTER */}
+                        <div className="flex items-start gap-2">
+                          <span className="flex-shrink-0 mt-[3px] text-[9px] font-bold uppercase tracking-widest text-emerald-400/70 w-10">After</span>
+                          <p className="text-sm leading-relaxed text-emerald-300 font-medium">{afterRaw}</p>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                }
+
+                // Legacy fallback: render as plain italic
+                return (
+                  <div className="flex items-start gap-3 px-4 py-3">
+                    <div className="flex items-center gap-1.5 flex-shrink-0 w-20 pt-0.5">
+                      <BookOpen className="h-3 w-3 text-white/50" />
+                      <span className="text-[10px] font-bold uppercase tracking-widest text-white/50">Example</span>
+                    </div>
+                    <p className="text-sm leading-relaxed text-white/80 italic">{tip.example}</p>
                   </div>
-                  <p className="text-sm leading-relaxed text-white/80 italic">{tip.example}</p>
-                </div>
-              )}
+                );
+              })()}
 
             </div>
           </div>

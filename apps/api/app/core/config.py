@@ -133,8 +133,8 @@ class Settings(BaseSettings):
     # ── Quotas ────────────────────────────────────────────────────────────────
     STARTER_SPEAKING_MOCK_TESTS: int = 1
     STARTER_WRITING_MOCK_TESTS:  int = 1
-    PRO_SPEAKING_PER_TASK:       int = 5
-    PRO_WRITING_PER_TASK:        int = 5
+    PRO_SPEAKING_PER_TASK:       int = 20
+    PRO_WRITING_PER_TASK:        int = 20
     PRO_SPEAKING_MOCK_TESTS:     int = 2
     PRO_WRITING_MOCK_TESTS:      int = 2
     ULTRA_SPEAKING_PER_TASK:     int = 15

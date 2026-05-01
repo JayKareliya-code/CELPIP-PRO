@@ -1,9 +1,5 @@
 "use client";
 
-// ─────────────────────────────────────────────────────────────────────────────
-// BillingFAQ.tsx — Collapsible FAQ section for the billing page
-// ─────────────────────────────────────────────────────────────────────────────
-
 import { useState } from "react";
 import { ChevronDown } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -11,27 +7,31 @@ import { cn } from "@/lib/utils";
 const FAQS = [
   {
     q: "Is this really a one-time payment?",
-    a: "Yes. There are no subscriptions, no renewals, and no hidden fees. You pay once and your attempts never expire.",
+    a: "Yes. Pro is a one-time purchase. There are no subscriptions, renewals, or hidden fees.",
   },
   {
-    q: "Can I upgrade from Pro to Ultra later?",
-    a: "Absolutely. You can upgrade at any time by selecting the Ultra plan on this page. You'll be charged the full Ultra price and your attempt pool will be increased immediately after payment is confirmed.",
+    q: "Is Ultra available now?",
+    a: "No. Ultra is coming soon. Pro is the paid plan currently available in production, and Ultra is shown only as a planned future upgrade.",
   },
   {
-    q: "What happens to my attempts if I upgrade?",
-    a: "Your previously used attempts are preserved. Upgrading simply increases the total pool. For example, if you've already used 3 of your 5 Pro attempts on Task 1, you'll have 12 of the 15 Ultra attempts remaining after upgrading.",
+    q: "What does Pro unlock?",
+    a: "Pro unlocks individual Speaking and Writing task practice, detailed AI feedback, estimated practice band scores, improved sample responses, vocabulary and templates, attempt history, and 2 full mock tests for Speaking plus 2 full mock tests for Writing.",
+  },
+  {
+    q: "Are the scores official CELPIP results?",
+    a: "No. CELPIPBRO provides AI-generated practice estimates and feedback. Official CELPIP scores only come from the official CELPIP test administrator.",
   },
   {
     q: "Can I get a refund?",
-    a: "Because CELPIPBro delivers instant digital access, all purchases are final. If you have a problem, reach out via the Contact page and we'll do our best to help.",
+    a: "Because CELPIPBRO delivers instant digital access, all purchases are final. If you have a problem, reach out via the Contact page and we'll do our best to help.",
   },
   {
     q: "Is my payment secure?",
-    a: "All payments are processed by Stripe, which is PCI DSS Level 1 certified. CELPIPBro never stores your card details.",
+    a: "All payments are processed by Stripe, which is PCI DSS Level 1 certified. CELPIPBRO never stores your card details.",
   },
   {
     q: "Do attempts expire?",
-    a: "No. Your practice attempts never expire. Use them at your own pace.",
+    a: "No. Your purchased Pro practice access does not expire. Use it at your own pace.",
   },
 ];
 

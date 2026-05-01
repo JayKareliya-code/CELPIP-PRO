@@ -19,26 +19,27 @@ const sourceSerif = Source_Serif_4({
 
 export const metadata: Metadata = {
   title: {
-    default: "CELPIPBro — AI-Powered CELPIP Exam Practice",
-    template: "%s | CELPIPBro",
+    default: "CELPIPBRO - AI-Powered CELPIP Practice",
+    template: "%s | CELPIPBRO",
   },
   description:
-    "Practice CELPIP Speaking and Writing tasks with AI-powered feedback, rubric-based scoring, and personalized progress tracking. Achieve your target band score.",
+    "Practice CELPIP Speaking and Writing tasks with timed sessions, AI feedback, practice band estimates, and progress tracking.",
   keywords: ["CELPIP", "CELPIP practice", "CELPIP speaking", "CELPIP writing", "Canadian English test"],
   icons: {
     icon: [
-      { url: "/favicon.ico" },
-      { url: "/icon.png",  type: "image/png" },
+      { url: "/icon-32.png",  sizes: "32x32",   type: "image/png" },
+      { url: "/icon-192.png", sizes: "192x192", type: "image/png" },
+      { url: "/icon.png",     sizes: "512x512",  type: "image/png" },
     ],
-    shortcut: "/favicon.ico",
-    apple:    "/icon.png",
+    shortcut: "/icon-32.png",
+    apple:    "/icon-180.png",
   },
   openGraph: {
-    type:        "website",
-    locale:      "en_CA",
-    siteName:    "CELPIPBro",
-    title:       "CELPIPBro — AI-Powered CELPIP Exam Practice",
-    description: "Practice CELPIP Speaking and Writing with AI feedback and rubric-based scoring.",
+    type: "website",
+    locale: "en_CA",
+    siteName: "CELPIPBRO",
+    title: "CELPIPBRO - AI-Powered CELPIP Practice",
+    description: "Practice CELPIP Speaking and Writing with AI feedback and practice band estimates.",
   },
 };
 
@@ -55,12 +56,9 @@ export default function RootLayout({
         suppressHydrationWarning
       >
         <body className="min-h-screen flex flex-col bg-muted font-sans antialiased">
-          {/* Providers wraps the client boundary (React Query, etc.)
-              while RootLayout itself stays a Server Component. */}
           <Providers>{children}</Providers>
         </body>
       </html>
     </ClerkProvider>
   );
 }
-

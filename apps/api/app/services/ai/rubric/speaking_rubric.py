@@ -80,8 +80,11 @@ Each tip MUST be a JSON object:
   "title": "<short 3–5 word label, e.g. 'Reduce Filler Words'>",
   "why": "<one sentence: how this specific gap lowers the band score>",
   "how": "<a specific, concrete practice drill or technique — 2 to 3 sentences>",
-  "example": "<one concrete before/after phrase from or related to this response>"
+  "example": "BEFORE: <3–10 words verbatim from the candidate's transcript showing the gap> → AFTER: <the improved version of that same phrase>"
 }}
+- example MUST follow the exact format 'BEFORE: ... → AFTER: ...' with both parts present.
+- BEFORE must be a real phrase from the transcript. AFTER must be the corrected/improved version.
+- Do NOT put only the before-text. Do NOT describe the change — show it.
 
 ### dimension_commentary
 A JSON object with exactly 5 keys — one per dimension — each a single sentence

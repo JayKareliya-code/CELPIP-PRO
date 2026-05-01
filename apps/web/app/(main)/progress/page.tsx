@@ -1,22 +1,28 @@
 import type { Metadata } from "next";
-import { PageWrapper } from "@/components/layout/PageWrapper";
-import { PlaceholderPage } from "@/components/layout/PlaceholderPage";
+import { PageWrapper }         from "@/components/layout/PageWrapper";
+import { ProgressPageClient }  from "@/components/progress/ProgressPageClient";
 
-export const metadata: Metadata = { title: "Progress" };
+export const metadata: Metadata = {
+  title: "Progress — CELPIPBRO",
+  description:
+    "Track your CELPIP Speaking and Writing improvement. See per-task scores, trend sparklines, and rubric dimension breakdowns.",
+};
 
 /**
- * Progress charts page placeholder — /progress
- * Band trend charts and weak-area detection come in Phase 3.
+ * Progress page — /progress
+ * Server-component shell. All data fetching and interactivity lives in
+ * ProgressPageClient (client component via React Query).
+ *
+ * Access control:
+ *   - Starter plan → upgrade gate (no individual task practice)
+ *   - Pro / Ultra  → full task grid + recent feed
+ *   - Ultra only   → rubric dimension breakdown panel
  */
 export default function ProgressPage() {
   return (
     <PageWrapper>
-      <PlaceholderPage
-        title="Progress Charts"
-        description="Band score trend charts and skill-level breakdowns are coming in Phase 3 once the scoring pipeline is live."
-        availableIn="Phase 3"
-        cta={{ label: "Back to Dashboard", href: "/dashboard" }}
-      />
+      <ProgressPageClient />
     </PageWrapper>
   );
 }
+

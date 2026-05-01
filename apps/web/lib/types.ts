@@ -382,11 +382,19 @@ export interface PaginatedHistory {
 
 // ── P2: Task Score History ────────────────────────────────────────────────────
 
+/** Per-dimension score within a historical score point */
+export interface HistoryDimensionScore {
+  dimension: string;  // snake_case key e.g. "coherence"
+  score:     number;
+  max_score: number;
+}
+
 /** One historical band score point for a skill+task_number */
 export interface TaskScorePoint {
   attempt_id:     string;
   estimated_band: number;
   completed_at:   string;   // ISO 8601
+  dimensions:     HistoryDimensionScore[];  // empty for legacy rows
 }
 
 /** Response from GET /api/v1/history/task-scores */

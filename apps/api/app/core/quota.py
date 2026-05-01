@@ -45,6 +45,8 @@ async def _acquire_user_lock(db: AsyncSession, user_id) -> None:
     )
 
 
+import uuid as _uuid
+
 async def enforce_quota(
     user: User,
     skill: str,
@@ -52,12 +54,18 @@ async def enforce_quota(
     is_mock_test: bool,
     db: AsyncSession,
     mock_exam_number: int | None = None,
+    prompt_id: _uuid.UUID | None = None,
 ) -> None:
     """
     Raises HTTP 402 if the user is over-quota.
     Must be called inside the attempt creation transaction.
 
-    For writing mock exams:
+    Regular task practice (non-mock):
+    - Retrying ANY prompt the user has already attempted is ALWAYS FREE.
+    - Quota only advances when the user attempts a prompt for the FIRST TIME.
+    - The per_task limit counts DISTINCT prompts attempted, not total attempts.
+
+    Mock exams:
     - mock_exam_number is the test slot (1, 2, 3 …).
     - Re-doing a slot the user has already started is always allowed (redo = free).
     - Only NEW slots (never started before) count against the limit.
@@ -103,11 +111,24 @@ async def enforce_quota(
             })
 
     if not is_mock_test and limits.per_task is not None:
-        used = await repo.count_by_user_skill_task(user.id, skill, task_number)
+        # ── Prompt-level redo check ───────────────────────────────────────────
+        # If the user has already attempted THIS prompt before, always allow.
+        # Unlimited retries on a prompt the user has already started are free.
+        if prompt_id is not None:
+            already_used = await repo.has_used_prompt(user.id, skill, prompt_id)
+            if already_used:
+                return  # redo — no quota charge
+
+        # ── New-prompt quota check ────────────────────────────────────────────
+        # Count DISTINCT prompts attempted (not total attempts) for this task.
+        used = await repo.count_distinct_prompts(user.id, skill, task_number)
         if used >= limits.per_task:
             raise HTTPException(status_code=402, detail={
-                "code": "QUOTA_EXCEEDED",
-                "used": used, "limit": limits.per_task,
+                "code":    "QUOTA_EXCEEDED",
+                "used":    used,
+                "limit":   limits.per_task,
+                "message": f"You have reached the limit of {limits.per_task} unique prompts for this task. Upgrade to Ultra for more.",
+                "upgrade_url": "/billing",
             })
 
 
