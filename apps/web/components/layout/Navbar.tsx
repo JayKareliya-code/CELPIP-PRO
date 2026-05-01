@@ -48,10 +48,10 @@ function Brand() {
       className="flex items-center select-none group shrink-0"
       aria-label="CELPIPBRO home"
     >
-      <span className="text-3xl font-black tracking-tight text-white group-hover:text-white/90 transition-colors">
+      <span className="text-2xl sm:text-3xl font-black tracking-tight text-white group-hover:text-white/90 transition-colors">
         CELPIP
       </span>
-      <span className="text-3xl font-black tracking-tight text-amber-400 group-hover:text-amber-300 transition-colors">
+      <span className="text-2xl sm:text-3xl font-black tracking-tight text-amber-400 group-hover:text-amber-300 transition-colors">
         BRO
       </span>
     </Link>
@@ -245,7 +245,7 @@ export function Navbar() {
             <div className="flex-1" />
 
             {/* Right side — nav links + profile (desktop) */}
-            <div className="flex items-center gap-6 shrink-0">
+            <div className="flex items-center gap-3 sm:gap-6 shrink-0">
 
               {/* Nav links — desktop only, auth users */}
               {showAuthNav && (
@@ -260,8 +260,8 @@ export function Navbar() {
                   <Link href="/terms"   className="hidden sm:inline text-xs text-white/35 hover:text-amber-400 transition-colors">Terms</Link>
                   <Link href="/privacy" className="hidden sm:inline text-xs text-white/35 hover:text-amber-400 transition-colors">Privacy</Link>
                   <Link href="/contact" className="hidden sm:inline text-xs text-white/35 hover:text-amber-400 transition-colors">Contact</Link>
-                  <Link href="/sign-in" className="text-sm font-medium text-white/55 hover:text-white/90 transition-colors">Sign In</Link>
-                  <Link href="/sign-up" className="text-sm font-semibold bg-amber-500 hover:bg-amber-400 text-black px-4 py-1.5 rounded-lg transition-colors">Get Started</Link>
+                  <Link href="/sign-in" className="hidden xs:inline text-sm font-medium text-white/55 hover:text-white/90 transition-colors">Sign In</Link>
+                  <Link href="/sign-up" className="text-sm font-semibold bg-amber-500 hover:bg-amber-400 text-black px-3 py-1 sm:px-4 sm:py-1.5 rounded-lg transition-colors whitespace-nowrap">Get Started</Link>
                 </>
               )}
 

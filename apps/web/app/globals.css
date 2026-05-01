@@ -46,6 +46,11 @@
 
   body {
     @apply bg-muted text-foreground font-sans antialiased;
+    overflow-x: hidden;
+  }
+
+  html {
+    overflow-x: hidden;
   }
 
   h1 { @apply text-3xl font-bold tracking-tight; }
