@@ -31,23 +31,23 @@ const COLORS: Record<Skill, {
   iconText: string; heading: string; body: string; btn: string;
 }> = {
   speaking: {
-    border:      "border-amber-700/40",
-    bg:          "from-amber-950/60 via-amber-950/40 to-yellow-950/40",
-    iconBg:      "bg-amber-600/20",
-    iconBorder:  "border-amber-500/30",
+    border:      "border-border",
+    bg:          "bg-surface",
+    iconBg:      "bg-amber-600/10",
+    iconBorder:  "border-amber-500/20",
     iconText:    "text-amber-400",
-    heading:     "text-amber-200",
-    body:        "text-amber-300/70",
+    heading:     "text-foreground",
+    body:        "text-subtle",
     btn:         "bg-amber-600 hover:bg-amber-500",
   },
   writing: {
-    border:      "border-amber-700/40",
-    bg:          "from-amber-950/60 via-amber-950/40 to-yellow-950/40",
-    iconBg:      "bg-amber-600/20",
-    iconBorder:  "border-amber-500/30",
+    border:      "border-border",
+    bg:          "bg-surface",
+    iconBg:      "bg-amber-600/10",
+    iconBorder:  "border-amber-500/20",
     iconText:    "text-amber-400",
-    heading:     "text-amber-200",
-    body:        "text-amber-300/70",
+    heading:     "text-foreground",
+    body:        "text-subtle",
     btn:         "bg-amber-600 hover:bg-amber-500",
   },
 };
@@ -74,7 +74,6 @@ export function PracticeUpgradeCTA({ skill, compact = false }: PracticeUpgradeCT
     <div
       className={cn(
         "relative overflow-hidden rounded-xl border p-4 flex items-center gap-4 flex-wrap",
-        "bg-gradient-to-r",
         c.border, c.bg,
       )}
     >

@@ -112,13 +112,6 @@ export function SpeakingTaskCard({
           : "hover:border-white/[0.18] hover:shadow-[0_4px_20px_rgba(0,0,0,0.35)] cursor-pointer"
       )}
     >
-      {/* ── Layer 0: gradient splash (top) ──────────────────────────────── */}
-      <div
-        className={cn(
-          "absolute inset-x-0 top-0 h-20 bg-gradient-to-b opacity-80 pointer-events-none",
-          meta.grad,
-        )}
-      />
 
       {/* ── Layer 1: progress fill wash ──────────────────────────────────── */}
       {fillPct > 0 && (
