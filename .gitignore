@@ -133,3 +133,10 @@ celerybeat.pid
 # ---------------------------------------------------------------------------
 client_secret_*.json
 google_workspace_acc
+
+# ---------------------------------------------------------------------------
+# Local design & brand assets (working files — not part of the codebase)
+# ---------------------------------------------------------------------------
+*.svg
+*.paint
+celpipbro-brand-logo*.png
