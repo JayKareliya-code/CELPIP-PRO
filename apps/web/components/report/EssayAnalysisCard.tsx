@@ -68,7 +68,6 @@ type Signal = { insight: string; textColor: string; barColor: string; statusPct:
 
 function wordCountSignal(count: number, taskNumber: number): Signal {
   // Task 1 = email/letter: 150–200 words. Task 2 = survey/essay: 150–280 words.
-  const target    = taskNumber === 2 ? 220 : 175;
   const lo        = 130;
   const hi        = taskNumber === 2 ? 300 : 220;
   const statusPct = Math.min(100, Math.round((count / hi) * 100));
@@ -78,7 +77,7 @@ function wordCountSignal(count: number, taskNumber: number): Signal {
   return                   { insight: "Over target — focus on conciseness; quality matters more than quantity.",  textColor: "text-amber-400",   barColor: "bg-amber-400",   statusPct: 100 };
 }
 
-function ttrSignal(ttr: number, uniqueWords: number): Signal {
+function ttrSignal(ttr: number): Signal {
   const statusPct = Math.round(ttr * 100);
   if (ttr >= 0.62) return { insight: "Excellent vocabulary variety — signals Band 9+ range.",                        textColor: "text-emerald-400", barColor: "bg-emerald-400", statusPct };
   if (ttr >= 0.48) return { insight: "Good variety — practise synonyms and precise nouns to push higher.",          textColor: "text-amber-400",   barColor: "bg-amber-400",   statusPct };
@@ -136,7 +135,7 @@ export function EssayAnalysisCard({ essayText, taskNumber }: Props) {
   if (!s.wordCount) return null;
 
   const wdS   = wordCountSignal(s.wordCount, taskNumber);
-  const ttrS  = ttrSignal(s.ttr, s.uniqueWords);
+  const ttrS  = ttrSignal(s.ttr);
   const sentS = sentenceVarietySignal(s.longSentPct);
   const paraS = paragraphSignal(s.paragraphs, taskNumber);
 

@@ -10,7 +10,7 @@
 //   • Writing:             instructions (if any) + prompt text
 // ─────────────────────────────────────────────────────────────────────────────
 
-import { Mic, PenLine, Shuffle, Zap } from "lucide-react";
+import { Mic, PenLine, Shuffle } from "lucide-react";
 import type { ChoiceOption, Skill } from "@/lib/types";
 
 interface Props {

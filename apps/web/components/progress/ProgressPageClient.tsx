@@ -12,7 +12,7 @@
 
 import { useState }             from "react";
 import Link                     from "next/link";
-import { Mic, PenLine, Lock, Sparkles, TrendingUp } from "lucide-react";
+import { Mic, PenLine, Sparkles, TrendingUp } from "lucide-react";
 import { cn }                   from "@/lib/utils";
 import { useCurrentUser }       from "@/lib/hooks/useCurrentUser";
 import { useProgressData }      from "@/lib/hooks/useProgressData";

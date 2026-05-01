@@ -7,7 +7,7 @@ import { FeaturesGrid } from "@/components/landing/FeaturesGrid";
 import { HowItWorksSection } from "@/components/landing/HowItWorksSection";
 import { PricingPreview } from "@/components/landing/PricingPreview";
 import { TestimonialsSection } from "@/components/landing/TestimonialsSection";
-import { STARTING_PRICE_CAD } from "@/lib/constants";
+
 import { auth } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 import type { Metadata } from "next";

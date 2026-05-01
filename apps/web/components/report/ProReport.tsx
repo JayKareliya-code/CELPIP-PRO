@@ -30,7 +30,7 @@ import { ResponsePanel }                   from "./ResponsePanel";
 import { ScoreSummaryCard }                from "./ScoreSummaryCard";
 import { ScoreProgressCard }               from "./ScoreProgressCard";
 import { DimensionBreakdown }              from "./DimensionBreakdown";
-import { StrengthsPanel, WeaknessesPanel, FeedbackToggle } from "./FeedbackPanels";
+import { FeedbackToggle }                              from "./FeedbackPanels";
 import { ImprovementTipsAccordion }        from "./ImprovementTipsAccordion";
 import { TranscriptAnalysisCard }          from "./TranscriptAnalysisCard";
 import { EssayAnalysisCard }              from "./EssayAnalysisCard";
