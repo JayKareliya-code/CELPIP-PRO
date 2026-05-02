@@ -2,7 +2,8 @@
 
 // ─────────────────────────────────────────────────────────────────────────────
 // AdminWritingTaskDetail.tsx — Orchestrator for /admin/prompts/writing/[task].
-// Composes: WritingTaskHeader + WritingPromptsTable + create/edit/delete modals.
+// Composes: WritingTaskHeader + WritingPromptsTable + create/edit/delete modals
+//           + PromptTableToolbar for search/filter.
 // Mirrors AdminSpeakingTaskDetail.tsx.
 // ─────────────────────────────────────────────────────────────────────────────
 
@@ -13,6 +14,11 @@ import { PromptFormModal } from "@/components/admin/PromptFormModal";
 import { ConfirmModal }    from "@/components/common/ConfirmModal";
 import { WritingTaskHeader }   from "./writing/WritingTaskHeader";
 import { WritingPromptsTable } from "./writing/WritingPromptsTable";
+import {
+  PromptTableToolbar,
+  type StatusFilter,
+  type ActiveFilter,
+} from "@/components/admin/shared/PromptTableToolbar";
 import {
   useAdminWritingPrompts,
   useCreateWritingPrompt,
@@ -88,11 +94,38 @@ export function AdminWritingTaskDetail({ taskNumber }: Props) {
   const [deleteTarget, setDeleteTarget] = useState<WritingPrompt | undefined>(undefined);
   const [modalOpen,    setModalOpen]    = useState(false);
 
+  // ── Filter state ────────────────────────────────────────────────────────────
+  const [search,       setSearch]       = useState("");
+  const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
+  const [activeFilter, setActiveFilter] = useState<ActiveFilter>("all");
+
+  function clearFilters() {
+    setSearch("");
+    setStatusFilter("all");
+    setActiveFilter("all");
+  }
+
   const { data: allPrompts = [], isLoading, isError } = useAdminWritingPrompts();
+
+  // ── Prompts for this task only ───────────────────────────────────────────────
   const prompts = useMemo(
     () => allPrompts.filter((p) => p.task_number === taskNumber),
     [allPrompts, taskNumber],
   );
+
+  // ── Filtered subset (client-side) ────────────────────────────────────────────
+  const filteredPrompts = useMemo(() => {
+    const q = search.toLowerCase().trim();
+    return prompts.filter((p) => {
+      if (q && !p.title?.toLowerCase().includes(q) && !p.prompt_text?.toLowerCase().includes(q)) {
+        return false;
+      }
+      if (statusFilter !== "all" && (p.status ?? "draft") !== statusFilter) return false;
+      if (activeFilter === "active"   && !p.is_active) return false;
+      if (activeFilter === "inactive" &&  p.is_active) return false;
+      return true;
+    });
+  }, [prompts, search, statusFilter, activeFilter]);
 
   const create       = useCreateWritingPrompt();
   const update       = useUpdateWritingPrompt();
@@ -136,9 +169,18 @@ export function AdminWritingTaskDetail({ taskNumber }: Props) {
     <div className="space-y-6">
       <WritingTaskHeader
         taskNumber={taskNumber}
-        promptCount={prompts.length}
         isMutating={isMutating}
         onAdd={openCreate}
+      />
+
+      {/* Filter toolbar */}
+      <PromptTableToolbar
+        search={search}       onSearch={setSearch}
+        status={statusFilter} onStatus={setStatusFilter}
+        active={activeFilter} onActive={setActiveFilter}
+        total={prompts.length}
+        filtered={filteredPrompts.length}
+        onClear={clearFilters}
       />
 
       {prompts.length === 0 ? (
@@ -151,9 +193,19 @@ export function AdminWritingTaskDetail({ taskNumber }: Props) {
             <Plus className="w-4 h-4" /> Add First Prompt
           </button>
         </div>
+      ) : filteredPrompts.length === 0 ? (
+        <div className="flex flex-col items-center justify-center h-48 gap-3 rounded-2xl border-2 border-dashed border-border">
+          <p className="text-subtle text-sm">No prompts match your current filters.</p>
+          <button
+            onClick={clearFilters}
+            className="text-sm font-semibold text-primary hover:underline"
+          >
+            Clear filters
+          </button>
+        </div>
       ) : (
         <WritingPromptsTable
-          prompts={prompts}
+          prompts={filteredPrompts}
           isMutating={isMutating}
           onEdit={openEdit}
           onDelete={setDeleteTarget}

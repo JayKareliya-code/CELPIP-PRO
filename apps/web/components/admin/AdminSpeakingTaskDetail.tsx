@@ -1,7 +1,7 @@
 "use client";
 
 // AdminSpeakingTaskDetail.tsx -- Thin orchestrator for /admin/prompts/speaking/[task].
-// Composes: SpeakingTaskHeader + SpeakingPromptsTable + modals.
+// Composes: SpeakingTaskHeader + SpeakingPromptsTable + modals + filter toolbar.
 
 import { useState, useCallback, useMemo } from "react";
 import { Loader2, Plus }    from "lucide-react";
@@ -10,6 +10,12 @@ import { PromptFormModal }  from "@/components/admin/PromptFormModal";
 import { ConfirmModal }     from "@/components/common/ConfirmModal";
 import { SpeakingTaskHeader }   from "./speaking/SpeakingTaskHeader";
 import { SpeakingPromptsTable } from "./speaking/SpeakingPromptsTable";
+import {
+  PromptTableToolbar,
+  type StatusFilter,
+  type ActiveFilter,
+  type PoolFilter,
+} from "@/components/admin/shared/PromptTableToolbar";
 import {
   useAdminSpeakingPrompts,
   useCreateSpeakingPrompt,
@@ -127,11 +133,46 @@ export function AdminSpeakingTaskDetail({ taskNumber }: Props) {
   const [deleteTarget, setDeleteTarget] = useState<SpeakingPrompt | undefined>(undefined);
   const [modalOpen,    setModalOpen]    = useState(false);
 
+  // ── Filter state ────────────────────────────────────────────────────────────
+  const [search,       setSearch]       = useState("");
+  const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
+  const [activeFilter, setActiveFilter] = useState<ActiveFilter>("all");
+  const [poolFilter,   setPoolFilter]   = useState<PoolFilter>("all");
+
+  function clearFilters() {
+    setSearch("");
+    setStatusFilter("all");
+    setActiveFilter("all");
+    setPoolFilter("all");
+  }
+
   const { data: allPrompts = [], isLoading, isError } = useAdminSpeakingPrompts();
+
+  // ── Prompts for this task only ───────────────────────────────────────────────
   const prompts = useMemo(
     () => allPrompts.filter((p) => p.task_number === taskNumber),
     [allPrompts, taskNumber],
   );
+
+  // ── Filtered subset (client-side) ────────────────────────────────────────────
+  const filteredPrompts = useMemo(() => {
+    const q = search.toLowerCase().trim();
+    return prompts.filter((p) => {
+      // Text search
+      if (q && !p.title?.toLowerCase().includes(q) && !p.prompt_text?.toLowerCase().includes(q)) {
+        return false;
+      }
+      // Status
+      if (statusFilter !== "all" && (p.status ?? "draft") !== statusFilter) return false;
+      // Active
+      if (activeFilter === "active"   && !p.is_active) return false;
+      if (activeFilter === "inactive" &&  p.is_active) return false;
+      // Pool (prompt_tag)
+      const tag = (p as SpeakingPrompt & { prompt_tag?: string }).prompt_tag ?? "practice";
+      if (poolFilter !== "all" && tag !== poolFilter) return false;
+      return true;
+    });
+  }, [prompts, search, statusFilter, activeFilter, poolFilter]);
 
   const create       = useCreateSpeakingPrompt();
   const update       = useUpdateSpeakingPrompt();
@@ -179,9 +220,19 @@ export function AdminSpeakingTaskDetail({ taskNumber }: Props) {
     <div className="space-y-6">
       <SpeakingTaskHeader
         taskNumber={taskNumber}
-        promptCount={prompts.length}
         isMutating={isMutating}
         onAdd={openCreate}
+      />
+
+      {/* Filter toolbar — shown even when empty so admin can see the count */}
+      <PromptTableToolbar
+        search={search}       onSearch={setSearch}
+        status={statusFilter} onStatus={setStatusFilter}
+        active={activeFilter} onActive={setActiveFilter}
+        pool={poolFilter}     onPool={setPoolFilter}
+        total={prompts.length}
+        filtered={filteredPrompts.length}
+        onClear={clearFilters}
       />
 
       {prompts.length === 0 ? (
@@ -194,9 +245,19 @@ export function AdminSpeakingTaskDetail({ taskNumber }: Props) {
             <Plus className="w-4 h-4" /> Add First Prompt
           </button>
         </div>
+      ) : filteredPrompts.length === 0 ? (
+        <div className="flex flex-col items-center justify-center h-48 gap-3 rounded-2xl border-2 border-dashed border-border">
+          <p className="text-subtle text-sm">No prompts match your current filters.</p>
+          <button
+            onClick={clearFilters}
+            className="text-sm font-semibold text-primary hover:underline"
+          >
+            Clear filters
+          </button>
+        </div>
       ) : (
         <SpeakingPromptsTable
-          prompts={prompts}
+          prompts={filteredPrompts}
           isMutating={isMutating}
           onEdit={openEdit}
           onDelete={setDeleteTarget}

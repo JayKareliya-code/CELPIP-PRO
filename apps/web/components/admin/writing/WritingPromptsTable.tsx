@@ -32,16 +32,25 @@ export function WritingPromptsTable({
 }: Props) {
   return (
     <div className="rounded-xl border border-border overflow-hidden shadow-card bg-surface">
-      <Table>
+      {/* Count bar */}
+      <div className="px-4 py-2 border-b border-border bg-muted/40 flex items-center justify-between">
+        <span className="text-xs text-subtle font-medium">
+          {prompts.length} {prompts.length === 1 ? "prompt" : "prompts"}
+        </span>
+      </div>
+
+      {/* table-fixed prevents prompt column from expanding unboundedly */}
+      <Table className="table-fixed w-full">
         <TableHeader>
           <TableRow className="bg-muted hover:bg-muted">
-            <TableHead className="w-full">Prompt</TableHead>
-            <TableHead className="w-24 text-center hidden sm:table-cell">Time</TableHead>
-            <TableHead className="w-32 text-center hidden sm:table-cell">Words</TableHead>
+            {/* Prompt column: no explicit width — takes all remaining space */}
+            <TableHead>Prompt</TableHead>
+            <TableHead className="w-20 text-center hidden sm:table-cell">Time</TableHead>
+            <TableHead className="w-28 text-center hidden sm:table-cell">Words</TableHead>
             <TableHead className="w-24 hidden md:table-cell">Difficulty</TableHead>
             <TableHead className="w-28 hidden lg:table-cell">Status</TableHead>
-            <TableHead className="w-20 text-center">Active</TableHead>
-            <TableHead className="w-36 text-right">Actions</TableHead>
+            <TableHead className="w-16 text-center">Active</TableHead>
+            <TableHead className="w-32 text-right">Actions</TableHead>
           </TableRow>
         </TableHeader>
 
@@ -50,9 +59,10 @@ export function WritingPromptsTable({
             <TableRow key={p.id} className="group hover:bg-muted/50 align-top">
 
               {/* Prompt text + topic badge */}
-              <TableCell className="py-3">
+              {/* overflow-hidden is required for line-clamp to work in table-fixed */}
+              <TableCell className="py-3 overflow-hidden">
                 <div className="min-w-0">
-                  <p className="text-sm font-medium text-foreground line-clamp-2">{p.prompt_text}</p>
+                  <p className="text-sm font-medium text-foreground line-clamp-2 break-words">{p.prompt_text}</p>
                   {p.topic && (
                     <Badge variant="outline" className="mt-1 text-[10px]">{p.topic}</Badge>
                   )}

@@ -12,12 +12,11 @@ import { WRITING_TASK_META } from "@/lib/admin/writingTaskMeta";
 
 interface Props {
   taskNumber:  1 | 2;
-  promptCount: number;
   isMutating:  boolean;
   onAdd:       () => void;
 }
 
-export function WritingTaskHeader({ taskNumber, promptCount, isMutating, onAdd }: Props) {
+export function WritingTaskHeader({ taskNumber, isMutating, onAdd }: Props) {
   const router = useRouter();
   const meta   = WRITING_TASK_META.find((m) => m.taskNumber === taskNumber);
   const name   = meta?.name ?? `Task ${taskNumber}`;
@@ -44,9 +43,6 @@ export function WritingTaskHeader({ taskNumber, promptCount, isMutating, onAdd }
             Task {taskNumber}
             <span className="ml-2 text-base font-normal text-subtle">— {name}</span>
           </h1>
-          <p className="text-sm text-subtle mt-0.5">
-            {promptCount} prompt{promptCount !== 1 ? "s" : ""}
-          </p>
         </div>
 
         <button

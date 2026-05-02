@@ -11,12 +11,11 @@ import { SPEAKING_TASK_NAMES, IMAGE_TASK_NUMBERS } from "@/lib/constants";
 
 interface Props {
   taskNumber:  number;
-  promptCount: number;
   isMutating:  boolean;
   onAdd:       () => void;
 }
 
-export function SpeakingTaskHeader({ taskNumber, promptCount, isMutating, onAdd }: Props) {
+export function SpeakingTaskHeader({ taskNumber, isMutating, onAdd }: Props) {
   const router      = useRouter();
   const taskName    = SPEAKING_TASK_NAMES[`task-${taskNumber}`] ?? `Task ${taskNumber}`;
   const [, shortName] = taskName.split("—").map((s) => s.trim());
@@ -57,10 +56,9 @@ export function SpeakingTaskHeader({ taskNumber, promptCount, isMutating, onAdd 
             )}
           </div>
           <p className="text-sm text-subtle mt-0.5">
-            {promptCount} prompt{promptCount !== 1 ? "s" : ""}
             {isImageTask && (
-              <span className="ml-2 text-subtle/60">
-                · Each prompt requires a scene image URL
+              <span className="text-subtle/60">
+                Each prompt requires a scene image URL
               </span>
             )}
           </p>

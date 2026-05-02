@@ -72,30 +72,40 @@ export function SpeakingPromptsTable({
 }: Props) {
   return (
     <div className="rounded-xl border border-border overflow-hidden shadow-card bg-surface">
-      <Table>
+      {/* Count bar */}
+      <div className="px-4 py-2 border-b border-border bg-muted/40 flex items-center justify-between">
+        <span className="text-xs text-subtle font-medium">
+          {prompts.length} {prompts.length === 1 ? "prompt" : "prompts"}
+        </span>
+      </div>
+
+      {/* table-fixed prevents prompt column from expanding unboundedly */}
+      <Table className="table-fixed w-full">
         <TableHeader>
           <TableRow className="bg-muted hover:bg-muted">
-            <TableHead className="w-full">Prompt</TableHead>
-            <TableHead className="w-24 text-center hidden sm:table-cell">Prep</TableHead>
-            <TableHead className="w-28 text-center hidden sm:table-cell">Response</TableHead>
+            {/* Prompt column: no explicit width — takes all remaining space */}
+            <TableHead>Prompt</TableHead>
+            <TableHead className="w-20 text-center hidden sm:table-cell">Prep</TableHead>
+            <TableHead className="w-24 text-center hidden sm:table-cell">Response</TableHead>
             <TableHead className="w-24 hidden md:table-cell">Difficulty</TableHead>
             <TableHead className="w-28 hidden lg:table-cell">Status</TableHead>
-            <TableHead className="w-20 text-center">Active</TableHead>
-            <TableHead className="w-36 text-right">Actions</TableHead>
+            <TableHead className="w-16 text-center">Active</TableHead>
+            <TableHead className="w-32 text-right">Actions</TableHead>
           </TableRow>
         </TableHeader>
 
         <TableBody>
           {prompts.map((p) => (
             <TableRow key={p.id} className="group hover:bg-muted/50 align-top">
-              <TableCell className="py-3">
-                <div className="flex items-start gap-2.5">
+              {/* Prompt cell: overflow-hidden ensures line-clamp works in table-fixed */}
+              <TableCell className="py-3 overflow-hidden">
+                <div className="flex items-start gap-2.5 min-w-0">
                   {/* Image thumbnail / placeholder for Tasks 3, 4, 8 */}
                   {IMAGE_TASK_NUMBERS.has(p.task_number) && (
                     <ImageThumb url={p.context_image_url ?? null} />
                   )}
-                  <div className="min-w-0">
-                    <p className="text-sm font-medium text-foreground line-clamp-2">{p.prompt_text}</p>
+                  <div className="min-w-0 flex-1">
+                    <p className="text-sm font-medium text-foreground line-clamp-2 break-words">{p.prompt_text}</p>
                     {p.topic && <Badge variant="outline" className="mt-1 text-[10px]">{p.topic}</Badge>}
                   </div>
                 </div>
