@@ -161,8 +161,8 @@ export function useAdminSpeakingPrompts(filters: SpeakingListFilters = {}) {
       return api.get<SpeakingPrompt[]>(`${API_V1}/admin/speaking-prompts${qs}`, { headers });
     },
     enabled:              isSignedIn,   // don't fire until Clerk confirms the session
-    staleTime:            30_000,
-    retry:                1,            // fail fast â€” don't cascade retries on hot reload
+    staleTime:            0,            // always refetch after mutation invalidation
+    retry:                1,            // fail fast — don't cascade retries on hot reload
     refetchOnWindowFocus: false,        // prevent refetch on tab switch / hot reload focus
   });
 }

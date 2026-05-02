@@ -16,7 +16,7 @@ class AdminSpeakingPromptRepo(BaseRepository[SpeakingPrompt]):
         status: str | None = None,
         search: str | None = None,
         task_number: int | None = None,
-        limit: int = 50,
+        limit: int = 500,
         offset: int = 0,
     ) -> list[SpeakingPrompt]:
         q = select(SpeakingPrompt)
@@ -54,7 +54,7 @@ class AdminWritingPromptRepo(BaseRepository[WritingPrompt]):
         status: str | None = None,
         search: str | None = None,
         task_number: int | None = None,
-        limit: int = 50,
+        limit: int = 500,
         offset: int = 0,
     ) -> list[WritingPrompt]:
         q = select(WritingPrompt)

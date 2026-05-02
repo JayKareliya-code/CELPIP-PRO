@@ -40,7 +40,7 @@ async def list_speaking(
     status: str | None = None,
     task_number: int | None = None,
     search: str | None = Query(None),
-    limit: int = Query(50, le=200),
+    limit: int = Query(500, le=500),
     offset: int = 0,
 ) -> list[dict[str, Any]]:
     items = await AdminSpeakingPromptRepo(db).list_cms(
@@ -212,7 +212,7 @@ async def list_writing(
     status: str | None = None,
     task_number: int | None = None,
     search: str | None = Query(None),
-    limit: int = Query(50, le=200),
+    limit: int = Query(500, le=500),
     offset: int = 0,
 ) -> list[dict[str, Any]]:
     items = await AdminWritingPromptRepo(db).list_cms(
