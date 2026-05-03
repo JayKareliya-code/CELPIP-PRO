@@ -4,6 +4,9 @@ export const metadata: Metadata = {
   title: "Contact Us",
   description:
     "Get in touch with the CELPIPBRO team. Find answers to common questions or reach our support and privacy teams directly.",
+  alternates: {
+    canonical: "/contact",
+  },
 };
 
 export default function ContactLayout({ children }: { children: React.ReactNode }) {

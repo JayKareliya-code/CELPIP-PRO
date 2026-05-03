@@ -6,6 +6,9 @@ export const metadata: Metadata = {
   title: "Terms of Service",
   description:
     "Read the CELPIPBRO Terms of Service to understand the rules, rights, and responsibilities that govern your use of our AI-powered CELPIP practice platform.",
+  alternates: {
+    canonical: "/terms",
+  },
 };
 
 const LAST_UPDATED = "April 22, 2026";

@@ -6,6 +6,9 @@ export const metadata: Metadata = {
   title: "Privacy Policy",
   description:
     "Learn how CELPIPBRO collects, uses, and protects your personal information when you use our AI-powered CELPIP practice platform.",
+  alternates: {
+    canonical: "/privacy",
+  },
 };
 
 const LAST_UPDATED = "April 22, 2026";

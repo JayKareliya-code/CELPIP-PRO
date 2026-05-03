@@ -11,6 +11,9 @@ const isPublicRoute = createRouteMatcher([
   "/terms",
   "/privacy",
   "/contact",
+  // SEO / crawl files — must be publicly accessible for Googlebot
+  "/sitemap.xml",
+  "/robots.txt",
   // Add future public marketing pages here, e.g. "/about", "/pricing"
 ]);
 

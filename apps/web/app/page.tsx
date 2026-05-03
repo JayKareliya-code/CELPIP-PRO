@@ -16,6 +16,9 @@ export const metadata: Metadata = {
   title: "CELPIPBRO - CELPIP Speaking & Writing Practice",
   description:
     "Practice CELPIP Speaking and Writing with timed tasks, AI band estimates, and feedback aligned to CELPIP performance standards. Start free, then unlock Pro with one payment.",
+  alternates: {
+    canonical: "/",
+  },
 };
 
 /**
@@ -29,6 +32,45 @@ export default async function LandingPage() {
   return (
     <>
       <Navbar />
+
+      {/* JSON-LD Structured Data — WebApplication schema for rich results */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "WebApplication",
+            name: "CELPIPBRO",
+            url: "https://celpipbro.ca",
+            description:
+              "AI-powered CELPIP Speaking and Writing practice platform with timed tasks, rubric-based scoring, and progress tracking.",
+            applicationCategory: "EducationApplication",
+            operatingSystem: "All",
+            inLanguage: "en-CA",
+            offers: [
+              {
+                "@type": "Offer",
+                name: "Starter",
+                price: "0",
+                priceCurrency: "CAD",
+                description: "Free plan — includes 1 Speaking and 1 Writing mock test.",
+              },
+              {
+                "@type": "Offer",
+                name: "Pro",
+                price: "24.99",
+                priceCurrency: "CAD",
+                description: "One-time payment — unlimited task practice, AI feedback, and progress tracking.",
+              },
+            ],
+            publisher: {
+              "@type": "Organization",
+              name: "CELPIPBRO",
+              url: "https://celpipbro.ca",
+            },
+          }),
+        }}
+      />
 
       <main id="main-content">
         <HeroSection />

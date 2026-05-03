@@ -17,14 +17,60 @@ const sourceSerif = Source_Serif_4({
   weight: ["400", "600"],
 });
 
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://celpipbro.ca";
+
 export const metadata: Metadata = {
+  // ── Base URL (required for all absolute OG / Twitter image URLs) ────────────
+  metadataBase: new URL(SITE_URL),
+
+  // ── Titles ──────────────────────────────────────────────────────────────────
   title: {
     default: "CELPIPBRO - AI-Powered CELPIP Practice",
     template: "%s | CELPIPBRO",
   },
+
+  // ── Description & Keywords ──────────────────────────────────────────────────
   description:
     "Practice CELPIP Speaking and Writing tasks with timed sessions, AI feedback, practice band estimates, and progress tracking.",
-  keywords: ["CELPIP", "CELPIP practice", "CELPIP speaking", "CELPIP writing", "Canadian English test"],
+  keywords: [
+    "CELPIP",
+    "CELPIP practice",
+    "CELPIP speaking practice",
+    "CELPIP writing practice",
+    "CELPIP test prep",
+    "CELPIP band score",
+    "CELPIP AI feedback",
+    "Canadian English test",
+    "CELPIP General",
+    "CELPIP mock test",
+    "CELPIP online practice",
+    "CELPIPBRO",
+  ],
+
+  // ── Canonical & Alternate URLs ───────────────────────────────────────────────
+  alternates: {
+    canonical: "/",
+  },
+
+  // ── Robots directive ────────────────────────────────────────────────────────
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-snippet": -1,
+      "max-image-preview": "large",
+      "max-video-preview": -1,
+    },
+  },
+
+  // ── Google Search Console Verification ──────────────────────────────────────
+  verification: {
+    google: "ntqSl4kE9qClED8xd_Q2K9CsJV-M8VvbknvYXDMBkpc",
+  },
+
+  // ── Icons ───────────────────────────────────────────────────────────────────
   icons: {
     icon: [
       { url: "/icon-32.png",  sizes: "32x32",   type: "image/png" },
@@ -34,12 +80,33 @@ export const metadata: Metadata = {
     shortcut: "/icon-32.png",
     apple:    "/icon-180.png",
   },
+
+  // ── Open Graph ──────────────────────────────────────────────────────────────
   openGraph: {
     type: "website",
     locale: "en_CA",
+    url: SITE_URL,
     siteName: "CELPIPBRO",
     title: "CELPIPBRO - AI-Powered CELPIP Practice",
-    description: "Practice CELPIP Speaking and Writing with AI feedback and practice band estimates.",
+    description:
+      "Practice CELPIP Speaking and Writing with AI feedback and practice band estimates.",
+    images: [
+      {
+        url: "/og-image.png",
+        width: 1200,
+        height: 630,
+        alt: "CELPIPBRO — AI-Powered CELPIP Practice",
+      },
+    ],
+  },
+
+  // ── Twitter / X Card ────────────────────────────────────────────────────────
+  twitter: {
+    card: "summary_large_image",
+    title: "CELPIPBRO - AI-Powered CELPIP Practice",
+    description:
+      "Practice CELPIP Speaking and Writing with AI feedback and practice band estimates.",
+    images: ["/og-image.png"],
   },
 };
 
