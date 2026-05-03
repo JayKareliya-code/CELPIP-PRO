@@ -64,6 +64,12 @@ async def get_or_create_user(
             user = await repo.get_by_clerk_id(clerk_user_id)
     else:
         _update_streak(user, today)
+        # Sync email / name in case they were previously stored as the
+        # clerk.local fallback (before the JWT template included email).
+        if email and not email.endswith("@clerk.local") and user.email != email:
+            user.email = email
+        if full_name and user.full_name != full_name:
+            user.full_name = full_name
         await db.flush()
 
     return user
