@@ -83,6 +83,7 @@ async def create_checkout_session(
             "celpipbro_user_id": str(user.id),
             "plan":              plan,
         },
+        invoice_creation={"enabled": True},
         customer_update={"address": "auto"},
         allow_promotion_codes=True,
     )
