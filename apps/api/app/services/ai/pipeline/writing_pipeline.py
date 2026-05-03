@@ -39,13 +39,14 @@ from app.services.ai.rubric.writing_rubric import build_writing_system_prompt
 
 logger = logging.getLogger(__name__)
 
+# Official CELPIP 4-dimension model (schema v2)
 WRITING_DIMENSIONS = [
-    "task_fulfillment",
-    "organization",
-    "tone_register",
+    "content_coherence",
     "vocabulary",
-    "grammar",
+    "readability",
+    "task_fulfillment",
 ]
+SCHEMA_VERSION = 2
 
 
 # ── Session factory ───────────────────────────────────────────────────────────
@@ -83,11 +84,11 @@ async def run_writing_pipeline(attempt_id: str) -> None:
 
 async def _pipeline(db: AsyncSession, attempt_id: UUID) -> None:
     await _mark_processing(db, attempt_id)
-    attempt, w_attempt  = await _load_attempt(db, attempt_id)
-    prompt_text, task_number = await _load_prompt(db, attempt.prompt_id)
-    target_band         = await _load_user_target_band(db, attempt.user_id)
-    system_prompt       = await _build_prompt(db, task_number, target_band)
-    result              = await _score(db, attempt_id, w_attempt.essay_text, prompt_text, system_prompt)
+    attempt, w_attempt      = await _load_attempt(db, attempt_id)
+    prompt_text, task_number, sample_band12, time_limit = await _load_prompt(db, attempt.prompt_id)
+    target_band             = await _load_user_target_band(db, attempt.user_id)
+    system_prompt           = await _build_prompt(db, task_number, target_band, sample_band12, time_limit)
+    result                  = await _score(db, attempt_id, w_attempt.essay_text, prompt_text, system_prompt)
     await _save_score(db, attempt_id, result, actual_model=settings.AI_SCORING_MODEL)
     await _save_feedback(db, attempt_id, result)
     await _mark_complete(db, attempt_id, result)
@@ -116,17 +117,25 @@ async def _load_attempt(db: AsyncSession, attempt_id: UUID) -> tuple[Attempt, Wr
     return attempt, w_attempt
 
 
-async def _load_prompt(db: AsyncSession, prompt_id: UUID) -> tuple[str, int]:
-    """Return (prompt_text, task_number) for the writing prompt."""
+async def _load_prompt(db: AsyncSession, prompt_id: UUID) -> tuple[str, int, str, int]:
+    """Return (prompt_text, task_number, sample_response_text, time_limit_seconds)."""
     row = (
         await db.execute(
-            sa.text("SELECT prompt_text, task_number FROM writing_prompts WHERE id = :pid"),
+            sa.text(
+                "SELECT prompt_text, task_number, sample_response_text, time_limit_seconds "
+                "FROM writing_prompts WHERE id = :pid"
+            ),
             {"pid": prompt_id},
         )
     ).mappings().one_or_none()
     if row is None:
         raise LookupError(f"Writing prompt {prompt_id} not found")
-    return row["prompt_text"], row["task_number"]
+    return (
+        row["prompt_text"],
+        row["task_number"],
+        row["sample_response_text"] or "",
+        row["time_limit_seconds"] or 1800,
+    )
 
 
 async def _load_user_target_band(db: AsyncSession, user_id: UUID) -> float | None:
@@ -146,8 +155,19 @@ async def _build_prompt(
     db: AsyncSession,
     task_number: int,
     target_band: float | None,
+    sample_band12: str = "",
+    time_limit_seconds: int = 1800,
 ) -> str:
-    calibration = await build_calibration_context(db, skill="writing", task_number=task_number)
+    # max_chars scales at 3× the time limit (writing produces ~3 chars/sec at Band 12).
+    # Minimum of 400 enforced so very short tasks still have a useful anchor.
+    max_chars = max(400, time_limit_seconds * 3)
+    calibration = await build_calibration_context(
+        db,
+        skill="writing",
+        task_number=task_number,
+        prompt_band12_sample=sample_band12 or None,
+        max_chars=max_chars,
+    )
     return build_writing_system_prompt(
         calibration_block=calibration,
         task_number=task_number,
@@ -182,12 +202,17 @@ async def _save_score(
     result: ScoringResult,
     actual_model: str,
 ) -> None:
-    """Persist ScoreReport using the model that was *actually* used for this call."""
+    """Persist ScoreReport using the model that was *actually* used for this call.
+
+    schema_version=2 identifies this as the official CELPIP 4-dimension model.
+    """
     report = ScoreReport(
         attempt_id=attempt_id,
         estimated_band=result.estimated_band,
         scoring_model=actual_model,
         raw_rubric_json=result.raw_json,
+        schema_version=SCHEMA_VERSION,
+        likely_range=result.likely_range or None,
     )
     db.add(report)
     await db.flush()

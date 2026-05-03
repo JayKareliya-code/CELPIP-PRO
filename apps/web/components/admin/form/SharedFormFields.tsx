@@ -109,12 +109,15 @@ export function SharedFormFields({ skill, initial, lockedTaskNumber }: Props) {
           defaultValue={initial?.sort_order ?? 0} className={inputCls} />
       </Field>
 
-      <Field label="Band-12 Sample Response" htmlFor="sample_response_band12"
-        hint="Shown to candidates after submission. Leave blank to hide.">
+      <Field
+        label="Band 12 Calibration Anchor"
+        htmlFor="sample_response_band12"
+        hint="Used directly by the AI scorer as the primary Band 12 reference for this prompt. Write a genuine Band 12 response — the more accurate it is, the better the scoring results."
+      >
         <textarea id="sample_response_band12" name="sample_response_band12" rows={5}
           defaultValue={getSampleResponse(initial)}
           className={cn(inputCls, "resize-y text-sm")}
-          placeholder="Write the ideal band-12 response here…" />
+          placeholder="Write the ideal Band 12 response for this exact prompt…" />
       </Field>
 
       {/* Prompt Pool — controls which pool this prompt belongs to */}

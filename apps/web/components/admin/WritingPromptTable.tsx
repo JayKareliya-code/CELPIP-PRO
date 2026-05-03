@@ -95,7 +95,21 @@ export function WritingPromptTable() {
               {prompts.map((p) => (
                 <TableRow key={p.id} className="group hover:bg-muted/50">
                   <TableCell className="text-center"><Badge variant="outline" className="text-xs font-semibold">{p.task_number}</Badge></TableCell>
-                  <TableCell className="font-medium text-sm text-foreground max-w-xs truncate">{p.title}</TableCell>
+                  <TableCell className="font-medium text-sm text-foreground max-w-xs">
+                    <div className="flex items-center gap-1.5 flex-wrap">
+                      <span className="truncate">{p.title}</span>
+                      {(p as WritingPrompt & { sample_response_text?: string | null }).sample_response_text && (
+                        <span
+                          title="Band 12 Calibration Anchor is set — AI scoring will use this prompt's sample as the primary calibration reference."
+                          className="inline-flex items-center px-1.5 py-0.5 rounded-full
+                                     text-[10px] font-semibold
+                                     bg-muted border border-border text-subtle shrink-0 cursor-default"
+                        >
+                          Calibrated
+                        </span>
+                      )}
+                    </div>
+                  </TableCell>
                   <TableCell className="text-center text-xs text-subtle hidden sm:table-cell">{formatTime(p.time_limit_seconds)}</TableCell>
                   <TableCell className="text-center text-xs text-subtle hidden md:table-cell">{p.min_words}–{p.max_words ?? "∞"} words</TableCell>
                   <TableCell className="hidden lg:table-cell"><span className={cn("inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold border", STATUS_STYLES[p.status ?? "draft"] ?? "bg-muted text-subtle")}>{p.status ?? "draft"}</span></TableCell>

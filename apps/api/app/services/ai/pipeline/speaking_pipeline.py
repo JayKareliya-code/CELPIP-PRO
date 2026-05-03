@@ -45,14 +45,21 @@ from app.services.storage.presigner import download_from_s3, generate_presigned_
 
 logger = logging.getLogger(__name__)
 
-DIMENSIONS = ["task_completion", "coherence", "vocabulary", "fluency", "grammar"]
+# Official CELPIP 4-dimension model (schema v2)
+DIMENSIONS = ["content_coherence", "vocabulary", "listenability", "task_fulfillment"]
+SCHEMA_VERSION = 2
 
 
 @dataclass(slots=True)
 class PromptContext:
-    prompt_text:       str
-    task_number:       int
-    context_image_url: str | None
+    prompt_text:          str
+    task_number:          int
+    context_image_url:    str | None
+    # Calibration anchor — Band 12 sample stored on this specific prompt row.
+    # Empty string means no anchor set; pipeline falls back to global pool.
+    sample_response_text: str = ""
+    # Used to scale the anchor truncation limit (response_time_seconds × 5 chars).
+    response_time_seconds: int = 60
 
     @property
     def is_image_task(self) -> bool:
@@ -66,6 +73,17 @@ class PromptContext:
             if self.is_image_task and self.context_image_url
             else settings.AI_SCORING_MODEL
         )
+
+    @property
+    def calibration_max_chars(self) -> int:
+        """Character budget for the prompt-specific Band 12 anchor.
+
+        Scales with response_time_seconds so longer tasks get more context.
+        E.g. 60s × 5 = 300 chars; 90s × 5 = 450 chars.
+        A minimum of 400 chars is enforced so very short tasks still get
+        a meaningful calibration snippet.
+        """
+        return max(400, self.response_time_seconds * 5)
 
 
 # ── Session factory ─────────────────────────────────────────────────────────
@@ -150,7 +168,11 @@ async def _load_user_target_band(db: AsyncSession, user_id: UUID) -> float | Non
 async def _load_prompt(db: AsyncSession, prompt_id: UUID) -> PromptContext:
     row = (
         await db.execute(
-            sa.text("SELECT prompt_text, task_number, context_image_url FROM speaking_prompts WHERE id=:id"),
+            sa.text(
+                "SELECT prompt_text, task_number, context_image_url, "
+                "       sample_response_text, response_time_seconds "
+                "FROM speaking_prompts WHERE id=:id"
+            ),
             {"id": prompt_id},
         )
     ).mappings().one_or_none()
@@ -164,8 +186,8 @@ async def _load_prompt(db: AsyncSession, prompt_id: UUID) -> PromptContext:
     if raw_image_url:
         try:
             # Extract the bare S3 key from the stored URL (strips bucket prefix / query params)
-            from app.api.v1.admin_prompts import _extract_key  # local import to avoid circular dep
-            s3_key = _extract_key(raw_image_url)
+            from app.api.v1._prompt_helpers import extract_s3_key  # local import to avoid circular dep
+            s3_key = extract_s3_key(raw_image_url)
             image_url: str | None = generate_presigned_get(key=s3_key, expires_in=300)
         except Exception:
             logger.warning("Could not presign context_image_url; falling back to stored URL", exc_info=True)
@@ -177,8 +199,15 @@ async def _load_prompt(db: AsyncSession, prompt_id: UUID) -> PromptContext:
         prompt_text=row["prompt_text"],
         task_number=row["task_number"],
         context_image_url=image_url,
+        sample_response_text=row["sample_response_text"] or "",
+        response_time_seconds=row["response_time_seconds"] or 60,
     )
-    logger.info("Prompt loaded: task=%d image_task=%s", ctx.task_number, ctx.is_image_task)
+    logger.info(
+        "Prompt loaded: task=%d image_task=%s has_band12_anchor=%s",
+        ctx.task_number,
+        ctx.is_image_task,
+        bool(ctx.sample_response_text),
+    )
     return ctx
 
 
@@ -196,7 +225,13 @@ async def _transcribe(db: AsyncSession, attempt_id: UUID, audio: bytes) -> str:
 
 
 async def _build_prompt(db: AsyncSession, ctx: PromptContext, target_band: float | None = None) -> str:
-    calibration = await build_calibration_context(db, skill="speaking", task_number=ctx.task_number)
+    calibration = await build_calibration_context(
+        db,
+        skill="speaking",
+        task_number=ctx.task_number,
+        prompt_band12_sample=ctx.sample_response_text or None,
+        max_chars=ctx.calibration_max_chars,
+    )
     return build_speaking_system_prompt(
         calibration_block=calibration,
         task_number=ctx.task_number,
@@ -236,12 +271,15 @@ async def _save_score(
 
     Vision tasks (3/4/8) use gpt-4o; text-only tasks use gpt-4o-mini.
     Recording the actual model here is important for cost auditing.
+    schema_version=2 identifies this as the official CELPIP 4-dimension model.
     """
     report = ScoreReport(
         attempt_id=attempt_id,
         estimated_band=result.estimated_band,
         scoring_model=actual_model,   # reflects gpt-4o for vision tasks
         raw_rubric_json=result.raw_json,
+        schema_version=SCHEMA_VERSION,
+        likely_range=result.likely_range or None,
     )
     db.add(report)
     await db.flush()

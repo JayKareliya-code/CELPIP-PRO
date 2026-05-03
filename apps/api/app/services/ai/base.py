@@ -3,6 +3,13 @@ Provider Protocol + core data contracts for the AI scoring layer.
 
 All AI providers (OpenAI, Anthropic, Gemini) must satisfy the ScoringProvider
 Protocol.  This file defines only data shapes and the Protocol — zero I/O.
+
+Schema versions:
+  v1 (legacy): 5-dimension model — task_completion/coherence/fluency/grammar for
+               speaking; task_fulfillment/organization/tone_register/grammar for writing.
+  v2 (current): Official CELPIP 4-dimension model — content_coherence/vocabulary/
+                listenability/task_fulfillment for speaking;
+                content_coherence/vocabulary/readability/task_fulfillment for writing.
 """
 from __future__ import annotations
 
@@ -27,9 +34,9 @@ class TokenUsage:
 @dataclass
 class FeedbackItem:
     """A single strength or weakness entry with evidence from the transcript."""
-    label: str              # Dimension name: "Vocabulary Range", "Fluency & Pronunciation"
+    label: str              # Dimension name: "content_coherence", "vocabulary", etc.
     observation: str        # What was done well / what the gap is
-    quote: str              # 3–8 words verbatim from the candidate's transcript
+    quote: str              # Verbatim words from the candidate's transcript/essay
     fix: str = ""           # Weaknesses only: one concrete substitution / action
 
 
@@ -46,24 +53,49 @@ class ImprovementTip:
 
 @dataclass
 class ScoringResult:
-    """Unified result returned by every scoring provider."""
+    """Unified result returned by every scoring provider.
 
-    # Speaking dimensions (1–12 each)
-    task_completion: int = 0
-    coherence: int = 0
-    vocabulary: int = 0
-    fluency: int = 0
-    grammar: int = 0
+    Schema v2 (current — 4 official CELPIP dimensions):
+      Speaking:  content_coherence, vocabulary, listenability, task_fulfillment
+      Writing:   content_coherence, vocabulary, readability, task_fulfillment
 
-    # Writing dimensions (1–12 each)
-    task_fulfillment: int = 0
-    organization: int = 0
-    tone_register: int = 0
+    Schema v1 (legacy — kept for backward compatibility with old score_reports rows):
+      Speaking:  task_completion, coherence, fluency, grammar + vocabulary
+      Writing:   task_fulfillment, organization, tone_register, grammar + vocabulary
 
-    # Shared fields
+    The pipeline sets schema_version=2 for all new attempts.  Old attempts stored
+    in the DB retain their v1 dimension rows and are identified by schema_version=1
+    on the score_reports row.
+    """
+
+    # ── Schema v2: official CELPIP 4-dimension model (speaking) ──────────────
+    content_coherence: int = 0     # Speaking: Content/Coherence (§4.1)
+    listenability: int = 0         # Speaking: Listenability (§4.3)
+
+    # ── Schema v2: official CELPIP 4-dimension model (writing) ───────────────
+    readability: int = 0           # Writing: Readability (§5.3)
+
+    # ── Shared dimensions (used in both speaking and writing v2) ─────────────
+    vocabulary: int = 0            # Vocabulary (§4.2 / §5.2)
+    task_fulfillment: int = 0      # Task Fulfillment (§4.4 / §5.4)
+
+    # ── Schema v1 legacy dimensions (deprecated — do not use in new code) ────
+    # Speaking v1
+    task_completion: int = 0       # Deprecated: use task_fulfillment
+    coherence: int = 0             # Deprecated: use content_coherence
+    fluency: int = 0               # Deprecated: use listenability
+    grammar: int = 0               # Deprecated: merged into listenability/readability
+    # Writing v1
+    organization: int = 0          # Deprecated: use content_coherence
+    tone_register: int = 0         # Deprecated: merged into readability
+
+    # ── Shared output fields ──────────────────────────────────────────────────
     estimated_band: float = 0.0
 
-    # Rich structured feedback (speaking — new format)
+    # Band range string: e.g. "7-8" or "9-10" (§9 official output format)
+    likely_range: str = ""
+
+    # Rich structured feedback
     strengths: list[FeedbackItem] = field(default_factory=list)
     weaknesses: list[FeedbackItem] = field(default_factory=list)
     improvement_tips: list[ImprovementTip] = field(default_factory=list)
@@ -125,7 +157,7 @@ class ScoringProvider(Protocol):
                                 the image in the scoring request for better accuracy.
 
         Returns:
-            ScoringResult with all 5 speaking dimensions populated.
+            ScoringResult with schema v2 speaking dimensions populated.
         """
         ...
 
@@ -144,6 +176,6 @@ class ScoringProvider(Protocol):
             system_prompt: Fully assembled rubric system prompt.
 
         Returns:
-            ScoringResult with all 3 writing dimensions populated.
+            ScoringResult with schema v2 writing dimensions populated.
         """
         ...

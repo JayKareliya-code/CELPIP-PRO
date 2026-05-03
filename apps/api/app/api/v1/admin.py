@@ -217,8 +217,19 @@ class CalibrationResponse(BaseModel):
     sample_text: str
     source: str
     is_active: bool
+    created_at: str | None = None
 
     model_config = {"from_attributes": True}
+
+
+class CalibrationUpdate(BaseModel):
+    """Full replacement schema for PUT /calibration/{id}."""
+    skill: str = Field(pattern="^(speaking|writing)$")
+    task_number: int | None = None
+    band_level: float = Field(ge=1.0, le=12.0)
+    sample_text: str
+    source: str = "official"
+    is_active: bool = True
 
 
 @router.get("/calibration", response_model=list[CalibrationResponse])
@@ -263,3 +274,40 @@ async def admin_toggle_calibration(
                      entity_type="calibration_sample", entity_id=sample_id,
                      new_value={"is_active": updated.is_active})
     return CalibrationResponse.model_validate(updated)
+
+
+@router.put("/calibration/{sample_id}", response_model=CalibrationResponse)
+async def admin_update_calibration(
+    sample_id: uuid.UUID,
+    body: CalibrationUpdate,
+    db: Annotated[AsyncSession, Depends(get_db)],
+    admin: Annotated[User, Depends(require_admin)],
+) -> CalibrationResponse:
+    """Replace all fields of a calibration sample (full edit)."""
+    repo: BaseRepository[CalibrationSample] = BaseRepository(CalibrationSample, db)
+    sample = await repo.get_by_id(sample_id)
+    if not sample:
+        raise HTTPException(status_code=404, detail="Calibration sample not found")
+    payload = _clean(body.model_dump())
+    updated = await repo.update(sample, **payload)
+    await log_action(db, admin_user_id=admin.id, action_type="update",
+                     entity_type="calibration_sample", entity_id=sample_id,
+                     new_value=payload)
+    return CalibrationResponse.model_validate(updated)
+
+
+@router.delete("/calibration/{sample_id}", status_code=204)
+async def admin_delete_calibration(
+    sample_id: uuid.UUID,
+    db: Annotated[AsyncSession, Depends(get_db)],
+    admin: Annotated[User, Depends(require_admin)],
+) -> None:
+    """Hard-delete a calibration sample."""
+    repo: BaseRepository[CalibrationSample] = BaseRepository(CalibrationSample, db)
+    sample = await repo.get_by_id(sample_id)
+    if not sample:
+        raise HTTPException(status_code=404, detail="Calibration sample not found")
+    await db.delete(sample)
+    await log_action(db, admin_user_id=admin.id, action_type="delete",
+                     entity_type="calibration_sample", entity_id=sample_id)
+    await db.commit()

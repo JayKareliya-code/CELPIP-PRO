@@ -75,12 +75,14 @@ async def run_writing_mock_pipeline(attempt_id: str) -> None:
 
 async def _pipeline(db: AsyncSession, attempt_id: UUID) -> None:
     await _mark_processing(db, attempt_id)
-    attempt, w_attempt  = await _load_attempt(db, attempt_id)
-    prompt_text, task_number = await _load_prompt(db, attempt.prompt_id)
-    band, model_used    = await _estimate_band(
+    attempt, w_attempt      = await _load_attempt(db, attempt_id)
+    prompt_text, task_number, sample_band12, time_limit = await _load_prompt(db, attempt.prompt_id)
+    band, model_used        = await _estimate_band(
         essay_text=w_attempt.essay_text or "",
         prompt_text=prompt_text,
         task_number=task_number,
+        sample_band12=sample_band12,
+        time_limit_seconds=time_limit,
     )
     await _save_result(db, attempt_id, band, model_used)
     await _mark_complete(db, attempt_id)
@@ -111,17 +113,25 @@ async def _load_attempt(db: AsyncSession, attempt_id: UUID) -> tuple[Attempt, Wr
     return attempt, w_attempt
 
 
-async def _load_prompt(db: AsyncSession, prompt_id: UUID) -> tuple[str, int]:
-    """Return (prompt_text, task_number) for the writing prompt."""
+async def _load_prompt(db: AsyncSession, prompt_id: UUID) -> tuple[str, int, str, int]:
+    """Return (prompt_text, task_number, sample_response_text, time_limit_seconds)."""
     row = (
         await db.execute(
-            sa.text("SELECT prompt_text, task_number FROM writing_prompts WHERE id = :pid"),
+            sa.text(
+                "SELECT prompt_text, task_number, sample_response_text, time_limit_seconds "
+                "FROM writing_prompts WHERE id = :pid"
+            ),
             {"pid": prompt_id},
         )
     ).mappings().one_or_none()
     if row is None:
         raise LookupError(f"Writing prompt {prompt_id} not found")
-    return row["prompt_text"], row["task_number"]
+    return (
+        row["prompt_text"],
+        row["task_number"],
+        row["sample_response_text"] or "",
+        row["time_limit_seconds"] or 1800,
+    )
 
 
 # ── Band estimator ─────────────────────────────────────────────────────────────
@@ -143,11 +153,17 @@ Return strictly: {"estimated_band": <float>}"""
 
 
 async def _estimate_band(
-    essay_text:  str,
-    prompt_text: str,
-    task_number:  int,
+    essay_text:         str,
+    prompt_text:        str,
+    task_number:        int,
+    sample_band12:      str = "",
+    time_limit_seconds: int = 1800,
 ) -> tuple[float | None, str]:
     """Lightweight LLM call — returns a single band score, no dimensions.
+
+    When a prompt-specific Band 12 sample is available, it is appended to the
+    system prompt so the model calibrates against the ideal response for this
+    exact question.
 
     Retries up to AI_MAX_RETRIES times on HTTP 429 (rate-limit) with
     exponential backoff, honouring the Retry-After header when present.
@@ -158,6 +174,18 @@ async def _estimate_band(
     provider = OpenAIProvider()
     model    = settings.AI_SCORING_MODEL
 
+    # Scale max_chars: 3 chars/sec is a reasonable Band 12 writing rate.
+    max_chars = max(400, time_limit_seconds * 3)
+    system_prompt = _BAND_ESTIMATOR_SYSTEM
+    if sample_band12 and sample_band12.strip():
+        anchor = sample_band12.strip()[:max_chars]
+        system_prompt = (
+            system_prompt
+            + "\n\n### Prompt-Specific Band 12 Reference\n"
+            + "Use the following as your primary calibration anchor (do NOT copy it):\n"
+            + anchor
+        )
+
     user_content = (
         f"Task {task_number} prompt:\n{prompt_text}\n\n"
         f"Candidate essay:\n{essay_text or '[no essay submitted]'}"
@@ -167,7 +195,7 @@ async def _estimate_band(
         "model":           model,
         "response_format": {"type": "json_object"},
         "messages": [
-            {"role": "system", "content": _BAND_ESTIMATOR_SYSTEM},
+            {"role": "system", "content": system_prompt},
             {"role": "user",   "content": user_content},
         ],
         "max_tokens": 50,

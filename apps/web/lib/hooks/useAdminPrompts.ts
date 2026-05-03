@@ -20,7 +20,7 @@ import type { SpeakingPrompt, WritingPrompt, ChoiceOption } from "@/lib/types";
 // â”€â”€ Query Keys â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 /** Base keys used for prefix-based invalidation â€” never include filter args here. */
-const BASE_KEYS = {
+export const BASE_KEYS = {
   adminSpeaking: ["adminSpeakingPrompts"] as const,
   adminWriting:  ["adminWritingPrompts"]  as const,
   publicSpeaking: ["speakingTasks"]       as const,

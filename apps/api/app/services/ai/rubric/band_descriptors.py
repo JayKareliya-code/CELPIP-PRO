@@ -4,129 +4,175 @@ CELPIP Band Descriptors (1–12) for speaking and writing.
 These descriptors are injected into every scoring system prompt.  They anchor
 the LLM to the official CELPIP scale so scores stay calibrated.
 
+Source: Official CELPIP Level Descriptors and CELPIP_LLM_Scoring_Context.md §2, §4, §5, §10.
+
 Maintenance note:
-  - Odd bands (3, 5, 7, 9, 11) are interpolated — CELPIP's published descriptors
-    use even bands.  During Day 9 calibration, adjust these as needed.
+  - Descriptors match the official CELPIP language exactly.
   - If CELPIP updates its official rubric, update this file immediately.
+  - Band 0: not persisted as a score — pipeline converts band < 4 to an
+    "unable to assess" result rather than storing a raw 0–3 band.
 """
 
 # ── Speaking Band Descriptors ─────────────────────────────────────────────────
+# Aligned with §4 Speaking Rubric and §10 Band Decision Rules.
 
 SPEAKING_BAND_DESCRIPTORS: dict[int, str] = {
     12: (
-        "Communicates all ideas with exceptional clarity; exemplary task completion "
-        "with full elaboration; highly coherent and cohesive organization; wide, "
-        "precise vocabulary used naturally; fluent delivery with no unnatural pauses; "
-        "near-native grammatical accuracy and structural variety."
+        "Expert proficiency. Handles demanding, non-routine situations with precision, "
+        "flexibility, and strong control. Ideas are fully developed with clear, specific "
+        "details. Language range is very broad with idiomatic or figurative language used "
+        "naturally. Delivery is consistently fluent and intelligible with excellent "
+        "intonation. Grammar is highly accurate with complex structural variety. Tone and "
+        "style adapt precisely to any situation, purpose, and listener."
     ),
     11: (
-        "Communicates ideas very clearly; almost complete task fulfillment; "
-        "well-organized with smooth discourse markers; broad vocabulary with only very "
-        "minor imprecision; fluent with rare self-corrections; very few minor grammar errors."
+        "Advanced proficiency. Handles demanding situations very well with clear, precise "
+        "language and strong control, with only minor limitations. Task is almost fully "
+        "addressed with elaboration. Vocabulary is broad with very minor imprecision. "
+        "Delivery is fluent with rare self-corrections. Very few minor grammar errors that "
+        "do not affect meaning."
     ),
     10: (
-        "Communicates ideas clearly; strong task completion; well-organized response; "
-        "broad vocabulary range; generally fluent with minor self-corrections or short "
-        "pauses; very few grammar errors that do not impede comprehension."
+        "Highly effective proficiency. Handles moderately demanding or some high-stakes "
+        "situations effectively. Ideas are clear, detailed, and mostly natural. Task is "
+        "fully addressed. Broad vocabulary range. Generally fluent with minor pauses or "
+        "self-corrections. Very few grammar errors that do not impede comprehension. "
+        "Adapts tone well to the situation."
     ),
     9: (
-        "Mostly clear communication; task largely complete; adequate organization with "
-        "some discourse markers; good vocabulary with occasional repetition; mostly fluent "
-        "with some natural pauses; some grammar errors but meaning remains clear."
+        "Effective proficiency. Communicates effectively with good support and organization. "
+        "Task is largely complete with some discourse markers. Good vocabulary with "
+        "occasional repetition. Mostly fluent with some natural pauses. Some grammar errors "
+        "but meaning remains clear. Conveys intended meaning and adjusts style to a range "
+        "of situations."
     ),
     8: (
-        "Communicates main ideas; task mostly complete; generally organized with basic "
-        "connectors; adequate vocabulary though repetition is noticeable; some pauses but "
-        "overall intelligible; grammar mostly accurate with some errors."
+        "Good proficiency. Communicates clearly in more demanding everyday situations. "
+        "Task is mostly complete. Ideas are developed but may lack depth or full flexibility. "
+        "Common vocabulary plus some context-specific words. Some pauses but overall "
+        "intelligible. Grammar mostly accurate with some noticeable errors. Tone generally "
+        "appropriate."
     ),
     7: (
-        "Ideas mostly communicated despite some gaps; partial task completion; basic "
-        "organization; vocabulary limited to common words with some inaccuracies; "
-        "noticeable pauses and some hesitation; several grammar errors."
+        "Adequate proficiency. Communicates adequately in somewhat demanding situations. "
+        "Main ideas are understandable but development, vocabulary, or grammar may be "
+        "limited. Task mostly complete but with gaps. Common words with some more precise "
+        "vocabulary. Noticeable pauses and some hesitation. Several grammar errors that do "
+        "not consistently block meaning. Conveys meaning in familiar or somewhat demanding "
+        "situations."
     ),
     6: (
-        "Some ideas communicated; partial task completion; noticeable organization issues; "
-        "limited vocabulary with repetition; frequent pauses and hesitation affecting "
-        "fluency; several grammar errors affecting clarity at times."
+        "Developing proficiency. Communicates basic information and opinions in everyday "
+        "situations, but support, accuracy, and organization are limited. Some ideas "
+        "communicated. Partial task completion. Mostly common words. Frequent pauses and "
+        "hesitation affecting fluency. Several grammar errors affecting clarity at times. "
+        "Conveys accurate basic information but may not fully adapt style."
     ),
     5: (
-        "Limited communication; task mostly incomplete; little organization; very limited "
-        "vocabulary; frequent pauses interrupting flow; many grammar errors frequently "
+        "Acquiring proficiency. Can communicate familiar information with simple language. "
+        "Limited complexity and frequent gaps. Task mostly incomplete. Very limited "
+        "vocabulary. Frequent pauses interrupting flow. Many grammar errors frequently "
         "hindering comprehension."
     ),
     4: (
-        "Communication severely limited; task largely incomplete; poor or no organization; "
-        "very limited vocabulary with many inaccuracies; very frequent pauses; many grammar "
-        "errors severely hindering comprehension."
+        "Adequate for daily life activities. Can produce simple descriptions or personal "
+        "information but communication is limited. Task largely incomplete. Very limited "
+        "vocabulary with many inaccuracies. Very frequent pauses. Many grammar errors "
+        "severely hindering comprehension."
     ),
     3: (
-        "Minimal communication; very little of the task addressed; no clear structure; "
-        "vocabulary barely adequate to convey the simplest ideas; nearly constant pauses "
-        "and reformulations; grammar errors make most content incomprehensible."
+        "Some proficiency in limited personal contexts. Can communicate very basic needs "
+        "or familiar information with major limitations. Very little of the task addressed. "
+        "No clear structure. Vocabulary barely adequate to convey the simplest ideas. "
+        "Nearly constant pauses and reformulations. Grammar errors make most content "
+        "incomprehensible."
     ),
     2: (
-        "Minimal communication; task effectively not completed; no organization; very few "
-        "recognizable words or phrases; almost all speech incomprehensible due to errors "
-        "and pausing."
+        "Limited ability. Minimal communication. Task effectively not completed. No "
+        "organization. Very few recognizable words or phrases. Almost all speech "
+        "incomprehensible due to errors and pausing."
     ),
     1: (
-        "No meaningful communication attempted; response is silent, off-topic, or "
-        "completely incomprehensible."
+        "Very limited ability or insufficient information. No meaningful communication "
+        "attempted. Response is silent, off-topic, completely incomprehensible, or "
+        "impossible to assess."
     ),
 }
 
 # ── Writing Band Descriptors ──────────────────────────────────────────────────
+# Aligned with §5 Writing Rubric and §10 Band Decision Rules.
 
 WRITING_BAND_DESCRIPTORS: dict[int, str] = {
     12: (
-        "All task requirements fully and thoroughly met; excellent paragraph structure "
-        "with a clear introduction, development and conclusion; precise academic or "
-        "professional vocabulary used appropriately; tone perfectly matches task type "
-        "(email/survey/essay); virtually no grammar or spelling errors."
+        "Expert proficiency. All task requirements fully and thoroughly met with precise, "
+        "complete development. Excellent paragraph structure with clear introduction, "
+        "development, and conclusion. Wide, specialized, formal, or precise vocabulary "
+        "used effectively. Tone and style are perfectly appropriate to the situation and "
+        "audience. Virtually no grammar, spelling, or punctuation errors. Transitions "
+        "connect ideas smoothly throughout."
     ),
     11: (
-        "Task requirements fully met; clear and well-structured response; wide vocabulary; "
-        "appropriate tone throughout; minor errors that do not affect comprehension."
+        "Advanced proficiency. Task requirements fully met. Clear and well-structured "
+        "response. Wide vocabulary with very minor imprecision. Appropriate tone and "
+        "style throughout. Minor errors that do not affect comprehension."
     ),
     10: (
-        "Task requirements met; clear structure; varied vocabulary; generally appropriate "
-        "tone; minor grammar or spelling errors that do not impede reading."
+        "Highly effective proficiency. Task requirements fully met with good development "
+        "of all points. Clear paragraph structure with topic sentences. Varied vocabulary "
+        "using synonyms and collocations. Tone consistently appropriate. Rare grammar or "
+        "spelling errors that do not affect readability. Smooth transitions within and "
+        "between paragraphs."
     ),
     9: (
-        "Task requirements mostly met; adequate structure; some vocabulary variety; "
-        "mostly appropriate tone; a few grammar or spelling errors."
+        "Effective proficiency. Task requirements mostly met. All main points addressed "
+        "though some may be underdeveloped. Structure present with basic connectors "
+        "(however, furthermore). Accurate vocabulary with some repetition. Tone generally "
+        "appropriate. A few noticeable grammar errors that occasionally slow the reader "
+        "but do not block meaning."
     ),
     8: (
-        "Task requirements mostly met; adequate structure; adequate vocabulary; "
-        "generally appropriate tone; some grammar errors affecting clarity occasionally."
+        "Good proficiency. Task requirements mostly met but at least one point is missing "
+        "or significantly underdeveloped. Basic paragraph structure but weak topic "
+        "sentences. Vocabulary is functional but repetitive. Tone occasionally slips. "
+        "Several grammar errors that sometimes affect clarity. Follows common writing "
+        "conventions; main ideas are conveyed."
     ),
     7: (
-        "Task requirements partially met; some structure present; limited vocabulary "
-        "range; tone sometimes inappropriate; several grammar errors."
+        "Adequate proficiency. Task requirements partially met — at least one required "
+        "point is absent or addressed in only one sentence. Paragraphing exists but ideas "
+        "within paragraphs are disjointed. Vocabulary limited to common everyday words "
+        "with noticeable repetition. Tone sometimes inappropriate. Several grammar errors "
+        "including subject-verb agreement, tense, or article mistakes. Conveys factual "
+        "information with mostly appropriate conventions."
     ),
     6: (
-        "Task requirements partially met; limited organization; limited vocabulary with "
-        "repetition; tone issues; several grammar errors affecting clarity."
+        "Developing proficiency. Task requirements partially met. Limited organization "
+        "with ideas jumping between topics. Vocabulary limited with frequent repetition "
+        "and imprecise word choices. Tone issues throughout. Several grammar errors "
+        "affecting clarity in multiple sentences. Conveys some factual information with "
+        "sometimes appropriate tone."
     ),
     5: (
-        "Many task requirements missed; poor structure; very limited vocabulary; "
-        "inappropriate tone in places; frequent errors."
+        "Acquiring proficiency. Many task requirements missed. Poor structure. Very "
+        "limited vocabulary. Inappropriate tone in places. Frequent errors. Communicates "
+        "only familiar or simple information."
     ),
     4: (
-        "Most task requirements not met; very poor structure; very limited vocabulary; "
-        "inappropriate tone; frequent errors severely affect meaning."
+        "Adequate for daily life activities. Most task requirements not met. Very poor "
+        "structure. Very limited vocabulary. Inappropriate tone. Frequent errors severely "
+        "affecting meaning."
     ),
     3: (
-        "Task requirements largely not met; little discernible structure; vocabulary "
-        "barely adequate to convey simple ideas; tone inappropriate; errors make much "
-        "content incomprehensible."
+        "Some proficiency in limited personal contexts. Task requirements largely not met. "
+        "Little discernible structure. Vocabulary barely adequate to convey simple ideas. "
+        "Tone inappropriate. Errors make much content incomprehensible."
     ),
     2: (
-        "Very little of the task addressed; no usable structure; very few recognizable "
-        "words; meaning almost wholly unclear due to errors."
+        "Limited ability. Very little of the task addressed. No usable structure. Very "
+        "few recognizable words. Meaning almost wholly unclear due to errors."
     ),
     1: (
-        "Task requirements not attempted or completely off-topic; no structure; "
-        "incomprehensible."
+        "Very limited ability or insufficient information. Task requirements not attempted "
+        "or completely off-topic. No structure. Incomprehensible."
     ),
 }

@@ -171,7 +171,21 @@ export function SpeakingPromptTable() {
               {prompts.map((p) => (
                 <TableRow key={p.id} className="group hover:bg-muted/50">
                   <TableCell className="text-center"><Badge variant="outline" className="text-xs font-semibold">{p.task_number === 0 ? "P" : p.task_number}</Badge></TableCell>
-                  <TableCell className="font-medium text-sm text-foreground max-w-xs truncate">{p.title}</TableCell>
+                  <TableCell className="font-medium text-sm text-foreground max-w-xs">
+                    <div className="flex items-center gap-1.5 flex-wrap">
+                      <span className="truncate">{p.title}</span>
+                      {(p as SpeakingPrompt & { sample_response_text?: string | null }).sample_response_text && (
+                        <span
+                          title="Band 12 Calibration Anchor is set — AI scoring will use this prompt's sample as the primary calibration reference."
+                          className="inline-flex items-center px-1.5 py-0.5 rounded-full
+                                     text-[10px] font-semibold
+                                     bg-muted border border-border text-subtle shrink-0 cursor-default"
+                        >
+                          Calibrated
+                        </span>
+                      )}
+                    </div>
+                  </TableCell>
                   <TableCell className="text-center text-xs text-subtle hidden sm:table-cell">{p.prep_time_seconds}s</TableCell>
                   <TableCell className="text-center text-xs text-subtle hidden sm:table-cell">{p.response_time_seconds}s</TableCell>
                   <TableCell className="hidden md:table-cell"><span className={cn("inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold border", DIFFICULTY_STYLES[p.difficulty] ?? "bg-muted text-subtle")}>{p.difficulty}</span></TableCell>

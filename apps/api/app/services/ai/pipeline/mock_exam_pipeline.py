@@ -75,10 +75,14 @@ async def run_mock_exam_pipeline(attempt_id: str) -> None:
 async def _pipeline(db: AsyncSession, attempt_id: UUID) -> None:
     await _mark_processing(db, attempt_id)
     attempt = await _load_attempt(db, attempt_id)
-    prompt_text, image_url = await _load_prompt(db, attempt.task_number, attempt.audio_s3_key)
+    prompt_text, image_url, sample_band12, response_time = await _load_prompt(
+        db, attempt.task_number, attempt.audio_s3_key
+    )
     audio = await download_from_s3(attempt.audio_s3_key)
     transcript = await _transcribe(audio)
-    band, model_used = await _estimate_band(transcript, prompt_text, attempt.task_number, image_url)
+    band, model_used = await _estimate_band(
+        transcript, prompt_text, attempt.task_number, image_url, sample_band12, response_time
+    )
     await _save_result(db, attempt_id, band, model_used)
     await _mark_complete(db, attempt_id)
     logger.info("Mock exam pipeline complete: attempt=%s band=%.1f", attempt_id, band)
@@ -127,8 +131,8 @@ async def _load_prompt(
     db: AsyncSession,
     task_number: int,
     audio_s3_key: str,  # noqa: ARG001 — reserved for future session-prompt join
-) -> tuple[str, str | None]:
-    """Return (prompt_text, presigned_image_url_or_None) for the given task.
+) -> tuple[str, str | None, str, int]:
+    """Return (prompt_text, presigned_image_url_or_None, sample_band12, response_time_seconds).
 
     We fetch the most recent published mock prompt for this task so the model
     has the right context when scoring.  Image URL is presigned for 5 min.
@@ -136,7 +140,9 @@ async def _load_prompt(
     row = (
         await db.execute(
             sa.text(
-                "SELECT prompt_text, context_image_url FROM speaking_prompts "
+                "SELECT prompt_text, context_image_url, "
+                "       sample_response_text, response_time_seconds "
+                "FROM speaking_prompts "
                 "WHERE task_number = :n AND status = 'published' AND is_active = TRUE "
                 "  AND prompt_tag = 'mock' "
                 "ORDER BY sort_order, created_at DESC LIMIT 1"
@@ -148,11 +154,13 @@ async def _load_prompt(
     if not row:
         # Graceful fallback — score without prompt context
         logger.warning("No mock prompt found for task %d; scoring without context", task_number)
-        return ("", None)
+        return ("", None, "", 60)
 
     prompt_text: str = row["prompt_text"] or ""
     raw_image_url: str | None = row["context_image_url"]
     image_url: str | None = None
+    sample_band12: str = row["sample_response_text"] or ""
+    response_time: int = row["response_time_seconds"] or 60
 
     if raw_image_url and task_number in IMAGE_TASKS:
         try:
@@ -162,7 +170,7 @@ async def _load_prompt(
             logger.warning("Could not presign image for task %d", task_number, exc_info=True)
             image_url = raw_image_url
 
-    return prompt_text, image_url
+    return prompt_text, image_url, sample_band12, response_time
 
 
 async def _transcribe(audio: bytes) -> str:
@@ -201,16 +209,32 @@ async def _estimate_band(
     prompt_text: str,
     task_number: int,
     image_url: str | None,
+    sample_band12: str = "",
+    response_time_seconds: int = 60,
 ) -> tuple[float, str]:
     """Call the LLM with a lightweight prompt that returns only estimated_band.
 
     Uses vision model for image tasks (3/4/8) so the model can cross-check
     whether the candidate actually described the scene shown to them.
     Falls back to text-only model for all other tasks.
+    When a prompt-specific Band 12 sample is available, it is appended to the
+    system prompt so the model calibrates against the exact expected response.
     """
     provider = OpenAIProvider()
     use_vision = bool(task_number in IMAGE_TASKS and image_url)
     model = settings.AI_VISION_SCORING_MODEL if use_vision else settings.AI_SCORING_MODEL
+
+    # Build calibration addendum if a prompt-specific anchor is available.
+    max_chars = max(400, response_time_seconds * 5)
+    system_prompt = _BAND_ESTIMATOR_SYSTEM
+    if sample_band12 and sample_band12.strip():
+        anchor = sample_band12.strip()[:max_chars]
+        system_prompt = (
+            system_prompt
+            + "\n\n### Prompt-Specific Band 12 Reference\n"
+            + "Use the following as your primary calibration anchor (do NOT copy it):\n"
+            + anchor
+        )
 
     text_content = (
         f"Task {task_number} prompt: {prompt_text}\n\n"
@@ -229,7 +253,7 @@ async def _estimate_band(
         "model": model,
         "response_format": {"type": "json_object"},
         "messages": [
-            {"role": "system", "content": _BAND_ESTIMATOR_SYSTEM},
+            {"role": "system", "content": system_prompt},
             {"role": "user",   "content": user_content},
         ],
         "max_tokens": 50,

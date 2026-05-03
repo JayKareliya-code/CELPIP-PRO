@@ -2,14 +2,17 @@
 ScoreReport + ScoreDimension — AI-generated band score per attempt.
 
 ScoreReport: one row per attempt (overall band + raw JSON).
-ScoreDimension: one row per rubric dimension per report (5 for speaking, 5 for writing).
+  schema_version=1: legacy 5-dimension model (pre-May 2026).
+  schema_version=2: official CELPIP 4-dimension model (content_coherence, vocabulary,
+                    listenability/readability, task_fulfillment).
+ScoreDimension: one row per rubric dimension per report (4 for schema_version=2).
 """
 from __future__ import annotations
 
 import uuid
 from decimal import Decimal
 
-from sqlalchemy import Integer, Numeric, Text, ForeignKey, Index
+from sqlalchemy import Integer, Numeric, Text, String, ForeignKey, Index
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import Mapped, mapped_column
 
@@ -29,8 +32,17 @@ class ScoreReport(Base, TimestampMixin):
         index=True,
     )
     estimated_band: Mapped[Decimal] = mapped_column(Numeric(4, 1), nullable=False)
-    scoring_model: Mapped[str] = mapped_column(Text, nullable=False)  # which LLM generated this
-    raw_rubric_json: Mapped[dict | None] = mapped_column(JSONB)        # full LLM response
+    scoring_model: Mapped[str] = mapped_column(Text, nullable=False)   # which LLM generated this
+    raw_rubric_json: Mapped[dict | None] = mapped_column(JSONB)         # full LLM response
+
+    # Scoring schema version — identifies which dimension model was used:
+    #   1 = legacy 5-dimension model (pre-May 2026 scores)
+    #   2 = official CELPIP 4-dimension model (current)
+    schema_version: Mapped[int] = mapped_column(Integer, nullable=False, default=1)
+
+    # Official CELPIP output format band range, e.g. "7-8" or "9-10".
+    # Populated only for schema_version=2 scores.
+    likely_range: Mapped[str | None] = mapped_column(String(10), nullable=True)
 
     __table_args__ = (
         Index("idx_score_reports_attempt", "attempt_id"),
