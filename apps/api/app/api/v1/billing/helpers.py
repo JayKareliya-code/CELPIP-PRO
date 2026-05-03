@@ -51,6 +51,24 @@ async def get_or_create_stripe_customer(user: User, db: AsyncSession) -> str:
     subscription = existing.scalar_one_or_none()
 
     if subscription and subscription.stripe_customer_id:
+        # Patch the Stripe customer's email if it was previously stored as the
+        # clerk.local fallback and we now have a real address from the JWT.
+        if user.email and not user.email.endswith("@clerk.local"):
+            try:
+                stripe.Customer.modify(
+                    subscription.stripe_customer_id,
+                    email=user.email,
+                    name=user.full_name or "",
+                )
+                logger.info(
+                    "Patched Stripe customer %s email for user %s",
+                    subscription.stripe_customer_id, user.id,
+                )
+            except stripe.StripeError:
+                logger.warning(
+                    "Failed to patch Stripe customer email for user %s",
+                    user.id, exc_info=True,
+                )
         return subscription.stripe_customer_id
 
     customer = stripe.Customer.create(
