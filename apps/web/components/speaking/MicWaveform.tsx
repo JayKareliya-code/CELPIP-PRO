@@ -5,6 +5,8 @@
 //
 // Architecture (production-grade):
 //   • AudioContext + MediaStream created once on mount via setupMic()
+//   • ctx.resume() called after AudioContext creation to satisfy the iOS
+//     Web Audio API requirement (context must be resumed after a user gesture).
 //   • Heights written DIRECTLY to DOM span elements via element refs —
 //     no React re-renders at 60 fps, zero layout thrash
 //   • isActive is read from a ref inside the rAF loop so the loop never
@@ -12,7 +14,8 @@
 //   • On UNMOUNT: MediaStream tracks are stopped (mic indicator goes off)
 //     and AudioContext is closed — no memory leaks, no persistent mic access
 //   • Graceful degradation: if mic is denied or browser doesn't support
-//     getUserMedia, bars animate via CSS keyframe fallback
+//     getUserMedia, bars animate via the global @keyframes mic-idle CSS rule
+//     (defined in globals.css — not injected inline to avoid mount churn).
 // ─────────────────────────────────────────────────────────────────────────────
 
 import { useEffect, useRef, useCallback } from "react";
@@ -61,6 +64,12 @@ export function MicWaveform({ isActive = true, className }: MicWaveformProps) {
     try {
       const stream   = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
       const ctx      = new AudioContext();
+
+      // iOS Safari requires AudioContext to be explicitly resumed after a user
+      // gesture. ctx.resume() is a no-op on Chrome/Firefox and resolves
+      // immediately once the gesture has already occurred.
+      await ctx.resume();
+
       const source   = ctx.createMediaStreamSource(stream);
       const analyser = ctx.createAnalyser();
 
@@ -75,7 +84,7 @@ export function MicWaveform({ isActive = true, className }: MicWaveformProps) {
       analyserRef.current = analyser;
       dataRef.current     = new Uint8Array(analyser.frequencyBinCount) as Uint8Array<ArrayBuffer>;
     } catch {
-      // Mic denied or unavailable — CSS fallback handles the visual
+      // Mic denied or unavailable — CSS @keyframes mic-idle fallback handles the visual
     }
   }, []);
 
@@ -129,10 +138,12 @@ export function MicWaveform({ isActive = true, className }: MicWaveformProps) {
   // ── Render ────────────────────────────────────────────────────────────────
 
   return (
+    // aria-hidden="true": this waveform is purely decorative — screen readers
+    // should not announce it. Do NOT add aria-label here; aria-hidden removes
+    // the element from the AT tree entirely, making aria-label unreachable.
     <div
       className={cn("flex items-end justify-center gap-[3px]", className)}
       aria-hidden="true"
-      aria-label="Voice level visualiser"
     >
       {Array.from({ length: BAR_COUNT }, (_, i) => (
         <span
@@ -149,21 +160,14 @@ export function MicWaveform({ isActive = true, className }: MicWaveformProps) {
           )}
           style={{
             height: `${MIN_BAR_HEIGHT_PX}px`,
-            // CSS idle animation — overridden by rAF heights once mic is live
+            // CSS idle animation — defined in globals.css (not inline).
+            // Overridden by rAF heights once mic is live.
             animation: isActive
               ? `mic-idle ${0.5 + (i % 5) * 0.15}s ease-in-out ${i * 40}ms infinite alternate`
               : "none",
           }}
         />
       ))}
-
-      {/* Lightweight idle keyframe — bars breathe before mic connects */}
-      <style>{`
-        @keyframes mic-idle {
-          from { height: ${MIN_BAR_HEIGHT_PX}px; }
-          to   { height: ${MIN_BAR_HEIGHT_PX + 12}px; }
-        }
-      `}</style>
     </div>
   );
 }

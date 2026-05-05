@@ -9,14 +9,14 @@ import { cn } from "@/lib/utils";
 import { MOCK_EXAM_TASK_NUMBERS } from "@/lib/practice/config";
 
 const TASK_META: Record<number, { label: string; duration: string; description: string }> = {
-  1: { label: "Giving Advice",                     duration: "1m 30s", description: "Respond with relevant advice to a scenario."                    },
-  2: { label: "Talking about a Personal Experience", duration: "1m",   description: "Describe a personal event or memory."                           },
-  3: { label: "Describing a Scene",                duration: "1m",     description: "Look at an image and describe what you see."                    },
-  4: { label: "Making Predictions",                duration: "1m",     description: "Study three images and make predictions."                       },
-  5: { label: "Comparing and Persuading",          duration: "2m",     description: "Compare options and argue both sides."                          },
-  6: { label: "Dealing with a Difficult Situation", duration: "1m",   description: "Respond to a real-life problem scenario."                       },
-  7: { label: "Expressing Opinions",               duration: "1m 30s", description: "Share and defend your opinion on a topic."                     },
-  8: { label: "Describing an Unusual Situation",   duration: "1m",     description: "Describe an unusual image and its story."                      },
+  1: { label: "Giving Advice", duration: "1m 30s", description: "Respond with relevant advice to a scenario." },
+  2: { label: "Talking about a Personal Experience", duration: "1m", description: "Describe a personal event or memory." },
+  3: { label: "Describing a Scene", duration: "1m", description: "Look at an image and describe what you see." },
+  4: { label: "Making Predictions", duration: "1m", description: "Study three images and make predictions." },
+  5: { label: "Comparing and Persuading", duration: "2m", description: "Compare options and argue both sides." },
+  6: { label: "Dealing with a Difficult Situation", duration: "1m", description: "Respond to a real-life problem scenario." },
+  7: { label: "Expressing Opinions", duration: "1m 30s", description: "Share and defend your opinion on a topic." },
+  8: { label: "Describing an Unusual Situation", duration: "1m", description: "Describe an unusual image and its story." },
 };
 
 interface ExamIntroScreenProps {
@@ -25,7 +25,7 @@ interface ExamIntroScreenProps {
 
 export function ExamIntroScreen({ onStart }: ExamIntroScreenProps) {
   return (
-    <div className="min-h-screen bg-muted flex flex-col">
+    <div className="min-h-screen bg-canvas flex flex-col">
       {/* Hero */}
       <div className="px-6 py-14 text-center flex flex-col items-center gap-5">
 
@@ -42,10 +42,6 @@ export function ExamIntroScreen({ onStart }: ExamIntroScreenProps) {
           <h1 className="text-3xl md:text-4xl font-bold text-foreground">
             CELPIP Speaking Test
           </h1>
-          <p className="text-subtle text-sm max-w-md mx-auto">
-            8 tasks, timed just like the real exam. Once started, the session
-            runs continuously. Make sure you&apos;re in a quiet place.
-          </p>
         </div>
 
         {/* Info row */}

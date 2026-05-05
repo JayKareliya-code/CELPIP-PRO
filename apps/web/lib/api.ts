@@ -3,7 +3,8 @@
 // All API calls go through this module. Set NEXT_PUBLIC_API_URL in .env.local.
 // ─────────────────────────────────────────────────────────────────────────────
 
-const API_BASE_URL =
+/** Base URL for all API calls. Import this instead of reading the env var locally. */
+export const API_BASE_URL =
   process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
 
 /** All v1 routes live under this prefix. */

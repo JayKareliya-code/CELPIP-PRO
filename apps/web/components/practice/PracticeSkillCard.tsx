@@ -78,11 +78,8 @@ export function PracticeSkillCard({
         {/* ── Row 1: badge strip ─────────────────────────────────────────── */}
         <div className="flex items-center justify-between gap-2 mb-3">
           <div className="flex items-center gap-1.5 flex-wrap">
-            <span className={cn(BADGE_BASE, "bg-white/[0.07] text-white/50 border-white/[0.10]")}>
+            <span className={cn(BADGE_BASE, "bg-white/[0.08] text-white/70 border-white/[0.12] tracking-wide text-[10px] font-bold uppercase")}>
               {skill === "speaking" ? "Speaking" : "Writing"}
-            </span>
-            <span className={cn(BADGE_BASE, meta.color.bg, meta.color.border, meta.color.text)}>
-              Mock Exam
             </span>
           </div>
 
@@ -117,29 +114,29 @@ export function PracticeSkillCard({
           )}>
             <Icon className={cn("w-4 h-4", meta.color.text)} />
           </div>
-          <h3 className="text-sm font-semibold text-foreground leading-snug">{meta.label}</h3>
+          <h3 className="text-base font-bold text-foreground leading-snug tracking-tight">{meta.label}</h3>
         </div>
 
         {/* ── Row 3: meta row ────────────────────────────────────────────── */}
-        <div className="flex items-center gap-3 text-xs text-subtle/80 mb-3">
+        <div className="flex items-center gap-3 text-[11px] font-medium text-subtle mb-3">
           <span className="flex items-center gap-1">
-            <Clock className="w-3 h-3" />
-            {meta.duration}
+            <Clock className="w-3 h-3 text-amber-400/60" />
+            <span>Duration <span className="text-foreground/60">{meta.duration}</span></span>
           </span>
           <span className="w-px h-3 bg-white/10 self-center" />
           <span className="flex items-center gap-1">
-            <AlignLeft className="w-3 h-3" />
-            {meta.taskSummary}
+            <AlignLeft className="w-3 h-3 text-amber-400/60" />
+            <span className="text-foreground/60">{meta.taskSummary}</span>
           </span>
         </div>
 
         {/* ── Row 4: description (flex-1, pushes footer down) ──────────── */}
-        <p className="text-sm text-subtle leading-relaxed line-clamp-2 flex-1">{meta.description}</p>
+        <p className="text-sm text-foreground/55 leading-relaxed line-clamp-2 flex-1">{meta.description}</p>
 
         {/* ── Row 5: footer ─────────────────────────────────────────────── */}
         {!isLocked && (
           <div className="flex items-center justify-between mt-3 pt-2.5 border-t border-white/[0.06]">
-            <span className="text-[11px] text-white/30">
+            <span className="text-[11px] text-white/40 font-medium">
               {quota.remaining > 0
                 ? `${quota.remaining} test${quota.remaining === 1 ? "" : "s"} remaining`
                 : "All tests used · retries available"}

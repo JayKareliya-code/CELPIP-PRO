@@ -32,6 +32,9 @@ class SpeakingPromptIn(BaseModel):
     #   "practice" → served in individual task practice attempts
     #   "mock"     → served in full mock exam sessions only
     prompt_tag: str = Field(default="practice", pattern="^(practice|mock)$")
+    # Assigns a mock prompt to a specific exam slot (1, 2, …). Only
+    # meaningful when prompt_tag = 'mock'. None = unassigned.
+    exam_slot: int | None = Field(default=None, ge=1)
 
 
 class SpeakingPromptPatchIn(BaseModel):
@@ -68,6 +71,8 @@ class SpeakingPromptPatchIn(BaseModel):
     curveball_instruction_text: str | None = None
     default_choice_index: int | None = None
     prompt_tag: str | None = Field(None, pattern="^(practice|mock)$")
+    # See SpeakingPromptIn.exam_slot
+    exam_slot: int | None = Field(default=None, ge=1)
 
 
 class SpeakingImageUploadIn(BaseModel):
@@ -104,9 +109,12 @@ class WritingPromptIn(BaseModel):
     status: str = Field(default="draft", pattern="^(draft|published|archived)$")
     sample_response_band12: str | None = None
     # Determines which pool this prompt belongs to:
-    #   "practice" → served in individual task practice attempts
+    #   "practice" → served in individual task practice (default)
     #   "mock"     → served in full mock writing exam sessions only
     prompt_tag: str = Field(default="practice", pattern="^(practice|mock)$")
+    # Assigns a mock prompt to a specific exam slot (1, 2, …). Only
+    # meaningful when prompt_tag = 'mock'. None = unassigned.
+    exam_slot: int | None = Field(default=None, ge=1)
 
 
 class WritingPromptPatchIn(BaseModel):
@@ -136,4 +144,6 @@ class WritingPromptPatchIn(BaseModel):
     status: str | None = Field(None, pattern="^(draft|published|archived)$")
     sample_response_band12: str | None = None
     prompt_tag: str | None = Field(None, pattern="^(practice|mock)$")
+    # See WritingPromptIn.exam_slot
+    exam_slot: int | None = Field(default=None, ge=1)
 

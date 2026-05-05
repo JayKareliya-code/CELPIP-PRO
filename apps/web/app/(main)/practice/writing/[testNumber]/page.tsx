@@ -9,12 +9,22 @@
 // Renders WritingMockExamShell — a full-screen sequential session
 // (Task 1 → break → Task 2 → complete screen).
 // No PageWrapper — the shell manages its own full-screen layout.
+//
+// Z-index stack:
+//   Navbar:                  z-50   → covered by the canvas
+//   Canvas:                  z-[55] → covers the navbar completely
+//   WritingMockExamExitGuard z-[60] → exit button + ConfirmModal in root context
+//
+// The exit guard is rendered OUTSIDE the canvas so the Radix Dialog portal
+// doesn't conflict with the z-[55] stacking context, and the focused exit
+// button is never caught by Radix's aria-hidden backdrop sweep.
 // ─────────────────────────────────────────────────────────────────────────────
 
-import type { Metadata }          from "next";
-import { notFound }               from "next/navigation";
-import { WritingMockExamShell }   from "@/components/writing/WritingMockExamShell";
-import { MAX_PRACTICE_SLOTS }     from "@/lib/practice/config";
+import type { Metadata }            from "next";
+import { notFound }                 from "next/navigation";
+import { WritingMockExamShell }     from "@/components/writing/WritingMockExamShell";
+import { WritingMockExamExitGuard } from "@/components/writing/WritingMockExamExitGuard";
+import { MAX_PRACTICE_SLOTS }       from "@/lib/practice/config";
 
 interface PageProps {
   params: Promise<{ testNumber: string }>;
@@ -38,8 +48,16 @@ export default async function WritingMockExamPage({ params }: PageProps) {
   }
 
   return (
-    <div className="min-h-screen bg-canvas">
-      <WritingMockExamShell examNumber={n} />
-    </div>
+    <>
+      {/* Full-screen canvas — covers Navbar (z-50) and Footer */}
+      <div className="fixed inset-0 z-[55] bg-canvas overflow-y-scroll overscroll-none flex flex-col no-scrollbar">
+        <WritingMockExamShell examNumber={n} />
+      </div>
+
+      {/* Exit guard — outside the canvas so both the button and the Radix
+          Dialog portal are in the root stacking context. No aria-hidden
+          conflict, no z-index conflict with the canvas. */}
+      <WritingMockExamExitGuard />
+    </>
   );
 }

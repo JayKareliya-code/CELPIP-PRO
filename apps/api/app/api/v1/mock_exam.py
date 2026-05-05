@@ -22,14 +22,14 @@ from typing import Annotated
 import boto3
 import redis.asyncio as aioredis
 from botocore.config import Config as BotoCoreConfig
-from fastapi import APIRouter, Depends, HTTPException, Path, Request, Response
+from fastapi import APIRouter, Depends, HTTPException, Path, Query, Request, Response
 from pydantic import BaseModel, Field
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.config import settings
 from app.core.deps import get_db, get_redis_pool
-from app.core.quota import enforce_mock_exam_session_quota
+from app.core.quota import enforce_mock_exam_plan_access
 from app.core.rate_limit import limiter
 from app.core.security import get_current_user
 from app.models.mock_exam_attempt import MockExamTaskAttempt
@@ -118,9 +118,19 @@ async def list_mock_exam_prompts(
     db: DB,
     _user: CurrentUser,
     redis: Annotated[aioredis.Redis, Depends(get_redis_pool)],
+    slot: int = Query(..., ge=1, le=20, description="Exam slot number (1, 2, …)"),
 ) -> list[SpeakingTaskResponse]:
-    """Return all published+active speaking prompts tagged 'mock', in task order."""
-    prompts = await prompt_service.get_mock_exam_prompts(db)
+    """Return published+active speaking prompts for a specific mock exam slot.
+
+    Requires ?slot=N query param. Returns 404 when no prompts are assigned
+    to that slot yet so the frontend can show a 'coming soon' screen.
+    """
+    prompts = await prompt_service.get_mock_exam_prompts(db, slot)
+    if not prompts:
+        raise HTTPException(
+            status_code=404,
+            detail=f"Mock Exam {slot} is not available yet. Check back soon.",
+        )
     return [await _sign_prompt(p, redis) for p in prompts]
 
 
@@ -145,8 +155,9 @@ async def get_mock_task_upload_url(
     """
     session_id = _validate_session_id(session_id)
 
-    # Quota gate — charges a mock-exam slot only on the FIRST task of a new session.
-    await enforce_mock_exam_session_quota(user=user, session_id=session_id, db=db)
+    # Plan-access gate — starters cannot use mock exams.
+    # Pro/Ultra users get unlimited retries (no session counting).
+    await enforce_mock_exam_plan_access(user=user)
 
     s3_key = _mock_s3_key(str(user.id), session_id, task_number)
     try:
@@ -191,8 +202,8 @@ async def confirm_mock_task_upload(
     """
     session_id = _validate_session_id(session_id)
 
-    # Defense-in-depth: re-check quota in case the upload-url step was skipped.
-    await enforce_mock_exam_session_quota(user=user, session_id=session_id, db=db)
+    # Plan-access gate — mirrors the upload-url check.
+    await enforce_mock_exam_plan_access(user=user)
 
     # s3_key ownership check — prevent the client from referencing someone else's upload.
     expected_prefix = f"{MOCK_AUDIO_PREFIX}{user.id}/{session_id}/"

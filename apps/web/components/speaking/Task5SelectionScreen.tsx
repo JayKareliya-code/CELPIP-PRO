@@ -1,36 +1,30 @@
 // ─────────────────────────────────────────────────────────────────────────────
 // Task5SelectionScreen.tsx — PREP phase for Task 5 (Comparing & Persuading)
-//
-// Everything fits in one viewport — no scrolling required.
-// Layout (top → bottom, flex-col h-[calc(100vh-3.5rem)]):
-//   1. Compact header: timer ring + badge side by side
-//   2. Scenario prompt card (text-base, readable)
-//   3. Option cards row — flex-1 grows to fill remaining space
-//   4. Guidance line (one line, xs)
 // ─────────────────────────────────────────────────────────────────────────────
 
 "use client";
 
-import { CheckCircle2 }      from "lucide-react";
-import { TimerRing }         from "@/components/common/TimerRing";
-import { TimerDisplay }      from "@/components/common/TimerDisplay";
-import { cn }                from "@/lib/utils";
-import type { ChoiceOption } from "@/lib/types";
-
-// ── Props ─────────────────────────────────────────────────────────────────────
+import { CheckCircle2 }       from "lucide-react";
+import { TaskIdentityStrip }  from "@/components/speaking/TaskIdentityStrip";
+import { TimerCard }          from "@/components/speaking/TimerCard";
+import { TaskPromptBox }      from "@/components/speaking/TaskPromptBox";
+import { cn }                 from "@/lib/utils";
+import type { ChoiceOption }  from "@/lib/types";
 
 interface Task5SelectionScreenProps {
-  secondsLeft:      number;
-  totalPrepSeconds: number;
-  promptText:       string;
-  choiceOptions:    ChoiceOption[];
-  /** Currently selected option — controlled by the parent (practice or mock exam store). */
-  selectedChoice:   ChoiceOption | null;
-  /** Callback when the user taps an option card. */
-  onSelect:         (option: ChoiceOption) => void;
+  secondsLeft:          number;
+  totalPrepSeconds:     number;
+  totalResponseSeconds: number;
+  promptText:           string;
+  choiceOptions:        ChoiceOption[];
+  selectedChoice:       ChoiceOption | null;
+  onSelect:             (option: ChoiceOption) => void;
+  taskNumber?:          number;
+  taskTitle?:           string;
+  showInfoBar?:         boolean;
 }
 
-// ── Option Card ───────────────────────────────────────────────────────────────
+// ── Option card ───────────────────────────────────────────────────────────────
 
 function OptionCard({
   option,
@@ -48,144 +42,124 @@ function OptionCard({
       type="button"
       onClick={() => onSelect(option)}
       className={cn(
-        // flex-1 min-w-0: equal-width in the sm:flex-row; no flex-col so no vertical growth
-        "relative flex-1 min-w-0 rounded-2xl border-2 overflow-hidden",
-        "text-left transition-all duration-200",
-        "focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-500",
+        "relative flex-1 min-w-0 rounded-2xl border-2 overflow-hidden text-left",
+        "transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary",
         isSelected
-          ? "border-amber-500 bg-amber-500/10 shadow-[0_0_24px_rgba(245,158,11,0.25)]"
-          : "border-white/[0.10] bg-white/[0.03] hover:border-white/[0.20] hover:bg-white/[0.06]"
+          ? "border-primary/60 bg-white/[0.04]"
+          : "border-border/40 bg-white/[0.02] hover:border-border hover:bg-white/[0.04]",
       )}
     >
-      {/* Image — capped at 25 vh, object-contain = full image visible, no crop */}
       {option.image_url && (
         // eslint-disable-next-line @next/next/no-img-element
-        <img
-          src={option.image_url}
-          alt={option.name}
-          className="w-full max-h-[25vh] object-contain shrink-0"
-        />
+        <img src={option.image_url} alt={option.name}
+          className="w-full max-h-[22vh] object-contain" />
       )}
 
-      {/* Card text content */}
       <div className="relative p-4">
-        {/* Selected checkmark — inside the text zone, not overlapping the image */}
         {isSelected && (
-          <span className="absolute top-2 right-2">
-            <CheckCircle2 className="w-4 h-4 text-amber-400" />
-          </span>
+          <CheckCircle2 className="absolute top-3 right-3 w-4 h-4 text-primary" />
         )}
-
-        <h3 className={cn(
-          "text-base font-bold underline underline-offset-2 pr-6",
-          isSelected ? "text-amber-200" : "text-foreground"
-        )}>
-          {option.name}
-        </h3>
-
-        <ul className="space-y-0.5">
-          {option.details.map((d, i) => (
-            <li key={i} className="text-sm leading-snug">
-              <span className="font-medium text-foreground/70">{d.label}:</span>{" "}
-              <span className="text-canvas-subtle">{d.value}</span>
-            </li>
-          ))}
-        </ul>
-
-        {/* Letter badge */}
-        <div className={cn(
-          "absolute bottom-2 right-2 w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold",
-          isSelected ? "bg-amber-500 text-white" : "bg-white/[0.06] text-white/40"
-        )}>
-          {index === 0 ? "A" : "B"}
+        <div className="flex items-start gap-2 pr-6">
+          {/* Letter badge */}
+          <span className={cn(
+            "shrink-0 mt-0.5 w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold",
+            isSelected ? "bg-primary text-primary-foreground" : "bg-white/[0.06] text-canvas-subtle",
+          )}>
+            {index === 0 ? "A" : "B"}
+          </span>
+          <div className="min-w-0">
+            <h3 className={cn(
+              "text-sm font-bold mb-1.5",
+              isSelected ? "text-primary" : "text-canvas-text",
+            )}>
+              {option.name}
+            </h3>
+            <ul className="space-y-1">
+              {option.details.map((d, i) => (
+                <li key={i} className="text-xs leading-snug flex gap-1">
+                  <span className="text-canvas-text/90 font-semibold shrink-0">{d.label}:</span>
+                  <span className="text-canvas-text/75">{d.value}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
         </div>
       </div>
     </button>
   );
 }
 
-// ── Main Component ────────────────────────────────────────────────────────────
+// ── Main ─────────────────────────────────────────────────────────────────────
 
 export function Task5SelectionScreen({
   secondsLeft,
   totalPrepSeconds,
+  totalResponseSeconds,
   promptText,
   choiceOptions,
   selectedChoice,
   onSelect,
+  taskNumber = 5,
+  taskTitle  = "Comparing and Persuading",
+  showInfoBar = true,
 }: Task5SelectionScreenProps) {
-
   const selectedIndex = selectedChoice
-    ? choiceOptions.findIndex((o) => o.name === selectedChoice.name)
+    ? choiceOptions.findIndex(o => o.name === selectedChoice.name)
     : -1;
 
-  const hasSelected = Boolean(selectedChoice);
-  const isUrgent    = secondsLeft <= 10;
-
   return (
-    // h-[calc(100vh-3.5rem)] + overflow-hidden → fills the viewport below the sticky navbar; no scroll
-    <div className="flex flex-col min-h-[calc(100vh-3.5rem)] overflow-y-auto bg-canvas px-5 py-4 gap-4 items-center justify-start sm:h-[calc(100vh-3.5rem)] sm:overflow-hidden sm:justify-center sm:px-6 sm:py-6">
+    <div className="flex flex-col flex-1">
+      <div className="flex-1 flex flex-col items-center justify-center gap-3 px-4 sm:px-6 lg:px-8 py-8 w-full max-w-5xl mx-auto">
 
-      {/* ── 1. Compact header ─────────────────────────────────────────────── */}
-      <div className="flex items-center gap-4 w-full max-w-3xl shrink-0">
-
-        {/* Timer ring: shrunk to 72 px so header stays compact */}
-        <div className="relative flex items-center justify-center shrink-0">
-          <TimerRing
-            secondsLeft={secondsLeft}
-            totalSeconds={totalPrepSeconds}
-            sizePx={72}
+        {/* Task identity strip — inline, above scenario card */}
+        {showInfoBar && (
+          <TaskIdentityStrip
+            taskNumber={taskNumber}
+            taskTitle={taskTitle}
+            prepSeconds={totalPrepSeconds}
+            responseSeconds={totalResponseSeconds}
+            className="w-full"
           />
-          <div className="absolute inset-0 flex items-center justify-center">
-            <TimerDisplay
-              secondsLeft={secondsLeft}
-              variant="dark"
-              size="sm"
-              pulseWhenCritical
-            />
-          </div>
+        )}
+
+        {/* Scenario */}
+        <TaskPromptBox
+          promptText={promptText}
+          variant="overlay"
+          label="Your scenario"
+          className="w-full"
+        />
+
+        {/* Urgency — no emoji, just text */}
+        {secondsLeft <= 10 && !selectedChoice && (
+          <p className="text-xs text-danger font-medium">
+            Select an option before time runs out
+          </p>
+        )}
+
+        {/* Option cards */}
+        <div className="flex flex-col sm:flex-row gap-3 w-full">
+          {choiceOptions.map((option, i) => (
+            <OptionCard key={option.name} option={option} index={i}
+              isSelected={selectedIndex === i} onSelect={onSelect} />
+          ))}
         </div>
 
-        {/* Badge + urgent warning */}
-        <div className="flex flex-col gap-1">
-          <span className="text-xs font-semibold tracking-[0.2em] uppercase text-primary px-3 py-1 rounded-full border border-primary/30 bg-primary/10 w-fit select-none">
-            Selection Time
-          </span>
-          {isUrgent && !hasSelected && (
-            <p className="text-xs text-amber-400 font-medium animate-pulse">
-              ⚡ Select an option before time runs out!
-            </p>
-          )}
-        </div>
-      </div>
+        {/* Timer */}
+        <TimerCard
+          secondsLeft={secondsLeft}
+          totalSeconds={totalPrepSeconds}
+          label="Selection Time"
+          className="w-full"
+        />
 
-      {/* ── 2. Scenario prompt ────────────────────────────────────────────── */}
-      <div className="w-full max-w-3xl shrink-0 rounded-xl border border-white/[0.08] bg-white/[0.03] px-4 py-3">
-        <p className="text-[10px] font-semibold tracking-[0.15em] uppercase text-canvas-subtle/50 mb-1 select-none">
-          Your scenario
+        {/* Guidance */}
+        <p className="text-xs text-canvas-subtle/50 text-center">
+          {selectedChoice
+            ? `Chose "${selectedChoice.name}". Use the remaining time to prepare your arguments.`
+            : "Tap the option you think is best. You can change your selection before time runs out."}
         </p>
-        <p className="text-base leading-relaxed text-canvas-text">{promptText}</p>
       </div>
-
-      {/* ── 3. Option cards — natural height, shrink-0 so they don't blow up ─── */}
-      <div className="flex flex-col sm:flex-row gap-3 w-full max-w-3xl shrink-0">
-        {choiceOptions.map((option, i) => (
-          <OptionCard
-            key={i}
-            option={option}
-            index={i}
-            isSelected={selectedIndex === i}
-            onSelect={option => onSelect(option)}
-          />
-        ))}
-      </div>
-
-      {/* ── 4. Guidance — single line at bottom ──────────────────────────── */}
-      <p className="text-xs text-canvas-subtle/60 text-center shrink-0">
-        {hasSelected
-          ? `✓ You chose "${selectedChoice!.name}". Use the remaining time to prepare.`
-          : "Tap the option you think is best. The timer advances automatically."}
-      </p>
     </div>
   );
 }

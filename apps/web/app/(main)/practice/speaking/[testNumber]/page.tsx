@@ -38,9 +38,10 @@ export default async function MockExamPage({ params }: PageProps) {
   // We intentionally keep this page minimal (no server-side data) so it stays
   // fast and doesn't block on auth during the page load.
   return (
-    // Full-screen dark layout — no nav sidebar, same as individual task practice
-    <div className="min-h-screen bg-canvas">
-      <MockExamShell />
+    // Full-screen canvas — sits above the site Navbar (z-50) so the exam
+    // bar is always visible without the navbar interfering.
+    <div className="fixed inset-0 z-[55] bg-canvas overflow-y-scroll overscroll-none flex flex-col no-scrollbar">
+      <MockExamShell slotNumber={n} />
     </div>
   );
 }

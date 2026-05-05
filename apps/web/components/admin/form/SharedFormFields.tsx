@@ -4,9 +4,10 @@
 // components/admin/form/SharedFormFields.tsx
 // Fields common to both speaking and writing prompts:
 // task number, title, slug, topic, prompt text, status, sort order,
-// band-12 sample response, active toggle.
+// band-12 sample response, active toggle, prompt pool, exam slot.
 // ─────────────────────────────────────────────────────────────────────────────
 
+import { useState } from "react";
 import { Field }    from "@/components/admin/shared/Field";
 import { inputCls } from "@/components/admin/shared/inputCls";
 import { cn }       from "@/lib/utils";
@@ -55,6 +56,13 @@ interface Props {
 
 export function SharedFormFields({ skill, initial, lockedTaskNumber }: Props) {
   const isLocked = lockedTaskNumber !== undefined;
+
+  // Track the currently selected pool so we can show/hide exam_slot
+  const initialTag = (initial as SpeakingPrompt & { prompt_tag?: string })?.prompt_tag ?? "practice";
+  const [selectedTag, setSelectedTag] = useState<string>(initialTag);
+
+  const initialSlot = (initial as SpeakingPrompt & { exam_slot?: number | null })?.exam_slot ?? null;
+
   return (
     <>
       {/* Task number — hidden when context-locked */}
@@ -150,6 +158,7 @@ export function SharedFormFields({ skill, initial, lockedTaskNumber }: Props) {
                   value={opt.value}
                   defaultChecked={defaultChecked}
                   className="sr-only"
+                  onChange={() => setSelectedTag(opt.value)}
                 />
                 <span className="text-sm font-semibold">{opt.label}</span>
                 <span className="text-xs text-subtle">{opt.description}</span>
@@ -158,6 +167,34 @@ export function SharedFormFields({ skill, initial, lockedTaskNumber }: Props) {
           })}
         </div>
       </Field>
+
+      {/* Exam Slot — only visible when prompt_tag = "mock" */}
+      {selectedTag === "mock" && (
+        <Field
+          label="Exam Slot"
+          htmlFor="exam_slot"
+          hint="Assign this prompt to a specific exam slot (1, 2, …). Prompts in different slots are kept completely separate — users will never see questions from another slot."
+        >
+          <select
+            id="exam_slot"
+            name="exam_slot"
+            defaultValue={initialSlot ?? ""}
+            className={inputCls}
+          >
+            <option value="">— Unassigned —</option>
+            {[1, 2, 3, 4, 5].map((n) => (
+              <option key={n} value={n}>
+                Exam Slot {n}
+              </option>
+            ))}
+          </select>
+        </Field>
+      )}
+
+      {/* Hidden field so FormData always contains exam_slot, even when practice is selected */}
+      {selectedTag !== "mock" && (
+        <input type="hidden" name="exam_slot" value="" />
+      )}
 
       <div className="flex items-center gap-2">
         <input id="is_active" name="is_active" type="checkbox"

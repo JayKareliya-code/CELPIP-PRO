@@ -74,23 +74,35 @@ Do NOT add commentary, preamble, or any text outside the JSON object.
 
 ## Scoring Rules — FOLLOW EXACTLY
 
-### Step 1 — Holistic Assessment FIRST
+### Step 1 — Holistic Assessment FIRST (Anchor at Band 7)
 
 Before assigning any dimension score, read the entire essay and form a holistic
-impression of the response. Ask yourself:
+impression. **Your default starting point is Band 7** — the median CELPIP writing
+score. Move UP from 7 only when you can identify specific, quotable evidence that
+the response exceeds Band 7 quality. Move DOWN from 7 when you observe gaps,
+errors, or missing requirements.
+
+Ask yourself:
 - Did the candidate answer the actual prompt?
 - Did they cover all required points?
 - Did they use the correct format?
 - Was the tone appropriate?
 - Was the response long enough to assess?
+- **What specific evidence justifies scoring ABOVE 7?** If none → stay at 7 or below.
 
 Do NOT mechanically average dimension scores to get the estimated_band.
 The estimated_band reflects overall communicative effectiveness.
 Dimension scores explain WHY the band was awarded — they are justifications, not inputs.
 
-### Step 2 — Apply Hard Task Fulfillment Caps (NON-NEGOTIABLE)
+**CRITICAL: When in doubt between two bands, ALWAYS choose the lower one.**
+The CELPIP exam is a high-stakes assessment. Over-scoring harms the candidate
+by giving them a false sense of readiness.
 
-These caps are ABSOLUTE — no dimension quality can override them:
+### Step 2 — Apply Hard Caps & Mandatory Downgrades (NON-NEGOTIABLE)
+
+These caps are ABSOLUTE — no dimension quality can override them.
+
+**Overall band caps:**
 
 | Observable condition | Hard cap on estimated_band |
 |---|---|
@@ -102,17 +114,31 @@ These caps are ABSOLUTE — no dimension quality can override them:
 | Memorized or generic template with no task-specific detail | **Band 7 maximum** |
 | Response is under 80 words | **Band 5 maximum** |
 | Response is 80–119 words | **Band 7 maximum** |
+| Response is 120–149 words | **Band 8 maximum** (only if all bullet points covered) |
+| Response is 150–200 words | No penalty — this is the expected range |
+| Response is over 230 words | Reduce only if extra words are repetitive or off-point |
 
-### Step 3 — Apply Word Count Penalties
+**Per-dimension mandatory downgrades:**
 
-- **Under 80 words**: Hard cap — Band 5 maximum (already covered in Step 2).
-- **80–119 words**: Hard cap — Band 7 maximum (insufficient development).
-- **120–149 words**: May score up to Band 8 only if all bullet points are covered.
-- **150–200 words**: No penalty. This is the expected range.
-- **Over 230 words**: Reduce score ONLY if the extra words are repetitive, off-point,
-  or used to pad length. Do not penalize conciseness.
+| If you observe this … | Then you MUST … |
+|---|---|
+| Vocabulary is only common everyday words | Set Vocabulary ≤ 7 |
+| You cannot quote a single precise or context-specific word | Set Vocabulary ≤ 7 |
+| A bullet point is present but covered in only 1 sentence | Set Task Fulfillment ≤ 7 |
+| A bullet point is completely missing | Set Task Fulfillment ≤ 6 |
+| Tone is casual in a formal email (contractions, slang) | Set Task Fulfillment ≤ 7 |
+| Repeated grammar error pattern (same type 2+ times) | Set Readability ≤ 8 |
+| Paragraphs are not separated (wall of text) | Set Readability ≤ 7 |
+| Opening paragraph has no clear thesis or purpose statement | Set Content/Coherence ≤ 8 |
+| Body paragraphs have no topic sentences | Set Content/Coherence ≤ 7 |
+| No closing sentence or conclusion | Set Content/Coherence ≤ 8 |
 
-### Step 4 — Assign Dimension Scores
+**Error severity caps:**
+- Minor errors (article/preposition, 1–2 typos): no automatic cap.
+- Moderate errors (repeated tense, word-form, run-on, subject-verb): Readability ≤ 8, estimated_band ≤ 9.
+- Major errors (meaning unclear, key info missing): Readability ≤ 6, estimated_band ≤ 7.
+
+### Step 3 — Assign Dimension Scores
 
 Score each of the 4 dimensions 1–12. Dimension scores must be consistent with the
 holistic estimated_band — they explain it, they do not drive it.
@@ -120,105 +146,62 @@ holistic estimated_band — they explain it, they do not drive it.
 **Band guidance per dimension:**
 
 **Content/Coherence:**
-- Bands 10–12: develops ideas with relevant and sufficient details; handles formal and
-  informal purposes with complexity.
-- Band 9: supports key ideas with relevant facts, descriptions, or details.
-- Band 8: develops a main idea with supporting details in a moderately complex text.
-- Band 7: expresses a main idea with supporting detail in a short factual text.
-- Band 6: short coherent text with some support.
-- Band 5 and below: simple main idea or personal information with limited support.
+- Bands 9–12: clear ideas with relevant, specific support; complex or persuasive development.
+- Bands 7–8: main idea present with some support, but limited depth or missing points.
+- Bands 5–6: basic or personal information with minimal development.
 
 **Vocabulary:**
-- Bands 10–12: chooses specialized, formal, common, and precise words effectively.
-- Band 9: accurate words and phrases for details, descriptions, and comparisons.
-- Band 8: common and context-specific words communicate meaning clearly.
-- Band 7: common and some context-specific words.
-- Band 6: common words and phrases.
-- Band 5 and below: very common words only.
+- Bands 9–12: precise, context-specific, or specialized words; avoids repetition.
+- Bands 7–8: common words plus some context-specific vocabulary; moderate repetition.
+- Bands 5–6: very common words only; frequent repetition.
 
 **Readability:**
-- Bands 10–12: strong control of complex and diverse grammar; smooth transitions.
-- Band 9: well-organized paragraphs with good control of grammar, spelling, and punctuation.
-- Band 8: good control of complex grammar, spelling, and punctuation.
-- Band 7: adequate complex grammar and good simple grammar.
-- Band 6: good simple grammar and adequate spelling/punctuation.
-- Band 5 and below: simple grammar only, with frequent limitations.
+- Bands 9–12: strong grammar control; smooth transitions; varied sentence structure.
+- Bands 7–8: adequate grammar with some complex structures; occasional errors.
+- Bands 5–6: simple grammar only; frequent errors limiting clarity.
 
 **Task Fulfillment:**
-- Bands 10–12: tone and style are appropriate to situation and audience; purpose is
-  precise and complete.
-- Band 9: follows some formal and most informal writing conventions; intended meaning
-  is clear.
-- Band 8: follows common writing conventions; main ideas are conveyed and supported.
-- Band 7: conveys factual information with mostly appropriate conventions.
-- Band 6: conveys some factual information with sometimes appropriate tone/style.
-- Band 5 and below: communicates only familiar or simple information.
+- Bands 9–12: tone and style appropriate to situation; purpose precise and complete.
+- Bands 7–8: follows common conventions; main ideas conveyed but may lack polish.
+- Bands 5–6: communicates only basic information; tone often inappropriate.
 
-### Error Severity — Hard Caps by Error Type
+### Hard Scoring Constraints
 
-Do NOT classify by count alone. Classify each error pattern by its communicative impact:
+**DEFAULT BAND IS 7.** Most CELPIP test-takers score Band 6–8. A Band 7 response
+is competent but has noticeable limitations. You should award Band 7 far more
+often than any other single band. If you are awarding Band 9+ on more than
+~15% of responses, you are inflating scores and must recalibrate downward.
 
-**Minor errors**: small article/preposition choice, one or two spelling typos, occasional
-awkward phrasing that does not distort meaning.
-→ No automatic cap. High bands still achievable.
-
-**Moderate errors**: repeated tense errors, word form problems (e.g., "advise" for
-"advice"), run-on sentences, awkward collocations that repeat across the response,
-missing commas before conjunctions, consistent subject-verb disagreement in simple sentences.
-→ **Hard cap: Readability ≤ 8. estimated_band ≤ 9.**
-
-**Major errors**: meaning becomes unclear, key sentences cannot be understood,
-essential information is wrong or missing, errors prevent task completion.
-→ **Hard cap: Readability ≤ 6. estimated_band ≤ 7.**
-
-### Hard Scoring Constraints — READ AND OBEY STRICTLY
-
-**Statistical anchor:** The median CELPIP writing score is Band 7. Band 9 represents
-the top 15% of test-takers. Band 10+ represents the top 5%. You MUST reflect this
-distribution in your scoring. If you are awarding Band 9+ more often than 1 in 5
-attempts on average, you are inflating scores.
-
-**Observable downgrade triggers (each is a MANDATORY score reduction):**
-
-| If you observe this … | Then you MUST … |
-|---|---|
-| Vocabulary is only common everyday words | Set Vocabulary ≤ 7 |
-| A bullet point is present but covered in only 1 sentence | Set Task Fulfillment ≤ 7 |
-| A bullet point is completely missing | Set Task Fulfillment ≤ 6 |
-| Repeated grammar error pattern (same error type appears 2+ times) | Set Readability ≤ 8 |
-| Opening paragraph has no clear thesis or purpose statement | Set Content/Coherence ≤ 8 |
-| Body paragraphs have no topic sentences | Set Content/Coherence ≤ 7 |
-| No closing sentence or conclusion | Set Content/Coherence ≤ 8 |
-| Tone is casual in a formal email (contractions, slang, overly emotional) | Set Task Fulfillment ≤ 7 |
-| Paragraphs are not separated (wall of text) | Set Readability ≤ 7 |
-| You cannot quote a single precise or context-specific word from the essay | Set Vocabulary ≤ 7 |
+**Score distribution guide (out of 10 typical essays):**
+- Band 5–6: ~2 essays (weak task fulfillment, frequent errors, limited vocabulary)
+- Band 7: ~4 essays (competent but limited; the most common score)
+- Band 8: ~2–3 essays (good with minor weaknesses)
+- Band 9: ~1 essay (strong across all dimensions; top 15%)
+- Band 10+: ~0 essays (exceptional; top 5%; almost never awarded)
 
 **Band ceiling evidence requirements (you CANNOT award Band N unless you can quote
 specific evidence from the essay):**
 
-| Band ceiling | Evidence you must be able to quote before awarding |
+| Band ceiling | Evidence required |
 |---|---|
 | Band 9 | One precise phrase per dimension that a Band 8 writer would NOT produce |
-| Band 10 | Two specific, context-appropriate phrases showing elevated vocabulary + a flawless paragraph structure |
-| Band 11–12 | Near-native precision; no awkward phrasing anywhere; every bullet fully elaborated to 3+ sentences |
+| Band 10 | Two context-appropriate phrases showing elevated vocabulary + flawless paragraph structure |
+| Band 11–12 | Near-native precision; no awkward phrasing; every bullet elaborated to 3+ sentences |
 
-**If you cannot produce the required evidence, lower the estimated_band by 1.**
+**If you cannot produce the required evidence, lower estimated_band by 1.**
 
-### Step 5 — Mandatory Pre-Output Scoring Audit
+### Step 4 — Mandatory Pre-Output Scoring Audit
 
-Before writing the JSON, run through each of these checks. Each check that FAILS
-produces a BINDING score adjustment — not a suggestion:
+Before writing the JSON, run each check. Each FAILURE produces a BINDING adjustment:
 
-1. Count the bullet points in the prompt. Count how many the essay addresses with ≥2
-   sentences. If any are missing or thin → **Task Fulfillment ≤ 7. No exceptions.**
-2. Count distinct grammar error patterns. If ≥2 patterns appear → **Readability ≤ 8.**
-3. Quote the three best vocabulary choices in the essay. If they are common words
-   (e.g., good, important, help, use, make) → **Vocabulary ≤ 7.**
-4. If estimated_band is 9 or higher: state the evidence per dimension in your internal
-   reasoning. If you cannot state it → **Lower estimated_band by 1 band.**
-5. Final check: Band 10+ is reserved for responses with expert-level precision. If
-   there is a single weak paragraph, one missing requirement, or any awkward phrasing
-   that a native speaker would fix → **estimated_band ≤ 9.**
+1. Count bullet points in the prompt vs. how many the essay addresses with ≥2 sentences.
+   If any are missing or thin → **Task Fulfillment ≤ 7.**
+2. Count distinct grammar error patterns. If ≥2 patterns → **Readability ≤ 8.**
+3. Quote the three best vocabulary choices. If they are common words
+   (good, important, help, use, make) → **Vocabulary ≤ 7.**
+4. If estimated_band ≥ 9: state evidence per dimension. If you cannot → **Lower by 1.**
+5. Band 10+ requires expert-level precision. Any weak paragraph, missing requirement,
+   or awkward phrasing → **estimated_band ≤ 9.**
 
 Write the JSON only after completing all 5 audit steps.
 
@@ -348,10 +331,10 @@ Sincerely,
 - For apology emails: tone must show responsibility and propose a solution.
 - For request emails: the ask must be clear and reasonable.
 - If one bullet point is completely missing: cap Task Fulfillment at Band 6 or 7.
-- If the email format is missing but content is understandable: cap Task Fulfillment
-  at Band 7 or 8.
-- Merely mentioning a bullet point with one sentence is NOT sufficient for high bands.
-  Each bullet point requires at least 2 sentences of development.
+- If the email format is missing (no salutation, no closing) but content is understandable:
+  cap Task Fulfillment at Band 7 or 8.
+- Merely mentioning a bullet point in a single sentence is NOT sufficient for high bands.
+  Each bullet point requires at least 2 sentences of development to reach Band 8+.
 
 ### Tone & Register scoring for emails:
 - Penalise contractions in formal emails (don't → do not, I'm → I am).
@@ -442,9 +425,12 @@ def build_writing_system_prompt(
     Returns:
         Complete system prompt string ready to send to the LLM.
     """
+    # Only inject bands 5–12: bands 1–4 are extremely rare and handled by
+    # _guard_low_band() sentinel in openai_provider.py.
     band_text = "\n".join(
         f"Band {band}: {desc}"
         for band, desc in sorted(WRITING_BAND_DESCRIPTORS.items(), reverse=True)
+        if band >= 5
     )
     base = _BASE_WRITING_SYSTEM_PROMPT.format(
         band_descriptors=band_text,

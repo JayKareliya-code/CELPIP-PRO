@@ -67,8 +67,8 @@ export function WordCounter({ count, minWords, maxWords, className }: WordCounte
           ? `/ max ${maxWords}`
           : isReady
           ? maxWords !== null
-            ? `/ ${maxWords} max ✓`
-            : `words ✓`
+            ? <><span aria-hidden="true">/ {maxWords} max </span><span aria-hidden="true">✓</span></>
+            : <><span aria-hidden="true">words </span><span aria-hidden="true">✓</span></>
           : `/ min ${minWords}`}
       </span>
 

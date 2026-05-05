@@ -37,41 +37,28 @@ import { BreadcrumbNav }    from "@/components/layout/BreadcrumbNav";
 import { useCurrentUser }   from "@/lib/hooks/useCurrentUser";
 import { useQuota }         from "@/lib/hooks/useQuota";
 import { cn }               from "@/lib/utils";
+import { formatShortDuration } from "@/lib/utils";
 import { API_V1, api, authHeaders } from "@/lib/api";
 import {
   PRO_PLAN_LIMITS,
   ULTRA_PLAN_LIMITS,
 } from "@/lib/constants";
+import {
+  SPEAKING_TASK_TITLES,
+  SPEAKING_TASK_DESCRIPTIONS,
+} from "@/lib/speaking-constants";
 import type { SpeakingTask, Difficulty } from "@/lib/types";
 
 /** Task numbers that use a scene image (Tasks 3, 4, 8). */
 const IMAGE_TASKS = new Set([3, 4, 8]);
 
+// TASK_LABELS and TASK_DESCRIPTIONS are imported from @/lib/speaking-constants
+// (single source of truth — no local duplicates).
+//
+// Note: TASK_LABELS in this file previously formatted as "Task N — Title"; we
+// now build that format inline where needed to avoid a separate derived map.
+
 // ── Helpers ───────────────────────────────────────────────────────────────────
-
-const TASK_LABELS: Record<number, string> = {
-  0: "Practice Task",
-  1: "Task 1 — Giving Advice",
-  2: "Task 2 — Talking about a Personal Experience",
-  3: "Task 3 — Describing a Scene",
-  4: "Task 4 — Making Predictions",
-  5: "Task 5 — Comparing and Persuading",
-  6: "Task 6 — Dealing with a Difficult Situation",
-  7: "Task 7 — Expressing Opinions",
-  8: "Task 8 — Describing an Unusual Situation",
-};
-
-const TASK_DESCRIPTIONS: Record<number, string> = {
-  0: "A short warm-up task to get comfortable speaking. Not scored in the real exam.",
-  1: "You will hear a situation and must give relevant, helpful advice.",
-  2: "Talk about a personal event, challenge, or memorable experience from your life.",
-  3: "Look at an image and describe everything you see in detail.",
-  4: "Study three images and make reasonable predictions about future outcomes.",
-  5: "Compare two options, state your preference, then argue for the other side.",
-  6: "Respond to a real-life scenario — leave a message, resolve a conflict, or ask for help.",
-  7: "Share and defend your opinion on a current issue using clear reasoning.",
-  8: "Describe an unusual scene, explain what led to it, and predict what happens next.",
-};
 
 const DIFFICULTY_CONFIG: Record<Difficulty, { label: string; classes: string }> = {
   easy:   { label: "Easy",   classes: "bg-emerald-900/40 text-emerald-400 border-emerald-800/50" },
@@ -83,7 +70,7 @@ const BADGE_BASE =
   "inline-flex items-center rounded-full border px-2 py-0.5 text-xs font-medium leading-none select-none";
 
 function formatTime(secs: number): string {
-  return secs < 60 ? `${secs}s` : `${Math.floor(secs / 60)}m`;
+  return formatShortDuration(secs);
 }
 
 // ── Props ─────────────────────────────────────────────────────────────────────
@@ -180,13 +167,13 @@ function PromptCard({
           <div className="flex flex-1 min-h-[180px]">
 
             {/* Left – scene image pane (fixed-width: 38%) */}
-            <div className="relative w-[38%] shrink-0 self-stretch">
+            <div className="relative w-[38%] shrink-0 self-stretch min-h-[160px] max-h-[220px] overflow-hidden">
               {imageUrl ? (
                 // eslint-disable-next-line @next/next/no-img-element
                 <img
                   src={imageUrl}
                   alt="Scene"
-                  className="absolute inset-0 w-full h-full object-cover group-hover:opacity-90 transition-opacity"
+                  className="absolute inset-0 w-full h-full object-contain bg-white/[0.03] blur-sm scale-105 transition-[filter] duration-300"
                   draggable={false}
                 />
               ) : (
@@ -331,7 +318,7 @@ export function TaskPromptsFolder({ taskNumber, prompts }: TaskPromptsFolderProp
   const { getToken } = useAuth();
   const plan     = user?.plan ?? "starter";
 
-  const { speaking_used_per_task } = useQuota("speaking");
+  const { speaking_used_per_task, isLoading: quotaLoading } = useQuota("speaking");
 
   // ── Fetch which prompts this user has already attempted ───────────────────
   const { data: attemptedPromptIds } = useQuery<string[]>({
@@ -359,8 +346,11 @@ export function TaskPromptsFolder({ taskNumber, prompts }: TaskPromptsFolderProp
   const isBonusRetry = attemptsLimit !== null && used >= attemptsLimit;
   const isStarter    = plan === "starter";
 
-  const taskLabel       = TASK_LABELS[taskNumber] ?? `Task ${taskNumber}`;
-  const taskDescription = TASK_DESCRIPTIONS[taskNumber] ?? "";
+  // Build a "Task N — Title" label for the page header.
+  const taskLabel       = taskNumber === 0
+    ? "Practice Task"
+    : `Task ${taskNumber} — ${SPEAKING_TASK_TITLES[taskNumber] ?? `Task ${taskNumber}`}`;
+  const taskDescription = SPEAKING_TASK_DESCRIPTIONS[taskNumber] ?? "";
   const isImageTask     = IMAGE_TASKS.has(taskNumber);
 
   // How many "coming soon" placeholders to show?
@@ -473,8 +463,15 @@ export function TaskPromptsFolder({ taskNumber, prompts }: TaskPromptsFolderProp
         </div>
       )}
 
-      {/* ── Prompts ────────────────────────────────────────────────────────── */}
-      {!hasAnyPrompts ? (
+      {/* ── Prompts ─────────────────────────────────────────────────────────── */}
+      {/* Gate on quotaLoading to prevent stale-quota UI flash:
+          While quota data is in-flight, 'used' defaults to 0, which would
+          briefly show non-bonus CTA buttons to exhausted-quota users. */}
+      {quotaLoading ? (
+        <div className="rounded-xl border border-white/[0.07] bg-surface/50 p-8 flex items-center justify-center">
+          <span className="text-sm text-subtle animate-pulse">Loading…</span>
+        </div>
+      ) : !hasAnyPrompts ? (
         /* Full empty state */
         <div className="rounded-xl border border-dashed border-white/10 bg-surface/50 p-12 text-center space-y-3">
           <div className="w-12 h-12 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center mx-auto">

@@ -20,6 +20,17 @@ export function formatTime(totalSeconds: number): string {
 }
 
 /**
+ * Formats seconds into a compact short-form label.
+ * e.g. 30 → "30s" | 60 → "1m" | 90 → "1m"
+ *
+ * Used on task cards and badges where MM:SS would be too wide.
+ * Use formatTime() when you need precision (exam timers, etc.).
+ */
+export function formatShortDuration(seconds: number): string {
+  return seconds < 60 ? `${seconds}s` : `${Math.floor(seconds / 60)}m`;
+}
+
+/**
  * Counts words in a string. Returns 0 for empty or whitespace-only input.
  */
 export function countWords(text: string): number {

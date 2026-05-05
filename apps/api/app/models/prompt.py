@@ -65,6 +65,12 @@ class SpeakingPrompt(Base, TimestampMixin):
         String(16), nullable=False, server_default="practice"
     )
 
+    # Exam slot assignment (migration 0016)
+    # NULL  → not assigned to a specific exam slot (practice prompts)
+    # 1, 2, … → assigned to that specific mock exam slot only
+    # Only meaningful when prompt_tag = 'mock'.
+    exam_slot: Mapped[int | None] = mapped_column(Integer, nullable=True)
+
     __table_args__ = (
         CheckConstraint("task_number BETWEEN 0 AND 8", name="check_speaking_task_number"),
         CheckConstraint("difficulty IN ('easy', 'medium', 'hard')", name="check_speaking_difficulty"),
@@ -113,6 +119,9 @@ class WritingPrompt(Base, TimestampMixin):
     prompt_tag: Mapped[str] = mapped_column(
         String(16), nullable=False, server_default="practice"
     )
+
+    # Exam slot assignment (migration 0016) — mirrors SpeakingPrompt.exam_slot
+    exam_slot: Mapped[int | None] = mapped_column(Integer, nullable=True)
 
     __table_args__ = (
         CheckConstraint("task_number IN (1, 2)", name="check_writing_task_number"),

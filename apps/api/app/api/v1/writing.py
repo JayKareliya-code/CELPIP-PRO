@@ -1,7 +1,7 @@
 """Writing routes — tasks listing and attempt lifecycle."""
 import uuid
 from typing import Annotated
-from fastapi import APIRouter, Depends, Query, Request, Response
+from fastapi import APIRouter, Depends, HTTPException, Query, Request, Response
 from pydantic import BaseModel
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -40,14 +40,20 @@ router = APIRouter()
 async def list_writing_mock_prompts(
     db: Annotated[AsyncSession, Depends(get_db)],
     _user: Annotated[User, Depends(get_current_user)],
+    slot: int = Query(..., ge=1, le=20, description="Exam slot number (1, 2, …)"),
 ) -> list[WritingTaskResponse]:
-    """Return published+active writing prompts tagged 'mock' for the mock exam.
+    """Return published+active writing prompts for a specific mock exam slot.
 
-    Returns one prompt per task number (Task 1 + Task 2), sorted by task_number
-    then sort_order — mirrors GET /mock-exam/prompts for speaking.
+    Requires ?slot=N query param. Returns 404 when no prompts are assigned
+    to that slot yet so the frontend can show a 'coming soon' screen.
     """
-    prompts = await prompt_service.get_writing_mock_tasks(db)
-    # De-duplicate: one per task_number (lowest sort_order = first in list)
+    prompts = await prompt_service.get_writing_mock_tasks(db, slot)
+    if not prompts:
+        raise HTTPException(
+            status_code=404,
+            detail=f"Writing Mock Exam {slot} is not available yet. Check back soon.",
+        )
+    # De-duplicate: one per task_number (lowest sort_order wins)
     seen: set[int] = set()
     result = []
     for p in sorted(prompts, key=lambda x: (x.task_number, x.sort_order)):

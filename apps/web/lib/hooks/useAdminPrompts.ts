@@ -76,6 +76,9 @@ export interface SpeakingPromptPayload {
    * "mock" = full mock exam sessions only.
    */
   prompt_tag?:                 "practice" | "mock";
+  /** Exam slot number (1, 2, …). Only meaningful when prompt_tag='mock'.
+   *  Prompts in different slots are fully isolated. */
+  exam_slot?:                  number | null;
 }
 
 export interface WritingPromptPayload {
@@ -98,6 +101,8 @@ export interface WritingPromptPayload {
   is_active?:                boolean;
   status?:                   "draft" | "published" | "archived";
   prompt_tag?:               "practice" | "mock";
+  /** Exam slot number (1, 2, …). Only meaningful when prompt_tag='mock'. */
+  exam_slot?:                number | null;
 }
 
 // â”€â”€ Internal helpers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€

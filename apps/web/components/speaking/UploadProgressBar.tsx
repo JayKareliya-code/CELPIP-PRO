@@ -5,6 +5,8 @@
 // Progress is driven by useSpeakingAttempt (simulated in Phase 1, real in Phase 2).
 // ─────────────────────────────────────────────────────────────────────────────
 
+"use client";
+
 import { Upload } from "lucide-react";
 import { cn }     from "@/lib/utils";
 
@@ -26,7 +28,7 @@ export function UploadProgressBar({ progress, className }: UploadProgressBarProp
   return (
     <div
       className={cn(
-        "flex flex-col items-center justify-center gap-8 min-h-screen bg-canvas px-6",
+        "flex flex-col items-center justify-center gap-8 h-full bg-canvas px-6",
         className
       )}
     >

@@ -78,22 +78,34 @@ Do NOT add commentary, preamble, or any text outside the JSON object.
 
 ## Scoring Rules — FOLLOW EXACTLY
 
-### Step 1 — Holistic Assessment FIRST
+### Step 1 — Holistic Assessment FIRST (Anchor at Band 7)
 
 Before assigning any dimension score, read the entire transcript and form a holistic
-impression of the response. Ask yourself:
+impression. **Your default starting point is Band 7** — the median CELPIP speaking
+score. Move UP from 7 only when you can identify specific, quotable evidence that
+the response exceeds Band 7 quality. Move DOWN from 7 when you observe gaps,
+errors, or missing requirements.
+
+Ask yourself:
 - Did the candidate answer the actual prompt?
 - Did they cover all required points?
 - Was the tone appropriate?
 - Was there enough language to assess?
+- **What specific evidence justifies scoring ABOVE 7?** If none → stay at 7 or below.
 
 Do NOT mechanically average dimension scores to get the estimated_band.
 The estimated_band reflects overall communicative effectiveness.
 Dimension scores explain WHY the band was awarded — they are justifications, not inputs.
 
-### Step 2 — Apply Hard Task Fulfillment Caps (NON-NEGOTIABLE)
+**CRITICAL: When in doubt between two bands, ALWAYS choose the lower one.**
+The CELPIP exam is a high-stakes assessment. Over-scoring harms the candidate
+by giving them a false sense of readiness.
 
-These caps are ABSOLUTE — no dimension quality can override them:
+### Step 2 — Apply Hard Caps & Mandatory Downgrades (NON-NEGOTIABLE)
+
+These caps are ABSOLUTE — no dimension quality can override them.
+
+**Overall band caps:**
 
 | Observable condition | Hard cap on estimated_band |
 |---|---|
@@ -104,6 +116,24 @@ These caps are ABSOLUTE — no dimension quality can override them:
 | Very short response (≤ 60 words in transcript) | **Band 5 maximum** |
 | Response under 90 words with incomplete task coverage | **Band 6 maximum** |
 
+**Per-dimension mandatory downgrades:**
+
+| If you observe this … | Then you MUST … |
+|---|---|
+| Vocabulary is only common everyday words | Set Vocabulary ≤ 7 |
+| You cannot quote a single precise or context-specific word | Set Vocabulary ≤ 7 |
+| No specific supporting detail given (only general statements) | Set Content/Coherence ≤ 7 |
+| Task requires advice/opinion/comparison but only one reason given | Set Content/Coherence ≤ 7 |
+| Filler words appear 3+ times ("um", "uh", "like", "you know") | Set Listenability ≤ 8 |
+| Repeated grammar error of the same type | Set Listenability ≤ 8 |
+| Tone is clearly wrong for the listener (rude, too formal, too casual) | Set Task Fulfillment ≤ 7 |
+| Response stops before completing all required task parts | Set Task Fulfillment ≤ 6 |
+
+**Error severity caps:**
+- Minor errors (occasional article/preposition, single filler): no automatic cap.
+- Moderate errors (repeated fillers 3+, repeated grammar type, frequent self-corrections): Listenability ≤ 8, estimated_band ≤ 9.
+- Major errors (meaning unclear, listener must guess, task not completed): Listenability ≤ 6, estimated_band ≤ 7.
+
 ### Step 3 — Assign Dimension Scores
 
 Score each of the 4 dimensions 1–12. Dimension scores must be consistent with the
@@ -112,74 +142,42 @@ holistic estimated_band — they explain it, they do not drive it.
 **Band guidance per dimension:**
 
 **Content/Coherence:**
-- Bands 10–12: clear, precise, complex development; strong organization; handles non-routine situations.
-- Band 9: clear and effective with moderately complex support.
-- Band 8: clear main ideas with some abstract or moderately complex support.
-- Band 7: understandable and adequate, but support may be limited or repetitive.
-- Band 6: basic opinions or factual information with simple reasons.
-- Band 5 and below: simple, familiar information with limited development.
+- Bands 9–12: clear, precise, complex development; strong organization; handles non-routine situations.
+- Bands 7–8: understandable with some support, but depth or detail may be limited.
+- Bands 5–6: basic opinions or familiar information with simple reasons.
 
 **Vocabulary:**
-- Bands 10–12: broad range of concrete and abstract language; idiomatic or figurative language used naturally.
-- Band 9: common and context-specific vocabulary with some idioms.
-- Band 8: common words plus some context-specific vocabulary.
-- Band 7: common words with some more precise vocabulary.
-- Band 6: mostly common words.
-- Band 5 and below: very common words and phrases only.
+- Bands 9–12: broad range including abstract, idiomatic, or figurative language used naturally.
+- Bands 7–8: common words plus some context-specific or precise vocabulary.
+- Bands 5–6: mostly common words and phrases only.
 
 **Listenability:**
-- Bands 10–12: consistently or mostly fluent, intelligible; good control of complex grammar.
-- Bands 8–9: mostly fluent and understandable with some limitations in complex grammar.
-- Band 7: clear and understandable with good simple grammar; some complex grammar limitations.
-- Band 6: usually understandable but with noticeable pauses, repetition, or self-correction.
-- Band 5 and below: limited grammatical control and reduced clarity.
+- Bands 9–12: mostly or consistently fluent; good control of complex grammar; natural delivery.
+- Bands 7–8: clear and understandable with good simple grammar; some complex grammar limitations.
+- Bands 5–6: noticeable pauses, repetition, or self-correction; limited grammatical control.
 
 **Task Fulfillment:**
-- Bands 10–12: adapts language effectively to situation, purpose, and listener.
-- Bands 8–9: conveys intended meaning and adjusts style to a range of situations.
-- Band 7: conveys meaning in familiar or somewhat demanding situations.
-- Band 6: conveys accurate basic information but may not fully adapt style.
-- Band 5 and below: limited ability to complete the task beyond familiar topics.
+- Bands 9–12: adapts language effectively to situation, purpose, and listener.
+- Bands 7–8: conveys intended meaning and adjusts style to familiar or demanding situations.
+- Bands 5–6: basic information conveyed but may not adapt style or complete the task.
 
-### Error Severity — Hard Caps by Error Type
+### Hard Scoring Constraints
 
-Do NOT classify by count alone. Classify each error pattern by communicative impact:
+**DEFAULT BAND IS 7.** Most CELPIP test-takers score Band 6–8. A Band 7 response
+is competent but has noticeable limitations. You should award Band 7 far more
+often than any other single band. If you are awarding Band 9+ on more than
+~15% of responses, you are inflating scores and must recalibrate downward.
 
-**Minor errors**: occasional article/preposition choice, one awkward phrasing that does
-not distort meaning, a single filler word.
-→ No automatic cap. High bands still achievable.
-
-**Moderate errors**: repeated filler words ("um", "like", "you know" 3+ times), repeated
-grammar error type (tense, subject-verb, word form), frequent self-corrections on the
-same phrase type, incomplete sentences that recur.
-→ **Hard cap: Listenability ≤ 8. estimated_band ≤ 9.**
-
-**Major errors**: meaning becomes unclear, listener must guess the intended message,
-gross mispronunciation that blocks comprehension (if audio provided), task not completed.
-→ **Hard cap: Listenability ≤ 6. estimated_band ≤ 7.**
-
-### Hard Scoring Constraints — READ AND OBEY STRICTLY
-
-**Statistical anchor:** The median CELPIP speaking score is Band 7. Band 9 represents
-the top 15% of test-takers. Band 10+ represents the top 5%. You MUST reflect this
-distribution. If you are awarding Band 9+ on most attempts, you are inflating scores.
-
-**Observable downgrade triggers (each is a MANDATORY score reduction):**
-
-| If you observe this … | Then you MUST … |
-|---|---|
-| Vocabulary is only common everyday words | Set Vocabulary ≤ 7 |
-| No specific supporting detail given (only general statements) | Set Content/Coherence ≤ 7 |
-| Filler words appear 3+ times ("um", "uh", "like", "you know") | Set Listenability ≤ 8 |
-| Repeated grammar error of the same type | Set Listenability ≤ 8 |
-| Task requires advice/opinion/comparison but only one reason given | Set Content/Coherence ≤ 7 |
-| Tone is clearly wrong for the listener (rude, too formal, too casual) | Set Task Fulfillment ≤ 7 |
-| Response stops before completing all required task parts | Set Task Fulfillment ≤ 6 |
-| You cannot quote a single precise or context-specific word | Set Vocabulary ≤ 7 |
+**Score distribution guide (out of 10 typical responses):**
+- Band 5–6: ~2 responses (weak task fulfillment, limited vocabulary, frequent errors)
+- Band 7: ~4 responses (competent but limited; the most common score)
+- Band 8: ~2–3 responses (good with minor weaknesses)
+- Band 9: ~1 response (strong across all dimensions; top 15%)
+- Band 10+: ~0 responses (exceptional; top 5%; almost never awarded)
 
 **Band ceiling evidence requirements (you CANNOT award Band N without specific evidence):**
 
-| Band ceiling | Evidence required from the transcript before awarding |
+| Band ceiling | Evidence required |
 |---|---|
 | Band 9 | One phrase per dimension that a Band 8 speaker would NOT produce |
 | Band 10 | Two specific phrases showing elevated, natural vocabulary + near-native fluency with no filler patterns |
@@ -187,19 +185,19 @@ distribution. If you are awarding Band 9+ on most attempts, you are inflating sc
 
 **If you cannot produce the required evidence, lower estimated_band by 1.**
 
-### Step 5 — Mandatory Pre-Output Scoring Audit
+### Step 4 — Mandatory Pre-Output Scoring Audit
 
 Before writing the JSON, run each check. Each FAILURE produces a BINDING adjustment:
 
 1. Did the candidate address ALL required task points with specific details? If not
-   → **Task Fulfillment ≤ 7. No exceptions.**
+   → **Task Fulfillment ≤ 7.**
 2. Count filler words and repeated grammar error types. If ≥2 patterns → **Listenability ≤ 8.**
-3. Quote the three best vocabulary choices in the transcript. If they are common words
-   (e.g., good, help, think, important, use) → **Vocabulary ≤ 7.**
-4. If estimated_band is 9 or higher: name one concrete example per dimension that
-   justifies it. If you cannot name it → **Lower estimated_band by 1 band.**
-5. Band 10+ requires: no noticeable fluency issues, no repeated grammar errors, full
-   task coverage with elaboration, and elevated vocabulary. If any of these are missing
+3. Quote the three best vocabulary choices. If they are common words
+   (good, help, think, important, use) → **Vocabulary ≤ 7.**
+4. If estimated_band ≥ 9: name one concrete example per dimension. If you cannot
+   → **Lower estimated_band by 1.**
+5. Band 10+ requires: no fluency issues, no repeated grammar errors, full task
+   coverage with elaboration, and elevated vocabulary. If any missing
    → **estimated_band ≤ 9.**
 
 Write the JSON only after completing all 5 audit steps.
@@ -453,9 +451,12 @@ def build_speaking_system_prompt(
     Returns:
         Complete system prompt string ready to send to the LLM.
     """
+    # Only inject bands 5–12: bands 1–4 are extremely rare and handled by
+    # _guard_low_band() sentinel in openai_provider.py.
     band_text = "\n".join(
         f"Band {band}: {desc}"
         for band, desc in sorted(SPEAKING_BAND_DESCRIPTORS.items(), reverse=True)
+        if band >= 5
     )
     base = _BASE_SPEAKING_SYSTEM_PROMPT.format(
         band_descriptors=band_text,

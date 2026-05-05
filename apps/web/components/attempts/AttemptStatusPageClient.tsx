@@ -7,8 +7,10 @@
 
 "use client";
 
-import { useAttemptStatus } from "@/lib/hooks/useAttemptStatus";
-import { AttemptStatusCard } from "@/components/attempts/AttemptStatusCard";
+import { useEffect }          from "react";
+import { useQueryClient }     from "@tanstack/react-query";
+import { useAttemptStatus }   from "@/lib/hooks/useAttemptStatus";
+import { AttemptStatusCard }  from "@/components/attempts/AttemptStatusCard";
 
 // ── Props ─────────────────────────────────────────────────────────────────────
 
@@ -21,7 +23,17 @@ interface AttemptStatusPageClientProps {
  * Kept separate from page.tsx so the page itself remains a server component.
  */
 export function AttemptStatusPageClient({ attemptId }: AttemptStatusPageClientProps) {
-  const { attempt, isLoading, isError } = useAttemptStatus(attemptId);
+  const queryClient = useQueryClient();
+  const { attempt, isLoading, isError, isComplete } = useAttemptStatus(attemptId);
+
+  // Invalidate both quota caches the moment scoring completes so per-task
+  // attempt rings and mock-test slot counters update without a manual refresh.
+  useEffect(() => {
+    if (isComplete) {
+      queryClient.invalidateQueries({ queryKey: ["quota"] });
+      queryClient.invalidateQueries({ queryKey: ["practiceQuota"] });
+    }
+  }, [isComplete, queryClient]);
 
   return (
     <div className="flex-1 flex flex-col items-center justify-center px-4 py-12">

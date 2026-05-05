@@ -11,29 +11,38 @@
  *
  * Mock mode (USE_MOCK=true): simulates progress with a setInterval, then
  * advances phase with a fake attempt ID.
+ *
+ * Safety guarantees (production hardening):
+ *   - AbortController: every fetch in the real pipeline is cancellable.
+ *     Call cancelUpload() on unmount or phase-effect cleanup — this is
+ *     wired into useSpeakingAttempt's cleanup so no request outlives the
+ *     component that started it.
+ *   - MIME type: the resolved mimeType from useMediaRecorder is forwarded
+ *     as the S3 Content-Type header, ensuring cross-browser accuracy.
  */
 
 import { useRef, useState } from "react";
 import { useAuth }          from "@clerk/nextjs";
 import { usePracticeSessionStore } from "@/store/practiceSessionStore";
 import type { SpeakingTask }       from "@/lib/types";
-import { API_V1, USE_MOCK, authHeaders } from "@/lib/api";
+import { API_BASE_URL, API_V1, USE_MOCK, authHeaders } from "@/lib/api";
 import type { StartAttemptResponse, UploadUrlResponse } from "./types";
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
+// ── Public interface ──────────────────────────────────────────────────────────
 
 export interface UseSpeakingUploadReturn {
   /** Run the full upload pipeline for the given audio blob. */
-  runUploadPipeline:  (blob: Blob) => Promise<void>;
+  runUploadPipeline:  (blob: Blob, mimeType?: string) => Promise<void>;
   /**
-   * Cancel the mock-mode progress simulation interval.
-   * Call from phase-effect cleanup so the interval doesn't
-   * outlive the UPLOADING phase.
+   * Cancel any in-flight upload (real pipeline via AbortController,
+   * mock mode via clearInterval). Safe to call multiple times.
    */
-  cancelMockUpload:   () => void;
+  cancelUpload:       () => void;
   /** Non-null when the pipeline fails; null on success or before first run. */
   uploadError:        string | null;
 }
+
+// ── Hook ──────────────────────────────────────────────────────────────────────
 
 export function useSpeakingUpload(
   taskRef:           React.MutableRefObject<SpeakingTask | null>,
@@ -43,16 +52,28 @@ export function useSpeakingUpload(
   const { setUploadProgress, setAttemptId, advancePhase } = usePracticeSessionStore();
 
   const [uploadError, setUploadError] = useState<string | null>(null);
-  const mockIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
-  function cancelMockUpload() {
+  // Mock-mode interval handle
+  const mockIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  // Real-pipeline abort controller
+  const abortRef = useRef<AbortController | null>(null);
+
+  /** Cancel both the mock interval and any real fetch pipeline. */
+  function cancelUpload() {
+    // Cancel real pipeline
+    if (abortRef.current) {
+      abortRef.current.abort();
+      abortRef.current = null;
+    }
+    // Cancel mock interval
     if (mockIntervalRef.current) {
       clearInterval(mockIntervalRef.current);
       mockIntervalRef.current = null;
     }
   }
 
-  async function runUploadPipeline(blob: Blob) {
+  async function runUploadPipeline(blob: Blob, mimeType = "audio/webm") {
+    setUploadError(null); // clear any error from a previous run
     const currentTask = taskRef.current;
     if (!currentTask) return;
 
@@ -63,7 +84,7 @@ export function useSpeakingUpload(
         pct += 10;
         setUploadProgress(pct);
         if (pct >= 100) {
-          cancelMockUpload();
+          cancelUpload();
           setAttemptId("mock-attempt-" + Date.now());
           advancePhase();
         }
@@ -72,15 +93,20 @@ export function useSpeakingUpload(
     }
 
     // ── Real pipeline ────────────────────────────────────────────────────────
+    // Create a fresh AbortController for this run.
+    abortRef.current = new AbortController();
+    const { signal } = abortRef.current;
+
     try {
       const token   = await getToken();
       const headers = { ...authHeaders(token), "Content-Type": "application/json" };
 
       // Step 1 — create attempt
       setUploadProgress(10);
-      const startRes = await fetch(`${API_BASE}${API_V1}/speaking/attempts/start`, {
+      const startRes = await fetch(`${API_BASE_URL}${API_V1}/speaking/attempts/start`, {
         method: "POST",
         headers,
+        signal,
         body:   JSON.stringify({ prompt_id: currentTask.id, is_mock_test: false }),
       });
       if (!startRes.ok) throw new Error(`start attempt failed: ${startRes.status}`);
@@ -90,17 +116,19 @@ export function useSpeakingUpload(
       // Step 2 — get presigned upload URL
       setUploadProgress(25);
       const urlRes = await fetch(
-        `${API_BASE}${API_V1}/speaking/attempts/${attempt_id}/upload-url`,
-        { method: "POST", headers, body: JSON.stringify({}) },
+        `${API_BASE_URL}${API_V1}/speaking/attempts/${attempt_id}/upload-url`,
+        { method: "POST", headers, signal, body: JSON.stringify({}) },
       );
       if (!urlRes.ok) throw new Error(`upload-url failed: ${urlRes.status}`);
       const { upload_url, s3_key }: UploadUrlResponse = await urlRes.json();
 
       // Step 3 — PUT blob directly to S3 (no auth header — presigned URL handles auth)
+      // Use the resolved mimeType from useMediaRecorder for cross-browser accuracy.
       setUploadProgress(40);
       const putRes = await fetch(upload_url, {
         method:  "PUT",
-        headers: { "Content-Type": "audio/webm" },
+        headers: { "Content-Type": mimeType || "audio/webm" },
+        signal,
         body:    blob,
       });
       if (!putRes.ok) throw new Error(`S3 PUT failed: ${putRes.status}`);
@@ -112,10 +140,11 @@ export function useSpeakingUpload(
         ? Date.now() - recordingStartRef.current
         : 0;
       const confirmRes = await fetch(
-        `${API_BASE}${API_V1}/speaking/attempts/${attempt_id}/confirm-upload`,
+        `${API_BASE_URL}${API_V1}/speaking/attempts/${attempt_id}/confirm-upload`,
         {
           method:  "POST",
           headers,
+          signal,
           body: JSON.stringify({ s3_key, audio_duration_ms: recordingDurationMs }),
         },
       );
@@ -125,6 +154,9 @@ export function useSpeakingUpload(
       advancePhase();
 
     } catch (err) {
+      // AbortError means the caller cancelled intentionally — not a user-visible error.
+      if (err instanceof Error && err.name === "AbortError") return;
+
       console.error("[useSpeakingUpload] Upload pipeline failed:", err);
       // Reset progress and surface the error. Do NOT advance phase — navigating
       // with a null attempt ID would route the user to a garbage URL.
@@ -135,5 +167,5 @@ export function useSpeakingUpload(
     }
   }
 
-  return { runUploadPipeline, cancelMockUpload, uploadError };
+  return { runUploadPipeline, cancelUpload, uploadError };
 }

@@ -12,13 +12,13 @@ async def get_speaking_tasks(db: AsyncSession) -> list[SpeakingPrompt]:
     return await SpeakingPromptRepository(db).list_active()
 
 
-async def get_mock_exam_prompts(db: AsyncSession) -> list[SpeakingPrompt]:
-    """Return all published+active 'mock' speaking prompts in task order.
+async def get_mock_exam_prompts(db: AsyncSession, slot: int) -> list[SpeakingPrompt]:
+    """Return published+active 'mock' speaking prompts for a specific exam slot.
 
-    Used exclusively by the GET /mock-exam/prompts endpoint. Falls back
-    gracefully — the route raises 404 if the list is empty.
+    slot (int): the exam slot number (1, 2, …) — only prompts assigned to
+    this slot are returned. Used exclusively by GET /mock-exam/prompts.
     """
-    return await SpeakingPromptRepository(db).list_active_mock()
+    return await SpeakingPromptRepository(db).list_active_mock(slot)
 
 
 async def get_speaking_task(db: AsyncSession, task_number: int) -> SpeakingPrompt:
@@ -37,12 +37,13 @@ async def get_writing_tasks(db: AsyncSession) -> list[WritingPrompt]:
     return await WritingPromptRepository(db).list_active()
 
 
-async def get_writing_mock_tasks(db: AsyncSession) -> list[WritingPrompt]:
-    """Return all active MOCK writing prompts (prompt_tag='mock').
+async def get_writing_mock_tasks(db: AsyncSession, slot: int) -> list[WritingPrompt]:
+    """Return published+active MOCK writing prompts for a specific exam slot.
 
-    Used by GET /writing/mock-prompts to serve the writing mock exam shell.
+    slot (int): the exam slot number (1, 2, …). Only prompts assigned to
+    this slot are returned. Used by GET /writing/mock-prompts.
     """
-    return await WritingPromptRepository(db).list_mock_active()
+    return await WritingPromptRepository(db).list_mock_active(slot)
 
 
 

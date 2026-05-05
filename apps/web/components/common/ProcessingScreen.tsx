@@ -42,7 +42,7 @@ export function ProcessingScreen({ skill, className }: ProcessingScreenProps) {
   return (
     <div
       className={cn(
-        "flex flex-col items-center justify-center gap-8 min-h-screen",
+        "flex flex-col items-center justify-center gap-8 h-full",
         "bg-canvas text-canvas-text px-6",
         className
       )}

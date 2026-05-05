@@ -55,6 +55,11 @@ function toPayload(data: FormData, taskNumber: number): WritingPromptPayload {
     sort_order:         Number(data.get("sort_order") || 0),
     sample_response_band12: String(data.get("sample_response_band12") || "").trim() || null,
     prompt_tag:         String(data.get("prompt_tag") || "practice") as "practice" | "mock",
+    exam_slot: (() => {
+      const raw = String(data.get("exam_slot") ?? "").trim();
+      const n   = parseInt(raw, 10);
+      return raw && !isNaN(n) ? n : null;
+    })(),
   };
 }
 
@@ -80,7 +85,8 @@ function promptHasChanges(payload: WritingPromptPayload, original: WritingPrompt
     (payload.slug         ?? null) !== (original.slug       ?? null)     ||
     (payload.topic        ?? null) !== (original.topic      ?? null)     ||
     (payload.sample_response_band12 ?? null) !== (origSample ?? null)   ||
-    (payload.prompt_tag   ?? "practice") !== ((original as WritingPrompt & { prompt_tag?: string }).prompt_tag ?? "practice")
+    (payload.prompt_tag   ?? "practice") !== ((original as WritingPrompt & { prompt_tag?: string }).prompt_tag ?? "practice") ||
+    (payload.exam_slot    ?? null)        !== ((original as WritingPrompt & { exam_slot?: number | null }).exam_slot  ?? null)
   );
 }
 

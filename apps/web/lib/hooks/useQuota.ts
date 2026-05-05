@@ -109,8 +109,13 @@ export function useQuota(skill: Skill): QuotaStatus & { isLoading: boolean } {
         skill === "speaking" ? resp.speaking_used_per_task : resp.writing_used_per_task;
       const limit =
         skill === "speaking" ? resp.speaking_limit_per_task : resp.writing_limit_per_task;
-      const totalUsed  = Object.values(usedMap).reduce((a, b) => a + b, 0);
-      const remaining  = limit === null ? -1 : Math.max(0, limit - totalUsed);
+
+      // Sum remaining slots across all tasks individually.
+      // Using (limit - totalUsed) was wrong because `limit` is per-task while
+      // `totalUsed` is the cross-task sum — this caused premature paywall display.
+      const remaining = limit === null
+        ? -1
+        : Object.values(usedMap).reduce((sum, used) => sum + Math.max(0, limit - used), 0);
 
       return {
         remaining,

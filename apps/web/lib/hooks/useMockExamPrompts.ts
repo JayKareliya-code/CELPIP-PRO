@@ -10,9 +10,9 @@
 // from SPEAKING_TASK_CONFIG so the UI is fully exercisable offline.
 // ─────────────────────────────────────────────────────────────────────────────
 
-import { useQuery }  from "@tanstack/react-query";
-import { useAuth }   from "@clerk/nextjs";
-import { API_V1, USE_MOCK, api, authHeaders } from "@/lib/api";
+import { useAuth }                from "@clerk/nextjs";
+import { useQuery }               from "@tanstack/react-query";
+import { API_V1, api, authHeaders, ApiError, USE_MOCK } from "@/lib/api";
 import { MOCK_EXAM_TASK_NUMBERS }        from "@/lib/practice/config";
 import { SPEAKING_TASK_CONFIG }          from "@/lib/constants";
 import type { MockExamPrompt }           from "@/lib/types";
@@ -68,11 +68,11 @@ export interface UseMockExamPromptsReturn {
   error:     Error | null;
 }
 
-export function useMockExamPrompts(): UseMockExamPromptsReturn {
+export function useMockExamPrompts(slotNumber: number): UseMockExamPromptsReturn {
   const { getToken } = useAuth();
 
   const { data, isLoading, error } = useQuery<MockExamPrompt[], Error>({
-    queryKey: ["mockExamPrompts"],
+    queryKey: ["mockExamPrompts", slotNumber],
 
     queryFn: async (): Promise<MockExamPrompt[]> => {
       // ── Mock / dev mode ────────────────────────────────────────────────────
@@ -82,16 +82,20 @@ export function useMockExamPrompts(): UseMockExamPromptsReturn {
       }
 
       // ── Real API ───────────────────────────────────────────────────────────
-      // Backend GET /api/v1/mock-exam/prompts returns list[SpeakingTaskResponse]
-      // which maps directly to MockExamPrompt[] (same shape, prompt_tag="mock").
+      // Backend GET /api/v1/mock-exam/prompts?slot=N returns list[SpeakingTaskResponse]
       const token = await getToken();
-      return api.get<MockExamPrompt[]>(`${API_V1}/mock-exam/prompts`, {
+      return api.get<MockExamPrompt[]>(`${API_V1}/mock-exam/prompts?slot=${slotNumber}`, {
         headers: authHeaders(token),
       });
     },
 
     staleTime: 5 * 60 * 1000,  // prompts don't change during an exam session
-    retry:     2,
+    // Don't retry on 404 (slot has no prompts yet) — show coming-soon immediately.
+    // Retry once for genuine network / 5xx failures.
+    retry: (failureCount, error) => {
+      if (error instanceof ApiError && error.status === 404) return false;
+      return failureCount < 1;
+    },
   });
 
   return {

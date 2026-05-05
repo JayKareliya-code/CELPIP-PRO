@@ -47,13 +47,16 @@ export interface UseMockExamSessionReturn {
   uploadError:      string | null;
   examSessionId:    string;
   /** Called once prompts are loaded — populates the store and shows the intro screen. */
-  initExam:         (prompts: MockExamPrompt[]) => void;
+  initExam:         (prompts: MockExamPrompt[], slotNumber: number) => void;
   /** User tapped "Begin Exam" on the intro screen. */
   startExam:        () => void;
   /** User selected a choice during Task 5 PREP phase. */
   selectChoice:     (choice: ChoiceOption) => void;
   /** Exits the exam mid-session (with confirm dialog). */
   exit:             () => void;
+  /** Silent termination — stops mic + resets store without confirm dialog.
+   *  Use in unmount effects (page navigation away). */
+  terminate:        () => void;
 }
 
 // ── Hook ──────────────────────────────────────────────────────────────────────
@@ -106,7 +109,17 @@ export function useMockExamSession(): UseMockExamSessionReturn {
 
   useEffect(() => {
     clearAll();
-    cancelMockUpload();
+    // NOTE: cancelMockUpload() is NOT called here. It is called inside
+    // runMockTaskUpload() at the start of each real upload run, and in the
+    // cleanup below on phase-change. Calling it at the top of every phase
+    // would abort a controller set up in the previous TASK_UPLOADING run
+    // before the .then() callback has a chance to fire.
+
+    // `cancelled` is set in the cleanup so the async .then() callback
+    // knows to bail out if this effect invocation is no longer live.
+    // This prevents React StrictMode double-invocation from firing
+    // setTaskError() on the first (already-cleaned-up) mount.
+    let cancelled = false;
 
     const prompt = currentTaskRef.current?.prompt;
 
@@ -163,9 +176,14 @@ export function useMockExamSession(): UseMockExamSessionReturn {
         break;
       }
 
-      // ── Upload current task audio during the break ────────────────────────
+      // ── Upload current task audio ─────────────────────────────────────────
+      // The `cancelled` guard prevents React StrictMode's double-invocation
+      // from firing setTaskError() on the first (already-cleaned-up) mount.
+      // Without it: mount#1 .then() fires after cleanup → setTaskError() → task marked failed.
       case "TASK_UPLOADING": {
         stopRecording().then(async (blob) => {
+          if (cancelled) return;   // ← StrictMode / phase-change guard
+
           stopMicStream();
           setRecordingBlob(blob);
 
@@ -180,6 +198,8 @@ export function useMockExamSession(): UseMockExamSessionReturn {
             sessionId,
             recordingStartRef.current,
           );
+
+          if (cancelled) return;   // ← guard again after the async upload
 
           if (attemptId) {
             finishTaskUpload(attemptId);
@@ -209,11 +229,14 @@ export function useMockExamSession(): UseMockExamSessionReturn {
     }
 
     return () => {
+      cancelled = true;   // ← signal any in-flight .then() to bail out
       clearAll();
       cancelMockUpload();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [phase]);
+
+
 
   // ── Cleanup on unmount ────────────────────────────────────────────────────────
 
@@ -228,11 +251,11 @@ export function useMockExamSession(): UseMockExamSessionReturn {
 
   // ── Public API ────────────────────────────────────────────────────────────────
 
-  const initExam = useCallback((prompts: MockExamPrompt[]) => {
+  const initExam = useCallback((prompts: MockExamPrompt[], slotNumber: number) => {
     // Fire beginLoading immediately so the shell shows ExamLoadingScreen.
     // loadExam is called on the next microtask so the LOADING phase is
     // actually rendered before the store transitions to READY.
-    beginLoading();
+    beginLoading(slotNumber);
     Promise.resolve().then(() => loadExam(prompts));
   }, [beginLoading, loadExam]);
 
@@ -255,6 +278,13 @@ export function useMockExamSession(): UseMockExamSessionReturn {
     }
   }, [forceStop, reset, router]);
 
+  // Silent teardown — no confirm dialog, no navigation. Used by the shell's
+  // unmount effect when the user navigates away themselves.
+  const terminate = useCallback(() => {
+    forceStop();
+    reset();
+  }, [forceStop, reset]);
+
   return {
     phase,
     tasks,
@@ -271,5 +301,6 @@ export function useMockExamSession(): UseMockExamSessionReturn {
     startExam,
     selectChoice,
     exit,
+    terminate,
   };
 }

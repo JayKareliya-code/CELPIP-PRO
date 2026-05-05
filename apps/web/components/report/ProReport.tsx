@@ -276,12 +276,24 @@ function ReportFooterCta({ report, weakestDim }: FooterProps) {
         >
           My History
         </Link>
-        <Link
-          href={`/${report.skill}/${report.prompt_id}/practice`}
-          className="rounded-xl bg-primary px-4 py-2 text-sm font-medium text-white hover:bg-primary-hover transition-colors"
-        >
-          Practice Again →
-        </Link>
+        {/* Guard: task_number should always be present, but legacy DB rows
+            may have a null. Fall back to omitting the task segment so the
+            URL degrades gracefully rather than producing /skill/undefined/... */}
+        {report.task_number != null ? (
+          <Link
+            href={`/${report.skill}/${report.task_number}/${report.prompt_id}/practice`}
+            className="rounded-xl bg-primary px-4 py-2 text-sm font-medium text-white hover:bg-primary-hover transition-colors"
+          >
+            Practice Again →
+          </Link>
+        ) : (
+          <Link
+            href={`/${report.skill}`}
+            className="rounded-xl bg-primary px-4 py-2 text-sm font-medium text-white hover:bg-primary-hover transition-colors"
+          >
+            Practice Again →
+          </Link>
+        )}
       </div>
     </div>
   );

@@ -11,19 +11,17 @@
 
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useAuth }             from "@clerk/nextjs";
-import { XCircle }             from "lucide-react";
 
 import { CountdownOverlay }    from "@/components/speaking/CountdownOverlay";
-import { WritingTimerBar }     from "@/components/writing/WritingTimerBar";
+import { WritingSessionHeader } from "@/components/writing/WritingSessionHeader";
 import { WritingPromptBox }    from "@/components/writing/WritingPromptBox";
 import { WritingEditor, clearDraft } from "@/components/writing/WritingEditor";
 import { WordCounter }         from "@/components/writing/WordCounter";
 import { SubmitWritingButton } from "@/components/writing/SubmitWritingButton";
-import { TimerDisplay }        from "@/components/common/TimerDisplay";
 import { ProcessingScreen }    from "@/components/common/ProcessingScreen";
 import { ConfirmModal }        from "@/components/common/ConfirmModal";
 import { countWords }          from "@/lib/utils";
-import { API_V1, authHeaders } from "@/lib/api";
+import { API_BASE_URL, API_V1, authHeaders } from "@/lib/api";
 import {
   COUNTDOWN_STEPS,
   COUNTDOWN_STEP_DURATION_MS,
@@ -34,7 +32,6 @@ import type { WritingTask }    from "@/lib/types";
 
 type TaskPhase = "COUNTDOWN" | "WRITING" | "SUBMITTING" | "PROCESSING";
 
-const API_BASE         = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
 const TOTAL_COUNTDOWN_MS = COUNTDOWN_STEPS.length * COUNTDOWN_STEP_DURATION_MS;
 
 // ── Props ─────────────────────────────────────────────────────────────────────
@@ -65,17 +62,33 @@ export function WritingTaskRunner({ task, examNumber, onComplete, onExit }: Writ
   const autoSubmitted  = useRef(false);
   const tickRef        = useRef<ReturnType<typeof setInterval>  | null>(null);
   const cdRef          = useRef<ReturnType<typeof setTimeout>   | null>(null);
+  // Tracks the in-flight submit request so we can abort it on unmount or re-entry
+  const abortRef       = useRef<AbortController | null>(null);
   const draftKey       = `mock-task-${task.id}`;
 
-  const clearAll = useCallback(() => {
+  const clearTimers = useCallback(() => {
     if (tickRef.current) { clearInterval(tickRef.current); tickRef.current = null; }
     if (cdRef.current)   { clearTimeout(cdRef.current);   cdRef.current   = null; }
   }, []);
 
+  // Full teardown: stops timers AND aborts any in-flight fetch.
+  // Only call this on unmount or when abandoning a submission entirely.
+  // Do NOT call this on normal phase transitions (e.g. SUBMITTING → PROCESSING)
+  // or the AbortController will kill the in-flight onComplete callback.
+  const clearAll = useCallback(() => {
+    clearTimers();
+    abortRef.current?.abort();
+    abortRef.current = null;
+  }, [clearTimers]);
+
   // ── Phase driver ───────────────────────────────────────────────────────────
 
   useEffect(() => {
-    clearAll();
+    // Only cancel timers here — do NOT abort in-flight requests.
+    // If we called clearAll() (which aborts) on every phase change, the
+    // SUBMITTING → PROCESSING transition would abort the AbortController
+    // just before onComplete fires, leaving the UI stuck on ProcessingScreen.
+    clearTimers();
 
     if (phase === "COUNTDOWN") {
       cdRef.current = setTimeout(() => {
@@ -88,7 +101,7 @@ export function WritingTaskRunner({ task, examNumber, onComplete, onExit }: Writ
     if (phase === "WRITING") {
       tickRef.current = setInterval(() => {
         if (secsRef.current <= 1) {
-          clearAll();
+          clearTimers();
           autoSubmitted.current = true;
           setPhase("SUBMITTING");
         } else {
@@ -100,29 +113,40 @@ export function WritingTaskRunner({ task, examNumber, onComplete, onExit }: Writ
 
     if (phase === "SUBMITTING") { runSubmit(); }
 
-    return clearAll;
+    return clearTimers;  // cleanup: stop timers only, preserve abort signal
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [phase]);
 
+  // Full teardown on unmount — stops timers AND aborts any in-flight fetch.
   useEffect(() => clearAll, [clearAll]);
 
   // ── API pipeline ───────────────────────────────────────────────────────────
 
   async function runSubmit() {
+    // Cancel any previous in-flight request and create a fresh abort signal.
+    // This prevents callbacks from firing if the component unmounts mid-request.
+    abortRef.current?.abort();
+    const ac     = new AbortController();
+    abortRef.current = ac;
+    const { signal } = ac;
+
     try {
       const token   = await getToken();
+      if (signal.aborted) return;
       const headers = { ...authHeaders(token), "Content-Type": "application/json" };
 
       // Step 1 — create attempt (quota check, is_mock_test = true)
-      const startRes = await fetch(`${API_BASE}${API_V1}/writing/attempts/start`, {
-        method: "POST", headers,
+      const startRes = await fetch(`${API_BASE_URL}${API_V1}/writing/attempts/start`, {
+        method: "POST", headers, signal,
         body: JSON.stringify({ prompt_id: task.id, is_mock_test: true, mock_exam_number: examNumber }),
       });
+      if (signal.aborted) return;
       if (!startRes.ok) {
         const err = await startRes.json().catch(() => ({}));
         throw new Error((err as { detail?: string }).detail ?? `start failed: ${startRes.status}`);
       }
       const { attempt_id } = await startRes.json() as { attempt_id: string };
+      if (signal.aborted) return;
 
       // Step 2 — submit essay.
       // Retry up to 3 times with backoff: the OPTIONS preflight + a new DB session
@@ -131,15 +155,17 @@ export function WritingTaskRunner({ task, examNumber, onComplete, onExit }: Writ
       let submitRes: Response | null = null;
       const MAX_SUBMIT_RETRIES = 3;
       for (let attempt = 0; attempt < MAX_SUBMIT_RETRIES; attempt++) {
+        if (signal.aborted) return;
         if (attempt > 0) {
           // Exponential backoff: 300ms, 700ms
           await new Promise((r) => setTimeout(r, 300 * (2 ** (attempt - 1))));
         }
+        if (signal.aborted) return;
         // Refresh token on every retry in case it expired during a retry delay.
         const retryToken   = await getToken();
         const retryHeaders = { ...authHeaders(retryToken), "Content-Type": "application/json" };
-        submitRes = await fetch(`${API_BASE}${API_V1}/writing/attempts/${attempt_id}/submit`, {
-          method: "POST", headers: retryHeaders,
+        submitRes = await fetch(`${API_BASE_URL}${API_V1}/writing/attempts/${attempt_id}/submit`, {
+          method: "POST", headers: retryHeaders, signal,
           body: JSON.stringify({
             essay_text:     plainTextRef.current,
             auto_submitted: autoSubmitted.current,
@@ -149,6 +175,7 @@ export function WritingTaskRunner({ task, examNumber, onComplete, onExit }: Writ
         if (submitRes.status !== 404) break;
       }
 
+      if (signal.aborted) return;
       if (!submitRes || !submitRes.ok) {
         const err = await submitRes?.json().catch(() => ({})) ?? {};
         throw new Error((err as { detail?: string }).detail ?? `submit failed: ${submitRes?.status}`);
@@ -156,10 +183,18 @@ export function WritingTaskRunner({ task, examNumber, onComplete, onExit }: Writ
 
       clearDraft(draftKey);
       setPhase("PROCESSING");
-      // Brief pause so PROCESSING screen is visible, then signal completion
-      setTimeout(() => onComplete(attempt_id), 1_200);
+      // Brief pause so PROCESSING screen is visible, then signal completion.
+      // Guard against component unmount between setPhase and the timeout firing.
+      if (!signal.aborted) {
+        setTimeout(() => { if (!signal.aborted) onComplete(attempt_id); }, 1_200);
+      }
 
     } catch (err) {
+      // Silently ignore intentional aborts (unmount or navigation).
+      if (err instanceof DOMException && err.name === "AbortError") return;
+      if (signal.aborted) return;
+      // P1-1: reset autoSubmitted — the retry will be a deliberate manual action.
+      autoSubmitted.current = false;
       setError(err instanceof Error ? err.message : "Submission failed. Please try again.");
       secsRef.current = Math.max(secsRef.current, 30);
       setSecsL(secsRef.current);
@@ -171,10 +206,10 @@ export function WritingTaskRunner({ task, examNumber, onComplete, onExit }: Writ
 
   const handleSubmit = useCallback(() => {
     clearDraft(draftKey);
-    clearAll();
+    clearTimers();  // stop tick; runSubmit will create a fresh AbortController
     autoSubmitted.current = false;
     setPhase("SUBMITTING");
-  }, [clearAll, draftKey]);
+  }, [clearTimers, draftKey]);
 
   const setContent = useCallback((_html: string, plainText: string) => {
     plainTextRef.current = plainText;
@@ -188,21 +223,17 @@ export function WritingTaskRunner({ task, examNumber, onComplete, onExit }: Writ
     return <ProcessingScreen skill="writing" />;
 
   return (
-    <div className="relative">
-      <div className="flex flex-col min-h-screen bg-surface">
+    // flex-col flex-1 gives CountdownOverlay's h-full a resolved height
+    <div className="flex flex-col flex-1 relative">
+      <div className="flex flex-col flex-1">
 
         {/* Sticky header */}
-        <div className="sticky top-0 z-30 bg-surface border-b border-border shadow-sm">
-          <WritingTimerBar secondsLeft={secondsLeft} totalSeconds={task.time_limit_seconds} />
-          <div className="flex items-center justify-between gap-4 px-4 py-3 max-w-4xl mx-auto w-full">
-            <span className="text-sm font-medium text-subtle hidden sm:block truncate">
-              Task {task.task_number} — {task.title}
-            </span>
-            <div className="ml-auto">
-              <TimerDisplay secondsLeft={secondsLeft} variant="light" size="md" pulseWhenCritical />
-            </div>
-          </div>
-        </div>
+        <WritingSessionHeader
+          taskNumber={task.task_number}
+          timeLimitSeconds={task.time_limit_seconds}
+          secondsLeft={secondsLeft}
+          totalTasks={2}
+        />
 
         {/* Content */}
         <div className="flex-1 max-w-4xl mx-auto w-full px-4 py-6 space-y-4">
@@ -224,20 +255,11 @@ export function WritingTaskRunner({ task, examNumber, onComplete, onExit }: Writ
 
           <div className="flex items-center justify-between pt-1">
             <WordCounter count={wordCount} minWords={task.min_words} maxWords={task.max_words} />
-            <SubmitWritingButton onSubmit={handleSubmit} disabled={wordCount === 0} isSubmitting={false} />
+            <SubmitWritingButton onSubmit={handleSubmit} disabled={wordCount === 0} />
           </div>
         </div>
       </div>
 
-      {/* Exit button */}
-      <button
-        onClick={() => setShowExit(true)}
-        className="fixed top-4 right-4 z-50 flex items-center gap-1.5 px-3 py-2
-                   rounded-lg bg-muted hover:bg-border border border-border
-                   text-subtle hover:text-foreground text-sm font-medium transition-all"
-      >
-        <XCircle className="w-4 h-4" /> Exit
-      </button>
 
       <ConfirmModal
         open={showExit}

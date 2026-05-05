@@ -16,6 +16,13 @@
 //   TASK_2    → WritingTaskRunner  (task 2)
 //   COMPLETE  → WritingExamCompleteScreen
 //   ERROR     → inline error panel
+//
+// Exit flow:
+//   The exit button (WritingMockExamExitGuard) is rendered OUTSIDE this
+//   component in page.tsx. It owns its own ConfirmModal — no CustomEvent
+//   bridge needed. When confirmed it calls router.push("/practice/writing").
+//   onExit() on WritingTaskRunner is kept as an internal escape hatch for
+//   task-level exits triggered from within the runner itself.
 // ─────────────────────────────────────────────────────────────────────────────
 
 import { useState, useEffect, useCallback } from "react";
@@ -31,7 +38,7 @@ import {
   WritingExamCompleteScreen,
 } from "@/components/writing-exam";
 
-import { API_V1, authHeaders } from "@/lib/api";
+import { API_BASE_URL, API_V1, authHeaders } from "@/lib/api";
 import type { WritingTask }    from "@/lib/types";
 
 // ── Types ─────────────────────────────────────────────────────────────────────
@@ -40,14 +47,17 @@ type ExamPhase = "LOADING" | "READY" | "TASK_1" | "BREAK" | "TASK_2" | "COMPLETE
 
 // ── Fetch helpers ─────────────────────────────────────────────────────────────
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
-
-async function fetchWritingMockPrompts(token: string | null): Promise<WritingTask[]> {
-  const res = await fetch(`${API_BASE}${API_V1}/writing/mock-prompts`, {
+async function fetchWritingMockPrompts(token: string | null, slot: number): Promise<WritingTask[]> {
+  const res = await fetch(`${API_BASE_URL}${API_V1}/writing/mock-prompts?slot=${slot}`, {
     headers: authHeaders(token),
     cache: "no-store",
   });
-  if (!res.ok) throw new Error(`Failed to load writing mock prompts (${res.status})`);
+  if (!res.ok) {
+    const detail = await res.json().then((j) => j?.detail ?? "").catch(() => "");
+    const err = new Error(detail || `Failed to load writing mock prompts (${res.status})`);
+    (err as Error & { status?: number }).status = res.status;
+    throw err;
+  }
   return res.json();
 }
 
@@ -68,10 +78,10 @@ export function WritingMockExamShell({ examNumber }: { examNumber: number }) {
   // ── Fetch mock prompts ────────────────────────────────────────────────────
 
   const { data: prompts, isLoading, error: fetchError } = useQuery<WritingTask[]>({
-    queryKey: ["writingMockPrompts"],
+    queryKey: ["writingMockPrompts", examNumber],
     queryFn: async () => {
       const token = await getToken();
-      return fetchWritingMockPrompts(token);
+      return fetchWritingMockPrompts(token, examNumber);
     },
     staleTime: 0,
     retry: 1,
@@ -80,12 +90,19 @@ export function WritingMockExamShell({ examNumber }: { examNumber: number }) {
   useEffect(() => {
     if (isLoading) return;
     if (fetchError) {
-      setErrMsg(fetchError.message);
+      const isComingSoon =
+        (fetchError as Error & { status?: number }).status === 404 ||
+        fetchError.message.includes("not available yet");
+      setErrMsg(
+        isComingSoon
+          ? `__coming_soon__`  // sentinel — rendered differently below
+          : fetchError.message,
+      );
       setPhase("ERROR");
       return;
     }
     if (!prompts || prompts.length < 2) {
-      setErrMsg("Writing mock prompts are not available yet. Please check back soon.");
+      setErrMsg("__coming_soon__");
       setPhase("ERROR");
       return;
     }
@@ -119,6 +136,10 @@ export function WritingMockExamShell({ examNumber }: { examNumber: number }) {
     router.push("/practice/writing");
   }, [router]);
 
+  // P1-3: memoized so WritingExamBreakScreen's useEffect([secs, onContinue])
+  // doesn't clear-and-restart its timer on every parent re-render.
+  const handleBreakContinue = useCallback(() => setPhase("TASK_2"), []);
+
   // ── Phase router ─────────────────────────────────────────────────────────
 
   if (phase === "LOADING" || isLoading) {
@@ -130,11 +151,30 @@ export function WritingMockExamShell({ examNumber }: { examNumber: number }) {
   }
 
   if (phase === "ERROR") {
+    const isComingSoon = errMsg === "__coming_soon__";
     return (
-      <div className="flex flex-col items-center justify-center min-h-screen bg-canvas gap-4 px-4 text-center">
-        <XCircle className="w-12 h-12 text-red-400" />
-        <p className="text-lg font-semibold text-foreground">Could not load exam</p>
-        <p className="text-sm text-subtle max-w-xs">{errMsg}</p>
+      <div className="flex flex-col items-center justify-center min-h-screen bg-canvas gap-6 px-4 text-center">
+        {isComingSoon ? (
+          <>
+            <div className="flex items-center justify-center w-16 h-16 rounded-2xl bg-primary/10 border border-primary/20">
+              <span className="text-3xl">🔒</span>
+            </div>
+            <div className="space-y-2">
+              <p className="text-lg font-semibold text-canvas-text">
+                Writing Mock Exam {examNumber} Coming Soon
+              </p>
+              <p className="text-sm text-canvas-subtle max-w-xs">
+                Questions for this exam are being prepared. Check back shortly.
+              </p>
+            </div>
+          </>
+        ) : (
+          <>
+            <XCircle className="w-12 h-12 text-red-400" />
+            <p className="text-lg font-semibold text-foreground">Could not load exam</p>
+            <p className="text-sm text-subtle max-w-xs">{errMsg}</p>
+          </>
+        )}
         <button
           onClick={() => router.push("/practice/writing")}
           className="mt-2 px-5 py-2.5 rounded-lg bg-amber-600 hover:bg-amber-500 text-white text-sm font-semibold"
@@ -167,7 +207,7 @@ export function WritingMockExamShell({ examNumber }: { examNumber: number }) {
   }
 
   if (phase === "BREAK") {
-    return <WritingExamBreakScreen onContinue={() => setPhase("TASK_2")} />;
+    return <WritingExamBreakScreen onContinue={handleBreakContinue} />;
   }
 
   if (phase === "TASK_2" && task2) {
@@ -181,7 +221,17 @@ export function WritingMockExamShell({ examNumber }: { examNumber: number }) {
     );
   }
 
-  if (phase === "COMPLETE" && attempt1Id && attempt2Id) {
+  if (phase === "COMPLETE") {
+    // P1-2: both IDs must be set before rendering results.
+    // In practice this is always true because COMPLETE is only entered via
+    // handleTask2Complete — guard anyway to avoid a silent white-screen.
+    if (!attempt1Id || !attempt2Id) {
+      return (
+        <div className="flex items-center justify-center min-h-screen bg-canvas">
+          <Loader2 className="w-8 h-8 text-amber-400 animate-spin" />
+        </div>
+      );
+    }
     return (
       <WritingExamCompleteScreen
         attempt1Id={attempt1Id}
@@ -190,5 +240,7 @@ export function WritingMockExamShell({ examNumber }: { examNumber: number }) {
     );
   }
 
+  // All known phases are handled above. This path is only hit transiently
+  // during READY when task1/task2 are still null — render nothing, not null.
   return null;
 }

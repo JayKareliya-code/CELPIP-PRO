@@ -16,8 +16,8 @@ export function BackButton() {
   return (
     <button
       onClick={() => router.back()}
-      className="fixed top-4 left-4 z-50 flex items-center gap-2 px-3 py-2 rounded-lg
-                 bg-white/8 hover:bg-white/15 border border-white/15 hover:border-white/30
+      className="fixed top-4 left-4 z-[60] flex items-center gap-2 px-3 py-2 rounded-lg
+                 bg-white/[0.08] hover:bg-white/[0.15] border border-white/[0.15] hover:border-white/30
                  text-white/70 hover:text-white text-sm font-medium backdrop-blur-sm
                  transition-all duration-150"
       aria-label="Go back"

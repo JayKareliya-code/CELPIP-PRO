@@ -84,8 +84,11 @@ export function usePracticeQuota(skill: Skill): {
 
         return buildQuota(skill, limit, used);
       } catch {
-        // Graceful degradation — return plan-based quota with 0 used
-        return buildQuota(skill, limit, 0);
+        // API error: fail closed (safe default) so a user who has exhausted their
+        // quota cannot start a session that will 402 at submission time.
+        // The caller can detect this via isLoading===false + error being non-null
+        // if React Query surfaces the error instead of returning stale data.
+        return buildQuota(skill, limit, limit);
       }
     },
 

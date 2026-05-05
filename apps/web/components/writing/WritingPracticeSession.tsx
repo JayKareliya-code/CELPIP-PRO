@@ -13,20 +13,17 @@
 
 "use client";
 
-import { useEffect, useState } from "react";
-import { XCircle }             from "lucide-react";
+import { useEffect } from "react";
 
-import { useWritingAttempt, clearSession } from "@/lib/hooks/useWritingAttempt";
-import { CountdownOverlay }       from "@/components/speaking/CountdownOverlay";
-import { WritingTimerBar }        from "@/components/writing/WritingTimerBar";
-import { WritingPromptBox }       from "@/components/writing/WritingPromptBox";
+import { useWritingAttempt } from "@/lib/hooks/useWritingAttempt";
+import { CountdownOverlay }         from "@/components/speaking/CountdownOverlay";
+import { WritingSessionHeader }     from "@/components/writing/WritingSessionHeader";
+import { WritingPromptBox }         from "@/components/writing/WritingPromptBox";
 import { WritingEditor, clearDraft } from "@/components/writing/WritingEditor";
-import { WordCounter }            from "@/components/writing/WordCounter";
-import { SubmitWritingButton }    from "@/components/writing/SubmitWritingButton";
-import { TimerDisplay }           from "@/components/common/TimerDisplay";
-import { ProcessingScreen }       from "@/components/common/ProcessingScreen";
-import { ConfirmModal }           from "@/components/common/ConfirmModal";
-import type { WritingTask }       from "@/lib/types";
+import { WordCounter }              from "@/components/writing/WordCounter";
+import { SubmitWritingButton }      from "@/components/writing/SubmitWritingButton";
+import { ProcessingScreen }         from "@/components/common/ProcessingScreen";
+import type { WritingTask }         from "@/lib/types";
 
 // ── Props ─────────────────────────────────────────────────────────────────────
 
@@ -45,17 +42,19 @@ export function WritingPracticeSession({ task }: WritingPracticeSessionProps) {
     start,
     setContent,
     submit,
-    exit,
+    terminate,
   } = useWritingAttempt();
-
-  const [showExitModal, setShowExitModal] = useState(false);
 
   // Draft session key — unique per task so each task has its own draft
   const draftKey = `task-${task.id}`;
 
-  // Auto-start once on mount
+  // Start session on mount; terminate cleanly when the component unmounts
+  // (covers browser back, Next.js navigation, or any parent re-key).
+  // Using a single effect pairs start/terminate in the same lifecycle slot,
+  // which is safe under React Strict Mode’s double-invoke.
   useEffect(() => {
     start(task);
+    return () => { terminate(); };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -78,31 +77,14 @@ export function WritingPracticeSession({ task }: WritingPracticeSessionProps) {
 
       case "WRITING":
         return (
-          <div className="flex flex-col min-h-screen bg-surface">
+          <div className="flex flex-col flex-1">
 
             {/* ── Sticky header ─────────────────────────────────────────── */}
-            <div className="sticky top-0 z-30 bg-surface border-b border-border shadow-sm">
-              {/* Colour-coded timer bar */}
-              <WritingTimerBar
-                secondsLeft={secondsLeft}
-                totalSeconds={task.time_limit_seconds}
-              />
-              {/* Title + clock */}
-              <div className="flex items-center justify-between gap-4 px-4 py-3
-                              max-w-4xl mx-auto w-full">
-                <span className="text-sm font-medium text-subtle hidden sm:block truncate">
-                  Task {task.task_number} — {task.title}
-                </span>
-                <div className="ml-auto">
-                  <TimerDisplay
-                    secondsLeft={secondsLeft}
-                    variant="light"
-                    size="md"
-                    pulseWhenCritical
-                  />
-                </div>
-              </div>
-            </div>
+            <WritingSessionHeader
+              taskNumber={task.task_number}
+              timeLimitSeconds={task.time_limit_seconds}
+              secondsLeft={secondsLeft}
+            />
 
             {/* ── Main content ─────────────────────────────────────────── */}
             <div className="flex-1 max-w-4xl mx-auto w-full px-4 py-6 space-y-4">
@@ -146,8 +128,8 @@ export function WritingPracticeSession({ task }: WritingPracticeSessionProps) {
                 <SubmitWritingButton
                   onSubmit={handleSubmit}
                   disabled={wordCount === 0}
-                  isSubmitting={false}
                 />
+
               </div>
             </div>
           </div>
@@ -169,40 +151,10 @@ export function WritingPracticeSession({ task }: WritingPracticeSessionProps) {
   // ── Render ─────────────────────────────────────────────────────────────────
 
   return (
-    <div className="relative">
+    // flex-col flex-1 gives CountdownOverlay's h-full a resolved height
+    // from the fixed-canvas layout (layout.tsx provides the true viewport size).
+    <div className="flex flex-col flex-1">
       {renderScreen()}
-
-      {/* Exit button — fixed top-right */}
-      {canExit && phase !== "COUNTDOWN" && (
-        <button
-          id="exit-writing-session-btn"
-          onClick={() => setShowExitModal(true)}
-          className="fixed top-4 right-4 z-50 flex items-center gap-1.5 px-3 py-2
-                     rounded-lg bg-muted hover:bg-border border border-border
-                     text-subtle hover:text-foreground text-sm font-medium
-                     transition-all duration-150"
-          aria-label="Exit writing session"
-        >
-          <XCircle className="w-4 h-4" />
-          Exit
-        </button>
-      )}
-
-      {/* Confirm exit */}
-      <ConfirmModal
-        open={showExitModal}
-        onCancel={() => setShowExitModal(false)}
-        onConfirm={() => {
-          setShowExitModal(false);
-          clearDraft(draftKey);
-          clearSession(`task-${task.id}`);
-          exit();
-        }}
-        title="Leave this session?"
-        description="Your written response will not be saved. This action cannot be undone."
-        confirmLabel="Leave session"
-        isDestructive
-      />
     </div>
   );
 }

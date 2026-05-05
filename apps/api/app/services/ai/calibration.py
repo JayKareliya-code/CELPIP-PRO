@@ -25,7 +25,8 @@ logger = logging.getLogger(__name__)
 _MAX_SAMPLES = 4          # max calibration examples injected per scoring call
 _MAX_SAMPLE_CHARS = 400   # truncation for global pool samples
 _DEFAULT_PROMPT_ANCHOR_CHARS = 800  # default when no time-based limit is given
-_MAX_PROMPT_ANCHOR_CHARS = 2000     # ceiling — prevents token waste on very long tasks
+_MAX_PROMPT_ANCHOR_CHARS_SPEAKING = 2000  # speaking responses can be longer
+_MAX_PROMPT_ANCHOR_CHARS_WRITING = 1200   # 200-word Band 12 essay ≈ 1000 chars
 
 
 async def build_calibration_context(
@@ -70,8 +71,9 @@ async def build_calibration_context(
         raw_limit = max_chars if max_chars and max_chars > 0 else _DEFAULT_PROMPT_ANCHOR_CHARS
         # Cap the anchor to avoid token waste while keeping it meaningful.
         # Floor: 600 chars — minimum for the anchor to show real structure.
-        # Ceiling: 2000 chars — prevents oversized prompts on long writing tasks.
-        limit = min(max(600, raw_limit), _MAX_PROMPT_ANCHOR_CHARS)
+        # Ceiling: skill-dependent — writing essays are shorter than speaking responses.
+        ceiling = _MAX_PROMPT_ANCHOR_CHARS_WRITING if skill == "writing" else _MAX_PROMPT_ANCHOR_CHARS_SPEAKING
+        limit = min(max(600, raw_limit), ceiling)
         text = prompt_band12_sample.strip()
         truncated = text[:limit]
         if len(text) > limit:

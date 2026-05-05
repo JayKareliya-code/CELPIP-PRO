@@ -25,33 +25,14 @@ import {
   PRO_PLAN_LIMITS,
   ULTRA_PLAN_LIMITS,
 } from "@/lib/constants";
+import {
+  SPEAKING_TASK_TITLES,
+  SPEAKING_TASK_DESCRIPTIONS,
+} from "@/lib/speaking-constants";
 import type { SpeakingTask } from "@/lib/types";
 
-// ── Task metadata (descriptions shown on cards) ───────────────────────────────
-
-const TASK_TITLES: Record<number, string> = {
-  0: "Practice Task",
-  1: "Giving Advice",
-  2: "Talking about a Personal Experience",
-  3: "Describing a Scene",
-  4: "Making Predictions",
-  5: "Comparing and Persuading",
-  6: "Dealing with a Difficult Situation",
-  7: "Expressing Opinions",
-  8: "Describing an Unusual Situation",
-};
-
-const TASK_DESCRIPTIONS: Record<number, string> = {
-  0: "Warm-up. Describe your daily routine or a familiar topic. No scoring.",
-  1: "Give advice to a friend or colleague about a personal or professional situation.",
-  2: "Share a personal story — an event, challenge, or memorable experience.",
-  3: "Look at an image and describe what you see in detail.",
-  4: "Look at an image and describe what will happen next.",
-  5: "Compare two situations, state a preference, then persuade someone to choose the other.",
-  6: "Handle a real-life scenario — leave a message, resolve a conflict, ask for help.",
-  7: "Express and defend your opinion on a topical issue with clear reasoning.",
-  8: "Describe an unusual scene, theorise a cause, and predict what happens next.",
-};
+// TASK_TITLES and TASK_DESCRIPTIONS are now imported from @/lib/speaking-constants
+// (single source of truth — no local duplicates).
 
 // ── Props ─────────────────────────────────────────────────────────────────────
 
@@ -162,8 +143,8 @@ export function SpeakingModuleHome({ tasks }: SpeakingModuleHomeProps) {
           {[
             {
               label: "Tasks",
-              value: "9",
-              sub: "Practice + 1–8",
+              value: String(uniqueTasks.length),
+              sub: `Practice + ${uniqueTasks.filter((t) => t.task_number > 0).length} scored`,
             },
             {
               label: "Attempts / task",
@@ -201,8 +182,8 @@ export function SpeakingModuleHome({ tasks }: SpeakingModuleHomeProps) {
             <SpeakingTaskCard
               key={taskNum}
               taskNumber={taskNum === 0 ? "practice" : taskNum}
-              title={TASK_TITLES[taskNum] ?? (taskNum === 0 ? "Practice Task" : `Task ${taskNum}`)}
-              description={TASK_DESCRIPTIONS[taskNum] ?? ""}
+              title={SPEAKING_TASK_TITLES[taskNum] ?? (taskNum === 0 ? "Practice Task" : `Task ${taskNum}`)}
+              description={SPEAKING_TASK_DESCRIPTIONS[taskNum] ?? ""}
               prepTimeSecs={task?.prep_time_seconds ?? 30}
               responseTimeSecs={task?.response_time_seconds ?? 60}
               difficulty={task?.difficulty ?? "medium"}

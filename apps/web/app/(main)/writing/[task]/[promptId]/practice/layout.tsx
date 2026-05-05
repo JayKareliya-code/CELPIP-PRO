@@ -1,11 +1,12 @@
 // ─────────────────────────────────────────────────────────────────────────────
-// layout.tsx — Session layout for /speaking/[task]/[promptId]/practice
-// Identical to /speaking/[task]/practice/layout.tsx
+// layout.tsx — Session layout for /writing/[task]/[promptId]/practice
+//
+// Identical to /writing/[task]/practice/layout.tsx
 // ─────────────────────────────────────────────────────────────────────────────
 
-import { BackButton } from "@/components/speaking/BackButton";
+import { WritingExitButton } from "@/components/writing/WritingExitButton";
 
-export default function PracticeLayout({
+export default function WritingPracticeLayout({
   children,
 }: {
   children: React.ReactNode;
@@ -17,8 +18,8 @@ export default function PracticeLayout({
         {children}
       </div>
 
-      {/* Back button — sits above the canvas */}
-      <BackButton />
+      {/* Exit button — outside the canvas, root stacking context */}
+      <WritingExitButton />
     </>
   );
 }

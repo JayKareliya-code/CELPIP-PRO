@@ -132,57 +132,30 @@ async def enforce_quota(
             })
 
 
-async def enforce_mock_exam_session_quota(
-    *,
-    user: User,
-    session_id: str,
-    db: AsyncSession,
-) -> None:
+async def enforce_mock_exam_plan_access(*, user: User) -> None:
     """
-    Per-SESSION quota for speaking mock exams.
+    Plan-access gate for speaking mock exam uploads.
 
-    One CELPIP speaking mock = 8 audio recordings (tasks 1–8) sharing a
-    client-generated ``session_id``. This helper enforces that a new session
-    counts against the user's speaking-mock limit and that re-doing an
-    already-started session is always free.
+    Replaces the previous per-session quota counter, which was incompatible
+    with client-generated ephemeral session UUIDs (a new UUID was minted on
+    every page visit, so the redo-check never fired and every attempt consumed
+    a new quota slot).
 
-    Must be called inside the transaction that inserts the MockExamTaskAttempt.
+    New model — mirrors practice-mode "same prompt = always free":
+      • Starter plan : mock exams are locked (402).
+      • Pro / Ultra  : unlimited attempts — retrying the same 8-prompt exam
+                       is always free, consistent with the UX contract.
+
+    If we ever want to limit mock exam VOLUME (e.g. anti-abuse), add a
+    daily/weekly rate-limit at the rate-limiter layer, not here.
     """
-    from sqlalchemy import func, select
-    from app.models.mock_exam_attempt import MockExamTaskAttempt
-
     limits = get_plan_limits(user.plan, "speaking")
-    if limits.mock_tests is None:
-        return
-
-    try:
-        await _acquire_user_lock(db, user.id)
-    except Exception:
-        pass
-
-    # Redo check — has the user already uploaded anything for this session?
-    row = await db.execute(
-        select(func.count(MockExamTaskAttempt.id))
-        .where(MockExamTaskAttempt.user_id == user.id)
-        .where(MockExamTaskAttempt.session_id == session_id)
-        .where(MockExamTaskAttempt.status.not_in(["cancelled"]))
-    )
-    if (row.scalar_one() or 0) > 0:
-        return  # existing session → redo/continuation, no quota charge
-
-    # New session — count distinct existing sessions.
-    row = await db.execute(
-        select(func.count(func.distinct(MockExamTaskAttempt.session_id)))
-        .where(MockExamTaskAttempt.user_id == user.id)
-        .where(MockExamTaskAttempt.status.not_in(["cancelled"]))
-    )
-    used = row.scalar_one() or 0
-    if used >= limits.mock_tests:
+    if limits.mock_tests == 0:
         raise HTTPException(
             status_code=402,
             detail={
-                "code": "QUOTA_EXCEEDED",
-                "used": used,
-                "limit": limits.mock_tests,
+                "code":        "MOCK_EXAM_LOCKED",
+                "message":     "Mock exams require a Pro or Ultra plan.",
+                "upgrade_url": "/billing",
             },
         )

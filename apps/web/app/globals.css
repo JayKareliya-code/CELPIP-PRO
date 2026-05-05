@@ -108,3 +108,11 @@
 #writing-editor {
   position: relative; /* needed for the absolute ::before placeholder */
 }
+
+/* ── MicWaveform idle animation ────────────────────────────────────────────── */
+/* Bars breathe gently before the AudioContext connects.                        */
+/* Heights are overridden by the rAF loop once the mic stream is live.         */
+@keyframes mic-idle {
+  from { height: 4px;  }
+  to   { height: 16px; }
+}

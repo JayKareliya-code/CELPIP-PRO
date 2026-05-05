@@ -11,8 +11,8 @@
 //   useSpeakingUpload  — 4-step API upload pipeline (+ mock simulation)
 // ─────────────────────────────────────────────────────────────────────────────
 
-import { useEffect, useRef, useCallback } from "react";
-import { useRouter }                      from "next/navigation";
+import { useEffect, useRef, useCallback, useState } from "react";
+import { useRouter }                                 from "next/navigation";
 import {
   usePracticeSessionStore,
   type SessionPhase,
@@ -34,14 +34,24 @@ const TOTAL_COUNTDOWN_MS = COUNTDOWN_STEPS.length * COUNTDOWN_STEP_DURATION_MS;
 // ── Hook public interface ─────────────────────────────────────────────────────
 
 export interface UseSpeakingAttemptReturn {
-  phase:          SessionPhase;
-  secondsLeft:    number;
-  uploadProgress: number;
-  attemptId:      string | null;
-  uploadError:    string | null;
-  selectedChoice: import("@/lib/types").ChoiceOption | null;
-  start:          (task: SpeakingTask) => void;
-  exit:           () => void;
+  phase:            SessionPhase;
+  secondsLeft:      number;
+  uploadProgress:   number;
+  attemptId:        string | null;
+  uploadError:      string | null;
+  selectedChoice:   import("@/lib/types").ChoiceOption | null;
+  /** True when the user has requested exit — mount a ConfirmModal when this is true. */
+  exitRequested:    boolean;
+  /** Call when the exit confirm modal Cancel button is clicked. */
+  cancelExit:       () => void;
+  /** Call when the exit confirm modal Confirm button is clicked. */
+  confirmExit:      () => void;
+  start:            (task: SpeakingTask) => void;
+  /** Request exit with confirmation — sets exitRequested=true (no window.confirm). */
+  exit:             () => void;
+  /** Silent termination — stops mic + resets store without confirm dialog.
+   *  Use in unmount effects (page navigation away). */
+  terminate:        () => void;
 }
 
 // ── Hook ──────────────────────────────────────────────────────────────────────
@@ -66,17 +76,22 @@ export function useSpeakingAttempt(): UseSpeakingAttemptReturn {
   taskRef.current  = task;
 
   // Timer handles
-  const tickIntervalRef     = useRef<ReturnType<typeof setInterval> | null>(null);
-  const countdownTimeoutRef = useRef<ReturnType<typeof setTimeout>  | null>(null);
+  const tickIntervalRef      = useRef<ReturnType<typeof setInterval> | null>(null);
+  const countdownTimeoutRef  = useRef<ReturnType<typeof setTimeout>  | null>(null);
+  const processingTimeoutRef = useRef<ReturnType<typeof setTimeout>  | null>(null);
 
-  const clearTick      = () => { if (tickIntervalRef.current)    clearInterval(tickIntervalRef.current);    tickIntervalRef.current    = null; };
-  const clearCountdown = () => { if (countdownTimeoutRef.current) clearTimeout(countdownTimeoutRef.current); countdownTimeoutRef.current = null; };
+  const clearTick        = () => { if (tickIntervalRef.current)      { clearInterval(tickIntervalRef.current);      tickIntervalRef.current      = null; } };
+  const clearCountdown   = () => { if (countdownTimeoutRef.current)  { clearTimeout(countdownTimeoutRef.current);   countdownTimeoutRef.current   = null; } };
+  const clearProcessing  = () => { if (processingTimeoutRef.current) { clearTimeout(processingTimeoutRef.current);  processingTimeoutRef.current  = null; } };
+
+  // ── Exit-confirm state (replaces window.confirm) ──────────────────────────
+  const [exitRequested, setExitRequested] = useState(false);
 
   // Sub-hooks
-  const { startRecording, stopRecording, stopMicStream, forceStop, recordingStartRef } =
+  const { startRecording, stopRecording, stopMicStream, forceStop, recordingStartRef, mimeTypeRef } =
     useMediaRecorder();
 
-  const { runUploadPipeline, cancelMockUpload, uploadError } =
+  const { runUploadPipeline, cancelUpload, uploadError } =
     useSpeakingUpload(taskRef, recordingStartRef);
 
   // ── Phase-change side effects ───────────────────────────────────────────────
@@ -84,7 +99,9 @@ export function useSpeakingAttempt(): UseSpeakingAttemptReturn {
   useEffect(() => {
     clearTick();
     clearCountdown();
-    cancelMockUpload();
+    clearProcessing();
+
+    let cancelled = false;
 
     switch (phase) {
 
@@ -119,7 +136,15 @@ export function useSpeakingAttempt(): UseSpeakingAttemptReturn {
         break;
       }
 
-      // Start recorder on the first recording phase; tick for both parts
+      // Start recorder on the first recording phase; tick for both parts.
+      // NOTE — Task 5 key={phase} caveat:
+      //   SpeakingPracticeSession uses key={phase} to remount children on
+      //   every phase transition, which is intentional (resets local waveform
+      //   state and triggers CSS entry animations). The trade-off is that
+      //   MicWaveform remounts at RECORDING→RECORDING_PART2 for Task 5, causing
+      //   a second getUserMedia call and a brief mic-indicator flash. This is
+      //   accepted: the alternative (lifting MicWaveform out of the keyed tree)
+      //   would complicate the component hierarchy significantly for a minor UX gain.
       case "RECORDING":
       case "RECORDING_PART2": {
         // Task 5: the RECORDING phase is a silent curveball-prep phase (no mic).
@@ -138,9 +163,11 @@ export function useSpeakingAttempt(): UseSpeakingAttemptReturn {
       // Stop recorder → collect blob → run upload pipeline
       case "UPLOADING": {
         stopRecording().then((blob) => {
+          if (cancelled) return;
           stopMicStream();
           setRecordingBlob(blob);
-          runUploadPipeline(blob);
+          // Forward the resolved MIME type so the S3 PUT Content-Type is accurate.
+          runUploadPipeline(blob, mimeTypeRef.current || "audio/webm");
         });
         break;
       }
@@ -150,10 +177,13 @@ export function useSpeakingAttempt(): UseSpeakingAttemptReturn {
         const storedId = usePracticeSessionStore.getState().attemptId;
         if (!storedId) {
           // Guard: upload pipeline should always set attemptId before advancing.
-          console.error("[useSpeakingAttempt] PROCESSING reached with no attemptId");
+          // If it's missing, something went wrong upstream — surface it to the user
+          // via uploadError rather than silently hanging on ProcessingScreen.
+          console.error("[useSpeakingAttempt] PROCESSING reached with no attemptId — resetting.");
+          reset();
           break;
         }
-        setTimeout(() => {
+        processingTimeoutRef.current = setTimeout(() => {
           router.push(`/attempts/${storedId}/status`);
         }, ATTEMPT_POLL_INTERVAL_MS);
         break;
@@ -164,9 +194,11 @@ export function useSpeakingAttempt(): UseSpeakingAttemptReturn {
     }
 
     return () => {
+      cancelled = true;
       clearTick();
       clearCountdown();
-      cancelMockUpload();
+      clearProcessing();
+      cancelUpload();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [phase]);
@@ -177,7 +209,8 @@ export function useSpeakingAttempt(): UseSpeakingAttemptReturn {
     return () => {
       clearTick();
       clearCountdown();
-      cancelMockUpload();
+      clearProcessing();
+      cancelUpload();
       forceStop();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -189,16 +222,32 @@ export function useSpeakingAttempt(): UseSpeakingAttemptReturn {
     startSession(speakingTask);
   }, [startSession]);
 
+  /** Request exit — sets exitRequested flag; parent renders ConfirmModal. */
   const exit = useCallback(() => {
-    const confirmed = window.confirm(
-      "Are you sure you want to leave this practice session?"
-    );
-    if (confirmed) {
-      forceStop();
-      reset();
-      router.back();
-    }
+    setExitRequested(true);
+  }, []);
+
+  const cancelExit = useCallback(() => {
+    setExitRequested(false);
+  }, []);
+
+  const confirmExit = useCallback(() => {
+    setExitRequested(false);
+    forceStop();
+    reset();
+    router.back();
   }, [reset, router, forceStop]);
 
-  return { phase, secondsLeft, uploadProgress, attemptId, uploadError, selectedChoice, start, exit };
+  // Silent teardown — no confirm dialog, no navigation. Used by the session
+  // component's unmount effect when the user navigates away themselves.
+  const terminate = useCallback(() => {
+    forceStop();
+    reset();
+  }, [forceStop, reset]);
+
+  return {
+    phase, secondsLeft, uploadProgress, attemptId, uploadError, selectedChoice,
+    exitRequested, cancelExit, confirmExit,
+    start, exit, terminate,
+  };
 }

@@ -5,12 +5,14 @@
 //
 // Shows:
 //   • "Task N Complete ✓" celebration pill
-//   • Large animated countdown ring
+//   • Large animated countdown ring (shared TimerRing component)
 //   • "Next up: Task N+1 — [Name]" preview card
 //   • Coaching tip specific to the next task
 // ─────────────────────────────────────────────────────────────────────────────
 
 import { CheckCircle2, Mic, Clock } from "lucide-react";
+import { TimerRing }    from "@/components/common/TimerRing";
+import { TimerDisplay } from "@/components/common/TimerDisplay";
 import { MOCK_EXAM_BREAK_SECONDS }  from "@/lib/practice/config";
 import type { MockExamTask }        from "@/lib/types";
 
@@ -38,47 +40,7 @@ const TASK_LABELS: Record<number, string> = {
   8: "Describing an Unusual Situation",
 };
 
-// ── Countdown ring ────────────────────────────────────────────────────────────
-
-function CountdownRing({
-  secondsLeft,
-  total,
-}: {
-  secondsLeft: number;
-  total:       number;
-}) {
-  const radius      = 52;
-  const circumference = 2 * Math.PI * radius;
-  const pct         = Math.max(0, secondsLeft / total);
-  const dashOffset  = circumference * (1 - pct);
-
-  return (
-    <div className="relative w-36 h-36 flex items-center justify-center">
-      <svg className="absolute inset-0 -rotate-90" width="144" height="144" viewBox="0 0 144 144">
-        {/* Track */}
-        <circle
-          cx="72" cy="72" r={radius}
-          fill="none" stroke="rgba(255,255,255,0.06)" strokeWidth="8"
-        />
-        {/* Progress */}
-        <circle
-          cx="72" cy="72" r={radius}
-          fill="none"
-          stroke={pct > 0.3 ? "#f59e0b" : "#ef4444"}
-          strokeWidth="8"
-          strokeLinecap="round"
-          strokeDasharray={circumference}
-          strokeDashoffset={dashOffset}
-          style={{ transition: "stroke-dashoffset 0.9s linear, stroke 0.5s" }}
-        />
-      </svg>
-      <div className="text-center z-10">
-        <p className="text-4xl font-bold tabular-nums text-foreground">{secondsLeft}</p>
-        <p className="text-xs text-subtle mt-0.5">seconds</p>
-      </div>
-    </div>
-  );
-}
+// ── Countdown ring — uses shared TimerRing + TimerDisplay ─────────────────────
 
 // ── Component ─────────────────────────────────────────────────────────────────
 
@@ -109,11 +71,21 @@ export function InterTaskBreakScreen({
         <p className="text-subtle text-sm">Take a breath — next task begins shortly.</p>
       </div>
 
-      {/* Countdown ring */}
-      <CountdownRing
-        secondsLeft={breakSecondsLeft}
-        total={MOCK_EXAM_BREAK_SECONDS}
-      />
+      {/* Countdown ring — shared components for visual consistency */}
+      <div className="relative flex items-center justify-center">
+        <TimerRing
+          secondsLeft={breakSecondsLeft}
+          totalSeconds={MOCK_EXAM_BREAK_SECONDS}
+          sizePx={144}
+        />
+        <div className="absolute inset-0 flex items-center justify-center">
+          <TimerDisplay
+            secondsLeft={breakSecondsLeft}
+            variant="dark"
+            size="lg"
+          />
+        </div>
+      </div>
 
       {/* Next task preview */}
       {nextTask && (

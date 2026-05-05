@@ -21,7 +21,8 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import { useRouter }   from "next/navigation";
 import { useAuth }     from "@clerk/nextjs";
 import { countWords }  from "@/lib/utils";
-import { API_V1, USE_MOCK, authHeaders } from "@/lib/api";
+import { API_BASE_URL, API_V1, USE_MOCK, authHeaders } from "@/lib/api";
+
 import {
   COUNTDOWN_STEPS,
   COUNTDOWN_STEP_DURATION_MS,
@@ -54,6 +55,9 @@ export interface UseWritingAttemptReturn {
   submit: () => void;
   /** Exit: resets state and navigates back. Caller must confirm first. */
   exit: () => void;
+  /** Silent termination — clears timers + session storage without navigating.
+   *  Use in unmount effects (page navigation away). */
+  terminate: () => void;
 }
 
 // ── Session persistence helpers ───────────────────────────────────────────────
@@ -90,8 +94,6 @@ export function clearSession(taskId: string): void {
 const TICK_MS            = 1_000;
 const TOTAL_COUNTDOWN_MS = COUNTDOWN_STEPS.length * COUNTDOWN_STEP_DURATION_MS;
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
-
 // ── Hook ──────────────────────────────────────────────────────────────────────
 
 export function useWritingAttempt(): UseWritingAttemptReturn {
@@ -111,6 +113,8 @@ export function useWritingAttempt(): UseWritingAttemptReturn {
   const tickRef        = useRef<ReturnType<typeof setInterval>  | null>(null);
   const countdownRef   = useRef<ReturnType<typeof setTimeout>   | null>(null);
   const processingRef  = useRef<ReturnType<typeof setTimeout>   | null>(null);
+  // AbortController for in-flight submit fetch calls — aborted in clearAll()
+  const abortRef       = useRef<AbortController | null>(null);
 
   // ── Timer management ──────────────────────────────────────────────────────
 
@@ -118,6 +122,9 @@ export function useWritingAttempt(): UseWritingAttemptReturn {
     if (tickRef.current)       { clearInterval(tickRef.current);      tickRef.current      = null; }
     if (countdownRef.current)  { clearTimeout(countdownRef.current);  countdownRef.current  = null; }
     if (processingRef.current) { clearTimeout(processingRef.current); processingRef.current = null; }
+    // Abort any in-flight submit fetch so callbacks don’t fire on an unmounted component
+    abortRef.current?.abort();
+    abortRef.current = null;
   }, []);
 
   const goToPhase = useCallback((next: WritingPhase, secs = 0) => {
@@ -192,25 +199,34 @@ export function useWritingAttempt(): UseWritingAttemptReturn {
     const task = taskRef.current;
     if (!task) return;
 
+    // Cancel any previous in-flight request and create a fresh abort signal
+    abortRef.current?.abort();
+    const ac     = new AbortController();
+    abortRef.current = ac;
+    const signal = ac.signal;
+
     // ── Mock mode ─────────────────────────────────────────────────────────────
     if (USE_MOCK) {
       const mockId = `mock-attempt-${Date.now()}`;
       attemptIdRef.current = mockId;
-      goToPhase("PROCESSING");
+      if (!signal.aborted) goToPhase("PROCESSING");
       return;
     }
 
     // ── Real pipeline ─────────────────────────────────────────────────────────
     try {
       const token   = await getToken();
+      if (signal.aborted) return;
       const headers = { ...authHeaders(token), "Content-Type": "application/json" };
 
       // Step 1 — create attempt (quota check happens here)
-      const startRes = await fetch(`${API_BASE}${API_V1}/writing/attempts/start`, {
+      const startRes = await fetch(`${API_BASE_URL}${API_V1}/writing/attempts/start`, {
         method: "POST",
         headers,
         body:   JSON.stringify({ prompt_id: task.id, is_mock_test: false }),
+        signal,
       });
+      if (signal.aborted) return;
       if (!startRes.ok) {
         const body = await startRes.json().catch(() => ({})) as Record<string, unknown>;
         if (startRes.status === 402) {
@@ -233,17 +249,20 @@ export function useWritingAttempt(): UseWritingAttemptReturn {
         throw new Error(err.detail ?? err.error ?? `start failed: ${startRes.status}`);
       }
       const { attempt_id } = await startRes.json() as { attempt_id: string };
+      if (signal.aborted) return;
       attemptIdRef.current = attempt_id;
 
       // Step 2 — submit essay (saves text + enqueues Celery scoring)
-      const submitRes = await fetch(`${API_BASE}${API_V1}/writing/attempts/${attempt_id}/submit`, {
+      const submitRes = await fetch(`${API_BASE_URL}${API_V1}/writing/attempts/${attempt_id}/submit`, {
         method: "POST",
         headers,
         body:   JSON.stringify({
           essay_text:     plainTextRef.current,
           auto_submitted: autoSubmitted.current,
         }),
+        signal,
       });
+      if (signal.aborted) return;
       if (!submitRes.ok) {
         const err = await submitRes.json().catch(() => ({})) as Record<string, string>;
         if (submitRes.status === 429) {
@@ -253,9 +272,12 @@ export function useWritingAttempt(): UseWritingAttemptReturn {
       }
 
       // Step 3 — advance to PROCESSING (triggers navigation)
-      goToPhase("PROCESSING");
+      if (!signal.aborted) goToPhase("PROCESSING");
 
     } catch (err) {
+      // Silently ignore intentional aborts (component unmounted / navigated away)
+      if (err instanceof DOMException && err.name === "AbortError") return;
+      if (signal.aborted) return;
       console.error("[useWritingAttempt] Submit pipeline failed:", err);
       setSubmitError(err instanceof Error ? err.message : "Submission failed. Please try again.");
       // Revert to WRITING so the user can retry manually
@@ -300,12 +322,23 @@ export function useWritingAttempt(): UseWritingAttemptReturn {
   }, [clearAll, goToPhase]);
 
   const exit = useCallback(() => {
+    const confirmed = window.confirm(
+      "Are you sure you want to leave? Your writing session will end and unsaved progress may be lost."
+    );
+    if (!confirmed) return;
     const task = taskRef.current;
     if (task) clearSession(task.id);
     clearAll();
-    setPhase("IDLE");
     router.back();
   }, [clearAll, router]);
 
-  return { phase, secondsLeft, wordCount, submitError, start, setContent, submit, exit };
+  // Silent teardown — no confirm dialog, no navigation. Used by the session
+  // component’s unmount effect when the user navigates away themselves.
+  // Does NOT clear sessionStorage so page-refresh mid-session can still resume.
+  // Does NOT call setPhase — the component is unmounting; state updates are moot.
+  const terminate = useCallback(() => {
+    clearAll();
+  }, [clearAll]);
+
+  return { phase, secondsLeft, wordCount, submitError, start, setContent, submit, exit, terminate };
 }

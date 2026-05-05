@@ -63,8 +63,10 @@ export interface MockExamState {
 
   // ── Actions ──────────────────────────────────────────────────────────────
 
-  /** Enter LOADING — called before the prompt fetch begins. */
-  beginLoading: () => void;
+  /** Enter LOADING — called before the prompt fetch begins. Accepts the
+   *  exam slot number so the session UUID can be stabilised across page
+   *  navigations (retakes reuse the same session_id → no quota inflation). */
+  beginLoading: (slotNumber: number) => void;
   /** Populate tasks and enter READY (intro screen). */
   loadExam: (prompts: MockExamPrompt[]) => void;
   /** User pressed "Begin Exam" — enter TASK_COUNTDOWN for task 0. */
@@ -169,8 +171,39 @@ const INITIAL: Pick<
 export const useMockExamStore = create<MockExamState>((set, get) => ({
   ...INITIAL,
 
-  beginLoading: () => {
-    set({ ...INITIAL, phase: "LOADING" });
+  beginLoading: (slotNumber: number) => {
+    // Derive a localStorage key that is user-agnostic but slot-specific.
+    // We scope it to "speaking" here because this store is speaking-only.
+    const storageKey = `celpip-mock-session-speaking-${slotNumber}`;
+
+    // Try to restore the session ID that was previously used for this slot.
+    // This is the core of the retake-dedup fix: if the user navigates away
+    // and comes back to the same slot, we must reuse the same UUID so the
+    // backend's COUNT(DISTINCT session_id) query doesn't inflate.
+    let examSessionId: string;
+    try {
+      const stored = localStorage.getItem(storageKey);
+      examSessionId = stored || "";
+    } catch {
+      examSessionId = get().examSessionId;
+    }
+
+    // If no stored ID exists (first-ever attempt on this slot), generate one
+    // and persist it immediately so future retakes can reuse it.
+    if (!examSessionId) {
+      examSessionId =
+        typeof crypto !== "undefined" && typeof crypto.randomUUID === "function"
+          ? crypto.randomUUID()
+          : "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, (c) => {
+              const r = (Math.random() * 16) | 0;
+              return (c === "x" ? r : (r & 0x3) | 0x8).toString(16);
+            });
+      try {
+        localStorage.setItem(storageKey, examSessionId);
+      } catch { /* storage quota or SSR — non-fatal */ }
+    }
+
+    set({ ...INITIAL, phase: "LOADING", examSessionId });
   },
 
   loadExam: (prompts) => {
@@ -187,22 +220,14 @@ export const useMockExamStore = create<MockExamState>((set, get) => ({
     const updatedTasks = tasks.map((t, i) =>
       i === 0 ? { ...t, status: "active" as const } : t
     );
+    // NOTE: examSessionId is intentionally NOT re-generated here.
+    // It was loaded from localStorage (or freshly minted) in beginLoading()
+    // and must survive startExam() so the backend always sees the same
+    // session_id for this exam slot — keeping COUNT(DISTINCT session_id) stable.
     set({
       tasks: updatedTasks,
       currentIndex: 0,
       phase: "TASK_COUNTDOWN",
-      // Generate a stable UUID for this exam session — shared by all 8 task uploads
-      examSessionId: (() => {
-        // crypto.randomUUID() requires a secure context (HTTPS / localhost).
-        // Fall back to a Math.random UUID for plain HTTP LAN dev access.
-        if (typeof crypto !== "undefined" && typeof crypto.randomUUID === "function") {
-          return crypto.randomUUID();
-        }
-        return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, (c) => {
-          const r = (Math.random() * 16) | 0;
-          return (c === "x" ? r : (r & 0x3) | 0x8).toString(16);
-        });
-      })(),
       secondsLeft: 0,
       selectedChoice: null,
       recordingBlob: null,
@@ -312,6 +337,10 @@ export const useMockExamStore = create<MockExamState>((set, get) => ({
   },
 
   reset: () => {
+    // NOTE: We intentionally reset examSessionId to "" here.
+    // The stable session UUID is persisted in localStorage (keyed by slot)
+    // and will be restored from there on the next call to beginLoading().
+    // Resetting the in-memory ID prevents stale state leaking between slots.
     set({ ...INITIAL });
   },
 }));

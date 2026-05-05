@@ -120,11 +120,8 @@ export function WritingTaskCard({
         {/* ── Row 1: badge strip ─────────────────────────────────────────── */}
         <div className="flex items-center justify-between gap-2 mb-3">
           <div className="flex items-center gap-1.5 flex-wrap">
-            <span className={cn(BADGE_BASE, "bg-white/[0.07] text-white/50 border-white/[0.10]")}>
+            <span className={cn(BADGE_BASE, "bg-white/[0.08] text-white/70 border-white/[0.12] tracking-wide text-[10px] font-bold uppercase")}>
               Task {taskNumber}
-            </span>
-            <span className={cn(BADGE_BASE, "bg-primary/10 text-primary border-primary/20")}>
-              {taskType}
             </span>
           </div>
 
@@ -158,29 +155,29 @@ export function WritingTaskCard({
           <div className="w-8 h-8 rounded-lg bg-amber-600/15 border border-amber-500/20 flex items-center justify-center shrink-0">
             <PenLine className="w-4 h-4 text-amber-400" />
           </div>
-          <h3 className="text-sm font-semibold text-foreground leading-snug line-clamp-2">{title}</h3>
+          <h3 className="text-base font-bold text-foreground leading-snug line-clamp-2 tracking-tight">{title}</h3>
         </div>
 
         {/* ── Row 3: meta row ────────────────────────────────────────────── */}
-        <div className="flex items-center gap-3 text-xs text-subtle/80 mb-3">
+        <div className="flex items-center gap-3 text-[11px] font-medium text-subtle mb-3">
           <span className="flex items-center gap-1">
-            <Clock className="w-3 h-3" />
-            {formatTime(timeLimitSecs)}
+            <Clock className="w-3 h-3 text-amber-400/60" />
+            <span>Time <span className="text-foreground/60">{formatTime(timeLimitSecs)}</span></span>
           </span>
           <span className="w-px h-3 bg-white/10 self-center" />
           <span className="flex items-center gap-1">
-            <AlignLeft className="w-3 h-3" />
-            {maxWords != null ? `${minWords}–${maxWords} words` : `${minWords}+ words`}
+            <AlignLeft className="w-3 h-3 text-amber-400/60" />
+            <span className="text-foreground/60">{maxWords != null ? `${minWords}–${maxWords} words` : `${minWords}+ words`}</span>
           </span>
         </div>
 
         {/* ── Row 4: description (flex-1, pushes footer down) ──────────── */}
-        <p className="text-sm text-subtle leading-relaxed line-clamp-2 flex-1">{description}</p>
+        <p className="text-sm text-foreground/55 leading-relaxed line-clamp-2 flex-1">{description}</p>
 
         {/* ── Row 5: footer ─────────────────────────────────────────────── */}
         {!isLocked && (
           <div className="flex items-center justify-between mt-3 pt-2.5 border-t border-white/[0.06]">
-            <span className="text-[11px] text-white/30">
+            <span className="text-[11px] text-white/40 font-medium">
               {promptCount > 0 ? `${promptCount} prompt${promptCount !== 1 ? "s" : ""}` : ""}
             </span>
             <ChevronRight className="w-4 h-4 text-white/30 group-hover:text-amber-400/70 transition-colors" />

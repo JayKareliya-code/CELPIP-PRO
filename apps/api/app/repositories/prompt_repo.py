@@ -28,17 +28,19 @@ class SpeakingPromptRepository(BaseRepository[SpeakingPrompt]):
         )
         return list(result.scalars().all())
 
-    async def list_active_mock(self) -> list[SpeakingPrompt]:
-        """Return all published+active 'mock' prompts ordered by task number.
+    async def list_active_mock(self, slot: int) -> list[SpeakingPrompt]:
+        """Return all published+active 'mock' prompts for a specific exam slot.
 
-        Returns one prompt per task (the lowest sort_order) so the mock exam
-        always gets exactly 8 prompts in task order.
+        Filters by BOTH prompt_tag='mock' AND exam_slot=slot so prompts
+        assigned to Exam 1 never appear in Exam 2 and vice versa.
+        Results are ordered by task_number then sort_order.
         """
         result = await self.session.execute(
             select(SpeakingPrompt)
             .where(SpeakingPrompt.is_active == True)   # noqa: E712
             .where(SpeakingPrompt.status == "published")
             .where(SpeakingPrompt.prompt_tag == "mock")
+            .where(SpeakingPrompt.exam_slot == slot)
             .order_by(SpeakingPrompt.task_number, SpeakingPrompt.sort_order)
         )
         return list(result.scalars().all())
@@ -104,17 +106,18 @@ class WritingPromptRepository(BaseRepository[WritingPrompt]):
         )
         return list(result.scalars().all())
 
-    async def list_mock_active(self) -> list[WritingPrompt]:
-        """Return published+active MOCK writing prompts ordered by task_number.
+    async def list_mock_active(self, slot: int) -> list[WritingPrompt]:
+        """Return published+active MOCK writing prompts for a specific exam slot.
 
-        Used by GET /writing/mock-prompts to serve the writing mock exam.
-        Only prompts tagged 'mock' are returned.
+        Filters by prompt_tag='mock' AND exam_slot=slot so writing exam slots
+        never share questions. Mirrors SpeakingPromptRepository.list_active_mock.
         """
         result = await self.session.execute(
             select(WritingPrompt)
             .where(WritingPrompt.is_active == True)   # noqa: E712
             .where(WritingPrompt.status == "published")
             .where(WritingPrompt.prompt_tag == "mock")
+            .where(WritingPrompt.exam_slot == slot)
             .order_by(WritingPrompt.task_number, WritingPrompt.sort_order)
         )
         return list(result.scalars().all())

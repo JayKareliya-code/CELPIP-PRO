@@ -240,6 +240,13 @@ def _guard_low_band(result: ScoringResult) -> ScoringResult:
     too weak to produce meaningful feedback.  We set estimated_band to 3.0
     as a sentinel value — the pipeline caller and frontend treat band < 4
     as 'score too low to assess — please try again'.
+
+    Bands 1–4 are intentionally excluded from the rubric system prompt
+    (see the ``if band >= 5`` filter in speaking_rubric.py /
+    writing_rubric.py build functions).  This function is the complementary
+    runtime sentinel: if the LLM still outputs a sub-4 band despite not
+    being given descriptors for those bands, we catch and normalise it here
+    rather than letting a spuriously low score reach the database.
     """
     if result.estimated_band < 4.0:
         logger.info(
@@ -369,6 +376,8 @@ class OpenAIProvider:
                 {"role": "system", "content": system_prompt},
                 {"role": "user",   "content": user_content},
             ],
+            "max_tokens": 4000,     # typical response is ~1500-2500 tok; cap prevents runaway output
+            "temperature": 0.15,    # low for scoring consistency, >0 for feedback variety
         }
         resp = await self._client.post("/chat/completions", json=payload)
         resp.raise_for_status()
@@ -474,7 +483,10 @@ class OpenAIProvider:
                 {"role": "system", "content": hardened_system},
                 {"role": "user", "content": user_content},
             ],
+            "max_tokens": 4000,     # typical response is ~1500-2500 tok; cap prevents runaway output
+            "temperature": 0.15,    # low for scoring consistency, >0 for feedback variety
         }
+
         resp = await self._client.post("/chat/completions", json=payload)
         resp.raise_for_status()
         body = resp.json()

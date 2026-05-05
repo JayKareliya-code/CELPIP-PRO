@@ -80,6 +80,11 @@ function toPayload(data: FormData, taskNumber: number): SpeakingPromptPayload {
       ? Number(data.get("default_choice_index"))
       : null,
     prompt_tag: (data.get("prompt_tag") as "practice" | "mock" | null) ?? "practice",
+    exam_slot:  (() => {
+      const raw = String(data.get("exam_slot") ?? "").trim();
+      const n   = parseInt(raw, 10);
+      return raw && !isNaN(n) ? n : null;
+    })(),
   };
 }
 
@@ -120,7 +125,8 @@ function promptHasChanges(
     jsonStr(payload.curveball_option)            !== jsonStr(original.curveball_option            ?? null) ||
     (payload.curveball_instruction_text ?? null) !== (original.curveball_instruction_text         ?? null) ||
     (payload.default_choice_index       ?? null) !== (original.default_choice_index               ?? null) ||
-    (payload.prompt_tag ?? "practice")           !== ((original as SpeakingPrompt & { prompt_tag?: string }).prompt_tag ?? "practice")
+    (payload.prompt_tag ?? "practice")           !== ((original as SpeakingPrompt & { prompt_tag?: string }).prompt_tag ?? "practice") ||
+    (payload.exam_slot  ?? null)                  !== ((original as SpeakingPrompt & { exam_slot?: number | null }).exam_slot  ?? null)
   );
 }
 

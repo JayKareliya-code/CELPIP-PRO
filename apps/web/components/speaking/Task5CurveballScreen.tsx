@@ -1,180 +1,149 @@
 // ─────────────────────────────────────────────────────────────────────────────
-// Task5CurveballScreen.tsx — RECORDING and RECORDING_PART2 phases for Task 5
-//
-// Handles BOTH curveball phases via `isRecording`:
-//   isRecording=false (RECORDING)      → silent curveball-prep, ring timer
-//   isRecording=true  (RECORDING_PART2) → mic active, depleting bar, waveform
-//
-// Everything fits in one viewport — no scrolling.
-// Layout (flex-col h-[calc(100vh-3.5rem)]):
-//   1. Compact header: phase indicator + timer
-//   2. Instruction banner (amber)
-//   3. Option cards side-by-side, images capped at 20 vh
-//   4. Bottom: guidance text OR mic/waveform controls
+// Task5CurveballScreen.tsx — Task 5 curveball prep + recording phases
 // ─────────────────────────────────────────────────────────────────────────────
 
 "use client";
 
-import { Mic }           from "lucide-react";
-import { TimerRing }    from "@/components/common/TimerRing";
-import { TimerDisplay } from "@/components/common/TimerDisplay";
-import { TimerBar }     from "@/components/common/TimerBar";
-import { MicWaveform }  from "@/components/speaking/MicWaveform";
-import { cn }           from "@/lib/utils";
-import { RESPONSE_PULSE_THRESHOLD_SECS } from "@/lib/constants";
-import type { ChoiceOption }      from "@/lib/types";
-
-// ── Props ─────────────────────────────────────────────────────────────────────
+import { Mic }                from "lucide-react";
+import { MicWaveform }        from "@/components/speaking/MicWaveform";
+import { TaskIdentityStrip }  from "@/components/speaking/TaskIdentityStrip";
+import { TimerCard }          from "@/components/speaking/TimerCard";
+import { TaskPromptBox }      from "@/components/speaking/TaskPromptBox";
+import { cn }                 from "@/lib/utils";
+import type { ChoiceOption }  from "@/lib/types";
 
 interface Task5CurveballScreenProps {
   secondsLeft:              number;
   totalSeconds:             number;
+  totalPrepSeconds?:        number;
   curveballOption:          ChoiceOption;
   selectedChoice:           ChoiceOption | null;
   curveballInstructionText: string;
   isRecording:              boolean;
+  taskNumber?:              number;
+  taskTitle?:               string;
+  showInfoBar?:             boolean;
 }
 
-// ── Option Detail Card ────────────────────────────────────────────────────────
+// ── Option detail card — neutral, no color fill ───────────────────────────────
 
 function OptionDetailCard({
   option,
-  variant = "default",
+  label,
+  isSelected = false,
 }: {
-  option:   ChoiceOption;
-  variant?: "curveball" | "selected" | "default";
+  option:      ChoiceOption;
+  label:       string;
+  isSelected?: boolean;
 }) {
-  const headerColour =
-    variant === "selected" ? "text-amber-300" : "text-foreground";
-
-  const borderColour =
-    variant === "selected" ? "border-amber-500/30 bg-amber-500/5" :
-    "border-white/[0.08] bg-white/[0.03]";
-
   return (
-    <div className={cn("rounded-xl border overflow-hidden flex flex-col", borderColour)}>
-      {/* Image — capped at 20 vh, full image visible (object-contain, no crop) */}
-      {option.image_url && (
-        // eslint-disable-next-line @next/next/no-img-element
-        <img
-          src={option.image_url}
-          alt={option.name}
-          className="w-full max-h-[20vh] object-contain shrink-0"
-        />
-      )}
-      <div className="px-4 py-3">
-        <h4 className={cn("text-sm font-bold mb-1.5 underline underline-offset-2", headerColour)}>
-          {option.name}
-        </h4>
-        <ul className="space-y-0.5">
-          {option.details.map((d, i) => (
-            <li key={i} className="text-xs text-canvas-subtle leading-snug">
-              <span className="font-medium text-foreground/60">{d.label}:</span>{" "}
-              <span>{d.value}</span>
-            </li>
-          ))}
-        </ul>
+    <div className="flex flex-col gap-1.5 flex-1 min-w-0">
+      <p className="text-[10px] font-semibold uppercase tracking-widest text-canvas-subtle/50 select-none">
+        {label}
+      </p>
+      <div className={cn(
+        "rounded-2xl border overflow-hidden",
+        isSelected ? "border-primary/40" : "border-border/40",
+        "bg-white/[0.03]",
+      )}>
+        {option.image_url && (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img src={option.image_url} alt={option.name}
+            className="w-full max-h-[18vh] object-contain" />
+        )}
+        <div className="px-4 py-3">
+          <h4 className={cn(
+            "text-sm font-bold mb-1.5",
+            isSelected ? "text-primary" : "text-canvas-text",
+          )}>
+            {option.name}
+          </h4>
+          <ul className="space-y-1">
+            {option.details.map((d, i) => (
+              <li key={i} className="text-xs leading-snug flex gap-1">
+                <span className="text-canvas-text/90 font-semibold shrink-0">{d.label}:</span>
+                <span className="text-canvas-text/75">{d.value}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
       </div>
     </div>
   );
 }
 
-// ── Main Component ────────────────────────────────────────────────────────────
+// ── Main ─────────────────────────────────────────────────────────────────────
 
 export function Task5CurveballScreen({
   secondsLeft,
   totalSeconds,
+  totalPrepSeconds = 30,
   curveballOption,
   selectedChoice,
   curveballInstructionText,
   isRecording,
+  taskNumber = 5,
+  taskTitle  = "Comparing and Persuading",
+  showInfoBar = true,
 }: Task5CurveballScreenProps) {
-  const isLow = secondsLeft <= RESPONSE_PULSE_THRESHOLD_SECS;
 
   return (
-    // h-[calc(100vh-3.5rem)] + overflow-hidden → fills usable viewport below the 3.5rem sticky navbar
-    <div className="flex flex-col min-h-[calc(100vh-3.5rem)] overflow-y-auto bg-canvas px-5 py-4 gap-4 items-center justify-start sm:h-[calc(100vh-3.5rem)] sm:overflow-hidden sm:justify-center sm:px-6 sm:py-6">
+    <div className="flex flex-col flex-1">
+      <div className="flex-1 flex flex-col items-center justify-center gap-3 px-4 sm:px-6 lg:px-8 py-8 w-full max-w-5xl mx-auto">
 
-      {/* ── 1. Compact header ───────────────────────────────────────────────── */}
-      <div className="flex items-center gap-4 w-full max-w-3xl shrink-0">
+        {/* Task identity strip — inline, above curveball card */}
+        {showInfoBar && (
+          <TaskIdentityStrip
+            taskNumber={taskNumber}
+            taskTitle={taskTitle}
+            prepSeconds={totalPrepSeconds}
+            responseSeconds={totalSeconds}
+            className="w-full"
+          />
+        )}
+
+        {/* Scenario update card */}
+        {curveballInstructionText && (
+          <TaskPromptBox
+            promptText={curveballInstructionText}
+            variant="overlay"
+            label="Scenario update"
+            className="w-full"
+          />
+        )}
+
+        {/* Option cards */}
+        <div className="w-full flex flex-col sm:flex-row gap-4">
+          <OptionDetailCard option={curveballOption} label="New option" />
+          {selectedChoice && (
+            <OptionDetailCard option={selectedChoice} label="Your choice" isSelected />
+          )}
+        </div>
+
+        {/* Timer (PREP) or Mic card (RECORDING) */}
         {isRecording ? (
-          // Recording phase: phase badge + timer display on one row, then TimerBar below
-          <div className="w-full space-y-2">
-            {/* REC badge row */}
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <span className="relative flex h-3 w-3">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-danger opacity-75" />
-                  <span className="relative inline-flex rounded-full h-3 w-3 bg-danger" />
-                </span>
-                <span className="text-xs font-semibold tracking-[0.18em] uppercase text-danger">Recording</span>
-                <span className="text-xs text-canvas-subtle border border-canvas-subtle/30 rounded-full px-2 py-0.5">Part 2 of 2</span>
-              </div>
-              <TimerDisplay secondsLeft={secondsLeft} variant="dark" size="sm" pulseWhenCritical />
+          <div className="w-full rounded-2xl border border-border/50 bg-surface/40 px-5 py-5 flex flex-col items-center gap-4">
+            <div className="flex h-12 w-12 items-center justify-center rounded-full border border-border/60 bg-white/[0.04] animate-pulse-ring">
+              <Mic className="w-5 h-5 text-danger/80" />
             </div>
-            {/* Shared TimerBar — consistent with RecordingInterface */}
-            <TimerBar
-              secondsLeft={secondsLeft}
-              totalSeconds={totalSeconds}
-              hint={isLow ? "⚡ Finish your thought!" : "Speak clearly and naturally"}
-            />
+            <MicWaveform isActive className="h-7 w-full max-w-xs" />
+            <p className="text-xs text-canvas-subtle/60">Speak clearly into your microphone</p>
           </div>
         ) : (
-          // Prep phase: compact ring (72 px) + badge
-          <>
-            <div className="relative flex items-center justify-center shrink-0">
-              <TimerRing secondsLeft={secondsLeft} totalSeconds={totalSeconds} sizePx={72} />
-              <div className="absolute inset-0 flex items-center justify-center">
-                <TimerDisplay secondsLeft={secondsLeft} variant="dark" size="sm" />
-              </div>
-            </div>
-            <span className="text-xs font-semibold tracking-[0.2em] uppercase text-primary px-3 py-1 rounded-full border border-primary/30 bg-primary/10 select-none">
-              Preparation Time
-            </span>
-          </>
+          <TimerCard
+            secondsLeft={secondsLeft}
+            totalSeconds={totalSeconds}
+            label="Preparation Time"
+            className="w-full"
+          />
         )}
-      </div>
 
-      {/* ── 2. Instruction banner — neutral style matching Step 1 scenario box ── */}
-      {curveballInstructionText && (
-        <div className="w-full max-w-3xl shrink-0 rounded-xl border border-white/[0.08] bg-white/[0.03] px-4 py-3">
-          <p className="text-[10px] font-semibold tracking-[0.15em] uppercase text-canvas-subtle/50 mb-1 select-none">Scenario update</p>
-          <p className="text-base leading-snug text-canvas-text">{curveballInstructionText}</p>
-        </div>
-      )}
-
-      {/* ── 3. Option cards — side-by-side, natural height ────────────────────── */}
-      <div className="w-full max-w-3xl grid grid-cols-1 sm:grid-cols-2 gap-3 items-start shrink-0">
-        <div className="flex flex-col gap-1">
-          <p className="text-[10px] font-semibold tracking-[0.14em] uppercase text-canvas-subtle/50 select-none">
-            New option
+        {!isRecording && (
+          <p className="text-xs text-canvas-subtle/50 text-center">
+            Study the new option and prepare to defend your choice.
           </p>
-          <OptionDetailCard option={curveballOption} variant="curveball" />
-        </div>
-
-        {selectedChoice && (
-          <div className="flex flex-col gap-1">
-            <p className="text-[10px] font-semibold tracking-[0.14em] uppercase text-canvas-subtle/50 select-none">
-              Your choice
-            </p>
-            <OptionDetailCard option={selectedChoice} variant="selected" />
-          </div>
         )}
       </div>
-
-      {/* ── 4. Bottom controls ───────────────────────────────────────────────── */}
-      {isRecording ? (
-        <div className="flex flex-col items-center gap-3 shrink-0">
-          <div className="flex h-14 w-14 items-center justify-center rounded-full bg-danger/10 border border-danger/30 animate-pulse-ring">
-            <Mic className="w-6 h-6 text-danger" />
-          </div>
-          <MicWaveform isActive className="h-8 w-full max-w-xs" />
-        </div>
-      ) : (
-        <p className="text-xs text-canvas-subtle/60 text-center shrink-0 max-w-md">
-          Study the new option and prepare to defend your choice. Recording starts automatically when time is up.
-        </p>
-      )}
     </div>
   );
 }

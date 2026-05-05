@@ -11,9 +11,9 @@
 import { useRouter }     from "next/navigation";
 import { useAuth }       from "@clerk/nextjs";
 import { useQuery }      from "@tanstack/react-query";
-import { PenLine, Loader2, CheckCircle2, RotateCcw } from "lucide-react";
+import { PenLine, Loader2, CheckCircle2, RotateCcw, AlertCircle } from "lucide-react";
 import { cn }            from "@/lib/utils";
-import { API_V1, authHeaders } from "@/lib/api";
+import { API_BASE_URL, API_V1, authHeaders } from "@/lib/api";
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -59,7 +59,6 @@ interface WritingExamCompleteScreenProps {
 
 // ── Component ─────────────────────────────────────────────────────────────────
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
 const TASK_LABELS: Record<number, string> = {
   1: "Task 1 — Email",
   2: "Task 2 — Essay",
@@ -72,12 +71,13 @@ export function WritingExamCompleteScreen({ attempt1Id, attempt2Id }: WritingExa
   const attemptIds = `${attempt1Id},${attempt2Id}`;
 
   // Poll until all_scored = true
-  const { data } = useQuery<ResultsResponse>({
+  const { data, isError } = useQuery<ResultsResponse>({
+
     queryKey: ["writingMockResults", attemptIds],
     queryFn: async () => {
       const token = await getToken();
       const res = await fetch(
-        `${API_BASE}${API_V1}/writing/mock-results?attempt_ids=${attemptIds}`,
+        `${API_BASE_URL}${API_V1}/writing/mock-results?attempt_ids=${attemptIds}`,
         { headers: authHeaders(token) },
       );
       if (!res.ok) throw new Error("Could not fetch results");
@@ -88,10 +88,33 @@ export function WritingExamCompleteScreen({ attempt1Id, attempt2Id }: WritingExa
       return d?.all_scored ? false : 5_000;   // stop polling once complete
     },
     staleTime: 0,
+    retry: 2,
   });
 
   const allScored = data?.all_scored ?? false;
   const results   = data?.results ?? [];
+
+  // P2-2: Surface polling errors instead of leaving the user on an infinite spinner
+  if (isError) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-screen bg-muted gap-4 px-6 text-center">
+        <div className="w-14 h-14 rounded-2xl bg-red-900/20 border border-red-700/30 flex items-center justify-center">
+          <AlertCircle className="w-7 h-7 text-red-400" />
+        </div>
+        <p className="text-base font-semibold text-foreground">Could not retrieve results</p>
+        <p className="text-sm text-subtle max-w-xs">
+          Your essays were submitted successfully. Check your History for results, or refresh this page.
+        </p>
+        <button
+          onClick={() => router.push("/history")}
+          className="mt-2 px-5 py-2.5 rounded-xl bg-primary hover:bg-primary/90
+                     text-primary-foreground text-sm font-semibold transition-colors border border-amber-400/30"
+        >
+          View History
+        </button>
+      </div>
+    );
+  }
 
   // Average band across both tasks (shown in header)
   const bands   = results.map((r) => r.estimated_band).filter((b): b is number => b !== null);

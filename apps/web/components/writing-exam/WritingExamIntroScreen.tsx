@@ -9,8 +9,8 @@ import { cn } from "@/lib/utils";
 import type { WritingTask } from "@/lib/types";
 
 interface WritingExamIntroScreenProps {
-  task1:   WritingTask;
-  task2:   WritingTask;
+  task1: WritingTask;
+  task2: WritingTask;
   onStart: () => void;
 }
 
@@ -34,16 +34,13 @@ export function WritingExamIntroScreen({ task1, task2, onStart }: WritingExamInt
           <h1 className="text-3xl md:text-4xl font-bold text-foreground">
             CELPIP Writing Test
           </h1>
-          <p className="text-subtle text-sm max-w-md mx-auto">
-            Two timed tasks — just like the real CELPIP exam. Complete both consecutively.
-          </p>
         </div>
 
         {/* Info row */}
         <div className="flex items-center gap-6 text-sm text-subtle mt-1">
           <span className="flex items-center gap-1.5">
             <Clock className="w-4 h-4 text-amber-400/70" />
-            ~27 minutes total
+            ~53 minutes total
           </span>
           <span className="w-px h-4 bg-white/10" />
           <span className="flex items-center gap-1.5">

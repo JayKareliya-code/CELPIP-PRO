@@ -49,13 +49,18 @@ export function CountdownOverlay({ className }: CountdownOverlayProps) {
   return (
     <div
       className={cn(
-        "fixed inset-0 z-50 flex flex-col items-center justify-center gap-6",
+        // Intentionally NOT fixed/inset-0 — the parent practice layout.tsx
+        // (z-[55] fixed canvas) provides the full-screen context. Using h-full
+        // here fills that canvas correctly and avoids a stacking-context conflict.
+        // If CountdownOverlay is ever used outside a fixed-canvas parent,
+        // this will need to revert to "fixed inset-0 z-50".
+        "h-full w-full flex flex-col items-center justify-center gap-6",
         "bg-canvas",
         className
       )}
       aria-live="assertive"
       role="status"
-      aria-label={`Starting in ${currentStep}`}
+      aria-label={isGo ? "Begin speaking now" : `Starting in ${currentStep}`}
     >
       {/* Step display with bounce-in animation */}
       <div
