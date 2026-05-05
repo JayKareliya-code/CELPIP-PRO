@@ -30,7 +30,6 @@ export function PrepTimerScreen({
   className,
 }: PrepTimerScreenProps) {
   const hasImage = Boolean(imageUrl);
-  const taskLabel = taskNumber === 0 ? "Practice" : `Task ${taskNumber}`;
 
   return (
     <div className={cn("flex flex-col flex-1", className)}>

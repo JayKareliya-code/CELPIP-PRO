@@ -138,15 +138,6 @@ export function MockExamShell({ slotNumber }: MockExamShellProps) {
     phase !== "IDLE" &&
     phase !== "LOADING";
 
-  // ── Show ExamProgressRail only during active task / break phases ──────────
-  const showRail =
-    tasks.length > 0 &&
-    phase !== "IDLE" &&
-    phase !== "LOADING" &&
-    phase !== "READY" &&
-    phase !== "COMPLETE" &&
-    phase !== "ERROR";
-
   // ── Phase router ──────────────────────────────────────────────────────────
 
   const renderScreen = () => {

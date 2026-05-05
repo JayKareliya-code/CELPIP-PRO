@@ -35,11 +35,6 @@ interface SpeakingTaskCardProps {
   href: string;
 }
 
-const DIFFICULTY_CONFIG: Record<Difficulty, { label: string; classes: string }> = {
-  easy:   { label: "Easy",   classes: "bg-emerald-900/40 text-emerald-400 border-emerald-800/50" },
-  medium: { label: "Medium", classes: "bg-amber-900/40   text-amber-400   border-amber-800/50"  },
-  hard:   { label: "Hard",   classes: "bg-red-900/40     text-red-400     border-red-800/50"    },
-};
 
 // Gradient splash + fill colour per task — unified amber-gold spectrum
 const TASK_META: Record<string, { grad: string; fill: string }> = {
@@ -63,8 +58,6 @@ export function SpeakingTaskCard({
   description,
   prepTimeSecs,
   responseTimeSecs,
-  difficulty,
-  hasParts = false,
   promptCount,
   attemptsUsed,
   attemptsLimit,
@@ -74,7 +67,6 @@ export function SpeakingTaskCard({
 }: SpeakingTaskCardProps) {
   const key       = taskNumber === "practice" ? "practice" : String(taskNumber);
   const taskLabel = taskNumber === "practice" ? "Practice" : `Task ${taskNumber}`;
-  const diffCfg   = DIFFICULTY_CONFIG[difficulty];
   const meta      = TASK_META[key] ?? TASK_META["1"];
 
   // ── Progress fill ──────────────────────────────────────────────────────────

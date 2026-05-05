@@ -58,8 +58,7 @@ export function WritingPracticeSession({ task }: WritingPracticeSessionProps) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const isSubmitting = phase === "SUBMITTING" || phase === "PROCESSING";
-  const canExit      = !isSubmitting && phase !== "DONE";
+
 
   // Clear draft on submit so a fresh session starts next time
   const handleSubmit = () => {

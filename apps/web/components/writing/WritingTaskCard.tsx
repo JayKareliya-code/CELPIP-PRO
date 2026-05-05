@@ -58,7 +58,6 @@ function formatTime(seconds: number): string {
 export function WritingTaskCard({
   taskNumber,
   title,
-  taskType,
   timeLimitSecs,
   minWords,
   maxWords,
