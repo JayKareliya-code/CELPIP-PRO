@@ -10,10 +10,6 @@ const FAQS = [
     a: "Yes. Pro is a one-time purchase. There are no subscriptions, renewals, or hidden fees.",
   },
   {
-    q: "Is Ultra available now?",
-    a: "No. Ultra is coming soon. Pro is the paid plan currently available in production, and Ultra is shown only as a planned future upgrade.",
-  },
-  {
     q: "What does Pro unlock?",
     a: "Pro unlocks individual Speaking and Writing task practice, detailed AI feedback, estimated practice band scores, improved sample responses, vocabulary and templates, attempt history, and 2 full mock tests for Speaking plus 2 full mock tests for Writing.",
   },
@@ -23,7 +19,7 @@ const FAQS = [
   },
   {
     q: "Can I get a refund?",
-    a: "Because CELPIPBRO delivers instant digital access, all purchases are final. If you have a problem, reach out via the Contact page and we'll do our best to help.",
+    a: "Because CELPIPBRO delivers instant digital access, all purchases are final. If you have a problem, reach out via the Contact page and we will do our best to help.",
   },
   {
     q: "Is my payment secure?",
@@ -39,21 +35,21 @@ function FAQItem({ q, a }: { q: string; a: string }) {
   const [open, setOpen] = useState(false);
 
   return (
-    <div className="border-b border-border last:border-0">
+    <div className="border-b border-white/[0.06] last:border-0">
       <button
         onClick={() => setOpen((o) => !o)}
-        className="w-full flex items-center justify-between gap-4 py-4 text-left hover:text-primary transition-colors"
+        className="w-full flex items-center justify-between gap-4 py-4 text-left hover:text-amber-400 transition-colors"
       >
-        <span className="text-sm font-semibold text-foreground">{q}</span>
+        <span className="text-sm font-medium text-white/70">{q}</span>
         <ChevronDown
           className={cn(
-            "w-4 h-4 text-subtle shrink-0 transition-transform duration-200",
+            "w-4 h-4 text-white/30 shrink-0 transition-transform duration-200",
             open && "rotate-180",
           )}
         />
       </button>
       {open && (
-        <p className="text-sm text-subtle leading-relaxed pb-4 pr-8">{a}</p>
+        <p className="text-sm text-white/40 leading-relaxed pb-4 pr-8">{a}</p>
       )}
     </div>
   );
@@ -61,9 +57,13 @@ function FAQItem({ q, a }: { q: string; a: string }) {
 
 export function BillingFAQ() {
   return (
-    <div className="rounded-2xl border border-border bg-surface p-6">
-      <h3 className="text-base font-bold text-foreground mb-2">Frequently Asked Questions</h3>
-      <div className="mt-2">
+    <div className="rounded-xl border border-white/[0.06] px-6 py-2">
+      <div className="py-4 border-b border-white/[0.06]">
+        <h3 className="text-sm font-semibold text-white/60 uppercase tracking-widest">
+          Frequently Asked Questions
+        </h3>
+      </div>
+      <div>
         {FAQS.map((faq) => (
           <FAQItem key={faq.q} q={faq.q} a={faq.a} />
         ))}

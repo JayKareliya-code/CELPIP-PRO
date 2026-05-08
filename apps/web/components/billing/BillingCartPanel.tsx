@@ -1,0 +1,139 @@
+"use client";
+
+import { ShoppingCart, Loader2 } from "lucide-react";
+import { cn } from "@/lib/utils";
+import { BillingCartItem } from "./BillingCartItem";
+import { PromoCodeForm } from "./PromoCodeForm";
+import { BillingTrustStrip } from "./BillingTrustStrip";
+import {
+  useBillingCartStore,
+  selectSubtotal,
+  selectTotal,
+  formatCAD,
+} from "@/store/billingCartStore";
+import { useCreateCheckoutSession } from "@/lib/hooks/useCreateCheckoutSession";
+import { toast } from "sonner";
+
+interface BillingCartPanelProps {
+  /** Flat layout for use inside the drawer; standalone card otherwise. */
+  embedded?: boolean;
+}
+
+export function BillingCartPanel({ embedded = false }: BillingCartPanelProps) {
+  const items         = useBillingCartStore((s) => s.items);
+  const promoCode     = useBillingCartStore((s) => s.promoCode);
+  const promoDiscount = useBillingCartStore((s) => s.promoDiscount);
+  const increaseQty   = useBillingCartStore((s) => s.increaseQty);
+  const decreaseQty   = useBillingCartStore((s) => s.decreaseQty);
+  const removeItem    = useBillingCartStore((s) => s.removeItem);
+
+  const subtotal = selectSubtotal(items);
+  const discount = promoCode ? promoDiscount : 0;
+  const total    = selectTotal(subtotal, discount);
+
+  const { createCheckoutSession, isPending } = useCreateCheckoutSession();
+  const isEmpty = items.length === 0;
+
+  const handleCheckout = () => {
+    if (!items.length) return;
+    createCheckoutSession(
+      { items, promo_code: promoCode },
+      {
+        onError: (err) => {
+          const msg = err instanceof Error ? err.message : "Something went wrong. Please try again.";
+          toast.error("Checkout failed", { description: msg });
+        },
+      },
+    );
+  };
+
+  const inner = (
+    <div className="space-y-5">
+      {isEmpty ? (
+        <div className="flex flex-col items-center gap-2 py-10 text-center">
+          <ShoppingCart className="w-10 h-10 text-white/10" />
+          <p className="text-sm text-white/35 leading-snug max-w-[220px]">
+            Your cart is empty. Choose a plan or add a practice pack to continue.
+          </p>
+        </div>
+      ) : (
+        <div className="space-y-2">
+          {items.map((item) => (
+            <BillingCartItem
+              key={item.id}
+              item={item}
+              onIncrease={increaseQty}
+              onDecrease={decreaseQty}
+              onRemove={removeItem}
+            />
+          ))}
+        </div>
+      )}
+
+      <PromoCodeForm />
+
+      <div className="space-y-2 border-t border-white/[0.06] pt-4">
+        <div className="flex justify-between text-sm">
+          <span className="text-white/40">Subtotal</span>
+          <span className="text-white/80 tabular-nums">${formatCAD(subtotal)} CAD</span>
+        </div>
+
+        {discount > 0 && (
+          <div className="flex justify-between text-sm">
+            <span className="text-emerald-400">Promo discount</span>
+            <span className="text-emerald-400 tabular-nums">−${formatCAD(discount)} CAD</span>
+          </div>
+        )}
+
+        <div className="flex justify-between items-baseline text-base font-bold pt-2 border-t border-white/[0.06]">
+          <div>
+            <span className="text-white/90">Total</span>
+            <p className="text-[10px] font-normal text-white/30 mt-0.5">
+              Applicable taxes calculated at checkout
+            </p>
+          </div>
+          <span className="text-amber-400 tabular-nums">${formatCAD(total)} CAD</span>
+        </div>
+      </div>
+
+      <button
+        id="billing-checkout-button"
+        onClick={handleCheckout}
+        disabled={isEmpty || isPending}
+        className={cn(
+          "w-full flex items-center justify-center gap-2 py-3.5 rounded-lg",
+          "bg-amber-500 hover:bg-amber-400 text-black font-semibold text-sm transition-all duration-200",
+          "disabled:opacity-40 disabled:cursor-not-allowed",
+        )}
+      >
+        {isPending ? (
+          <>
+            <Loader2 className="w-4 h-4 animate-spin" />
+            Processing...
+          </>
+        ) : (
+          <>
+            <span>Proceed to Checkout</span>
+            <span className="opacity-50 font-light">·</span>
+            <span className="tabular-nums">${formatCAD(total)} CAD</span>
+            <span>→</span>
+          </>
+        )}
+      </button>
+
+      <p className="text-center text-[11px] text-white/30">
+        Secure checkout powered by Stripe
+      </p>
+
+      <BillingTrustStrip />
+    </div>
+  );
+
+  if (embedded) return <div className="p-5">{inner}</div>;
+
+  return (
+    <div className="rounded-2xl border border-border bg-surface shadow-card p-5">
+      {inner}
+    </div>
+  );
+}

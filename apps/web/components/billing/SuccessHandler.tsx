@@ -1,17 +1,5 @@
 "use client";
 
-// ─────────────────────────────────────────────────────────────────────────────
-// SuccessHandler.tsx — Handles ?success=true and ?canceled=true query params
-//
-// After Stripe redirects back with ?success=true:
-//   1. Invalidates React Query billing + user caches immediately.
-//   2. Shows success toast.
-//   3. Polls GET /billing/status every 5 s for up to 15 s as a fallback for
-//      corporate proxies that block SSE connections.  Stops polling once the
-//      plan is no longer 'starter' (the SSE push has already landed) or after
-//      3 polls (15 s), whichever comes first.
-// ─────────────────────────────────────────────────────────────────────────────
-
 import { useEffect, useRef } from "react";
 import { useRouter }         from "next/navigation";
 import { toast }             from "sonner";
