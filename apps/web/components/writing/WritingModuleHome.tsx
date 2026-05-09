@@ -11,20 +11,16 @@
 //
 // Data:
 //   • tasks: passed in from server component
-//   • quota: from useQuota("writing")
-//   • plan:  from useCurrentUser
+//   • quota: centralised via useWritingQuota — effectiveLimit = planLimit + addonCredits
+//   • plan:  derived from useWritingQuota (no separate useCurrentUser needed)
 // ─────────────────────────────────────────────────────────────────────────────
 
 import { PenLine, ArrowRight, BookOpen } from "lucide-react";
 import Link from "next/link";
-import { BreadcrumbNav }   from "@/components/layout/BreadcrumbNav";
-import { WritingTaskGrid } from "@/components/writing/WritingTaskGrid";
-import { useCurrentUser }  from "@/lib/hooks/useCurrentUser";
-import { useQuota }        from "@/lib/hooks/useQuota";
-import {
-  PRO_PLAN_LIMITS,
-  ULTRA_PLAN_LIMITS,
-} from "@/lib/constants";
+import { BreadcrumbNav }    from "@/components/layout/BreadcrumbNav";
+import { WritingTaskGrid }  from "@/components/writing/WritingTaskGrid";
+import { useQuota }         from "@/lib/hooks/useQuota";
+import { useWritingQuota }  from "@/lib/hooks/useWritingQuota";
 import type { WritingTask } from "@/lib/types";
 
 // ── Props ─────────────────────────────────────────────────────────────────────
@@ -36,19 +32,18 @@ interface WritingModuleHomeProps {
 // ── Component ─────────────────────────────────────────────────────────────────
 
 export function WritingModuleHome({ tasks }: WritingModuleHomeProps) {
-  const { user } = useCurrentUser();
-  const { writing_used_per_task, isLoading: quotaLoading } = useQuota("writing");
+  // Plan-level quota (null taskNumber = overview mode: effectiveLimit = planLimit only,
+  // addonCredits = 0 because we can't sum across tasks here).
+  const {
+    effectiveLimit: attemptsLimit,
+    plan,
+    isLoading,
+  } = useWritingQuota(null);
 
-  const plan      = user?.plan ?? "starter";
-  const isStarter = plan === "starter";
-
-  // Per-task attempt limit from plan
-  const attemptsLimit: number | null =
-    plan === "pro"
-      ? PRO_PLAN_LIMITS.writing_attempts_per_task
-      : plan === "ultra"
-        ? ULTRA_PLAN_LIMITS.writing_attempts_per_task
-        : null; // starter: locked anyway
+  // Full quota response — gives us per-task used counts AND per-task addon credits.
+  const quotaResult  = useQuota("writing");
+  const quotaLoading = quotaResult.isLoading;
+  const isStarter    = plan === "starter";
 
   return (
     <div className="space-y-6">
@@ -81,7 +76,7 @@ export function WritingModuleHome({ tasks }: WritingModuleHomeProps) {
               Unlock individual task practice
             </p>
             <p className="text-xs text-amber-300/70 mt-0.5">
-              Starter plan includes 1 full writing mock test. Upgrade to Pro or Ultra to
+              Starter plan includes 1 full writing mock test. Upgrade to Pro to
               practice each task individually and get AI scoring.
             </p>
           </div>
@@ -96,7 +91,7 @@ export function WritingModuleHome({ tasks }: WritingModuleHomeProps) {
       )}
 
       {/* ── Stats strip ───────────────────────────────────────────────────── */}
-      {!isStarter && !quotaLoading && (
+      {!isStarter && !quotaLoading && !isLoading && (
         <div className="grid grid-cols-3 sm:grid-cols-3 gap-3">
           {[
             {
@@ -106,7 +101,7 @@ export function WritingModuleHome({ tasks }: WritingModuleHomeProps) {
             },
             {
               label: "Attempts / task",
-              value: attemptsLimit === null ? "∞" : String(attemptsLimit),
+              value: String(attemptsLimit),
               sub:   `Included in ${plan}`,
             },
             {
@@ -130,8 +125,9 @@ export function WritingModuleHome({ tasks }: WritingModuleHomeProps) {
       {/* ── Task grid ─────────────────────────────────────────────────────── */}
       <WritingTaskGrid
         tasks={tasks}
-        writingUsedPerTask={writing_used_per_task}
-        attemptsLimit={attemptsLimit}
+        writingUsedPerTask={quotaResult.writing_used_per_task}
+        writingAddonCreditsPerTask={quotaResult.writing_addon_credits_per_task}
+        planAttemptsLimit={attemptsLimit}
         isLocked={isStarter}
       />
     </div>

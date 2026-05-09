@@ -53,11 +53,19 @@ async def get_or_create_stripe_customer(user: User, db: AsyncSession) -> str:
     if subscription and subscription.stripe_customer_id:
         # Patch the Stripe customer's email if it was previously stored as the
         # clerk.local fallback and we now have a real address from the JWT.
-        if user.email and not user.email.endswith("@clerk.local"):
+        real_email = (
+            user.email
+            if user.email
+            and "@" in user.email
+            and not user.email.endswith("@clerk.local")
+            and user.email not in ("YOUR_EMAIL_HERE", "REPLACE_ME")
+            else None
+        )
+        if real_email:
             try:
                 stripe.Customer.modify(
                     subscription.stripe_customer_id,
-                    email=user.email,
+                    email=real_email,
                     name=user.full_name or "",
                 )
                 logger.info(
@@ -71,8 +79,21 @@ async def get_or_create_stripe_customer(user: User, db: AsyncSession) -> str:
                 )
         return subscription.stripe_customer_id
 
+    # Sanitise email before passing to Stripe — reject obvious placeholders and
+    # Clerk's @clerk.local fallback so we never hit Stripe's email validation.
+    raw_email = user.email or ""
+    stripe_email: str | None = (
+        raw_email
+        if raw_email
+        and "@" in raw_email
+        and not raw_email.endswith("@clerk.local")
+        and raw_email not in ("YOUR_EMAIL_HERE", "REPLACE_ME")
+        and not raw_email.startswith("test_token_")
+        else None
+    )
+
     customer = stripe.Customer.create(
-        email=user.email,
+        email=stripe_email,
         name=user.full_name or "",
         metadata={"celpipbro_user_id": str(user.id)},
     )

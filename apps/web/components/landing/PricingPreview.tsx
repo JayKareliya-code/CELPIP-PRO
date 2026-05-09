@@ -1,7 +1,7 @@
 import Link from "next/link";
-import { ArrowRight, Check, Rocket, Trophy, X, Zap } from "lucide-react";
+import { ArrowRight, Check, Rocket, X, Zap } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { PLAN_PRICING, PRO_PLAN_LIMITS, ULTRA_PLAN_LIMITS } from "@/lib/constants";
+import { PLAN_PRICING, PRO_PLAN_LIMITS } from "@/lib/constants";
 
 interface PlanFeature {
   text: string;
@@ -21,21 +21,16 @@ interface Plan {
   cta: string;
   ctaHref: string;
   highlighted: boolean;
-  comingSoon?: boolean;
   badge?: string;
   badgeColor?: string;
 }
 
 const SPEAKING_TASK_COUNT = 8;
-const WRITING_TASK_COUNT = 2;
+const WRITING_TASK_COUNT  = 2;
 const PRO_SPEAKING_PRACTICES =
   SPEAKING_TASK_COUNT * PRO_PLAN_LIMITS.speaking_attempts_per_task;
 const PRO_WRITING_PRACTICES =
   WRITING_TASK_COUNT * PRO_PLAN_LIMITS.writing_attempts_per_task;
-const ULTRA_SPEAKING_PRACTICES =
-  SPEAKING_TASK_COUNT * ULTRA_PLAN_LIMITS.speaking_attempts_per_task;
-const ULTRA_WRITING_PRACTICES =
-  WRITING_TASK_COUNT * ULTRA_PLAN_LIMITS.writing_attempts_per_task;
 
 const PLANS: Plan[] = [
   {
@@ -50,14 +45,14 @@ const PLANS: Plan[] = [
     cta: "Start Free",
     ctaHref: "/sign-up",
     features: [
-      { text: "1 Speaking mock test",              included: true  },
-      { text: "1 Writing mock test",               included: true  },
-      { text: "Estimated band score",              included: true  },
-      { text: "Vocabulary and connector tips",     included: true  },
-      { text: "Detailed AI feedback",              included: false },
-      { text: "Individual task practice",          included: false },
-      { text: "Attempt history & progress",        included: false },
-      { text: "Vocab templates & sample responses",included: false },
+      { text: "Band estimation only",               included: true  },
+      { text: "Practice access",                    included: true  },
+      { text: "Basic results",                      included: true  },
+      { text: "Detailed AI feedback",               included: false },
+      { text: "Strengths & weaknesses",             included: false },
+      { text: "Improvement tips",                   included: false },
+      { text: "Sample response",                    included: false },
+      { text: "Analytics",                          included: false },
     ],
   },
   {
@@ -69,47 +64,18 @@ const PLANS: Plan[] = [
     icon: <Rocket className="w-5 h-5 text-primary" />,
     iconBg: "bg-primary/15",
     highlighted: true,
-    badge: "Live Now",
+    badge: "Most Popular",
     badgeColor: "bg-primary",
     cta: `Unlock ${PLAN_PRICING.pro.name}`,
     ctaHref: "/sign-up?plan=pro",
-      features: [
+    features: [
       { text: `${PRO_SPEAKING_PRACTICES} Speaking practices across all 8 task types`, included: true, highlight: true },
       { text: `${PRO_WRITING_PRACTICES} Writing practices across both task types`,     included: true, highlight: true },
-      { text: `${PRO_PLAN_LIMITS.speaking_mock_tests} full Speaking mock tests`,       included: true },
-      { text: `${PRO_PLAN_LIMITS.writing_mock_tests} full Writing mock tests`,         included: true },
-      { text: "Detailed AI feedback: strengths, weaknesses, and next steps",          included: true, highlight: true },
-      { text: "Estimated band score per attempt",                                     included: true },
-      { text: "Improved sample response",                                             included: true },
-      { text: "Vocabulary, connectors & templates",                                   included: true },
-      { text: "Attempt history & progress tracking",                                  included: true },
-      { text: "Advanced analytics & deeper rewrite drills",                           included: false },
-    ],
-  },
-  {
-    id: PLAN_PRICING.ultra.id,
-    name: PLAN_PRICING.ultra.name,
-    tagline: "Expanded practice depth is coming soon",
-    priceLabel: PLAN_PRICING.ultra.priceLabel,
-    priceNote: "Planned one-time price",
-    icon: <Trophy className="w-5 h-5 text-warning" />,
-    iconBg: "bg-warning/15",
-    highlighted: false,
-    comingSoon: true,
-    badge: "Coming Soon",
-    badgeColor: "bg-warning/90",
-    cta: "Coming Soon",
-    ctaHref: "#pricing",
-    features: [
-      { text: `${ULTRA_SPEAKING_PRACTICES} Speaking practices across all 8 task types`,  included: true, highlight: true },
-      { text: `${ULTRA_WRITING_PRACTICES} Writing practices across both task types`,      included: true, highlight: true },
-      { text: `${ULTRA_PLAN_LIMITS.speaking_mock_tests} full Speaking mock tests`,        included: true },
-      { text: `${ULTRA_PLAN_LIMITS.writing_mock_tests} full Writing mock tests`,          included: true },
-      { text: "Advanced AI feedback with rewriting tools",                              included: true, highlight: true },
-      { text: "Multiple sample responses per attempt",                                  included: true },
-      { text: "Advanced analytics & weak-area detection",                               included: true },
-      { text: "Personalized study suggestions",                                         included: true },
-      { text: "Idea generation & vocabulary drills",                                    included: true },
+      { text: "Detailed AI report",                                                   included: true, highlight: true },
+      { text: "Strengths & weaknesses",                                               included: true },
+      { text: "Improvement tips",                                                     included: true },
+      { text: "Sample response",                                                      included: true },
+      { text: "Analytics",                                                            included: true },
     ],
   },
 ];
@@ -121,12 +87,12 @@ export function PricingPreview() {
       text: "Starter lets you try the workflow for free. Pro unlocks individual task practice, detailed AI feedback, and progress tracking.",
     },
     {
-      label: "Why One-Time?",
-      text: `Pro includes ${PRO_SPEAKING_PRACTICES} Speaking and ${PRO_WRITING_PRACTICES} Writing practice sessions, plus ${PRO_PLAN_LIMITS.speaking_mock_tests + PRO_PLAN_LIMITS.writing_mock_tests} full mock tests — for a single payment, no subscription.`,
+      label: "Monthly subscription",
+      text: `Pro is ${PLAN_PRICING.pro.priceLabel} CAD/month. Cancel any time. Add-ons let you buy extra practice packs without changing your plan.`,
     },
     {
-      label: "Ultra",
-      text: "Ultra is coming soon with expanded practice volume, advanced rewriting tools, and analytics. Join the waitlist to be notified.",
+      label: "Practice add-ons",
+      text: "Pro subscribers can buy Writing, Speaking, or Custom Task bundles to get more focused practice exactly where they need it.",
     },
   ];
 
@@ -140,11 +106,9 @@ export function PricingPreview() {
           <h2 className="text-3xl sm:text-4xl font-bold text-foreground">
             Start Free. Unlock Full Practice When You&apos;re Ready.
           </h2>
-
         </div>
 
-
-        <div className="flex gap-4 overflow-x-auto pb-4 snap-x snap-mandatory sm:overflow-visible sm:pb-0 sm:grid sm:grid-cols-3 sm:gap-6 items-start -mx-4 px-4 sm:mx-0 sm:px-0">
+        <div className="flex gap-4 overflow-x-auto pb-4 snap-x snap-mandatory sm:overflow-visible sm:pb-0 sm:grid sm:grid-cols-2 sm:gap-6 items-start -mx-4 px-4 sm:mx-0 sm:px-0 max-w-3xl mx-auto">
           {PLANS.map((plan) => (
             <div
               key={plan.id}
@@ -155,7 +119,6 @@ export function PricingPreview() {
                 plan.highlighted
                   ? "bg-primary/10 border-primary/40 shadow-[0_0_50px_rgba(99,102,241,0.15)] p-7 sm:scale-[1.02]"
                   : "bg-surface border-border hover:border-primary/30 p-7",
-                plan.comingSoon && "opacity-90"
               )}
             >
               {plan.badge && (
@@ -182,7 +145,7 @@ export function PricingPreview() {
                       {plan.priceLabel}
                     </span>
                     {plan.priceLabel !== "Free" && (
-                      <span className="text-subtle text-sm">CAD</span>
+                      <span className="text-subtle text-sm">CAD / month</span>
                     )}
                   </div>
                   <p className="text-xs text-subtle mt-0.5">{plan.priceNote}</p>
@@ -219,29 +182,19 @@ export function PricingPreview() {
                 ))}
               </ul>
 
-              {plan.comingSoon ? (
-                <div
-                  id={`plan-cta-${plan.id}`}
-                  className="inline-flex items-center justify-center gap-2 w-full py-3.5 rounded-xl bg-warning/5 border border-warning/30 text-warning/70 font-semibold text-sm cursor-not-allowed select-none"
-                  aria-disabled="true"
-                >
-                  {plan.cta}
-                </div>
-              ) : (
-                <Link
-                  id={`plan-cta-${plan.id}`}
-                  href={plan.ctaHref}
-                  className={cn(
-                    "inline-flex items-center justify-center gap-2 w-full py-3.5 rounded-xl font-semibold text-sm transition-all duration-200",
-                    plan.highlighted
-                      ? "bg-primary text-white hover:bg-primary-hover"
-                      : "bg-surface border border-border text-foreground hover:border-primary/40"
-                  )}
-                >
-                  {plan.cta}
-                  <ArrowRight className="w-4 h-4" />
-                </Link>
-              )}
+              <Link
+                id={`plan-cta-${plan.id}`}
+                href={plan.ctaHref}
+                className={cn(
+                  "inline-flex items-center justify-center gap-2 w-full py-3.5 rounded-xl font-semibold text-sm transition-all duration-200",
+                  plan.highlighted
+                    ? "bg-primary text-white hover:bg-primary-hover"
+                    : "bg-surface border border-border text-foreground hover:border-primary/40"
+                )}
+              >
+                {plan.cta}
+                <ArrowRight className="w-4 h-4" />
+              </Link>
             </div>
           ))}
         </div>
@@ -260,10 +213,8 @@ export function PricingPreview() {
         </div>
 
         <p className="text-center text-xs text-subtle mt-6">
-          Prices in CAD. Paid plans are one-time purchases with no subscription
-          or renewal. CELPIPBRO is not affiliated with Paragon Testing
-          Enterprises. AI scores are practice estimates, not official CELPIP
-          results.
+          Prices in CAD. Monthly subscription — cancel any time. CELPIPBRO is not affiliated with Paragon Testing
+          Enterprises. AI scores are practice estimates, not official CELPIP results.
         </p>
       </div>
     </section>

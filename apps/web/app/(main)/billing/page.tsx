@@ -17,16 +17,19 @@ export default async function BillingPage({
 }: {
   searchParams: Promise<Record<string, string>>;
 }) {
-  const params   = await searchParams;
-  const success  = params.success === "true";
-  const canceled = params.canceled === "true";
-  const plan     = params.plan ?? undefined;
+  const params    = await searchParams;
+  const success   = params.success   === "true";
+  const canceled  = params.canceled  === "true";
+  const plan      = params.plan      ?? undefined;
+  // addon_only=true when the cart had no plan item (addon-only purchase)
+  const addonOnly = params.addon_only === "true";
 
   return (
     <BillingPageClient
       success={success}
       canceled={canceled}
       planParam={plan}
+      addonOnly={addonOnly}
     />
   );
 }

@@ -21,10 +21,9 @@ import {
 } from "lucide-react";
 import { BreadcrumbNav }     from "@/components/layout/BreadcrumbNav";
 import { useCurrentUser }    from "@/lib/hooks/useCurrentUser";
-import { useQuota }          from "@/lib/hooks/useQuota";
+import { useWritingQuota }   from "@/lib/hooks/useWritingQuota";
 import { cn }                from "@/lib/utils";
 import { API_V1, api, authHeaders } from "@/lib/api";
-import { PRO_PLAN_LIMITS, ULTRA_PLAN_LIMITS } from "@/lib/constants";
 import type { WritingTask, Difficulty } from "@/lib/types";
 
 // ── Constants ─────────────────────────────────────────────────────────────────
@@ -210,12 +209,22 @@ function PromptCard({
 // ── Main Component ────────────────────────────────────────────────────────────
 
 export function WritingTaskPromptsFolder({ taskNumber, prompts }: WritingTaskPromptsFolderProps) {
-  const router    = useRouter();
-  const { user }  = useCurrentUser();
+  const router       = useRouter();
+  const { user }     = useCurrentUser();
   const { getToken } = useAuth();
-  const plan      = user?.plan ?? "starter";
 
-  const { writing_used_per_task } = useQuota("writing");
+  // Centralised quota: effectiveLimit = planLimit + addonCredits for THIS task.
+  // - writing_pack purchase → adds credits to all writing tasks (webhook expands per-task)
+  // - custom_bundle for writing-task-N → only raises effectiveLimit for Task N
+  const {
+    plan,
+    effectiveLimit: attemptsLimit,
+    used,
+    remaining,
+    isBonusRetry,
+    isLoading: quotaLoading,
+  } = useWritingQuota(taskNumber);
+  const isStarter = plan === "starter";
 
   // ── Which prompts has the user already attempted? ─────────────────────────
   const { data: attemptedPromptIds } = useQuery<string[]>({
@@ -227,30 +236,17 @@ export function WritingTaskPromptsFolder({ taskNumber, prompts }: WritingTaskPro
         { headers: authHeaders(token) },
       );
     },
-    enabled: !!user && plan !== "starter",
+    enabled: !!user && !isStarter,
     staleTime: 30_000,
   });
   const attemptedSet = new Set(attemptedPromptIds ?? []);
-
-  // ── Quota maths ────────────────────────────────────────────────────────────
-  const attemptsLimit: number | null =
-    plan === "pro"
-      ? PRO_PLAN_LIMITS.writing_attempts_per_task
-      : plan === "ultra"
-        ? ULTRA_PLAN_LIMITS.writing_attempts_per_task
-        : null;
-
-  const used         = (writing_used_per_task as Record<number, number> | undefined)?.[taskNumber] ?? 0;
-  const isBonusRetry = attemptsLimit !== null && used >= attemptsLimit;
-  const isStarter    = plan === "starter";
 
   const taskLabel       = TASK_LABELS[taskNumber] ?? `Task ${taskNumber}`;
   const taskDescription = TASK_DESCRIPTIONS[taskNumber] ?? "";
   const hasAnyPrompts   = prompts.length > 0;
 
-  // Coming-soon slots: fill up to the plan limit
-  const visibleLimit    = attemptsLimit ?? 5;
-  const comingSoonCount = Math.max(0, visibleLimit - prompts.length);
+  // Coming-soon slots: fill up to the effective limit (planLimit + addonCredits)
+  const comingSoonCount = Math.max(0, attemptsLimit - prompts.length);
 
   return (
     <div className="space-y-6">
@@ -285,7 +281,7 @@ export function WritingTaskPromptsFolder({ taskNumber, prompts }: WritingTaskPro
           <div className="flex-1">
             <p className="text-sm font-semibold text-amber-200">Task practice is locked</p>
             <p className="text-xs text-amber-300/70 mt-0.5">
-              Your Starter plan includes 1 writing mock test. Upgrade to Pro or Ultra to
+              Your Starter plan includes 1 writing mock test. Upgrade to Pro to
               practice individual tasks with AI scoring.
             </p>
           </div>
@@ -306,15 +302,13 @@ export function WritingTaskPromptsFolder({ taskNumber, prompts }: WritingTaskPro
               <span className="text-subtle font-medium">
                 {isBonusRetry
                   ? "Quota used — free retries active"
-                  : `${used} of ${attemptsLimit ?? "∞"} attempts used`}
+                  : `${used} of ${attemptsLimit} attempts used`}
               </span>
               {isBonusRetry ? (
                 <span className="text-amber-400 font-semibold">Retry mode ⚡</span>
               ) : (
                 <span className="text-subtle">
-                  {attemptsLimit !== null
-                    ? `${Math.max(0, attemptsLimit - used)} remaining`
-                    : "Unlimited"}
+                  {remaining} remaining
                 </span>
               )}
             </div>
@@ -324,11 +318,7 @@ export function WritingTaskPromptsFolder({ taskNumber, prompts }: WritingTaskPro
                   "h-full rounded-full transition-all duration-500",
                   isBonusRetry ? "bg-amber-500" : "bg-primary",
                 )}
-                style={{
-                  width: attemptsLimit
-                    ? `${Math.min((used / attemptsLimit) * 100, 100)}%`
-                    : "100%",
-                }}
+                style={{ width: `${Math.min((used / attemptsLimit) * 100, 100)}%` }}
               />
             </div>
           </div>
@@ -340,7 +330,12 @@ export function WritingTaskPromptsFolder({ taskNumber, prompts }: WritingTaskPro
       )}
 
       {/* ── Prompts ────────────────────────────────────────────────────────── */}
-      {!hasAnyPrompts ? (
+      {/* Gate on quotaLoading to prevent stale-quota UI flash */}
+      {quotaLoading ? (
+        <div className="rounded-xl border border-white/[0.07] bg-surface/50 p-8 flex items-center justify-center">
+          <span className="text-sm text-subtle animate-pulse">Loading…</span>
+        </div>
+      ) : !hasAnyPrompts ? (
         <div className="rounded-xl border border-dashed border-white/10 bg-surface/50 p-12 text-center space-y-3">
           <div className="w-12 h-12 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center mx-auto">
             <Sparkles className="w-6 h-6 text-white/25" />

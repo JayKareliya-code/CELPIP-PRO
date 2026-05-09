@@ -56,6 +56,12 @@ const TYPE_META: Record<
     bgColor:     "bg-amber-500/10",
     borderColor: "border-amber-500/20",
   },
+  mock_bundle: {
+    label:       "Mock Test",
+    textColor:   "text-violet-400",
+    bgColor:     "bg-violet-500/10",
+    borderColor: "border-violet-500/20",
+  },
 };
 
 interface BillingCartItemProps {

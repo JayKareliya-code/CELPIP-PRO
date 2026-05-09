@@ -10,7 +10,7 @@ export type Difficulty = "easy" | "medium" | "hard";
 
 export type AttemptStatus = "pending" | "processing" | "complete" | "failed" | "cancelled";
 
-export type UserPlan = "starter" | "pro" | "ultra";
+export type UserPlan = "starter" | "pro";
 
 // ── Speaking ─────────────────────────────────────────────────────────────────
 
@@ -129,10 +129,38 @@ export interface QuotaStatusResponse {
   plan: UserPlan;
   speaking_used_per_task: Record<number, number>;
   writing_used_per_task:  Record<number, number>;
-  speaking_limit_per_task: number | null;   // null = unlimited (ultra bypass)
+  speaking_limit_per_task: number | null;   // null = unlimited
   writing_limit_per_task:  number | null;
   can_attempt_speaking: Record<number, boolean>;
   can_attempt_writing:  Record<number, boolean>;
+  /**
+   * Purchased addon credits remaining per task.
+   * speaking_pack expands to all 8 tasks at webhook time; custom_bundle
+   * is task-specific. Frontend adds this to planLimit for effectiveLimit.
+   */
+  speaking_addon_credits_per_task: Record<number, number>;
+  writing_addon_credits_per_task:  Record<number, number>;
+}
+
+/** One task's credit balance — from GET /api/v1/billing/addon-credits */
+export interface TaskCreditStat {
+  /** Remaining unconsumed credits for this task. */
+  available: number;
+  /** Total credits ever purchased for this task (excluding refunds). */
+  purchased: number;
+}
+
+/**
+ * Per-skill, per-task addon credit inventory.
+ * Returned by GET /api/v1/billing/addon-credits.
+ *
+ * Keys are task_number integers; missing tasks have no credits.
+ * Includes both active and exhausted rows so progress bars work even
+ * when a pack is fully consumed.
+ */
+export interface AddonCreditSummary {
+  speaking: Record<number, TaskCreditStat>;
+  writing:  Record<number, TaskCreditStat>;
 }
 
 // ── Attempts ─────────────────────────────────────────────────────────────────

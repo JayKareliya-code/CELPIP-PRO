@@ -66,29 +66,26 @@ export const PLAN_PRICING = {
   pro: {
     id: "pro",
     name: "Pro",
-    price: 24.99,         // CAD
-    priceLabel: "$24.99",
-    priceNote: "One-time · No subscription",
-  },
-  ultra: {
-    id: "ultra",
-    name: "Ultra",
-    price: 49.99,         // CAD
-    priceLabel: "$49.99",
-    priceNote: "One-time · No subscription",
+    price: 9.99,          // CAD / month
+    priceLabel: "$9.99",
+    priceNote: "CAD / month",
   },
 } as const;
 
 /** Lowest paid plan price — used in marketing copy (e.g. "plans from $X CAD") */
 export const STARTING_PRICE_CAD = PLAN_PRICING.pro.price;
 
+/** Monthly Pro subscription price label */
+export const PRO_PRICE_LABEL = PLAN_PRICING.pro.priceLabel;
+
 // ── Starter Plan (Free) Quotas ──────────────────────────────────────────────
 
 export const STARTER_PLAN_LIMITS = {
-  speaking_mock_tests: 1,  // 1 full speaking mock test
-  writing_mock_tests: 1,  // 1 full writing mock test
-  task_practice: false, // individual task practice locked
-  detailed_feedback: false, // only basic estimated band
+  speaking_attempts_per_task: 2,  // 2 free attempts per speaking task
+  writing_attempts_per_task:  2,  // 2 free attempts per writing task
+  speaking_mock_tests: 1,
+  writing_mock_tests:  1,
+  detailed_feedback: false,
 } as const;
 
 // ── Score Booster Pro Plan Quotas ────────────────────────────────────────────
@@ -103,26 +100,15 @@ export const PRO_PLAN_LIMITS = {
   history_tracking: true,
 } as const;
 
-// ── Band Achiever Ultra Plan Quotas ──────────────────────────────────────────
-
-export const ULTRA_PLAN_LIMITS = {
-  speaking_attempts_per_task: 15, // Tasks 1–8 × 15 each
-  writing_attempts_per_task: 15, // Tasks 1–2 × 15 each
-  speaking_mock_tests: 5,
-  writing_mock_tests: 5,
-  detailed_feedback: true,
-  advanced_rewriting: true,
-  multiple_samples: true,
-  analytics: true,
-  weak_area_detection: true,
-  personalized_suggestions: true,
-} as const;
+// Ultra plan has been removed — CELPIPBRO now uses a Free + Pro two-tier model.
 
 // ── Legacy aliases (kept for backward-compat during migration) ───────────────
 /** @deprecated Use STARTER_PLAN_LIMITS */
 export const FREE_PLAN_LIMITS = STARTER_PLAN_LIMITS;
 /** @deprecated Use PRO_PLAN_LIMITS */
 export const PREMIUM_PLAN_LIMITS = PRO_PLAN_LIMITS;
+/** @deprecated Ultra plan removed — use PRO_PLAN_LIMITS */
+export const ULTRA_PLAN_LIMITS = PRO_PLAN_LIMITS;
 
 // ── Timer Warning Thresholds ──────────────────────────────────────────────────
 

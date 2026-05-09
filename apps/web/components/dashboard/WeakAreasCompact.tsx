@@ -23,8 +23,8 @@ export function WeakAreasCompact() {
   // Don't render anything until we know the plan
   if (userLoading || areasLoading) return null;
 
-  // Only show to Pro / Ultra users
-  const isPro = user?.plan === "pro" || user?.plan === "ultra";
+  // Only show to Pro users
+  const isPro = user?.plan === "pro";
   if (!isPro) return null;
 
   // No data yet — stay silent

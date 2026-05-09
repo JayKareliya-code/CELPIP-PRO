@@ -15,10 +15,11 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useAuth, useUser } from "@clerk/nextjs";
 import { api, API_V1, authHeaders } from "@/lib/api";
+import { addonCreditsKey } from "@/lib/hooks/useAddonCredits";
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
-export type BillingPlan = "pro" | "ultra";
+export type BillingPlan = "pro";
 
 export interface BillingStatus {
   plan: string;
@@ -80,12 +81,14 @@ export function useBilling() {
       const token = await getToken();
       return api.post<{ checkout_url: string }>(
         `${API_V1}/billing/checkout`,
-        { plan },
+        {
+          items:      [{ id: plan, type: "plan", quantity: 1, metadata: { plan_slug: plan } }],
+          promo_code: null,
+        },
         { headers: authHeaders(token) },
       );
     },
     onSuccess: ({ checkout_url }) => {
-      // Hard-redirect to Stripe Checkout — browser handles return URL
       window.location.href = checkout_url;
     },
   });
@@ -114,6 +117,11 @@ export function useBilling() {
   const refreshAfterPayment = () => {
     queryClient.invalidateQueries({ queryKey: cacheKey });
     queryClient.invalidateQueries({ queryKey: ["current-user", userId] });
+    // Invalidate quota so speaking/writing limits update immediately after purchase.
+    // Without this the 60s staleTime means users see the old limit until the next refetch.
+    queryClient.invalidateQueries({ queryKey: ["quota"] });
+    // Invalidate addon-credits so the Usage tab's Practice Packs section refreshes.
+    queryClient.invalidateQueries({ queryKey: addonCreditsKey(userId) });
   };
 
   return {

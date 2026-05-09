@@ -88,10 +88,10 @@ function LockedState() {
       <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 bg-surface/80 backdrop-blur-sm rounded-xl">
         <div className="flex items-center gap-2 rounded-full border border-primary/30 bg-primary/10 px-3 py-1">
           <Lock className="h-3.5 w-3.5 text-primary" />
-          <span className="text-xs font-semibold text-primary">Ultra Plan</span>
+          <span className="text-xs font-semibold text-primary">Pro Plan</span>
         </div>
         <p className="text-sm font-semibold text-foreground text-center px-6">
-          Dimension breakdown is an Ultra feature
+          Dimension breakdown is a Pro feature
         </p>
         <p className="text-xs text-subtle text-center px-8">
           See exactly where each of your 5 rubric dimensions stands — and what to fix first.
@@ -101,7 +101,7 @@ function LockedState() {
           className="inline-flex items-center gap-1.5 rounded-lg bg-primary px-4 py-2 text-xs font-semibold text-primary-foreground hover:bg-primary-hover transition-colors"
         >
           <Sparkles className="h-3.5 w-3.5" />
-          Upgrade to Ultra
+          Upgrade to Pro
         </Link>
       </div>
     </div>
@@ -164,7 +164,7 @@ export function WeakAreaPanel() {
 
   if (userLoading) return null;
 
-  const isUltra = user?.plan === "ultra";
+  const isPro = user?.plan === "pro";
 
   return (
     <section>
@@ -177,15 +177,15 @@ export function WeakAreaPanel() {
             Your average score per CELPIP rubric criterion, across all recent attempts
           </p>
         </div>
-        {!isUltra && (
+        {!isPro && (
           <span className="inline-flex items-center gap-1 rounded-full border border-primary/20 bg-primary/10 px-2 py-0.5 text-[10px] font-semibold text-primary">
             <Lock className="h-2.5 w-2.5" />
-            Ultra only
+            Pro only
           </span>
         )}
       </div>
 
-      {isUltra ? (
+      {isPro ? (
         <div className="rounded-xl border border-border bg-surface p-5">
           <WeakAreaContent />
         </div>

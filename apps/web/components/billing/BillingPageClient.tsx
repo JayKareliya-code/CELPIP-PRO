@@ -26,15 +26,15 @@ interface BillingPageClientProps {
   success:    boolean;
   canceled:   boolean;
   planParam?: string;
+  addonOnly?: boolean;
 }
 
-export function BillingPageClient({ success, canceled, planParam }: BillingPageClientProps) {
+export function BillingPageClient({ success, canceled, planParam, addonOnly = false }: BillingPageClientProps) {
   const { user, isLoading: userLoading } = useCurrentUser();
   const { startCheckout } = useBilling();
 
   const [checkingOutPlan, setCheckingOutPlan] = useState<BillingPlan | null>(null);
   const currentPlan: UserPlan = (user?.plan ?? "starter") as UserPlan;
-  const isPro = currentPlan === "pro";
 
   const addItem = useBillingCartStore((s) => s.addItem);
 
@@ -70,7 +70,7 @@ export function BillingPageClient({ success, canceled, planParam }: BillingPageC
   return (
     <BillingCartDrawerProvider>
       <PageWrapper>
-        <SuccessHandler success={success} canceled={canceled} plan={planParam} />
+        <SuccessHandler success={success} canceled={canceled} plan={planParam} addonOnly={addonOnly} />
 
         <div className="animate-fade-in space-y-12">
           <div>
@@ -107,24 +107,18 @@ export function BillingPageClient({ success, canceled, planParam }: BillingPageC
                   <Package className="w-4 h-4 text-white/30" />
                   <h3 className="text-sm font-semibold text-white/60 uppercase tracking-widest">Practice Add-ons</h3>
                 </div>
-                <p className="text-xs text-white/35">
-                  {isPro ? "One-time question packs — use any time" : "Available on Pro — one-time purchases"}
-                </p>
+        <p className="text-xs text-white/35">
+            One-time question packs — use any time.
+          </p>
               </div>
 
               {ADDONS.map((addon) => (
                 <AddonRow
                   key={addon.id}
-                  config={{ ...addon, disabled: !isPro }}
+                  config={addon}
                   onAddToCart={handleAddToCart}
                 />
               ))}
-
-              {!isPro && (
-                <p className="text-[11px] text-white/25 text-center pt-1">
-                  Upgrade to Pro to unlock add-ons.
-                </p>
-              )}
             </div>
           </div>
 

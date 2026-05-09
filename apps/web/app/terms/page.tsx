@@ -282,10 +282,10 @@ export default function TermsOfServicePage() {
             <p className="mt-1">
               Email:{" "}
               <a
-                href="mailto:support@CELPIPBRO.ca"
+                href="mailto:support@celpipbro.ca"
                 className="text-amber-400 hover:text-amber-300 transition-colors"
               >
-                support@CELPIPBRO.ca
+                support@celpipbro.ca
               </a>
             </p>
           </div>

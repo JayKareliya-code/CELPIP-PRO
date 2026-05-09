@@ -4,7 +4,8 @@ export type CartItemType =
   | "plan"
   | "writing_pack"
   | "speaking_pack"
-  | "custom_bundle";
+  | "custom_bundle"
+  | "mock_bundle";
 
 export interface CartItem {
   id:        string;

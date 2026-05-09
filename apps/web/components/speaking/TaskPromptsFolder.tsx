@@ -29,20 +29,15 @@ import {
   Sparkles,
   PlayCircle,
   RotateCcw,
-  Lock,
   Timer,
   ImageIcon,
 } from "lucide-react";
 import { BreadcrumbNav }    from "@/components/layout/BreadcrumbNav";
 import { useCurrentUser }   from "@/lib/hooks/useCurrentUser";
-import { useQuota }         from "@/lib/hooks/useQuota";
+import { useSpeakingQuota } from "@/lib/hooks/useSpeakingQuota";
 import { cn }               from "@/lib/utils";
 import { formatShortDuration } from "@/lib/utils";
 import { API_V1, api, authHeaders } from "@/lib/api";
-import {
-  PRO_PLAN_LIMITS,
-  ULTRA_PLAN_LIMITS,
-} from "@/lib/constants";
 import {
   SPEAKING_TASK_TITLES,
   SPEAKING_TASK_DESCRIPTIONS,
@@ -316,11 +311,19 @@ export function TaskPromptsFolder({ taskNumber, prompts }: TaskPromptsFolderProp
   const router = useRouter();
   const { user } = useCurrentUser();
   const { getToken } = useAuth();
-  const plan     = user?.plan ?? "starter";
 
-  const { speaking_used_per_task, isLoading: quotaLoading } = useQuota("speaking");
-
-  // ── Fetch which prompts this user has already attempted ───────────────────
+  // Centralised quota: effectiveLimit = planLimit + addonCredits for THIS task.
+  // - speaking_pack purchase → adds credits to all tasks (webhook expands per-task)
+  // - custom_bundle for Task N → only raises effectiveLimit for Task N
+  const {
+    plan,
+    effectiveLimit: attemptsLimit,
+    used,
+    remaining,
+    isBonusRetry,
+    isLoading: quotaLoading,
+  } = useSpeakingQuota(taskNumber);
+  const isStarter = plan === "starter";
   const { data: attemptedPromptIds } = useQuery<string[]>({
     queryKey: ["attemptedPrompts", taskNumber, user?.id],
     queryFn: async () => {
@@ -330,21 +333,10 @@ export function TaskPromptsFolder({ taskNumber, prompts }: TaskPromptsFolderProp
         { headers: authHeaders(token) },
       );
     },
-    enabled: !!user && !user.plan.includes("starter"),
+    enabled: !!user,
     staleTime: 30_000,
   });
   const attemptedSet = new Set(attemptedPromptIds ?? []);
-
-  const attemptsLimit: number | null =
-    plan === "pro"
-      ? PRO_PLAN_LIMITS.speaking_attempts_per_task
-      : plan === "ultra"
-      ? ULTRA_PLAN_LIMITS.speaking_attempts_per_task
-      : null;
-
-  const used = (speaking_used_per_task as Record<number, number> | undefined)?.[taskNumber] ?? 0;
-  const isBonusRetry = attemptsLimit !== null && used >= attemptsLimit;
-  const isStarter    = plan === "starter";
 
   // Build a "Task N — Title" label for the page header.
   const taskLabel       = taskNumber === 0
@@ -354,11 +346,8 @@ export function TaskPromptsFolder({ taskNumber, prompts }: TaskPromptsFolderProp
   const isImageTask     = IMAGE_TASKS.has(taskNumber);
 
   // How many "coming soon" placeholders to show?
-  // Show placeholders up to the plan's attempt limit so users see future slots.
-  const visibleLimit = attemptsLimit ?? 5; // fallback for starter (though locked)
-  const comingSoonCount = Math.max(0, visibleLimit - prompts.length);
-
-  const hasAnyPrompts = prompts.length > 0;
+  const comingSoonCount = Math.max(0, attemptsLimit - prompts.length);
+  const hasAnyPrompts   = prompts.length > 0;
 
   return (
     <div className="space-y-6">
@@ -400,15 +389,16 @@ export function TaskPromptsFolder({ taskNumber, prompts }: TaskPromptsFolderProp
         </div>
       </div>
 
-      {/* ── Locked banner for Starter ──────────────────────────────────────── */}
+      {/* ── Starter info banner ──────────────────────────────────────────────── */}
       {isStarter && (
         <div className="rounded-xl border border-amber-700/30 bg-amber-950/40 p-4 flex items-center gap-4">
-          <Lock className="w-5 h-5 text-amber-400 shrink-0" />
+          <Sparkles className="w-5 h-5 text-amber-400 shrink-0" />
           <div className="flex-1">
-            <p className="text-sm font-semibold text-amber-200">Task practice is locked</p>
+            <p className="text-sm font-semibold text-amber-200">
+              {attemptsLimit} free attempts included with your Starter plan
+            </p>
             <p className="text-xs text-amber-300/70 mt-0.5">
-              Your Starter plan includes 1 speaking mock test. Upgrade to Pro or Ultra to
-              practice individual tasks with AI scoring.
+              Upgrade to Pro for 5 attempts per task, AI scoring, and mock tests.
             </p>
           </div>
           <Link
@@ -420,53 +410,41 @@ export function TaskPromptsFolder({ taskNumber, prompts }: TaskPromptsFolderProp
         </div>
       )}
 
-      {/* ── Attempt progress bar ───────────────────────────────────────────── */}
-      {!isStarter && (
-        <div className="rounded-xl border border-white/[0.07] bg-surface px-4 py-3 flex items-center gap-4">
-          <div className="flex-1 space-y-1.5">
-            <div className="flex items-center justify-between text-xs">
-              <span className="text-subtle font-medium">
-                {isBonusRetry
-                  ? "Quota used — free retries active"
-                  : `${used} of ${attemptsLimit ?? "∞"} attempts used`}
+      {/* ── Attempt progress bar (all plans) ────────────────────────────────── */}
+      <div className="rounded-xl border border-white/[0.07] bg-surface px-4 py-3 flex items-center gap-4">
+        <div className="flex-1 space-y-1.5">
+          <div className="flex items-center justify-between text-xs">
+            <span className="text-subtle font-medium">
+              {isBonusRetry
+                ? "Quota used — free retries active"
+                : `${used} of ${attemptsLimit} attempts used`}
+            </span>
+            {isBonusRetry ? (
+              <span className="text-amber-400 font-semibold">Retry mode ⚡</span>
+            ) : (
+              <span className="text-subtle">
+                {remaining} remaining
               </span>
-              {isBonusRetry ? (
-                <span className="text-amber-400 font-semibold">Retry mode ⚡</span>
-              ) : (
-                <span className="text-subtle">
-                  {attemptsLimit !== null
-                    ? `${Math.max(0, attemptsLimit - used)} remaining`
-                    : "Unlimited"}
-                </span>
-              )}
-            </div>
-            <div className="h-1.5 bg-white/[0.06] rounded-full overflow-hidden">
-              <div
-                className={cn(
-                  "h-full rounded-full transition-all duration-500",
-                  isBonusRetry
-                    ? "bg-amber-500"
-                    : "bg-primary"
-                )}
-                style={{
-                  width: attemptsLimit
-                    ? `${Math.min((used / attemptsLimit) * 100, 100)}%`
-                    : "100%",
-                }}
-              />
-            </div>
+            )}
           </div>
-          <div className="text-right shrink-0">
-            <p className="text-xs text-subtle">Plan</p>
-            <p className="text-sm font-bold text-foreground capitalize">{plan}</p>
+          <div className="h-1.5 bg-white/[0.06] rounded-full overflow-hidden">
+            <div
+              className={cn(
+                "h-full rounded-full transition-all duration-500",
+                isBonusRetry ? "bg-amber-500" : "bg-primary"
+              )}
+              style={{ width: `${Math.min((used / attemptsLimit) * 100, 100)}%` }}
+            />
           </div>
         </div>
-      )}
+        <div className="text-right shrink-0">
+          <p className="text-xs text-subtle">Plan</p>
+          <p className="text-sm font-bold text-foreground capitalize">{plan}</p>
+        </div>
+      </div>
 
       {/* ── Prompts ─────────────────────────────────────────────────────────── */}
-      {/* Gate on quotaLoading to prevent stale-quota UI flash:
-          While quota data is in-flight, 'used' defaults to 0, which would
-          briefly show non-bonus CTA buttons to exhausted-quota users. */}
+      {/* Gate on quotaLoading to prevent stale-quota UI flash */}
       {quotaLoading ? (
         <div className="rounded-xl border border-white/[0.07] bg-surface/50 p-8 flex items-center justify-center">
           <span className="text-sm text-subtle animate-pulse">Loading…</span>
@@ -511,7 +489,7 @@ export function TaskPromptsFolder({ taskNumber, prompts }: TaskPromptsFolderProp
                 index={i}
                 taskNumber={taskNumber}
                 isAlreadyAttempted={attemptedSet.has(prompt.id)}
-                isBonusRetry={isBonusRetry && !isStarter}
+                isBonusRetry={isBonusRetry}
               />
             ))}
 
@@ -521,7 +499,7 @@ export function TaskPromptsFolder({ taskNumber, prompts }: TaskPromptsFolderProp
             ))}
           </div>
 
-          {/* Info note when in bonus retry mode */}
+          {/* Bonus retry info note */}
           {isBonusRetry && (
             <div className="rounded-xl border border-amber-700/30 bg-amber-950/30 px-4 py-3 flex items-start gap-3 mt-2">
               <span className="text-amber-400 shrink-0 mt-0.5">⚡</span>

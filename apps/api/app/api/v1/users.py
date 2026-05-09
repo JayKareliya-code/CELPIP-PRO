@@ -16,6 +16,7 @@ from app.repositories.attempt_repo import AttemptRepository
 from app.repositories.user_repo import UserRepository
 from app.schemas.user import UserMeResponse, SetTargetScoreRequest, WeakAreaItem
 from app.schemas.attempt import QuotaStatusResponse
+from app.services.addon_credit_service import get_credits_per_task
 
 logger = logging.getLogger(__name__)
 
@@ -135,6 +136,12 @@ async def get_my_quota(
     s_used_per_task: dict[int, int] = {i: s_used_raw.get(i, 0) for i in range(9)}
     w_used_per_task: dict[int, int] = {i: w_used_raw.get(i, 0) for i in range(1, 3)}
 
+    # Addon credits per task — queried separately; 0 when no addons purchased.
+    # A speaking_pack purchase creates one row per task at webhook time, so this
+    # correctly reflects both module-level packs AND task-specific custom bundles.
+    s_addon_credits = await get_credits_per_task(user.id, "speaking", db)
+    w_addon_credits = await get_credits_per_task(user.id, "writing",  db)
+
     # Distinct speaking mock exam sessions (uses the mock_exam_task_attempts table)
     mock_result = await db.execute(
         text(
@@ -155,13 +162,20 @@ async def get_my_quota(
     s_limit = s_limits.per_task
     w_limit = w_limits.per_task
 
-    if user.plan == "starter":
-        # Starter: task practice locked; mock tests still allowed via enforce_quota
-        s_can: dict[int, bool] = {i: False for i in range(9)}
-        w_can: dict[int, bool] = {i: False for i in range(1, 3)}
-    else:
-        s_can = {i: (s_limit is None or usage < s_limit) for i, usage in s_used_per_task.items()}
-        w_can = {i: (w_limit is None or usage < w_limit) for i, usage in w_used_per_task.items()}
+    # can_attempt = True when usage < planLimit OR addon credits available for that task.
+    # This allows starter users with a purchased addon to still start attempts.
+    def _can_attempt_speaking(task_num: int, usage: int) -> bool:
+        if s_limit is not None and usage < s_limit:
+            return True
+        return s_addon_credits.get(task_num, 0) > 0
+
+    def _can_attempt_writing(task_num: int, usage: int) -> bool:
+        if w_limit is not None and usage < w_limit:
+            return True
+        return w_addon_credits.get(task_num, 0) > 0
+
+    s_can = {i: _can_attempt_speaking(i, usage) for i, usage in s_used_per_task.items()}
+    w_can = {i: _can_attempt_writing(i, usage)  for i, usage in w_used_per_task.items()}
 
     return QuotaStatusResponse(
         plan=user.plan,
@@ -171,6 +185,8 @@ async def get_my_quota(
         writing_limit_per_task=w_limit,
         can_attempt_speaking=s_can,
         can_attempt_writing=w_can,
+        speaking_addon_credits_per_task=s_addon_credits,
+        writing_addon_credits_per_task=w_addon_credits,
         speaking_mock_tests_used=speaking_mock_used,
         writing_mock_tests_used=writing_mock_used,
     )

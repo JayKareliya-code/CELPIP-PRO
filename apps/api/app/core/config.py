@@ -15,9 +15,6 @@ class Settings(BaseSettings):
     # This single value automatically drives:
     #   CORS_ORIGINS  → always keeps localhost + adds http://<HOST_IP>:3000
     #   FRONTEND_URL  → Stripe redirect target = http://<HOST_IP>:3000
-    #
-    # Override CORS_ORIGINS or FRONTEND_URL directly in .env to bypass the
-    # auto-compute (e.g. staging/production with a real domain).
     # ══════════════════════════════════════════════════════════════════════════
     HOST_IP: str = "localhost"
 
@@ -60,7 +57,6 @@ class Settings(BaseSettings):
             "http://127.0.0.1:3000",
         ]
 
-        # ── Auto-compute CORS_ORIGINS ─────────────────────────────────────────
         if not self.CORS_ORIGINS:
             origins = list(_always_allowed)
             if self.HOST_IP not in ("localhost", "127.0.0.1", ""):
@@ -69,11 +65,9 @@ class Settings(BaseSettings):
                     origins.append(lan_origin)
             self.CORS_ORIGINS = origins
 
-        # ── Auto-compute FRONTEND_URL ─────────────────────────────────────────
         if not self.FRONTEND_URL:
             self.FRONTEND_URL = f"http://{self.HOST_IP}:3000"
 
-        # ── APP_ENV guard ─────────────────────────────────────────────────────
         _valid_envs = ("development", "staging", "production")
         if self.APP_ENV not in _valid_envs:
             raise ValueError(
@@ -81,7 +75,6 @@ class Settings(BaseSettings):
                 "Check your .env file."
             )
 
-        # ── Production guard ──────────────────────────────────────────────────
         if self.APP_ENV == "production":
             bad = [o for o in self.CORS_ORIGINS if "localhost" in o]
             if bad:
@@ -96,20 +89,14 @@ class Settings(BaseSettings):
                     "Use https:// only."
                 )
             if not self.STRIPE_WEBHOOK_SECRET:
-                raise ValueError(
-                    "STRIPE_WEBHOOK_SECRET is required in production."
-                )
+                raise ValueError("STRIPE_WEBHOOK_SECRET is required in production.")
             if self.AWS_ACCESS_KEY_ID == "REPLACE_ME" or self.AWS_SECRET_ACCESS_KEY == "REPLACE_ME":
-                raise ValueError(
-                    "AWS credentials are not configured for production."
-                )
+                raise ValueError("AWS credentials are not configured for production.")
 
         return self
 
     # ── Database ──────────────────────────────────────────────────────────────
-    DATABASE_URL: str = "postgresql+asyncpg://celpip:celpip@localhost:5432/celpip_dev"
-    # Read replica (S2-8): when set, read-only routes use this engine instead of primary.
-    # Leave empty to fall back to the primary (default — safe in dev/single-node).
+    DATABASE_URL:      str = "postgresql+asyncpg://celpip:celpip@localhost:5432/celpip_dev"
     DATABASE_READ_URL: str = ""
 
     # ── Redis / Celery ────────────────────────────────────────────────────────
@@ -130,76 +117,68 @@ class Settings(BaseSettings):
     S3_DOWNLOAD_EXPIRY_SECS: int       = 3600
     S3_AUDIO_PREFIX:         str       = "audio/"
 
-    # ── Quotas ────────────────────────────────────────────────────────────────
+    # ── Plan quotas ───────────────────────────────────────────────────────────
+    STARTER_SPEAKING_PER_TASK:   int = 2
+    STARTER_WRITING_PER_TASK:    int = 2
     STARTER_SPEAKING_MOCK_TESTS: int = 1
     STARTER_WRITING_MOCK_TESTS:  int = 1
-    PRO_SPEAKING_PER_TASK:       int = 20
-    PRO_WRITING_PER_TASK:        int = 20
+    PRO_SPEAKING_PER_TASK:       int = 5
+    PRO_WRITING_PER_TASK:        int = 5
     PRO_SPEAKING_MOCK_TESTS:     int = 2
     PRO_WRITING_MOCK_TESTS:      int = 2
-    ULTRA_SPEAKING_PER_TASK:     int = 15
-    ULTRA_WRITING_PER_TASK:      int = 15
-    ULTRA_SPEAKING_MOCK_TESTS:   int = 5
-    ULTRA_WRITING_MOCK_TESTS:    int = 5
+
+    # ── Addon credits ─────────────────────────────────────────────────────────
+    # Number of practice questions granted per addon pack unit.
+    # Applied per-task for module packs (writing_pack / speaking_pack) and
+    # per custom_bundle purchase. Multiplied by cart quantity at webhook time.
+    ADDON_CREDITS_PER_PACK: int = 5
 
     # ── AI Scoring ────────────────────────────────────────────────────────────
-    AI_SCORING_PROVIDER:       str = "openai"
-    AI_SCORING_MODEL:          str = "gpt-4o-mini"
-    AI_VISION_SCORING_MODEL:   str = "gpt-4o"
-    AI_STT_PROVIDER:           str = "openai"
-    AI_STT_MODEL:              str = "whisper-1"
-    AI_FEEDBACK_PROVIDER:      str = "openai"
-    AI_FEEDBACK_MODEL:         str = "gpt-4o-mini"
-    AI_MAX_RETRIES:            int = 3
-    AI_TIMEOUT_SECS:           int = 90
+    AI_SCORING_PROVIDER:     str = "openai"
+    AI_SCORING_MODEL:        str = "gpt-4o-mini"
+    AI_VISION_SCORING_MODEL: str = "gpt-4o"
+    AI_STT_PROVIDER:         str = "openai"
+    AI_STT_MODEL:            str = "whisper-1"
+    AI_FEEDBACK_PROVIDER:    str = "openai"
+    AI_FEEDBACK_MODEL:       str = "gpt-4o-mini"
+    AI_MAX_RETRIES:          int = 3
+    AI_TIMEOUT_SECS:         int = 90
 
     OPENAI_API_KEY:    str = ""
     ANTHROPIC_API_KEY: str = ""
     GEMINI_API_KEY:    str = ""
 
-    # ── Stripe Payments ───────────────────────────────────────────────────────
-    STRIPE_PUBLISH_KEY:       str = ""
-    STRIPE_SECRET_KEY:        str = ""
-    STRIPE_WEBHOOK_SECRET:    str = ""
-    STRIPE_PRO_PRICE_ID:      str = ""
-    STRIPE_ULTRA_PRICE_ID:    str = ""
+    # ── Stripe ────────────────────────────────────────────────────────────────
+    STRIPE_PUBLISH_KEY:            str = ""
+    STRIPE_SECRET_KEY:             str = ""
+    STRIPE_WEBHOOK_SECRET:         str = ""
+    STRIPE_PRO_PRICE_ID:           str = ""
+    STRIPE_WRITING_PACK_PRICE_ID:  str = ""
+    STRIPE_SPEAKING_PACK_PRICE_ID: str = ""
+    STRIPE_CUSTOM_BUNDLE_PRICE_ID: str = ""
+    STRIPE_MOCK_BUNDLE_PRICE_ID:   str = ""
 
     # ── Compliance / Terms ────────────────────────────────────────────────────
     TOS_CURRENT_VERSION: str = "2026-04-22"
 
     # ── Observability ─────────────────────────────────────────────────────────
-    # Leave SENTRY_DSN empty to disable Sentry (default in dev).
-    # In production, set to your project DSN: https://xxx@oyyy.ingest.sentry.io/zzz
-    SENTRY_DSN: str = ""
-
-    # OpenTelemetry tracing (S2-1)
-    # Set to OTLP gRPC endpoint to enable distributed tracing.
-    # In docker-compose dev: OTEL_EXPORTER_OTLP_ENDPOINT=http://jaeger:4317
-    # Leave empty to disable (default).
+    SENTRY_DSN:                  str = ""
     OTEL_EXPORTER_OTLP_ENDPOINT: str = ""
-    # Optional bearer token to guard GET /metrics in non-dev deployments.
-    # When empty, /metrics is unprotected (fine inside a private VPC/subnet).
-    METRICS_AUTH_TOKEN: str = ""
+    METRICS_AUTH_TOKEN:          str = ""
 
-    # ── Feature Flags ─────────────────────────────────────────────
-    # Option A: self-hosted Unleash (optional dep: UnleashClient>=5.2.0)
-    #   Set both UNLEASH_URL and UNLEASH_TOKEN to activate.
-    # Option B: env-var JSON (no extra dep, works out of the box)
-    #   Set FEATURE_FLAGS_JSON to a JSON object, e.g.:
-    #     FEATURE_FLAGS_JSON='{"new_essay_prompt": true, "mock_exam_v2": false}'
-    # Unknown flags always default to False (safe / closed).
-    UNLEASH_URL:        str = ""    # e.g. https://unleash.internal/api
-    UNLEASH_TOKEN:      str = ""    # Unleash client API token
-    FEATURE_FLAGS_JSON: str = "{}"  # JSON dict[str, bool] for env-var fallback
+    # ── Feature Flags ─────────────────────────────────────────────────────────
+    UNLEASH_URL:        str = ""
+    UNLEASH_TOKEN:      str = ""
+    FEATURE_FLAGS_JSON: str = "{}"
 
     # ── Upload limits ─────────────────────────────────────────────────────────
-    AUDIO_MAX_BYTES:       int  = 25 * 1024 * 1024   # 25 MB
-    AUDIO_MIN_BYTES:       int  = 1024               # 1 KB
-    ESSAY_MAX_CHARS:       int  = 8000
-    ESSAY_MIN_CHARS:       int  = 1
+    AUDIO_MAX_BYTES: int = 25 * 1024 * 1024
+    AUDIO_MIN_BYTES: int = 1024
+    ESSAY_MAX_CHARS: int = 8000
+    ESSAY_MIN_CHARS: int = 1
 
     # ── Rate limits (per minute, per user) ────────────────────────────────────
-    RATE_LIMIT_ATTEMPTS_PER_MIN:   str = "10/minute"
+    RATE_LIMIT_ATTEMPTS_PER_MIN:    str = "10/minute"
     RATE_LIMIT_SUBMISSIONS_PER_MIN: str = "10/minute"
     RATE_LIMIT_CHECKOUT_PER_MIN:    str = "5/minute"
     RATE_LIMIT_DEFAULT:             str = "120/minute"

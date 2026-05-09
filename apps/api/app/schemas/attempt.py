@@ -58,6 +58,13 @@ class QuotaStatusResponse(BaseModel):
     writing_limit_per_task:  int | None
     can_attempt_speaking:    dict[int, bool]
     can_attempt_writing:     dict[int, bool]
+    # ── Addon credits per task (plan baseline + these = effectiveLimit) ───────
+    # Keys are task_number ints; missing key → 0 addon credits for that task.
+    # speaking_pack purchase expands into all 8 tasks at webhook time, so
+    # speaking_addon_credits_per_task[4] will be non-zero for both a speaking_pack
+    # AND a custom_bundle targeting task 4.
+    speaking_addon_credits_per_task: dict[int, int] = {}
+    writing_addon_credits_per_task:  dict[int, int] = {}
     # ── Mock-exam session counts (used by usePracticeQuota) ──────────────────
     speaking_mock_tests_used: int = 0
     writing_mock_tests_used:  int = 0

@@ -18,7 +18,6 @@ import { usePracticeQuota }       from "@/lib/hooks/usePracticeQuota";
 import { useCurrentUser }         from "@/lib/hooks/useCurrentUser";
 import {
   PRO_PLAN_LIMITS,
-  ULTRA_PLAN_LIMITS,
 } from "@/lib/constants";
 import type { AppUser } from "@/lib/types";
 
@@ -38,19 +37,11 @@ export function PracticeHub({ user: serverUser }: PracticeHubProps) {
   const { quota: writingQuota,  isLoading: loadingW } = usePracticeQuota("writing");
 
   const isLoading = loadingS || loadingW;
-  const planLabel = plan === "ultra" ? "Ultra Plan" : plan === "pro" ? "Pro Plan" : "Starter Plan";
+  const planLabel = plan === "pro" ? "Pro Plan" : "Starter Plan";
 
   // Total tests available across both skills
-  const totalSpeaking = plan === "ultra"
-    ? ULTRA_PLAN_LIMITS.speaking_mock_tests
-    : plan === "pro"
-      ? PRO_PLAN_LIMITS.speaking_mock_tests
-      : 1;
-  const totalWriting = plan === "ultra"
-    ? ULTRA_PLAN_LIMITS.writing_mock_tests
-    : plan === "pro"
-      ? PRO_PLAN_LIMITS.writing_mock_tests
-      : 1;
+  const totalSpeaking = plan === "pro" ? PRO_PLAN_LIMITS.speaking_mock_tests : 1;
+  const totalWriting  = plan === "pro" ? PRO_PLAN_LIMITS.writing_mock_tests  : 1;
 
   return (
     <div className="space-y-6">

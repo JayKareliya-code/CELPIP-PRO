@@ -18,6 +18,7 @@ import { SETTINGS_TABS, type SettingsTab } from "@/components/settings/types";
 import { ProfileTab }      from "@/components/settings/tabs/ProfileTab";
 import { GoalTab }         from "@/components/settings/tabs/GoalTab";
 import { SubscriptionTab } from "@/components/settings/tabs/SubscriptionTab";
+import { UsageTab }        from "@/components/settings/tabs/UsageTab";
 import { PrivacyTab }      from "@/components/settings/tabs/PrivacyTab";
 import { DangerTab }       from "@/components/settings/tabs/DangerTab";
 
@@ -26,6 +27,7 @@ const TAB_COMPONENTS: Record<SettingsTab, React.ReactNode> = {
   profile:      <ProfileTab />,
   goal:         <GoalTab />,
   subscription: <SubscriptionTab />,
+  usage:        <UsageTab />,
   privacy:      <PrivacyTab />,
   danger:       <DangerTab />,
 };

@@ -66,7 +66,7 @@ export function ReportPage({ attemptId }: Props) {
   // ── Resolve plan & target band ─────────────────────────────────────────────
   const plan       = user?.plan ?? "starter";
   const targetBand = user?.target_band ?? null;
-  const isPro      = plan === "pro" || plan === "ultra";
+  const isPro      = plan === "pro";
 
   // ── Render ─────────────────────────────────────────────────────────────────
   return (

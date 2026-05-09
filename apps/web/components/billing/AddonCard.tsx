@@ -16,6 +16,7 @@ export interface AddonCardConfig {
   quantityLabel:      string;
   description:        string;
   taskOptions?:       Record<string, string>;
+  mockTestOptions?:   Record<string, string>;  // mock_bundle: slot number → label
   moduleTaskOptions?: Record<string, Record<string, string>>;
   disabled?:          boolean;
 }
@@ -31,8 +32,24 @@ export function buildCartItem(
   selectedModule: string,
   selectedModuleTask: string,
   selectedTask: string,
+  selectedMockTest: string = "",
 ): Omit<CartItem, "quantity"> {
-  const { id, cartType, name, price, quantityLabel, taskOptions, moduleTaskOptions } = config;
+  const { id, cartType, name, price, quantityLabel, taskOptions, mockTestOptions, moduleTaskOptions } = config;
+
+  // mock_bundle: encode mock_test_number as string metadata
+  if (cartType === "mock_bundle" && mockTestOptions && selectedMockTest) {
+    const label = mockTestOptions[selectedMockTest] ?? selectedMockTest;
+    return {
+      id:        `${id}-${selectedMockTest}`,
+      type:      "mock_bundle",
+      name,
+      subtitle:  label,
+      unitPrice: price,
+      currency:  "CAD",
+      // mock_test_number must be a string (Record<string,string>)
+      metadata:  { mock_test_number: selectedMockTest, mock_test_label: label },
+    };
+  }
 
   if (moduleTaskOptions && selectedModuleTask) {
     const label = moduleTaskOptions[selectedModule]?.[selectedModuleTask] ?? selectedModuleTask;
@@ -43,7 +60,8 @@ export function buildCartItem(
       subtitle:  `${selectedModule} · ${label}`,
       unitPrice: price,
       currency:  "CAD",
-      metadata:  { module: selectedModule, taskKey: selectedModuleTask, taskLabel: label },
+      // task_key (snake_case) matches backend CartItemRequest.metadata.task_key
+      metadata:  { module: selectedModule, task_key: selectedModuleTask, task_label: label },
     };
   }
 
@@ -55,7 +73,7 @@ export function buildCartItem(
       subtitle:  taskOptions[selectedTask] ?? quantityLabel,
       unitPrice: price,
       currency:  "CAD",
-      metadata:  { taskKey: selectedTask, taskLabel: taskOptions[selectedTask] ?? "" },
+      metadata:  { task_key: selectedTask, task_label: taskOptions[selectedTask] ?? "" },
     };
   }
 
@@ -65,13 +83,15 @@ export function buildCartItem(
 export function AddonCard({ config, onAddToCart }: AddonCardProps) {
   const {
     id, icon, iconBg, name, price, quantityLabel,
-    description, taskOptions, moduleTaskOptions, disabled,
+    description, taskOptions, mockTestOptions, moduleTaskOptions, disabled,
   } = config;
 
-  const taskKeys   = taskOptions ? Object.keys(taskOptions) : [];
+  const taskKeys    = taskOptions     ? Object.keys(taskOptions)     : [];
+  const mockKeys    = mockTestOptions ? Object.keys(mockTestOptions) : [];
   const moduleNames = moduleTaskOptions ? Object.keys(moduleTaskOptions) : [];
 
   const [selectedTask, setSelectedTask]         = useState(taskKeys[0] ?? "");
+  const [selectedMockTest, setSelectedMockTest] = useState(mockKeys[0] ?? "");
   const [selectedModule, setSelectedModule]     = useState(moduleNames[0] ?? "");
   const [selectedModuleTask, setSelectedModuleTask] = useState(
     () => Object.keys(moduleTaskOptions?.[moduleNames[0] ?? ""] ?? {})[0] ?? "",
@@ -86,7 +106,7 @@ export function AddonCard({ config, onAddToCart }: AddonCardProps) {
 
   const handleAdd = () => {
     if (disabled) return;
-    onAddToCart(buildCartItem(config, selectedModule, selectedModuleTask, selectedTask));
+    onAddToCart(buildCartItem(config, selectedModule, selectedModuleTask, selectedTask, selectedMockTest));
   };
 
   return (
@@ -111,6 +131,16 @@ export function AddonCard({ config, onAddToCart }: AddonCardProps) {
       </div>
 
       <p className="text-xs text-white/40 leading-relaxed">{description}</p>
+
+      {/* Mock test slot selector */}
+      {mockTestOptions && (
+        <BillingSelect
+          value={selectedMockTest}
+          onChange={setSelectedMockTest}
+          disabled={disabled}
+          options={mockKeys.map((key) => ({ key, label: mockTestOptions[key] }))}
+        />
+      )}
 
       {taskOptions && (
         <BillingSelect

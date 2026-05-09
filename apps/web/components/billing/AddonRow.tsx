@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { ShoppingCart, Lock } from "lucide-react";
+import { ShoppingCart } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { BillingSelect } from "./BillingSelect";
 import { buildCartItem } from "./AddonCard";
@@ -16,13 +16,15 @@ interface AddonRowProps {
 export function AddonRow({ config, onAddToCart }: AddonRowProps) {
   const {
     icon, iconBg, name, price, description,
-    taskOptions, moduleTaskOptions, disabled,
+    taskOptions, mockTestOptions, moduleTaskOptions, disabled,
   } = config;
 
-  const taskKeys    = taskOptions ? Object.keys(taskOptions) : [];
+  const taskKeys    = taskOptions     ? Object.keys(taskOptions)     : [];
+  const mockKeys    = mockTestOptions ? Object.keys(mockTestOptions) : [];
   const moduleNames = moduleTaskOptions ? Object.keys(moduleTaskOptions) : [];
 
   const [selectedTask, setSelectedTask]             = useState(taskKeys[0] ?? "");
+  const [selectedMockTest, setSelectedMockTest]     = useState(mockKeys[0] ?? "");
   const [selectedModule, setSelectedModule]         = useState(moduleNames[0] ?? "");
   const [selectedModuleTask, setSelectedModuleTask] = useState(
     () => Object.keys(moduleTaskOptions?.[moduleNames[0] ?? ""] ?? {})[0] ?? "",
@@ -37,7 +39,7 @@ export function AddonRow({ config, onAddToCart }: AddonRowProps) {
 
   const handleAdd = () => {
     if (disabled) return;
-    onAddToCart(buildCartItem(config, selectedModule, selectedModuleTask, selectedTask));
+    onAddToCart(buildCartItem(config, selectedModule, selectedModuleTask, selectedTask, selectedMockTest));
   };
 
   return (
@@ -62,6 +64,16 @@ export function AddonRow({ config, onAddToCart }: AddonRowProps) {
           <p className="text-[11px] text-white/40 mt-0.5 leading-snug">{description}</p>
         </div>
       </div>
+
+      {/* Mock test slot selector */}
+      {mockTestOptions && (
+        <BillingSelect
+          value={selectedMockTest}
+          onChange={setSelectedMockTest}
+          disabled={disabled}
+          options={mockKeys.map((key) => ({ key, label: mockTestOptions[key] }))}
+        />
+      )}
 
       {moduleTaskOptions && (
         <div className="space-y-1.5">
@@ -92,20 +104,13 @@ export function AddonRow({ config, onAddToCart }: AddonRowProps) {
 
       <button
         onClick={handleAdd}
-        disabled={disabled}
-        title={disabled ? "Upgrade to Pro to purchase add-ons" : undefined}
         className={cn(
           "w-full flex items-center justify-center gap-1.5 py-2 rounded-lg",
           "text-xs font-semibold transition-all duration-200 border",
-          disabled
-            ? "border-white/[0.04] text-white/20 cursor-not-allowed"
-            : "border-amber-500/40 text-amber-400 hover:border-amber-500/70 hover:bg-amber-500/[0.06]",
+          "border-amber-500/40 text-amber-400 hover:border-amber-500/70 hover:bg-amber-500/[0.06]",
         )}
       >
-        {disabled
-          ? <><Lock className="w-3 h-3" /> Requires Pro</>
-          : <><ShoppingCart className="w-3 h-3" /> Add to cart</>
-        }
+        <ShoppingCart className="w-3 h-3" /> Add to cart
       </button>
     </div>
   );

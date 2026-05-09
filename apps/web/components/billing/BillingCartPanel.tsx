@@ -27,9 +27,10 @@ export function BillingCartPanel({ embedded = false }: BillingCartPanelProps) {
   const decreaseQty   = useBillingCartStore((s) => s.decreaseQty);
   const removeItem    = useBillingCartStore((s) => s.removeItem);
 
-  const subtotal = selectSubtotal(items);
-  const discount = promoCode ? promoDiscount : 0;
-  const total    = selectTotal(subtotal, discount);
+  const subtotal        = selectSubtotal(items);
+  const discountPercent = promoCode ? promoDiscount : 0;
+  const discountAmount  = Math.round(subtotal * discountPercent) / 100;
+  const total           = selectTotal(subtotal, discountAmount);
 
   const { createCheckoutSession, isPending } = useCreateCheckoutSession();
   const isEmpty = items.length === 0;
@@ -78,10 +79,10 @@ export function BillingCartPanel({ embedded = false }: BillingCartPanelProps) {
           <span className="text-white/80 tabular-nums">${formatCAD(subtotal)} CAD</span>
         </div>
 
-        {discount > 0 && (
+        {discountAmount > 0 && (
           <div className="flex justify-between text-sm">
-            <span className="text-emerald-400">Promo discount</span>
-            <span className="text-emerald-400 tabular-nums">−${formatCAD(discount)} CAD</span>
+            <span className="text-emerald-400">Promo ({discountPercent}% off)</span>
+            <span className="text-emerald-400 tabular-nums">−${formatCAD(discountAmount)} CAD</span>
           </div>
         )}
 

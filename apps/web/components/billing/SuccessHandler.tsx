@@ -5,20 +5,24 @@ import { useRouter }         from "next/navigation";
 import { toast }             from "sonner";
 import { useBilling }        from "@/lib/hooks/useBilling";
 import { useCurrentUser }    from "@/lib/hooks/useCurrentUser";
+import { useBillingCartStore } from "@/store/billingCartStore";
 
 interface SuccessHandlerProps {
-  success:  boolean;
-  canceled: boolean;
-  plan?:    string;
+  success:    boolean;
+  canceled:   boolean;
+  plan?:      string;
+  /** True when the cart contained only addon items (no plan upgrade). */
+  addonOnly?: boolean;
 }
 
 const POLL_INTERVAL_MS = 5_000;
 const MAX_POLLS        = 3;
 
-export function SuccessHandler({ success, canceled, plan }: SuccessHandlerProps) {
+export function SuccessHandler({ success, canceled, plan, addonOnly = false }: SuccessHandlerProps) {
   const router                  = useRouter();
   const { refreshAfterPayment } = useBilling();
   const { user }                = useCurrentUser();
+  const clearCart               = useBillingCartStore((s) => s.clearCart);
 
   // Keep a ref to the polling interval so we can clear it
   const pollTimer = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -31,11 +35,13 @@ export function SuccessHandler({ success, canceled, plan }: SuccessHandlerProps)
     };
   }, []);
 
-  // Kick off polling when plan is still 'starter' after redirect
+  // ── Plan-upgrade polling ────────────────────────────────────────────────────
+  // Only runs for plan upgrades (not addon-only carts).
+  // Polls until the SSE-delivered plan change arrives or MAX_POLLS is reached.
   useEffect(() => {
-    if (!success) return;
+    if (!success || addonOnly) return;
     if (!user) return;
-    // If SSE already delivered the update, plan won't be 'starter' — stop here.
+    // SSE already delivered the plan update — stop here.
     if (user.plan !== "starter") {
       if (pollTimer.current) clearInterval(pollTimer.current);
       return;
@@ -57,21 +63,32 @@ export function SuccessHandler({ success, canceled, plan }: SuccessHandlerProps)
       if (pollTimer.current) clearInterval(pollTimer.current);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [success, user?.plan]);
+  }, [success, addonOnly, user?.plan]);
 
+  // ── One-shot on mount (success / canceled) ──────────────────────────────────
   useEffect(() => {
     if (success) {
-      // Refresh both billing status + user profile (plan badge in navbar)
+      // Always refresh billing status + quota immediately (catches addon credit refresh too)
       refreshAfterPayment();
 
-      const planLabel = plan
-        ? plan.charAt(0).toUpperCase() + plan.slice(1)
-        : "plan";
+      // Clear the cart — purchase is complete
+      clearCart();
 
-      toast.success(`🎉 Welcome to ${planLabel}!`, {
-        description: "Your plan has been upgraded. All features are now unlocked.",
-        duration:    6000,
-      });
+      if (addonOnly) {
+        // Addon-only purchase — plan didn't change, just credits added
+        toast.success("🎉 Practice packs added!", {
+          description: "Your extra questions are ready. Start practising any time.",
+          duration:    6000,
+        });
+      } else {
+        const planLabel = plan
+          ? plan.charAt(0).toUpperCase() + plan.slice(1)
+          : "Pro";
+        toast.success(`🎉 Welcome to ${planLabel}!`, {
+          description: "Your plan has been upgraded. All features are now unlocked.",
+          duration:    6000,
+        });
+      }
 
       // Clean up query params without re-render
       router.replace("/billing", { scroll: false });

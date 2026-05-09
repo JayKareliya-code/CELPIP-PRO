@@ -1,9 +1,8 @@
 "use client";
 
-import { PenLine, Mic, SlidersHorizontal } from "lucide-react";
+import { PenLine, Mic, SlidersHorizontal, ClipboardList } from "lucide-react";
 import { AddonCard } from "./AddonCard";
 import type { AddonCardConfig } from "./AddonCard";
-import type { UserPlan } from "@/lib/types";
 import type { CartItem } from "@/store/billingCartStore";
 
 export const SPEAKING_TASK_OPTIONS: Record<string, string> = {
@@ -25,60 +24,74 @@ export const WRITING_TASK_OPTIONS: Record<string, string> = {
 // Grouped by module — used by the two-level selector in AddonCard/AddonRow
 export const CUSTOM_BUNDLE_MODULES: Record<string, Record<string, string>> = {
   Speaking: SPEAKING_TASK_OPTIONS,
-  Writing:  WRITING_TASK_OPTIONS,
+  Writing: WRITING_TASK_OPTIONS,
+};
+
+// Mock test slot options (1–5)
+export const MOCK_TEST_OPTIONS: Record<string, string> = {
+  "1": "Mock Test 1",
+  "2": "Mock Test 2",
+  "3": "Mock Test 3",
+  "4": "Mock Test 4",
+  "5": "Mock Test 5",
 };
 
 export const ADDONS: AddonCardConfig[] = [
   {
-    id:            "writing-pack",
-    cartType:      "writing_pack",
-    icon:          <PenLine className="w-4 h-4 text-blue-400" />,
-    iconBg:        "border-white/[0.10] bg-transparent",
-    name:          "Writing Pack",
-    price:         3.99,
+    id: "writing-pack",
+    cartType: "writing_pack",
+    icon: <PenLine className="w-4 h-4 text-blue-400" />,
+    iconBg: "border-white/[0.10] bg-transparent",
+    name: "Writing Pack",
+    price: 2.99,
     quantityLabel: "5 questions",
-    description:   "Use across writing tasks to get more detailed AI feedback and improvement tips.",
+    description: "Use across writing tasks to get more detailed AI feedback and improvement tips.",
   },
   {
-    id:            "speaking-pack",
-    cartType:      "speaking_pack",
-    icon:          <Mic className="w-4 h-4 text-emerald-400" />,
-    iconBg:        "border-white/[0.10] bg-transparent",
-    name:          "Speaking Pack",
-    price:         6.99,
+    id: "speaking-pack",
+    cartType: "speaking_pack",
+    icon: <Mic className="w-4 h-4 text-emerald-400" />,
+    iconBg: "border-white/[0.10] bg-transparent",
+    name: "Speaking Pack",
+    price: 6.99,
     quantityLabel: "5 questions",
-    description:   "Use across speaking tasks to practise more without changing your plan.",
+    description: "Use across speaking tasks to practise more without changing your plan.",
   },
   {
-    id:                "custom-bundle",
-    cartType:          "custom_bundle",
-    icon:              <SlidersHorizontal className="w-4 h-4 text-amber-400" />,
-    iconBg:            "border-white/[0.10] bg-transparent",
-    name:              "Custom Task Bundle",
-    price:             1.99,
-    quantityLabel:     "5 questions",
-    description:       "Choose any specific Speaking or Writing task for focused practice exactly where you need it.",
+    id: "custom-bundle",
+    cartType: "custom_bundle",
+    icon: <SlidersHorizontal className="w-4 h-4 text-amber-400" />,
+    iconBg: "border-white/[0.10] bg-transparent",
+    name: "Custom Task Bundle",
+    price: 1.99,
+    quantityLabel: "5 questions",
+    description: "Choose any specific Speaking or Writing task for focused practice exactly where you need it.",
     moduleTaskOptions: CUSTOM_BUNDLE_MODULES,
+  },
+  {
+    id: "mock-bundle",
+    cartType: "mock_bundle",
+    icon: <ClipboardList className="w-4 h-4 text-violet-400" />,
+    iconBg: "border-white/[0.10] bg-transparent",
+    name: "Mock Test Bundle",
+    price: 2.99,
+    quantityLabel: "1 Speaking + 1 Writing mock",
+    description: "Add an extra full mock test slot — one complete speaking session and one writing session.",
+    mockTestOptions: MOCK_TEST_OPTIONS,
   },
 ];
 
 interface AddonGridProps {
-  currentPlan: UserPlan;
   onAddToCart: (item: Omit<CartItem, "quantity">) => void;
 }
 
-export function AddonGrid({ currentPlan, onAddToCart }: AddonGridProps) {
-  const isPro = currentPlan === "pro";
-
+export function AddonGrid({ onAddToCart }: AddonGridProps) {
   return (
     <div className="space-y-4">
       <div>
         <h2 className="text-base font-semibold text-white/90 mb-1">Practice Add-ons</h2>
         <p className="text-sm text-white/40">
           Buy extra practice questions without changing your plan.
-          {!isPro && (
-            <span className="text-amber-400/70 ml-1">Requires a Pro subscription.</span>
-          )}
         </p>
       </div>
 
@@ -86,7 +99,7 @@ export function AddonGrid({ currentPlan, onAddToCart }: AddonGridProps) {
         {ADDONS.map((addon) => (
           <AddonCard
             key={addon.id}
-            config={{ ...addon, disabled: !isPro }}
+            config={addon}
             onAddToCart={onAddToCart}
           />
         ))}
@@ -94,3 +107,4 @@ export function AddonGrid({ currentPlan, onAddToCart }: AddonGridProps) {
     </div>
   );
 }
+

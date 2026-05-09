@@ -15,7 +15,6 @@ import { PlanBadge }      from "@/components/settings/shared/PlanBadge";
 const PLAN_DESCRIPTIONS: Record<string, string> = {
   starter: "Free plan — limited to 1 mock test per module.",
   pro:     "Pro plan — 5 attempts per task, detailed AI feedback.",
-  ultra:   "Ultra plan — 15 attempts per task, full analytics suite.",
 };
 
 export function SubscriptionTab() {
@@ -39,7 +38,7 @@ export function SubscriptionTab() {
             )}
           </div>
 
-          {plan !== "ultra" && (
+          {plan !== "pro" && (
             <Link
               href="/billing"
               className="shrink-0 inline-flex items-center gap-1.5 rounded-xl bg-amber-500 hover:bg-amber-400 px-4 py-2 text-sm font-semibold text-black transition-colors"

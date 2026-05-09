@@ -46,6 +46,9 @@ export interface QuotaStatus {
    */
   speaking_used_per_task?: Record<number, number>;
   writing_used_per_task?: Record<number, number>;
+  /** Per-task available addon credits — populated from backend addon_credits table. */
+  speaking_addon_credits_per_task?: Record<number, number>;
+  writing_addon_credits_per_task?: Record<number, number>;
 }
 
 // ── Mock quota resolver ────────────────────────────────────────────────────────
@@ -127,6 +130,11 @@ export function useQuota(skill: Skill): QuotaStatus & { isLoading: boolean } {
           skill === "speaking" ? resp.speaking_used_per_task : undefined,
         writing_used_per_task:
           skill === "writing"  ? resp.writing_used_per_task  : undefined,
+        // Expose per-task addon credits so useSpeakingQuota can compute effectiveLimit
+        speaking_addon_credits_per_task:
+          skill === "speaking" ? resp.speaking_addon_credits_per_task : undefined,
+        writing_addon_credits_per_task:
+          skill === "writing"  ? resp.writing_addon_credits_per_task  : undefined,
       };
     },
 

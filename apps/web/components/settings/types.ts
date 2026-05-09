@@ -3,7 +3,7 @@
 // Shared types scoped to the Settings feature module.
 // ─────────────:──────────────────────────────────────────────────────────────
 
-import { CreditCard, Shield, Target, Trash2, User2 } from "lucide-react";
+import { BarChart2, CreditCard, Shield, Target, Trash2, User2 } from "lucide-react";
 
 // ── Tab IDs ───────────────────────────────────────────────────────────────────
 
@@ -11,6 +11,7 @@ export type SettingsTab =
   | "profile"
   | "goal"
   | "subscription"
+  | "usage"
   | "privacy"
   | "danger";
 
@@ -24,6 +25,7 @@ export const SETTINGS_TABS: TabConfig[] = [
   { id: "profile",      label: "Profile",        icon: User2      },
   { id: "goal",         label: "Practice Goal",  icon: Target     },
   { id: "subscription", label: "Subscription",   icon: CreditCard },
+  { id: "usage",        label: "Usage & Packs",  icon: BarChart2  },
   { id: "privacy",      label: "Privacy & Data", icon: Shield     },
   { id: "danger",       label: "Danger Zone",    icon: Trash2     },
 ];
