@@ -7,7 +7,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.core.deps import get_db
 from app.core.security import get_current_user
 from app.models.user import User
-from app.api.v1.billing.schemas import AddonCreditSummaryResponse, TaskCreditStat
+from app.api.v1.billing.schemas import AddonCreditSummaryResponse, TaskCreditStat, MockCreditStat
 from app.services.addon_credit_service import get_addon_credit_summary
 
 router = APIRouter()
@@ -27,7 +27,7 @@ async def get_my_addon_credits(
     Response is safe to cache for ~30 s on the client (TanStack Query staleTime).
     No writes are performed here.
     """
-    raw = await get_addon_credit_summary(user.id, db)
+    summary, mock_raw = await get_addon_credit_summary(user.id, db)
 
     def _to_stat_map(skill_data: dict[int, dict[str, int]]) -> dict[int, TaskCreditStat]:
         return {
@@ -38,7 +38,13 @@ async def get_my_addon_credits(
             for task_num, stat in skill_data.items()
         }
 
+    mock_stats = {
+        skill: MockCreditStat(available=d["available"], purchased=d["purchased"])
+        for skill, d in mock_raw.items()
+    }
+
     return AddonCreditSummaryResponse(
-        speaking=_to_stat_map(raw.get("speaking", {})),
-        writing =_to_stat_map(raw.get("writing",  {})),
+        speaking=_to_stat_map(summary.get("speaking", {})),
+        writing =_to_stat_map(summary.get("writing",  {})),
+        mock    =mock_stats,
     )

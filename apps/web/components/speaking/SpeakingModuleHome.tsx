@@ -15,12 +15,13 @@
 // ─────────────────────────────────────────────────────────────────────────────
 
 import { useMemo } from "react";
-import { Mic, ArrowRight, BookOpen } from "lucide-react";
+import { Mic, ArrowRight, BookOpen, Sparkles } from "lucide-react";
 import Link from "next/link";
-import { BreadcrumbNav } from "@/components/layout/BreadcrumbNav";
-import { SpeakingTaskCard } from "@/components/speaking/SpeakingTaskCard";
-import { useSpeakingQuota } from "@/lib/hooks/useSpeakingQuota";
-import { useQuota } from "@/lib/hooks/useQuota";
+import { BreadcrumbNav }        from "@/components/layout/BreadcrumbNav";
+import { SpeakingTaskCard }    from "@/components/speaking/SpeakingTaskCard";
+import { useSpeakingQuota }    from "@/lib/hooks/useSpeakingQuota";
+import { useQuota }            from "@/lib/hooks/useQuota";
+import { useTaskModuleAccess } from "@/lib/hooks/useTaskModuleAccess";
 import {
   SPEAKING_TASK_TITLES,
   SPEAKING_TASK_DESCRIPTIONS,
@@ -43,25 +44,24 @@ interface SpeakingModuleHomeProps {
 // ── Component ─────────────────────────────────────────────────────────────────
 
 export function SpeakingModuleHome({ tasks }: SpeakingModuleHomeProps) {
-  // Plan-level quota (null taskNumber = overview mode: effectiveLimit = planLimit only,
-  // addonCredits = 0 because we can't sum across tasks here).
+  // Plan-level quota (null taskNumber = overview mode).
   const {
     effectiveLimit: planAttemptsLimit,
     plan,
     isLoading,
   } = useSpeakingQuota(null);
 
-  // Full quota response — gives us per-task used counts AND per-task addon credits.
-  const quotaResult  = useQuota("speaking");
-  const quotaLoading = quotaResult.isLoading;
-  const quotaReady   = !isLoading && !quotaLoading;
-  const isStarter    = plan === "starter";
+  // Centralised access gate — single source of truth for locking logic.
+  // Handles the "Starter + addon credits = unlocked" rule.
+  const access = useTaskModuleAccess("speaking");
+
+  // Full quota response — per-task USED counts (access hook only holds credits, not usage).
+  const quotaResult = useQuota("speaking");
+
+  const quotaReady = !isLoading && !access.isLoading;
 
   // Per-task addon credits map (task_number → available addon credits).
-  // Used to compute per-task effectiveLimit in the card loop.
-  const addonCreditsMap = (quotaResult as {
-    speaking_addon_credits_per_task?: Record<number, number>
-  }).speaking_addon_credits_per_task ?? {};
+  const addonCreditsMap = access.addonCreditsPerTask;
 
   // Group prompts by task_number → count per task
   const promptCountByTask = useMemo(() => {
@@ -113,8 +113,10 @@ export function SpeakingModuleHome({ tasks }: SpeakingModuleHomeProps) {
 
       </div>
 
-      {/* ── Starter info banner ─────────────────────────────────────────── */}
-      {isStarter && (
+      {/* ── Context-aware banner ─────────────────────────────────────── */}
+
+      {/* A: Starter with NO addon credits → show plan info + upgrade CTA */}
+      {access.plan === "starter" && !access.hasAddonCredits && (
         <div className="relative overflow-hidden rounded-xl border border-amber-700/40 bg-gradient-to-r from-amber-950/60 via-amber-950/40 to-yellow-950/40 p-4 flex items-center gap-4 flex-wrap">
           <div className="w-9 h-9 rounded-lg bg-amber-600/20 border border-amber-500/30 flex items-center justify-center shrink-0">
             <BookOpen className="w-4.5 h-4.5 text-amber-400" />
@@ -137,7 +139,28 @@ export function SpeakingModuleHome({ tasks }: SpeakingModuleHomeProps) {
         </div>
       )}
 
-      {/* ── Task stats strip ────────────────────────────────────────────────── */}
+      {/* B: Starter WITH addon credits → Speaking Pack active info */}
+      {access.plan === "starter" && access.hasAddonCredits && (
+        <div className="rounded-xl border border-primary/30 bg-primary/[0.07] p-4 flex items-center gap-4 flex-wrap">
+          <div className="w-9 h-9 rounded-lg bg-primary/10 border border-primary/20 flex items-center justify-center shrink-0">
+            <Sparkles className="w-4 h-4 text-primary" />
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-semibold text-primary">Speaking Pack active</p>
+            <p className="text-xs text-primary/70 mt-0.5">
+              Your purchased credits are available. Use them any time.
+            </p>
+          </div>
+          <Link
+            href="/billing"
+            className="shrink-0 text-xs text-primary/60 hover:text-primary transition-colors"
+          >
+            View billing →
+          </Link>
+        </div>
+      )}
+
+      {/* ── Task stats strip ──────────────────────────────────────────────────── */}
       {quotaReady && (
         <div className="grid grid-cols-3 sm:grid-cols-3 gap-3">
           {[
@@ -152,9 +175,9 @@ export function SpeakingModuleHome({ tasks }: SpeakingModuleHomeProps) {
               sub: `Included in ${plan}`,
             },
             {
-              label: "Bonus retries",
-              value: "Unlimited",
-              sub: "After quota used",
+              label: "Redos",
+              value: "Free",
+              sub: "Retry any completed prompt",
             },
           ].map(({ label, value, sub }) => (
             <div
@@ -172,16 +195,15 @@ export function SpeakingModuleHome({ tasks }: SpeakingModuleHomeProps) {
       {/* ── Task grid ─────────────────────────────────────────────────────── */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         {taskNumbers.map((taskNum) => {
-          const task         = uniqueTasks.find((t) => t.task_number === taskNum);
-          const promptCount  = promptCountByTask[taskNum] ?? 0;
-          const used         = quotaResult.speaking_used_per_task?.[taskNum] ?? 0;
+          const task        = uniqueTasks.find((t) => t.task_number === taskNum);
+          const promptCount = promptCountByTask[taskNum] ?? 0;
+          const used        = quotaResult.speaking_used_per_task?.[taskNum] ?? 0;
 
           // Per-task effectiveLimit: planLimit + any addon credits for this specific task.
           // This means a custom_bundle for Task 4 only changes Task 4's limit,
           // while a speaking_pack (expanded to all tasks at webhook time) raises all.
           const taskAddonCredits   = addonCreditsMap[taskNum] ?? 0;
           const taskEffectiveLimit = planAttemptsLimit + taskAddonCredits;
-          const isBonusRetry       = used >= taskEffectiveLimit;
 
           return (
             <SpeakingTaskCard
@@ -196,7 +218,6 @@ export function SpeakingModuleHome({ tasks }: SpeakingModuleHomeProps) {
               promptCount={promptCount}
               attemptsUsed={used}
               attemptsLimit={taskEffectiveLimit}
-              isBonusRetryMode={isBonusRetry}
               isLocked={false}
               href={`/speaking/${taskNum}`}
             />

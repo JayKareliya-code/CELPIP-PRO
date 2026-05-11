@@ -4,11 +4,17 @@
 // WritingTaskPromptsFolder — Folder-style view for ALL prompts of one task.
 //
 // Mirrors speaking/TaskPromptsFolder exactly:
-//   Breadcrumb → Header → Attempt bar → Prompt grid (+ Coming Soon slots)
+//   Breadcrumb → Header → Progress bar → Prompt grid (+ Coming Soon slots)
 //
-// Props:
-//   taskNumber — 1 | 2
-//   prompts    — all active WritingTask prompts for this task_number
+// Quota logic:
+//   - effectiveLimit = planLimit + addonCredits (from useWritingQuota)
+//   - used = distinct prompts with a COMPLETED attempt (quota at completion)
+//   - quotaExhausted = used >= effectiveLimit
+//   - A prompt is FREE to redo if user has already completed it
+//   - A prompt is LOCKED if quota is exhausted AND user has NOT completed it
+//   - "Coming soon" placeholders fill the grid up to effectiveLimit
+//
+// Writing tasks are NEVER locked by plan alone — Starter gets 2 free attempts.
 // ─────────────────────────────────────────────────────────────────────────────
 
 import Link        from "next/link";
@@ -62,9 +68,19 @@ interface WritingTaskPromptsFolderProps {
 }
 
 // ── CTA Button ────────────────────────────────────────────────────────────────
+// Three states:
+//   isAlreadyAttempted → amber "Redo" button
+//   isQuotaLocked      → greyed "Quota Reached" (not a link)
+//   default            → primary "Start Writing"
 
-function CtaButton({ isAttempted, isBonusRetry }: { isAttempted: boolean; isBonusRetry: boolean }) {
-  if (isAttempted && !isBonusRetry) {
+function CtaButton({
+  isAlreadyAttempted,
+  isQuotaLocked,
+}: {
+  isAlreadyAttempted: boolean;
+  isQuotaLocked:      boolean;
+}) {
+  if (isAlreadyAttempted) {
     return (
       <div className={cn(
         "w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg",
@@ -77,16 +93,15 @@ function CtaButton({ isAttempted, isBonusRetry }: { isAttempted: boolean; isBonu
       </div>
     );
   }
-  if (isBonusRetry) {
+  if (isQuotaLocked) {
     return (
       <div className={cn(
         "w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg",
-        "text-sm font-semibold transition-all duration-150",
-        "bg-amber-700/60 group-hover:bg-amber-700/80",
-        "text-amber-100 border border-amber-600/40 group-hover:border-amber-500/60",
+        "text-sm font-semibold",
+        "bg-white/[0.03] text-white/25 border border-white/[0.06]",
       )}>
-        <RotateCcw className="w-4 h-4" />
-        Practice Again (Free Retry)
+        <Lock className="w-4 h-4" />
+        Quota Reached
       </div>
     );
   }
@@ -103,7 +118,7 @@ function CtaButton({ isAttempted, isBonusRetry }: { isAttempted: boolean; isBonu
   );
 }
 
-// ── Coming Soon Card ──────────────────────────────────────────────────────────
+// ── Coming Soon Placeholder ───────────────────────────────────────────────────
 
 function ComingSoonCard({ index }: { index: number }) {
   return (
@@ -136,72 +151,92 @@ function ComingSoonCard({ index }: { index: number }) {
 // ── Prompt Card ───────────────────────────────────────────────────────────────
 
 function PromptCard({
-  prompt, index, isAttempted, isBonusRetry,
+  prompt,
+  index,
+  isAlreadyAttempted,
+  isQuotaLocked,
 }: {
-  prompt:      WritingTask;
-  index:       number;
-  isAttempted: boolean;
-  isBonusRetry: boolean;
+  prompt:             WritingTask;
+  index:              number;
+  isAlreadyAttempted: boolean;
+  isQuotaLocked:      boolean;
 }) {
-  const diffCfg = DIFFICULTY_CONFIG[(prompt as WritingTask & { difficulty?: Difficulty }).difficulty ?? "medium"];
+  const diffCfg = DIFFICULTY_CONFIG[
+    (prompt as WritingTask & { difficulty?: Difficulty }).difficulty ?? "medium"
+  ];
 
-  return (
-    <Link href={`/writing/${prompt.task_number}/${prompt.id}/practice`} className="group flex h-full">
-      <div className="flex flex-col h-full w-full rounded-xl border border-border bg-surface hover:border-white/[0.18] hover:shadow-[0_4px_24px_rgba(0,0,0,0.35)] transition-all duration-200 overflow-hidden">
-
-        {/* Header */}
-        <div className="px-4 pt-4 pb-3 border-b border-white/[0.06] shrink-0">
-          <div className="flex items-center justify-between gap-2 flex-wrap">
-            <div className="flex items-center gap-2">
-              <span className={cn(BADGE_BASE, "bg-white/[0.06] text-white/40 border-white/[0.08]")}>
-                Prompt {index + 1}
+  const cardContent = (
+    <div className={cn(
+      "flex flex-col h-full w-full rounded-xl border bg-surface transition-all duration-200 overflow-hidden",
+      isQuotaLocked
+        ? "border-border opacity-60 cursor-not-allowed"
+        : "border-border hover:border-white/[0.18] hover:shadow-[0_4px_24px_rgba(0,0,0,0.35)]"
+    )}>
+      {/* Header */}
+      <div className="px-4 pt-4 pb-3 border-b border-white/[0.06] shrink-0">
+        <div className="flex items-center justify-between gap-2 flex-wrap">
+          <div className="flex items-center gap-2">
+            <span className={cn(BADGE_BASE, "bg-white/[0.06] text-white/40 border-white/[0.08]")}>
+              Prompt {index + 1}
+            </span>
+            {diffCfg && (
+              <span className={cn(BADGE_BASE, diffCfg.classes)}>{diffCfg.label}</span>
+            )}
+            <span className={cn(BADGE_BASE, "bg-primary/10 text-primary border-primary/20")}>
+              {prompt.task_type}
+            </span>
+            {isAlreadyAttempted && (
+              <span className={cn(BADGE_BASE, "bg-emerald-900/30 text-emerald-400 border-emerald-700/40")}>
+                Completed
               </span>
-              {diffCfg && (
-                <span className={cn(BADGE_BASE, diffCfg.classes)}>{diffCfg.label}</span>
-              )}
-              <span className={cn(BADGE_BASE, "bg-primary/10 text-primary border-primary/20")}>
-                {prompt.task_type}
+            )}
+            {isQuotaLocked && !isAlreadyAttempted && (
+              <span className={cn(BADGE_BASE, "bg-white/[0.05] text-white/30 border-white/[0.08]")}>
+                Quota reached
               </span>
-              {isAttempted && !isBonusRetry && (
-                <span className={cn(BADGE_BASE, "bg-amber-900/30 text-amber-400 border-amber-700/40")}>
-                  Attempted
-                </span>
-              )}
-              {isBonusRetry && (
-                <span className={cn(BADGE_BASE, "bg-amber-900/30 text-amber-400 border-amber-700/40")}>
-                  Retry mode
-                </span>
-              )}
-            </div>
-            {/* Time + word count */}
-            <div className="flex items-center gap-2 text-xs text-subtle/70">
-              <span className="flex items-center gap-1">
-                <Timer className="w-3 h-3" />
-                {formatTime(prompt.time_limit_seconds)}
-              </span>
-              <span className="flex items-center gap-1">
-                <AlignLeft className="w-3 h-3" />
-                {prompt.max_words != null
-                  ? `${prompt.min_words}–${prompt.max_words} words`
-                  : `${prompt.min_words}+ words`}
-              </span>
-            </div>
+            )}
+          </div>
+          {/* Time + word count */}
+          <div className="flex items-center gap-2 text-xs text-subtle/70">
+            <span className="flex items-center gap-1">
+              <Timer className="w-3 h-3" />
+              {formatTime(prompt.time_limit_seconds)}
+            </span>
+            <span className="flex items-center gap-1">
+              <AlignLeft className="w-3 h-3" />
+              {prompt.max_words != null
+                ? `${prompt.min_words}–${prompt.max_words} words`
+                : `${prompt.min_words}+ words`}
+            </span>
           </div>
         </div>
-
-        {/* Prompt excerpt — flex-1 so it expands to fill remaining space */}
-        <div className="px-4 py-3 flex-1">
-          <p className="text-sm text-foreground/80 leading-relaxed">
-            {prompt.prompt_text}
-          </p>
-        </div>
-
-        {/* CTA — always pinned to bottom */}
-        <div className="px-4 pb-4 pt-1 shrink-0">
-          <CtaButton isAttempted={isAttempted} isBonusRetry={isBonusRetry} />
-        </div>
-
       </div>
+
+      {/* Prompt excerpt */}
+      <div className="px-4 py-3 flex-1">
+        <p className="text-sm text-foreground/80 leading-relaxed">
+          {prompt.prompt_text}
+        </p>
+      </div>
+
+      {/* CTA */}
+      <div className="px-4 pb-4 pt-1 shrink-0">
+        <CtaButton isAlreadyAttempted={isAlreadyAttempted} isQuotaLocked={isQuotaLocked} />
+      </div>
+    </div>
+  );
+
+  // Locked prompts are not wrapped in a link.
+  if (isQuotaLocked) {
+    return <div className="group flex h-full">{cardContent}</div>;
+  }
+
+  return (
+    <Link
+      href={`/writing/${prompt.task_number}/${prompt.id}/practice`}
+      className="group flex h-full"
+    >
+      {cardContent}
     </Link>
   );
 }
@@ -214,19 +249,22 @@ export function WritingTaskPromptsFolder({ taskNumber, prompts }: WritingTaskPro
   const { getToken } = useAuth();
 
   // Centralised quota: effectiveLimit = planLimit + addonCredits for THIS task.
-  // - writing_pack purchase → adds credits to all writing tasks (webhook expands per-task)
-  // - custom_bundle for writing-task-N → only raises effectiveLimit for Task N
+  // "used" counts COMPLETED attempts only — quota consumed at completion.
+  // Redo of any completed prompt is always free.
   const {
     plan,
     effectiveLimit: attemptsLimit,
+    addonCredits,
     used,
     remaining,
-    isBonusRetry,
     isLoading: quotaLoading,
   } = useWritingQuota(taskNumber);
-  const isStarter = plan === "starter";
 
-  // ── Which prompts has the user already attempted? ─────────────────────────
+  const isStarter          = plan === "starter";
+  const quotaExhausted     = used >= attemptsLimit;
+  const hasTaskAddonCredit = addonCredits > 0;
+
+  // ── Which prompts has the user already completed? ─────────────────────────
   const { data: attemptedPromptIds } = useQuery<string[]>({
     queryKey: ["attemptedWritingPrompts", taskNumber, user?.id],
     queryFn: async () => {
@@ -236,8 +274,9 @@ export function WritingTaskPromptsFolder({ taskNumber, prompts }: WritingTaskPro
         { headers: authHeaders(token) },
       );
     },
-    enabled: !!user && !isStarter,
-    staleTime: 30_000,
+    enabled: !!user,
+    staleTime: 10_000,
+    refetchOnWindowFocus: true,
   });
   const attemptedSet = new Set(attemptedPromptIds ?? []);
 
@@ -245,7 +284,7 @@ export function WritingTaskPromptsFolder({ taskNumber, prompts }: WritingTaskPro
   const taskDescription = TASK_DESCRIPTIONS[taskNumber] ?? "";
   const hasAnyPrompts   = prompts.length > 0;
 
-  // Coming-soon slots: fill up to the effective limit (planLimit + addonCredits)
+  // "Coming soon" slots fill up to effectiveLimit.
   const comingSoonCount = Math.max(0, attemptsLimit - prompts.length);
 
   return (
@@ -274,15 +313,18 @@ export function WritingTaskPromptsFolder({ taskNumber, prompts }: WritingTaskPro
         </div>
       </div>
 
-      {/* ── Locked banner (Starter) ────────────────────────────────────────── */}
-      {isStarter && (
+      {/* ── Context-aware info banner ─────────────────────────────────────── */}
+
+      {/* A: Starter with NO addon credits → show plan limit + upgrade CTA */}
+      {isStarter && !hasTaskAddonCredit && (
         <div className="rounded-xl border border-amber-700/30 bg-amber-950/40 p-4 flex items-center gap-4">
-          <Lock className="w-5 h-5 text-amber-400 shrink-0" />
+          <Sparkles className="w-5 h-5 text-amber-400 shrink-0" />
           <div className="flex-1">
-            <p className="text-sm font-semibold text-amber-200">Task practice is locked</p>
+            <p className="text-sm font-semibold text-amber-200">
+              {attemptsLimit} free attempts included with your Starter plan
+            </p>
             <p className="text-xs text-amber-300/70 mt-0.5">
-              Your Starter plan includes 1 writing mock test. Upgrade to Pro to
-              practice individual tasks with AI scoring.
+              Upgrade to Pro for 5 attempts per task, AI scoring, and mock tests.
             </p>
           </div>
           <Link
@@ -294,43 +336,52 @@ export function WritingTaskPromptsFolder({ taskNumber, prompts }: WritingTaskPro
         </div>
       )}
 
-      {/* ── Attempt progress bar ───────────────────────────────────────────── */}
-      {!isStarter && (
-        <div className="rounded-xl border border-white/[0.07] bg-surface px-4 py-3 flex items-center gap-4">
-          <div className="flex-1 space-y-1.5">
-            <div className="flex items-center justify-between text-xs">
-              <span className="text-subtle font-medium">
-                {isBonusRetry
-                  ? "Quota used — free retries active"
-                  : `${used} of ${attemptsLimit} attempts used`}
-              </span>
-              {isBonusRetry ? (
-                <span className="text-amber-400 font-semibold">Retry mode ⚡</span>
-              ) : (
-                <span className="text-subtle">
-                  {remaining} remaining
-                </span>
-              )}
-            </div>
-            <div className="h-1.5 bg-white/[0.06] rounded-full overflow-hidden">
-              <div
-                className={cn(
-                  "h-full rounded-full transition-all duration-500",
-                  isBonusRetry ? "bg-amber-500" : "bg-primary",
-                )}
-                style={{ width: `${Math.min((used / attemptsLimit) * 100, 100)}%` }}
-              />
-            </div>
+      {/* B: Starter WITH addon credits → show effective limit */}
+      {isStarter && hasTaskAddonCredit && (
+        <div className="rounded-xl border border-primary/30 bg-primary/[0.07] p-4 flex items-center gap-4">
+          <Sparkles className="w-5 h-5 text-primary shrink-0" />
+          <div className="flex-1">
+            <p className="text-sm font-semibold text-primary">
+              {attemptsLimit} attempts available — pack credits active
+            </p>
+            <p className="text-xs text-primary/70 mt-0.5">
+              Your purchased add-on includes {addonCredits} extra question{addonCredits !== 1 ? "s" : ""} for this task.
+            </p>
           </div>
-          <div className="text-right shrink-0">
-            <p className="text-xs text-subtle">Plan</p>
-            <p className="text-sm font-bold text-foreground capitalize">{plan}</p>
-          </div>
+          <Link
+            href="/billing"
+            className="shrink-0 text-xs text-primary/60 hover:text-primary transition-colors"
+          >
+            View billing →
+          </Link>
         </div>
       )}
 
+      {/* ── Attempt progress bar ──────────────────────────────────────────── */}
+      <div className="rounded-xl border border-white/[0.07] bg-surface px-4 py-3 flex items-center gap-4">
+        <div className="flex-1 space-y-1.5">
+          <div className="flex items-center justify-between text-xs">
+            <span className="text-subtle font-medium">
+              {`${used} of ${attemptsLimit} attempts used`}
+            </span>
+            <span className="text-subtle">
+              {remaining} remaining
+            </span>
+          </div>
+          <div className="h-1.5 bg-white/[0.06] rounded-full overflow-hidden">
+            <div
+              className="h-full rounded-full transition-all duration-500 bg-primary"
+              style={{ width: `${Math.min((used / attemptsLimit) * 100, 100)}%` }}
+            />
+          </div>
+        </div>
+        <div className="text-right shrink-0">
+          <p className="text-xs text-subtle">Plan</p>
+          <p className="text-sm font-bold text-foreground capitalize">{plan}</p>
+        </div>
+      </div>
+
       {/* ── Prompts ────────────────────────────────────────────────────────── */}
-      {/* Gate on quotaLoading to prevent stale-quota UI flash */}
       {quotaLoading ? (
         <div className="rounded-xl border border-white/[0.07] bg-surface/50 p-8 flex items-center justify-center">
           <span className="text-sm text-subtle animate-pulse">Loading…</span>
@@ -366,37 +417,49 @@ export function WritingTaskPromptsFolder({ taskNumber, prompts }: WritingTaskPro
 
           {/* Prompt grid */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {prompts.map((prompt, i) => (
-              <PromptCard
-                key={prompt.id}
-                prompt={prompt}
-                index={i}
-                isAttempted={attemptedSet.has(prompt.id)}
-                isBonusRetry={isBonusRetry && !isStarter}
-              />
-            ))}
+            {prompts.map((prompt, i) => {
+              const isAlreadyAttempted = attemptedSet.has(prompt.id);
+              // Lock new (not yet completed) prompts when quota is exhausted.
+              // Completed prompts are always accessible as free redos.
+              const isQuotaLocked = quotaExhausted && !isAlreadyAttempted;
 
-            {/* Coming soon placeholders */}
-            {!isBonusRetry && comingSoonCount > 0 &&
-              Array.from({ length: comingSoonCount }).map((_, i) => (
-                <ComingSoonCard key={`cs-${i}`} index={prompts.length + i} />
-              ))
-            }
+              return (
+                <PromptCard
+                  key={prompt.id}
+                  prompt={prompt}
+                  index={i}
+                  isAlreadyAttempted={isAlreadyAttempted}
+                  isQuotaLocked={isQuotaLocked}
+                />
+              );
+            })}
+
+            {/* Coming soon placeholders — fill up to effectiveLimit */}
+            {comingSoonCount > 0 && Array.from({ length: comingSoonCount }).map((_, i) => (
+              <ComingSoonCard key={`cs-${i}`} index={prompts.length + i} />
+            ))}
           </div>
 
-          {/* Bonus retry note */}
-          {isBonusRetry && !isStarter && (
-            <div className="rounded-xl border border-amber-700/30 bg-amber-950/30 px-4 py-3 flex items-start gap-3 mt-2">
-              <span className="text-amber-400 shrink-0 mt-0.5">⚡</span>
+          {/* Quota exhausted notice */}
+          {quotaExhausted && (
+            <div className="rounded-xl border border-white/[0.08] bg-surface/60 px-4 py-3 flex items-start gap-3 mt-2">
+              <Lock className="w-4 h-4 text-white/30 shrink-0 mt-0.5" />
               <div>
-                <p className="text-sm font-semibold text-amber-200">
-                  Free retry mode — your quota is fully used
+                <p className="text-sm font-semibold text-foreground/70">
+                  All {attemptsLimit} attempts used for this task
                 </p>
-                <p className="text-xs text-amber-300/70 mt-0.5">
-                  You&apos;ve used all {attemptsLimit} attempts for this task. You can still
-                  practice as many times as you like — these attempts don&apos;t count
-                  against your quota.
+                <p className="text-xs text-subtle mt-0.5">
+                  You can still redo any completed prompt for free.
+                  {isStarter && !hasTaskAddonCredit
+                    ? " Upgrade to Pro or purchase an add-on for more new prompts."
+                    : " Purchase an add-on pack to unlock additional questions."}
                 </p>
+                <Link
+                  href="/billing"
+                  className="inline-flex items-center gap-1 mt-2 text-xs text-primary/70 hover:text-primary transition-colors font-medium"
+                >
+                  Get more attempts →
+                </Link>
               </div>
             </div>
           )}

@@ -21,7 +21,7 @@
 //
 // HOW IT WORKS:
 //   Clicking "Back" opens a ConfirmModal (local state). Confirming navigates
-//   to /practice/writing. Cancelling closes the modal and returns focus to
+//   to /mock-test/writing. Cancelling closes the modal and returns focus to
 //   the exit button via a ref.
 // ─────────────────────────────────────────────────────────────────────────────
 
@@ -31,12 +31,12 @@ import { ArrowLeft }        from "lucide-react";
 import { ConfirmModal }     from "@/components/common/ConfirmModal";
 
 interface WritingMockExamExitGuardProps {
-  /** Where to navigate on confirmed exit. Defaults to /practice/writing. */
+  /** Where to navigate on confirmed exit. Defaults to /mock-test/writing. */
   exitHref?: string;
 }
 
 export function WritingMockExamExitGuard({
-  exitHref = "/practice/writing",
+  exitHref = "/mock-test/writing",
 }: WritingMockExamExitGuardProps) {
   const router     = useRouter();
   const [open, setOpen] = useState(false);

@@ -26,8 +26,8 @@ const config: Config = {
         warning: { DEFAULT: "#FBBF24", light: "#451A03", foreground: "#fff" },
         danger:  { DEFAULT: "#F87171", light: "#450A0A", foreground: "#fff" },
         // ── Dark Neutrals ───────────────────────────────────────────────────
-        surface:  "#151824",      // card / panel / navbar backgrounds
-        muted:    "#0D0F17",      // page background (darkest layer)
+        surface:  "#111111",      // card / panel / navbar backgrounds
+        muted:    "#000000",      // page background (pure black)
         border:   "#252836",      // dividers, card borders
         subtle:   "#8892A4",      // secondary / muted text
         // ── Practice full-screen dark mode ─────────────────────────────────

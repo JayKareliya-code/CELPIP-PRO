@@ -69,25 +69,32 @@ export function usePracticeQuota(skill: Skill): {
       // Falls back to 0 used until the backend returns this field.
       try {
         const token = await getToken();
-        const resp  = await api.get<QuotaStatusResponse & {
-          speaking_mock_tests_used?: number;
-          writing_mock_tests_used?:  number;
-        }>(
+        const resp  = await api.get<QuotaStatusResponse>(
           `${API_V1}/users/me/quota`,
           { headers: authHeaders(token) },
         );
 
         const used =
           skill === "speaking"
-            ? (resp.speaking_mock_tests_used ?? 0)
-            : (resp.writing_mock_tests_used  ?? 0);
+            ? resp.speaking_mock_tests_used
+            : resp.writing_mock_tests_used;
 
-        return buildQuota(skill, limit, used);
+        // Effective limit = plan limit + purchased addon pool credits.
+        const addonCredits =
+          skill === "speaking"
+            ? resp.speaking_mock_addon_credits
+            : resp.writing_mock_addon_credits;
+
+        const planLimit =
+          skill === "speaking"
+            ? (resp.speaking_mock_tests_limit ?? limit)
+            : (resp.writing_mock_tests_limit  ?? limit);
+
+        const effectiveLimit = planLimit + addonCredits;
+
+        return buildQuota(skill, effectiveLimit, used);
       } catch {
-        // API error: fail closed (safe default) so a user who has exhausted their
-        // quota cannot start a session that will 402 at submission time.
-        // The caller can detect this via isLoading===false + error being non-null
-        // if React Query surfaces the error instead of returning stale data.
+        // API error: fail closed (safe default).
         return buildQuota(skill, limit, limit);
       }
     },

@@ -16,8 +16,8 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const { skill } = await params;
   const label = skill === "speaking" ? "Speaking" : "Writing";
   return {
-    title: `${label} Practice Tests — CELPIPBRO`,
-    description: `Choose a full-length ${label.toLowerCase()} practice test based on your plan.`,
+    title: `${label} Mock Tests — CELPIPBRO`,
+    description: `Choose a full-length ${label.toLowerCase()} mock exam based on your plan.`,
   };
 }
 

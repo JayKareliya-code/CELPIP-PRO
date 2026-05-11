@@ -4,10 +4,10 @@ import { Rocket, Zap } from "lucide-react";
 import { PlanCard } from "./PlanCard";
 import type { PlanCardConfig } from "./PlanCard";
 import type { BillingPlan } from "@/lib/hooks/useBilling";
-import { PLAN_PRICING, PRO_PLAN_LIMITS } from "@/lib/constants";
+import { PLAN_PRICING, PRO_PLAN_LIMITS, STARTER_PLAN_LIMITS } from "@/lib/constants";
 
 const SPEAKING_TASK_COUNT = 8;
-const WRITING_TASK_COUNT  = 2;
+const WRITING_TASK_COUNT = 2;
 
 export const PLANS: PlanCardConfig[] = [
   {
@@ -16,39 +16,38 @@ export const PLANS: PlanCardConfig[] = [
     tagline: "Try the workflow first",
     priceLabel: PLAN_PRICING.starter.priceLabel,
     priceNote: PLAN_PRICING.starter.priceNote,
-    icon: <Zap className="w-5 h-5 text-white/35" />,
+    icon: <Zap className="w-5 h-5 text-primary" />,
     iconBg: "border-white/[0.10] bg-transparent",
     highlighted: false,
     features: [
-      { text: "Band estimation only",    included: true },
-      { text: "Practice access",         included: true },
-      { text: "Basic results",           included: true },
-      { text: "Detailed AI report",      included: false },
-      { text: "Strengths & weaknesses",  included: false },
-      { text: "Improvement tips",        included: false },
-      { text: "Sample response",         included: false },
-      { text: "Analytics",               included: false },
+      { text: `${SPEAKING_TASK_COUNT * STARTER_PLAN_LIMITS.speaking_attempts_per_task} Focused Speaking practices`, included: true, highlight: true },
+      { text: `${WRITING_TASK_COUNT * STARTER_PLAN_LIMITS.writing_attempts_per_task} Focused Writing practices`, included: true, highlight: true },
+      { text: "1 Full Mock exam", included: true, highlight: true },
+      { text: "Basic Estimate Band Score", included: true, highlight: true },
+      { text: "Detailed rubric-style scoring", included: false, highlight: true },
+      { text: "Targeted rewrite response", included: false, highlight: true },
+      { text: "Progress Tracking", included: false, highlight: true },
+      { text: "Analytics", included: false, highlight: true },
     ],
   },
   {
     id: "pro",
     name: PLAN_PRICING.pro.name,
-    tagline: "The live plan for serious practice",
+    tagline: "Unlocks advanced features",
     priceLabel: PLAN_PRICING.pro.priceLabel,
     priceNote: PLAN_PRICING.pro.priceNote,
     icon: <Rocket className="w-5 h-5 text-amber-400" />,
     iconBg: "border-white/[0.10] bg-transparent",
     highlighted: true,
-    badge: "Most Popular",
-    badgeColor: "bg-amber-500",
     features: [
       { text: `${SPEAKING_TASK_COUNT * PRO_PLAN_LIMITS.speaking_attempts_per_task} focused Speaking practices`, included: true, highlight: true },
-      { text: `${WRITING_TASK_COUNT  * PRO_PLAN_LIMITS.writing_attempts_per_task}  focused Writing practices`,  included: true, highlight: true },
-      { text: "Detailed AI report",      included: true, highlight: true },
-      { text: "Strengths & weaknesses",  included: true },
-      { text: "Improvement tips",        included: true },
-      { text: "Sample response",         included: true },
-      { text: "Analytics",               included: true },
+      { text: `${WRITING_TASK_COUNT * PRO_PLAN_LIMITS.writing_attempts_per_task}  focused Writing practices`, included: true, highlight: true },
+      { text: "2 Full Mock exam", included: true, highlight: true },
+      { text: "Advanced AI Feedback", included: true, highlight: true },
+      { text: "Detailed rubric-style scoring", included: true, highlight: true },
+      { text: "Targeted rewrite response", included: true, highlight: true },
+      { text: "Progress Tracking", included: true, highlight: true },
+      { text: "Analytics", included: true, highlight: true },
     ],
   },
 ];

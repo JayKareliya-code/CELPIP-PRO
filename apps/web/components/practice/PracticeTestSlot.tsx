@@ -41,7 +41,7 @@ export function PracticeTestSlot({ slot, skill, href }: PracticeTestSlotProps) {
   const { slotNumber, isUsed, isLocked, estimatedBand } = slot;
   const meta  = SKILL_META[skill];
   const Icon  = meta.icon;
-  const label = `Full Practice ${slotNumber}`;
+  const label = `Mock Test ${slotNumber}`;
 
   // ── Background fill ───────────────────────────────────────────────────────
   // Used slots get a full-width translucent skill-colour wash (same pattern

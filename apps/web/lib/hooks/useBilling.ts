@@ -118,8 +118,9 @@ export function useBilling() {
     queryClient.invalidateQueries({ queryKey: cacheKey });
     queryClient.invalidateQueries({ queryKey: ["current-user", userId] });
     // Invalidate quota so speaking/writing limits update immediately after purchase.
-    // Without this the 60s staleTime means users see the old limit until the next refetch.
     queryClient.invalidateQueries({ queryKey: ["quota"] });
+    // Invalidate practiceQuota (mock test quota shown on Practice Tests page).
+    queryClient.invalidateQueries({ queryKey: ["practiceQuota"] });
     // Invalidate addon-credits so the Usage tab's Practice Packs section refreshes.
     queryClient.invalidateQueries({ queryKey: addonCreditsKey(userId) });
   };

@@ -1,5 +1,5 @@
 // ─────────────────────────────────────────────────────────────────────────────
-// /practice/speaking/[testNumber] — Full CELPIP speaking mock exam page.
+// /mock-test/speaking/[testNumber] — Full CELPIP speaking mock exam page.
 //
 // Params:
 //   testNumber: "1" | "2" | … | MAX_PRACTICE_SLOTS

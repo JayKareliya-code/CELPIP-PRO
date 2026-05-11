@@ -15,25 +15,13 @@
 //                  - writing_pack purchase → credits added to BOTH writing tasks
 //                  - custom_bundle (e.g. "writing-task-1") → credits only for Task 1
 //
-// Without this hook the formula was copy-pasted across WritingModuleHome and
-// WritingTaskPromptsFolder — neither location accounted for add-on credits,
-// making the displayed limit wrong the moment a user purchased a pack.
-//
-// Usage
-// ─────
-//   // Task-specific (WritingTaskPromptsFolder, etc.)
-//   const { effectiveLimit, used, remaining, isBonusRetry, isLoading } =
-//     useWritingQuota(taskNumber);
-//
-//   // Plan-level overview (WritingModuleHome stats strip)
-//   const { effectiveLimit, plan, isLoading } = useWritingQuota(null);
-//   //  → used / remaining / isBonusRetry are 0 / 0 / false when taskNumber=null
-//
-// Scalability
+// Quota model
 // ────────────
-// When the backend adds writing_addon_credits_per_task to QuotaStatusResponse
-// (already implemented in useQuota.ts), this hook picks it up automatically.
-// No component changes are ever needed to wire in future addon types.
+// - Starter gets 2 free writing attempts per task (never locked by default).
+// - Pro gets 5 attempts per task.
+// - Addon credits stack on top: effectiveLimit = planLimit + addonCredits.
+// - Quota is consumed only when an attempt reaches 'complete' status.
+// - Redo of any completed prompt is always free — no quota charge.
 // ─────────────────────────────────────────────────────────────────────────────
 
 "use client";
@@ -70,7 +58,8 @@ export interface WritingTaskQuotaResult {
   effectiveLimit: number;
 
   /**
-   * Distinct prompts attempted for this task.
+   * Distinct prompts COMPLETED for this task (quota-consumed count).
+   * Quota is consumed at completion; redo of any completed prompt is free.
    * Always 0 when taskNumber is null.
    */
   used:           number;
@@ -80,14 +69,6 @@ export interface WritingTaskQuotaResult {
    * Always 0 when taskNumber is null.
    */
   remaining:      number;
-
-  /**
-   * True when used >= effectiveLimit — the user has exhausted both plan quota
-   * AND any add-on credits.  In this state they can still practice but it
-   * counts as a "bonus retry" (no quota charge, prompt stays fixed).
-   * Always false when taskNumber is null.
-   */
-  isBonusRetry:   boolean;
 
   /** True while quota data is loading from the server. */
   isLoading:      boolean;
@@ -135,9 +116,8 @@ export function useWritingQuota(taskNumber: number | null): WritingTaskQuotaResu
           ?.[taskNumber] ?? 0
       : 0;
 
-  // ── Step 5: Derived fields ──────────────────────────────────────────────────
-  const remaining    = Math.max(0, effectiveLimit - used);
-  const isBonusRetry = taskNumber !== null && used >= effectiveLimit;
+  // ── Step 5: Derived fields ───────────────────────────────────────────────────────
+  const remaining = Math.max(0, effectiveLimit - used);
 
   return {
     plan,
@@ -146,7 +126,6 @@ export function useWritingQuota(taskNumber: number | null): WritingTaskQuotaResu
     effectiveLimit,
     used,
     remaining,
-    isBonusRetry,
     isLoading: quotaResult.isLoading,
   };
 }

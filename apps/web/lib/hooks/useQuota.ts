@@ -49,6 +49,16 @@ export interface QuotaStatus {
   /** Per-task available addon credits — populated from backend addon_credits table. */
   speaking_addon_credits_per_task?: Record<number, number>;
   writing_addon_credits_per_task?: Record<number, number>;
+  /** Plan baseline limit per task (null = unlimited). From backend get_plan_limits. */
+  speaking_limit_per_task?: number | null;
+  writing_limit_per_task?:  number | null;
+  /** Mock test fields from backend quota response. */
+  speaking_mock_tests_used?:    number;
+  writing_mock_tests_used?:     number;
+  speaking_mock_tests_limit?:   number | null;
+  writing_mock_tests_limit?:    number | null;
+  speaking_mock_addon_credits?: number;
+  writing_mock_addon_credits?:  number;
 }
 
 // ── Mock quota resolver ────────────────────────────────────────────────────────
@@ -113,12 +123,21 @@ export function useQuota(skill: Skill): QuotaStatus & { isLoading: boolean } {
       const limit =
         skill === "speaking" ? resp.speaking_limit_per_task : resp.writing_limit_per_task;
 
-      // Sum remaining slots across all tasks individually.
-      // Using (limit - totalUsed) was wrong because `limit` is per-task while
-      // `totalUsed` is the cross-task sum — this caused premature paywall display.
+      // Per-task addon credits — used to compute accurate effectiveLimit per task.
+      const addonMap =
+        skill === "speaking"
+          ? (resp.speaking_addon_credits_per_task ?? {})
+          : (resp.writing_addon_credits_per_task  ?? {});
+
+      // Sum remaining slots using the EFFECTIVE limit (plan + addons) per task.
+      // This ensures users with purchased addon packs see accurate remaining counts.
       const remaining = limit === null
         ? -1
-        : Object.values(usedMap).reduce((sum, used) => sum + Math.max(0, limit - used), 0);
+        : Object.entries(usedMap).reduce((sum, [taskKey, used]) => {
+            const addonCredits  = addonMap[Number(taskKey)] ?? 0;
+            const effectiveLimit = limit + addonCredits;
+            return sum + Math.max(0, effectiveLimit - used);
+          }, 0);
 
       return {
         remaining,
@@ -135,11 +154,24 @@ export function useQuota(skill: Skill): QuotaStatus & { isLoading: boolean } {
           skill === "speaking" ? resp.speaking_addon_credits_per_task : undefined,
         writing_addon_credits_per_task:
           skill === "writing"  ? resp.writing_addon_credits_per_task  : undefined,
+        // Expose plan limits so consumers don't duplicate backend config values
+        speaking_limit_per_task:
+          skill === "speaking" ? resp.speaking_limit_per_task : undefined,
+        writing_limit_per_task:
+          skill === "writing"  ? resp.writing_limit_per_task  : undefined,
+        // Mock test usage + limits + addon pool (forwarded for UsageTab)
+        speaking_mock_tests_used:    resp.speaking_mock_tests_used,
+        writing_mock_tests_used:     resp.writing_mock_tests_used,
+        speaking_mock_tests_limit:   resp.speaking_mock_tests_limit,
+        writing_mock_tests_limit:    resp.writing_mock_tests_limit,
+        speaking_mock_addon_credits: resp.speaking_mock_addon_credits,
+        writing_mock_addon_credits:  resp.writing_mock_addon_credits,
       };
     },
 
-    enabled:   USE_MOCK || !!user,
-    staleTime: 60_000,
+    enabled:            USE_MOCK || !!user,
+    staleTime:          15_000,   // 15 s — refreshes quickly after a pack purchase
+    refetchOnWindowFocus: true,   // re-fetch when user returns from /billing
   });
 
   const fallback: QuotaStatus = { remaining: 0, canAttempt: false, showPaywall: false };

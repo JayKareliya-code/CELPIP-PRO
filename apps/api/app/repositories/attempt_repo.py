@@ -31,10 +31,11 @@ class AttemptRepository(BaseRepository[Attempt]):
     async def has_used_prompt(
         self, user_id: uuid.UUID, skill: str, prompt_id: uuid.UUID
     ) -> bool:
-        """Return True if the user has ANY non-cancelled/failed attempt for this prompt.
+        """Return True if the user has a COMPLETED attempt for this prompt.
 
-        Used by enforce_quota to allow unlimited retries on already-attempted
-        prompts without consuming additional quota slots.
+        Quota is consumed only when an attempt reaches 'complete' status.
+        Redo of any completed prompt is always free — no quota charge.
+        Pending / processing / failed attempts do not count.
         """
         result = await self.session.execute(
             select(func.count(Attempt.id))
@@ -42,18 +43,19 @@ class AttemptRepository(BaseRepository[Attempt]):
             .where(Attempt.skill       == skill)
             .where(Attempt.prompt_id   == prompt_id)
             .where(Attempt.is_mock_test == False)   # noqa: E712
-            .where(Attempt.status.not_in(["cancelled", "failed"]))
+            .where(Attempt.status      == "complete")
         )
         return (result.scalar_one() or 0) > 0
 
     async def count_distinct_prompts(
         self, user_id: uuid.UUID, skill: str, task_number: int
     ) -> int:
-        """Count DISTINCT prompts the user has attempted for a task.
+        """Count DISTINCT prompts the user has COMPLETED for a task.
 
-        Retrying the same prompt never increments this count — only a first
-        attempt on a new prompt does. This enforces the 'unlimited retries,
-        quota per unique prompt' contract.
+        Quota is only consumed when an attempt reaches 'complete' status:
+        - Pending / processing attempts do NOT count toward quota.
+        - Failed attempts do NOT count — a retry on a failed attempt is free.
+        - Redo of a completed prompt does NOT count (same prompt_id seen again).
         """
         result = await self.session.execute(
             select(func.count(func.distinct(Attempt.prompt_id)))
@@ -61,7 +63,7 @@ class AttemptRepository(BaseRepository[Attempt]):
             .where(Attempt.skill       == skill)
             .where(Attempt.task_number == task_number)
             .where(Attempt.is_mock_test == False)   # noqa: E712
-            .where(Attempt.status.not_in(["cancelled", "failed"]))
+            .where(Attempt.status      == "complete")
             .where(Attempt.prompt_id.is_not(None))
         )
         return result.scalar_one() or 0
@@ -69,17 +71,18 @@ class AttemptRepository(BaseRepository[Attempt]):
     async def count_distinct_prompts_per_skill(
         self, user_id: uuid.UUID, skill: str
     ) -> dict[int, int]:
-        """Return {task_number: distinct_prompt_count} for all tasks in ONE query.
+        """Return {task_number: distinct_completed_prompt_count} for all tasks.
 
-        Used by the /me/quota endpoint so it issues a single GROUP BY instead
-        of N sequential counts. Mirrors count_distinct_prompts semantics.
+        Single GROUP BY; mirrors count_distinct_prompts semantics.
+        Counts only COMPLETED attempts so the /me/quota endpoint
+        reflects the 'consumed at completion' quota model.
         """
         result = await self.session.execute(
             select(Attempt.task_number, func.count(func.distinct(Attempt.prompt_id)))
             .where(Attempt.user_id      == user_id)
             .where(Attempt.skill        == skill)
             .where(Attempt.is_mock_test == False)   # noqa: E712
-            .where(Attempt.status.not_in(["cancelled", "failed"]))
+            .where(Attempt.status       == "complete")
             .where(Attempt.prompt_id.is_not(None))
             .group_by(Attempt.task_number)
         )
@@ -147,10 +150,11 @@ class AttemptRepository(BaseRepository[Attempt]):
     async def get_attempted_prompt_ids(
         self, user_id: uuid.UUID, task_number: int, skill: str = "speaking"
     ) -> set[str]:
-        """Return the set of prompt UUIDs the user has already attempted for a task.
+        """Return prompt UUIDs the user has COMPLETED for a task.
 
-        Used by the /speaking/[task] page to mark prompts as attempted so the
-        UI can show a green 'Redo' CTA instead of 'Start Practice'.
+        Used by the /speaking/[task] page to show a 'Redo' CTA only after
+        a prompt has been fully scored (status='complete'). Pending/processing
+        attempts do not qualify — the user must reach a scored result first.
         """
         result = await self.session.execute(
             select(Attempt.prompt_id)
@@ -158,7 +162,7 @@ class AttemptRepository(BaseRepository[Attempt]):
             .where(Attempt.skill       == skill)
             .where(Attempt.task_number == task_number)
             .where(Attempt.is_mock_test == False)  # noqa: E712
-            .where(Attempt.status.not_in(["cancelled", "failed"]))
+            .where(Attempt.status      == "complete")
             .distinct()
         )
         return {str(row[0]) for row in result.all()}

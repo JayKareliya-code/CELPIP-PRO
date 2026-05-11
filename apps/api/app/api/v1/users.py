@@ -16,7 +16,7 @@ from app.repositories.attempt_repo import AttemptRepository
 from app.repositories.user_repo import UserRepository
 from app.schemas.user import UserMeResponse, SetTargetScoreRequest, WeakAreaItem
 from app.schemas.attempt import QuotaStatusResponse
-from app.services.addon_credit_service import get_credits_per_task
+from app.services.addon_credit_service import get_credits_per_task, get_available_credits
 
 logger = logging.getLogger(__name__)
 
@@ -177,6 +177,10 @@ async def get_my_quota(
     s_can = {i: _can_attempt_speaking(i, usage) for i, usage in s_used_per_task.items()}
     w_can = {i: _can_attempt_writing(i, usage)  for i, usage in w_used_per_task.items()}
 
+    # Mock addon pool credits — sum available credits for each skill pool key.
+    s_mock_addon = await get_available_credits(user.id, "mock-test-speaking-addon", db)
+    w_mock_addon = await get_available_credits(user.id, "mock-test-writing-addon",  db)
+
     return QuotaStatusResponse(
         plan=user.plan,
         speaking_used_per_task=s_used_per_task,
@@ -189,6 +193,10 @@ async def get_my_quota(
         writing_addon_credits_per_task=w_addon_credits,
         speaking_mock_tests_used=speaking_mock_used,
         writing_mock_tests_used=writing_mock_used,
+        speaking_mock_tests_limit=s_limits.mock_tests,
+        writing_mock_tests_limit=w_limits.mock_tests,
+        speaking_mock_addon_credits=s_mock_addon,
+        writing_mock_addon_credits=w_mock_addon,
     )
 
 

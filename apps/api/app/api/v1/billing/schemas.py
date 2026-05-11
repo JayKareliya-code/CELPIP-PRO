@@ -67,8 +67,14 @@ class TaskCreditStat(BaseModel):
     purchased: int = Field(ge=0, description="Total credits ever purchased for this task (excluding refunds).")
 
 
+class MockCreditStat(BaseModel):
+    """Aggregate mock test credit balance (not task-specific)."""
+    available: int = Field(ge=0, description="Remaining mock test credits.")
+    purchased: int = Field(ge=0, description="Total mock credits ever purchased.")
+
+
 class AddonCreditSummaryResponse(BaseModel):
-    """Per-skill, per-task addon credit inventory.
+    """Per-skill, per-task addon credit inventory plus mock bundle balances.
 
     Returned by GET /billing/addon-credits.
 
@@ -81,9 +87,12 @@ class AddonCreditSummaryResponse(BaseModel):
         {
           "speaking": {"1": {"available": 4, "purchased": 5}},
           "writing":  {"1": {"available": 5, "purchased": 5},
-                       "2": {"available": 0, "purchased": 5}}
+                       "2": {"available": 0, "purchased": 5}},
+          "mock":     {"speaking": {"available": 2, "purchased": 2},
+                       "writing":  {"available": 1, "purchased": 2}}
         }
     """
     speaking: dict[int, TaskCreditStat] = Field(default_factory=dict)
     writing:  dict[int, TaskCreditStat] = Field(default_factory=dict)
+    mock:     dict[str, MockCreditStat] = Field(default_factory=dict)
 

@@ -1,10 +1,10 @@
 // ─────────────────────────────────────────────────────────────────────────────
-// /practice/writing/[testNumber] — Full CELPIP writing mock exam page.
+// /mock-test/writing/[testNumber] — Full CELPIP writing mock exam page.
 //
 // Params:
 //   testNumber: "1" | "2" | … | MAX_PRACTICE_SLOTS
 //   Validated against the slot range; quota gate is enforced by the
-//   PracticeTestSlot component on the /practice/writing list page.
+//   PracticeTestSlot component on the /mock-test/writing list page.
 //
 // Renders WritingMockExamShell — a full-screen sequential session
 // (Task 1 → break → Task 2 → complete screen).

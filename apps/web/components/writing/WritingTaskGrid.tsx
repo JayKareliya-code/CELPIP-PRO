@@ -4,15 +4,16 @@
 // WritingTaskGrid.tsx — 2-card responsive grid for the writing module home.
 //
 // Receives ALL active writing prompts from the server component.
-// Groups them by task_number → renders ONE WritingTaskCard per task,
-// mirroring how SpeakingModuleHome de-duplicates speaking prompts.
+// Groups them by task_number → renders ONE WritingTaskCard per task.
 //
-// The card href links to the task folder page /writing/<task_number>,
-// which then shows the prompt list for that task.
+// Locking: Writing tasks are NEVER locked — Starter users get 2 free attempts
+// per task by default. The locked overlay on cards is only used when explicitly
+// passed isLocked=true (currently never).
 // ─────────────────────────────────────────────────────────────────────────────
 
 import { useMemo }          from "react";
 import { WritingTaskCard }  from "@/components/writing/WritingTaskCard";
+import { useQuota }         from "@/lib/hooks/useQuota";
 import type { WritingTask } from "@/lib/types";
 
 // ── Task titles + descriptions (shown on cards) ───────────────────────────────
@@ -31,16 +32,13 @@ const TASK_DESCRIPTIONS: Record<number, string> = {
 
 interface WritingTaskGridProps {
   tasks: WritingTask[];
-  /** Per-task attempts used — from useQuota("writing").writing_used_per_task */
-  writingUsedPerTask?: Record<number, number>;
   /**
-   * Per-task available addon credits — from useQuota("writing").writing_addon_credits_per_task.
-   * writing_pack purchase credits all tasks; custom_bundle credits only the specific task.
+   * Per-task available addon credits from useTaskModuleAccess.
+   * Used to compute effectiveLimit = planLimit + taskAddonCredits per card.
    */
-  writingAddonCreditsPerTask?: Record<number, number>;
-  /** Plan baseline quota (from STARTER/PRO_PLAN_LIMITS — no add-ons). */
+  addonCreditsPerTask: Record<number, number>;
+  /** Plan baseline quota (no add-ons). From useWritingQuota(null).effectiveLimit */
   planAttemptsLimit: number;
-  isLocked: boolean;
 }
 
 /**
@@ -48,15 +46,15 @@ interface WritingTaskGridProps {
  *
  * All active prompts for a task are grouped together — the card shows
  * the prompt count and links to the task folder (/writing/<task_number>).
- * Multiple prompts per task are accessible from the folder page.
  */
 export function WritingTaskGrid({
   tasks,
-  writingUsedPerTask,
-  writingAddonCreditsPerTask = {},
+  addonCreditsPerTask,
   planAttemptsLimit,
-  isLocked,
 }: WritingTaskGridProps) {
+  // Per-task used counts from the quota API.
+  const quotaResult        = useQuota("writing");
+  const writingUsedPerTask = quotaResult.writing_used_per_task ?? {};
 
   // ── Group prompts by task_number ───────────────────────────────────────────
   const { uniqueTasks, promptCountByTask } = useMemo(() => {
@@ -68,7 +66,6 @@ export function WritingTaskGrid({
       if (!firstPrompt[t.task_number]) firstPrompt[t.task_number] = t;
     }
 
-    // One canonical entry per task_number, sorted by task_number
     const unique = Object.values(firstPrompt).sort(
       (a, b) => a.task_number - b.task_number,
     );
@@ -93,14 +90,11 @@ export function WritingTaskGrid({
       {taskNumbers.map((taskNum) => {
         const task        = uniqueTasks.find((t) => t.task_number === taskNum);
         const promptCount = promptCountByTask[taskNum] ?? 0;
-        const used        = writingUsedPerTask?.[taskNum] ?? 0;
+        const used        = writingUsedPerTask[taskNum] ?? 0;
 
-        // Per-task effectiveLimit: planLimit + any addon credits for this specific task.
-        // custom_bundle for writing-task-1 only changes Task 1's limit;
-        // writing_pack credits both tasks equally.
-        const taskAddonCredits   = writingAddonCreditsPerTask[taskNum] ?? 0;
+        // Per-task effective limit: plan baseline + any addon credits for this task.
+        const taskAddonCredits   = addonCreditsPerTask[taskNum] ?? 0;
         const taskEffectiveLimit = planAttemptsLimit + taskAddonCredits;
-        const isBonusRetry       = !isLocked && used >= taskEffectiveLimit;
 
         return (
           <WritingTaskCard
@@ -114,9 +108,8 @@ export function WritingTaskGrid({
             description={TASK_DESCRIPTIONS[taskNum] ?? ""}
             promptCount={promptCount}
             attemptsUsed={used}
-            attemptsLimit={isLocked ? 0 : taskEffectiveLimit}
-            isBonusRetryMode={isBonusRetry}
-            isLocked={isLocked}
+            attemptsLimit={taskEffectiveLimit}
+            isLocked={false}
             href={`/writing/${taskNum}`}
           />
         );

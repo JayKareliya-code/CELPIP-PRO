@@ -11,6 +11,7 @@ export const ROUTES = {
   dashboard: "/dashboard",
   speaking: "/speaking",
   writing: "/writing",
+  mockTest: "/mock-test",
   history: "/history",
   progress: "/progress",
   billing: "/billing",
@@ -61,14 +62,14 @@ export const PLAN_PRICING = {
     name: "Starter",
     price: 0,          // free
     priceLabel: "Free",
-    priceNote: "No credit card · Always free",
+    priceNote: "Basic estimate band score",
   },
   pro: {
     id: "pro",
     name: "Pro",
-    price: 9.99,          // CAD / month
+    price: 9.99,
     priceLabel: "$9.99",
-    priceNote: "CAD / month",
+    priceNote: "One-time purchase",
   },
 } as const;
 
@@ -82,9 +83,9 @@ export const PRO_PRICE_LABEL = PLAN_PRICING.pro.priceLabel;
 
 export const STARTER_PLAN_LIMITS = {
   speaking_attempts_per_task: 2,  // 2 free attempts per speaking task
-  writing_attempts_per_task:  2,  // 2 free attempts per writing task
+  writing_attempts_per_task: 2,  // 2 free attempts per writing task
   speaking_mock_tests: 1,
-  writing_mock_tests:  1,
+  writing_mock_tests: 1,
   detailed_feedback: false,
 } as const;
 

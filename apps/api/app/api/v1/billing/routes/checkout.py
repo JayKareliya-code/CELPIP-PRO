@@ -37,6 +37,7 @@ def _encode_cart_metadata(items: list, promo_code: str | None) -> dict[str, str]
     - plan items:          ``plan:1:pro``            (extra = plan slug)
     - custom_bundle items: ``custom_bundle:1:speaking-task-4``  (extra = task_key)
     - module pack items:   ``speaking_pack:2:null``  (extra = literal 'null')
+    - mock_bundle items:   ``mock_bundle:1:null``    (no slot — assigned by webhook)
 
     Total metadata value stays well under Stripe's 500-char limit for realistic carts.
     """
@@ -114,16 +115,8 @@ async def create_checkout_session(
             price_id = ADDON_PRICE_IDS["custom_bundle"]
 
         elif item.type == "mock_bundle":
-            mock_num = item.metadata.get("mock_test_number")
-            try:
-                mock_num = int(mock_num)
-            except (TypeError, ValueError):
-                mock_num = None
-            if mock_num not in MOCK_TEST_NUMBERS:
-                raise HTTPException(
-                    status_code=400,
-                    detail=f"Invalid mock_test_number {mock_num!r}. Must be 1–5.",
-                )
+            # No slot-number validation needed — the webhook auto-assigns
+            # general-pool credits (mock-test-speaking-addon / mock-test-writing-addon).
             price_id = ADDON_PRICE_IDS["mock_bundle"]
 
         else:

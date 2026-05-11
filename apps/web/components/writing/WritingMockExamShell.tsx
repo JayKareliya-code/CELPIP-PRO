@@ -133,7 +133,7 @@ export function WritingMockExamShell({ examNumber }: { examNumber: number }) {
   }, []);
 
   const handleExit = useCallback(() => {
-    router.push("/practice/writing");
+    router.push("/mock-test/writing");
   }, [router]);
 
   // P1-3: memoized so WritingExamBreakScreen's useEffect([secs, onContinue])
@@ -176,10 +176,10 @@ export function WritingMockExamShell({ examNumber }: { examNumber: number }) {
           </>
         )}
         <button
-          onClick={() => router.push("/practice/writing")}
+          onClick={() => router.push("/mock-test/writing")}
           className="mt-2 px-5 py-2.5 rounded-lg bg-amber-600 hover:bg-amber-500 text-white text-sm font-semibold"
         >
-          Back to Practice
+          Back to Mock Tests
         </button>
       </div>
     );

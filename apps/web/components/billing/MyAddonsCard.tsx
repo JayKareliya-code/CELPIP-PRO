@@ -19,9 +19,9 @@
 // ─────────────────────────────────────────────────────────────────────────────
 
 import { cn } from "@/lib/utils";
-import { Sparkles, Mic, PenLine } from "lucide-react";
+import { Sparkles, Mic, PenLine, ClipboardList } from "lucide-react";
 import { useAddonCredits } from "@/lib/hooks/useAddonCredits";
-import type { TaskCreditStat } from "@/lib/types";
+import type { TaskCreditStat, MockCreditStat } from "@/lib/types";
 
 // ── Task label tables ─────────────────────────────────────────────────────────
 
@@ -138,6 +138,71 @@ function SkillSection({ skill, taskMap, labelTable }: SkillSectionProps) {
   );
 }
 
+// ── MockSection ──────────────────────────────────────────────────────────────
+
+function MockSection({ mock }: { mock: Record<string, MockCreditStat> }) {
+  const skills = Object.keys(mock).sort(); // speaking, writing
+  if (skills.length === 0) return null;
+
+  return (
+    <div className="space-y-2.5">
+      {/* Section header */}
+      <div className="flex items-center gap-1.5">
+        <div className="w-5 h-5 rounded-md bg-violet-400/10 flex items-center justify-center">
+          <ClipboardList className="w-3 h-3 text-violet-400" />
+        </div>
+        <span className="text-[11px] font-semibold uppercase tracking-widest text-violet-400">
+          Mock Tests
+        </span>
+      </div>
+
+      {/* Credit rows */}
+      <div className="space-y-2.5 pl-1">
+        {skills.map((skill) => {
+          const stat = mock[skill];
+          const used        = stat.purchased - stat.available;
+          const pct         = stat.purchased > 0 ? Math.min((used / stat.purchased) * 100, 100) : 0;
+          const isExhausted = stat.available === 0;
+          return (
+            <div key={skill} className="flex items-center gap-3">
+              {/* Skill badge */}
+              <span className="text-[10px] font-bold text-white/25 w-6 shrink-0 text-right capitalize">
+                {skill.slice(0, 2).toUpperCase()}
+              </span>
+              {/* Label + bar */}
+              <div className="flex-1 min-w-0 space-y-1">
+                <p className="text-xs text-white/60 capitalize">{skill}</p>
+                <div className="h-1 bg-white/[0.06] rounded-full overflow-hidden">
+                  <div
+                    className={cn(
+                      "h-full rounded-full transition-all duration-500",
+                      isExhausted ? "bg-white/20" : "bg-violet-400",
+                    )}
+                    style={{ width: `${pct}%` }}
+                  />
+                </div>
+              </div>
+              {/* Stat */}
+              <div className="text-right shrink-0">
+                {isExhausted ? (
+                  <span className="text-[10px] font-semibold text-white/30">
+                    {used}/{stat.purchased} <span className="text-white/20">used</span>
+                  </span>
+                ) : (
+                  <span className="text-[10px] font-semibold tabular-nums text-white/50">
+                    <span className="text-violet-400 font-bold">{stat.available}</span>
+                    <span className="text-white/25"> / {stat.purchased} left</span>
+                  </span>
+                )}
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
 // ── Skeleton ──────────────────────────────────────────────────────────────────
 
 function MyAddonsSkeleton() {
@@ -166,13 +231,14 @@ export function MyAddonsCard() {
 
   const hasSpeaking = Object.keys(summary.speaking).length > 0;
   const hasWriting  = Object.keys(summary.writing).length  > 0;
+  const hasMock     = Object.keys(summary.mock ?? {}).length > 0;
 
   return (
     <div className="rounded-2xl border border-white/[0.07] bg-surface p-5 space-y-5 animate-fade-in">
       {/* Header */}
       <div className="flex items-center gap-2">
-        <div className="w-6 h-6 rounded-lg bg-amber-400/10 flex items-center justify-center">
-          <Sparkles className="w-3.5 h-3.5 text-amber-400" />
+        <div className="w-6 h-6 rounded-lg bg-primary/10 flex items-center justify-center">
+          <Sparkles className="w-3.5 h-3.5 text-primary" />
         </div>
         <div>
           <h2 className="text-sm font-semibold text-white/90">My Practice Packs</h2>
@@ -184,7 +250,7 @@ export function MyAddonsCard() {
 
       <div className="border-t border-white/[0.05]" />
 
-      {/* Skill sections */}
+      {/* Skill sections + mock */}
       <div className="space-y-5">
         {hasSpeaking && (
           <SkillSection
@@ -200,6 +266,7 @@ export function MyAddonsCard() {
             labelTable={WRITING_TASK_LABELS}
           />
         )}
+        {hasMock && <MockSection mock={summary.mock!} />}
       </div>
 
       {/* Footer note */}

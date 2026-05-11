@@ -35,21 +35,21 @@ function FAQItem({ q, a }: { q: string; a: string }) {
   const [open, setOpen] = useState(false);
 
   return (
-    <div className="border-b border-white/[0.06] last:border-0">
+    <div className="border-b border-white/[0.08] last:border-0">
       <button
         onClick={() => setOpen((o) => !o)}
-        className="w-full flex items-center justify-between gap-4 py-4 text-left hover:text-amber-400 transition-colors"
+        className="w-full flex items-center justify-between gap-4 py-4 text-left hover:text-primary transition-colors"
       >
-        <span className="text-sm font-medium text-white/70">{q}</span>
+        <span className="text-sm font-medium text-white/75">{q}</span>
         <ChevronDown
           className={cn(
-            "w-4 h-4 text-white/30 shrink-0 transition-transform duration-200",
+            "w-4 h-4 text-white/40 shrink-0 transition-transform duration-200",
             open && "rotate-180",
           )}
         />
       </button>
       {open && (
-        <p className="text-sm text-white/40 leading-relaxed pb-4 pr-8">{a}</p>
+        <p className="text-sm text-white/55 leading-relaxed pb-4 pr-8">{a}</p>
       )}
     </div>
   );
@@ -57,9 +57,9 @@ function FAQItem({ q, a }: { q: string; a: string }) {
 
 export function BillingFAQ() {
   return (
-    <div className="rounded-xl border border-white/[0.06] px-6 py-2">
-      <div className="py-4 border-b border-white/[0.06]">
-        <h3 className="text-sm font-semibold text-white/60 uppercase tracking-widest">
+    <div className="rounded-xl border border-white/[0.08] px-6 py-2">
+      <div className="py-4 border-b border-white/[0.08]">
+        <h3 className="text-base font-semibold text-white/70">
           Frequently Asked Questions
         </h3>
       </div>

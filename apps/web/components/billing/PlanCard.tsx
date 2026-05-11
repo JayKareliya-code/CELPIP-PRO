@@ -46,8 +46,8 @@ export function PlanCard({ plan, currentPlan, isCheckingOut, onUpgrade }: PlanCa
     <div
       id={`billing-plan-${plan.id}`}
       className={cn(
-        "relative rounded-xl border flex flex-col gap-5 transition-all duration-200 overflow-hidden p-6 h-full",
-        "border-white/[0.10] hover:border-white/[0.16]",
+        "relative rounded-xl border flex flex-col gap-5 transition-all duration-200 overflow-hidden p-6 h-full bg-surface",
+        "border-white/[0.14] hover:border-white/[0.22]",
         plan.highlighted && !isCurrent && "shadow-[0_0_30px_rgba(245,158,11,0.07)]",
         plan.comingSoon && "opacity-75",
       )}
@@ -55,19 +55,19 @@ export function PlanCard({ plan, currentPlan, isCheckingOut, onUpgrade }: PlanCa
       {/* Corner badge */}
       {isCurrent ? (
         <div className="absolute top-0 right-0">
-          <div className="bg-amber-500/20 text-amber-400 text-[10px] font-bold px-3 py-1 rounded-bl-xl rounded-tr-xl tracking-widest uppercase border-l border-b border-amber-500/20">
+          <div className="bg-primary/20 text-primary text-[10px] font-bold px-3 py-1 rounded-bl-xl rounded-tr-xl tracking-widest uppercase border-l border-b border-primary/20">
             Current Plan
           </div>
         </div>
       ) : plan.comingSoon ? (
         <div className="absolute top-0 right-0">
-          <div className="bg-white/[0.05] text-white/35 text-[10px] font-bold px-3 py-1 rounded-bl-xl rounded-tr-xl tracking-widest uppercase border-l border-b border-white/[0.06]">
+          <div className="bg-white/[0.05] text-white/35 text-[10px] font-bold px-3 py-1 rounded-bl-xl rounded-tr-xl tracking-widest uppercase border-l border-b border-white/[0.10]">
             Coming Soon
           </div>
         </div>
       ) : plan.badge ? (
         <div className="absolute top-0 right-0">
-          <div className="bg-amber-500/20 text-amber-400 text-[10px] font-bold px-3 py-1 rounded-bl-xl rounded-tr-xl tracking-widest uppercase border-l border-b border-amber-500/20">
+          <div className="bg-primary/20 text-primary text-[10px] font-bold px-3 py-1 rounded-bl-xl rounded-tr-xl tracking-widest uppercase border-l border-b border-primary/20">
             {plan.badge}
           </div>
         </div>
@@ -80,7 +80,7 @@ export function PlanCard({ plan, currentPlan, isCheckingOut, onUpgrade }: PlanCa
         </div>
         <div>
           <h3 className="text-base font-bold text-white/90">{plan.name}</h3>
-          <p className="text-sm text-white/40 mt-0.5">{plan.tagline}</p>
+          <p className="text-sm text-white/50 mt-0.5">{plan.tagline}</p>
         </div>
         <div>
           <div className="flex items-baseline gap-1.5">
@@ -88,15 +88,15 @@ export function PlanCard({ plan, currentPlan, isCheckingOut, onUpgrade }: PlanCa
               {plan.priceLabel}
             </span>
             {plan.priceLabel !== "Free" && (
-              <span className="text-white/35 text-sm">CAD</span>
+              <span className="text-xs text-white/50">CAD</span>
             )}
           </div>
-          <p className="text-xs text-white/35 mt-0.5">{plan.priceNote}</p>
+          <p className="text-xs text-white/50 mt-1">{plan.priceNote}</p>
         </div>
       </div>
 
       {/* Divider */}
-      <div className="border-t border-white/[0.06]" />
+      <div className="border-t border-white/[0.10]" />
 
       {/* Features list */}
       <ul className="space-y-2.5 flex-1">
@@ -107,15 +107,15 @@ export function PlanCard({ plan, currentPlan, isCheckingOut, onUpgrade }: PlanCa
               "flex items-start gap-2.5 text-sm",
               feat.included
                 ? feat.highlight
-                  ? "text-white/90 font-medium"
+                  ? "text-white/85 font-medium"
                   : "text-white/60"
-                : "text-white/20",
+                : "text-white/35",
             )}
           >
             {feat.included ? (
-              <Check className={cn("w-4 h-4 flex-shrink-0 mt-0.5", feat.highlight ? "text-amber-400" : "text-amber-400/50")} />
+              <Check className="w-4 h-4 flex-shrink-0 mt-0.5 text-primary" />
             ) : (
-              <X className="w-4 h-4 flex-shrink-0 mt-0.5 text-white/15" />
+              <X className="w-4 h-4 flex-shrink-0 mt-0.5 text-white/30" />
             )}
             {feat.text}
           </li>
@@ -126,17 +126,17 @@ export function PlanCard({ plan, currentPlan, isCheckingOut, onUpgrade }: PlanCa
       {plan.comingSoon ? (
         <div
           id={`billing-plan-${plan.id}-coming-soon`}
-          className="inline-flex items-center justify-center gap-2 w-full py-3 rounded-lg border border-white/[0.06] text-white/25 text-sm font-medium cursor-not-allowed select-none"
+          className="inline-flex items-center justify-center gap-2 w-full py-3 rounded-lg border border-white/[0.10] text-white/25 text-sm font-medium cursor-not-allowed select-none"
           aria-disabled="true"
         >
           Coming Soon
         </div>
       ) : isCurrent ? (
-        <div className="inline-flex items-center justify-center gap-2 w-full py-3 rounded-lg border border-amber-500/20 text-amber-400/70 text-sm font-medium cursor-default select-none">
+        <div className="inline-flex items-center justify-center gap-2 w-full py-3 rounded-lg border border-primary/30 text-primary text-sm font-medium cursor-default select-none">
           Active Plan
         </div>
       ) : isStarter ? (
-        <div className="inline-flex items-center justify-center w-full py-3 rounded-lg border border-white/[0.06] text-white/30 text-sm font-medium cursor-default select-none">
+        <div className="inline-flex items-center justify-center w-full py-3 rounded-lg border border-white/[0.14] text-white/50 text-sm font-medium cursor-default select-none">
           Always Free
         </div>
       ) : canUpgrade ? (
@@ -146,7 +146,7 @@ export function PlanCard({ plan, currentPlan, isCheckingOut, onUpgrade }: PlanCa
           disabled={isCheckingOut}
           className={cn(
             "inline-flex items-center justify-center gap-2 w-full py-3 rounded-lg font-semibold text-sm transition-all duration-200",
-            "bg-amber-500 hover:bg-amber-400 text-black btn-glow",
+            "bg-primary hover:bg-primary-hover text-primary-foreground btn-glow",
             "disabled:opacity-50 disabled:cursor-not-allowed disabled:shadow-none",
           )}
         >
@@ -163,7 +163,7 @@ export function PlanCard({ plan, currentPlan, isCheckingOut, onUpgrade }: PlanCa
           )}
         </button>
       ) : (
-        <div className="inline-flex items-center justify-center w-full py-3 rounded-lg border border-white/[0.06] text-white/20 text-sm cursor-default select-none">
+        <div className="inline-flex items-center justify-center w-full py-3 rounded-lg border border-white/[0.14] text-white/40 text-sm cursor-default select-none">
           Not available
         </div>
       )}

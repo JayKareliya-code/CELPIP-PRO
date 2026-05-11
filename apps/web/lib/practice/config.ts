@@ -13,7 +13,6 @@ import { Mic, PenLine } from "lucide-react";
 import {
   STARTER_PLAN_LIMITS,
   PRO_PLAN_LIMITS,
-  ULTRA_PLAN_LIMITS,
 } from "@/lib/constants";
 import type { Skill, UserPlan } from "@/lib/types";
 import type { PracticeSkillConfig } from "@/lib/practice/types";
@@ -63,10 +62,6 @@ export function getPlanMockLimit(plan: UserPlan | string, skill: Skill): number 
       return skill === "speaking"
         ? PRO_PLAN_LIMITS.speaking_mock_tests
         : PRO_PLAN_LIMITS.writing_mock_tests;
-    case "ultra":
-      return skill === "speaking"
-        ? ULTRA_PLAN_LIMITS.speaking_mock_tests
-        : ULTRA_PLAN_LIMITS.writing_mock_tests;
     default: // "starter" or unknown
       return skill === "speaking"
         ? STARTER_PLAN_LIMITS.speaking_mock_tests
@@ -76,11 +71,11 @@ export function getPlanMockLimit(plan: UserPlan | string, skill: Skill): number 
 
 /**
  * The maximum number of test slots ever shown in the UI.
- * Always the Ultra limit (highest possible) so all plans see the same row count.
+ * Always the Pro limit (highest plan) so all plans see the same row count.
  */
 export const MAX_PRACTICE_SLOTS = Math.max(
-  ULTRA_PLAN_LIMITS.speaking_mock_tests,
-  ULTRA_PLAN_LIMITS.writing_mock_tests,
+  PRO_PLAN_LIMITS.speaking_mock_tests,
+  PRO_PLAN_LIMITS.writing_mock_tests,
 );
 
 // ── Mock Exam constants ─────────────────────────────────────────────────────────────────

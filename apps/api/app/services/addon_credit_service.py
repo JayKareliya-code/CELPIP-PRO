@@ -81,6 +81,7 @@ async def get_credits_per_task(
             AddonCredit.user_id == user_id,
             AddonCredit.task_key.like(f"{prefix}%"),
             AddonCredit.status  == "active",
+            AddonCredit.addon_type != "mock_bundle",  # exclude pool keys
         )
     )
     rows = result.scalars().all()
@@ -191,8 +192,20 @@ async def get_addon_credit_summary(
 
     # skill → task_num → {"available": int, "purchased": int}
     summary: dict[str, dict[int, dict[str, int]]] = {}
+    # mock → skill → {"available": int, "purchased": int}
+    mock: dict[str, dict[str, int]] = {}
 
     for row in rows:
+        # ── Mock bundle pool rows ──────────────────────────────────────────────
+        # task_key format: "mock-test-speaking-addon" / "mock-test-writing-addon"
+        if row.addon_type == "mock_bundle":
+            skill = "speaking" if "speaking" in row.task_key else "writing"
+            entry = mock.setdefault(skill, {"available": 0, "purchased": 0})
+            entry["available"] += max(0, row.credits_total - row.credits_used)
+            entry["purchased"] += row.credits_total
+            continue
+
+        # ── Practice pack / custom bundle rows ────────────────────────────────
         # task_key format:  "speaking-task-4"  or  "writing-task-1"
         parts = row.task_key.split("-task-")
         if len(parts) != 2:
@@ -210,5 +223,5 @@ async def get_addon_credit_summary(
         entry["available"]  += max(0, row.credits_total - row.credits_used)
         entry["purchased"]  += row.credits_total
 
-    return summary
+    return summary, mock
 

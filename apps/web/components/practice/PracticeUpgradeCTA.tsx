@@ -18,11 +18,11 @@ interface PracticeUpgradeCTAProps {
 const COPY: Record<Skill, { heading: string; body: string }> = {
   speaking: {
     heading: "Want more speaking practice tests?",
-    body:    "Upgrade to Pro (2 tests) or Ultra (5 tests) to unlock more full-length speaking sessions.",
+    body:    "Purchase a Mock Test Bundle or upgrade to Pro to unlock more full-length speaking sessions.",
   },
   writing: {
     heading: "Want more writing practice tests?",
-    body:    "Upgrade to Pro (2 tests) or Ultra (5 tests) to unlock more full-length writing sessions.",
+    body:    "Purchase a Mock Test Bundle or upgrade to Pro to unlock more full-length writing sessions.",
   },
 };
 

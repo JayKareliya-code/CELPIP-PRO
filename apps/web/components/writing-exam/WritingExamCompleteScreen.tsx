@@ -204,7 +204,7 @@ export function WritingExamCompleteScreen({ attempt1Id, attempt2Id }: WritingExa
       {/* Action buttons */}
       <div className="flex flex-col sm:flex-row gap-3 pt-2">
         <button
-          onClick={() => router.push("/practice/writing")}
+          onClick={() => router.push("/mock-test/writing")}
           className="flex items-center gap-2 px-5 py-2.5 rounded-xl border border-white/10
                      bg-surface hover:bg-muted text-sm font-semibold text-foreground transition-colors"
         >

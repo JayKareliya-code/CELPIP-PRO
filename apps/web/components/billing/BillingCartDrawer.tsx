@@ -73,13 +73,13 @@ export function BillingCartDrawer() {
         role="dialog"
         className={cn(
           "fixed top-0 right-0 z-50 h-full w-full sm:w-[400px] flex flex-col",
-          "bg-[#0D0F17] border-l border-white/[0.06] shadow-[0_0_60px_rgba(0,0,0,0.8)]",
+          "bg-[#000000] border-l border-white/[0.12] shadow-[0_0_60px_rgba(0,0,0,0.8)]",
           "font-light tracking-wide transition-transform duration-300 ease-out will-change-transform",
           isOpen ? "translate-x-0" : "translate-x-full",
         )}
       >
-        <div className="flex items-center justify-between px-5 py-4 border-b border-white/[0.06] shrink-0">
-          <h2 className="text-sm font-semibold tracking-widest uppercase text-white/50">Your Cart</h2>
+        <div className="flex items-center justify-between px-5 py-4 border-b border-white/[0.10] shrink-0">
+          <h2 className="text-base font-semibold text-white/70">Your Cart</h2>
           <button
             onClick={close}
             aria-label="Close cart"

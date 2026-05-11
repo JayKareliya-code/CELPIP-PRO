@@ -17,7 +17,7 @@ const SEGMENT_LABELS: Record<string, string> = {
   admin:       "Admin",
   prompts:     "Prompts",
   calibration: "Calibration",
-  practice:    "Practice",
+  "mock-test": "Mock Tests",
   instruction: "Instructions",
   tips:        "Tips & Vocabulary",
   status:      "Processing",

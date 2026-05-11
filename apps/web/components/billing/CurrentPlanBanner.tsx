@@ -15,15 +15,15 @@ const PLAN_META: Record<
     label: "Starter",
     tagline: "You're on the free plan. Upgrade to Pro to unlock full task practice and detailed AI feedback.",
     icon: <Zap className="w-5 h-5" />,
-    accentText:   "text-white/35",
-    accentBorder: "border-white/[0.08]",
+    accentText:   "text-white/50",
+    accentBorder: "border-white/[0.10]",
   },
   pro: {
     label: "Pro",
     tagline: `You have ${PRO_PLAN_LIMITS.speaking_attempts_per_task} practices per Speaking task, ${PRO_PLAN_LIMITS.writing_attempts_per_task} practices per Writing task, detailed AI feedback, and progress tracking.`,
     icon: <Rocket className="w-5 h-5" />,
-    accentText:   "text-amber-400",
-    accentBorder: "border-amber-500/25",
+    accentText:   "text-primary",
+    accentBorder: "border-primary/30",
   },
 };
 
@@ -60,16 +60,16 @@ export function CurrentPlanBanner({
       </div>
 
       <div className="flex-1 min-w-0">
-        <p className="text-[10px] font-semibold text-white/25 uppercase tracking-widest mb-0.5">Current Plan</p>
+        <p className="text-[10px] font-semibold text-white/45 uppercase tracking-widest mb-0.5">Current Plan</p>
         <h2 className={cn("text-lg font-bold", meta.accentText)}>{meta.label}</h2>
-        <p className="text-sm text-white/40 mt-0.5 leading-relaxed">{meta.tagline}</p>
+        <p className="text-sm text-white/55 mt-0.5 leading-relaxed">{meta.tagline}</p>
       </div>
 
       <div className="flex flex-col sm:items-end gap-2 shrink-0">
         {plan === "starter" && (
           <Link
             href="#plans"
-            className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg bg-amber-500 hover:bg-amber-400 text-black text-sm font-semibold transition-colors btn-glow"
+            className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg bg-primary hover:bg-primary-hover text-primary-foreground text-sm font-semibold transition-colors btn-glow"
           >
             Upgrade to Pro
             <ArrowRight className="w-3.5 h-3.5" />
@@ -80,7 +80,7 @@ export function CurrentPlanBanner({
             id="billing-portal-btn"
             onClick={onOpenPortal}
             disabled={isOpeningPortal}
-            className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg border border-white/[0.08] text-sm text-white/40 hover:text-white/70 hover:border-white/[0.14] transition-colors disabled:opacity-50"
+            className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg border border-white/[0.14] text-sm text-white/50 hover:text-white/75 hover:border-white/[0.22] transition-colors disabled:opacity-50"
           >
             <ExternalLink className="w-3.5 h-3.5" />
             {isOpeningPortal ? "Opening..." : "View Receipts"}

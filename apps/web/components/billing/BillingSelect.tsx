@@ -167,9 +167,9 @@ export function BillingSelect({
           "bg-transparent text-white/70",
           "transition-colors duration-150 outline-none",
           open
-            ? "border-amber-500/40 ring-1 ring-amber-500/15"
-            : "border-white/[0.08] hover:border-white/[0.16]",
-          "focus-visible:border-amber-500/40 focus-visible:ring-1 focus-visible:ring-amber-500/15",
+            ? "border-primary/40 ring-1 ring-primary/15"
+            : "border-white/[0.12] hover:border-white/[0.22]",
+          "focus-visible:border-primary/40 focus-visible:ring-1 focus-visible:ring-primary/15",
           disabled && "opacity-40 cursor-not-allowed pointer-events-none",
         )}
       >
@@ -195,7 +195,7 @@ export function BillingSelect({
           className={cn(
             "absolute left-0 right-0 z-[60]",
             openUp ? "bottom-full mb-1" : "top-full mt-1",
-            "bg-[#111318] border border-white/[0.10] rounded-lg",
+            "bg-[#111318] border border-white/[0.14] rounded-lg",
             "shadow-[0_12px_40px_rgba(0,0,0,0.7)]",
             "max-h-[200px] overflow-y-auto",
             "py-1",
@@ -220,7 +220,7 @@ export function BillingSelect({
                   "flex items-center justify-between gap-2 px-3 py-2 text-sm cursor-pointer select-none",
                   "transition-colors duration-100",
                   isSelected
-                    ? "text-amber-400"
+                    ? "text-primary"
                     : isFocused
                       ? "text-white/90 bg-white/[0.05]"
                       : "text-white/55 hover:text-white/90 hover:bg-white/[0.04]",
@@ -228,7 +228,7 @@ export function BillingSelect({
               >
                 <span className="truncate">{opt.label}</span>
                 {isSelected && (
-                  <Check className="w-3.5 h-3.5 shrink-0 text-amber-400" />
+                  <Check className="w-3.5 h-3.5 shrink-0 text-primary" />
                 )}
               </li>
             );

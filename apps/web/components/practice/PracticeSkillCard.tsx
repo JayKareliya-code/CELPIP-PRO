@@ -151,7 +151,7 @@ export function PracticeSkillCard({
         <div className="absolute inset-0 bg-black/20 flex items-end justify-center pb-4 rounded-xl">
           <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-black/50 border border-white/10 text-xs text-white/40 font-medium backdrop-blur-sm">
             <Lock className="w-3 h-3" />
-            Requires Pro or Ultra
+            Requires Pro
           </div>
         </div>
       )}
@@ -159,5 +159,5 @@ export function PracticeSkillCard({
   );
 
   if (isLocked) return inner;
-  return <Link href={`/practice/${skill}`} className="block h-full">{inner}</Link>;
+  return <Link href={`/mock-test/${skill}`} className="block h-full">{inner}</Link>;
 }

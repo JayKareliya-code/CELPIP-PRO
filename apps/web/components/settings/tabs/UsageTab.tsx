@@ -6,12 +6,13 @@
 // Displays the user's per-task attempt usage vs their plan quota.
 // ─────────────────────────────────────────────────────────────────────────────
 
-import { Mic, PenLine } from "lucide-react";
+import { Mic, PenLine, ClipboardList } from "lucide-react";
 
 import { cn }             from "@/lib/utils";
 import { useQuota }       from "@/lib/hooks/useQuota";
 import { useCurrentUser } from "@/lib/hooks/useCurrentUser";
 import { Section }        from "@/components/settings/shared/Section";
+import { PRO_PLAN_LIMITS } from "@/lib/constants";
 
 // ── Task label tables ─────────────────────────────────────────────────────────
 
@@ -108,6 +109,59 @@ function QuotaRow({ taskNum, taskLabel, used, limit, addonCredits }: QuotaRowPro
   );
 }
 
+// ── Mock row ──────────────────────────────────────────────────────────────────
+
+interface MockRowProps {
+  skill:        "Speaking" | "Writing";
+  used:         number;
+  limit:        number | null;
+  addonCredits: number;
+}
+
+function MockRow({ skill, used, limit, addonCredits }: MockRowProps) {
+  const isUnlimited    = limit === null;
+  const effectiveLimit = isUnlimited ? null : limit + addonCredits;
+  const pct            = effectiveLimit ? Math.min((used / effectiveLimit) * 100, 100) : 0;
+  const isExhausted    = effectiveLimit !== null && used >= effectiveLimit;
+
+  return (
+    <div className="flex items-center gap-3">
+      <span className="text-[10px] font-bold text-white/25 w-5 shrink-0 text-right">
+        {skill.slice(0, 2).toUpperCase()}
+      </span>
+      <div className="flex-1 min-w-0 space-y-1">
+        <p className="text-xs text-white/60">{skill} Mock</p>
+        <div className="h-1 bg-white/[0.06] rounded-full overflow-hidden">
+          {isUnlimited ? (
+            <div className="h-full w-full bg-violet-400/30 rounded-full" />
+          ) : (
+            <div
+              className={cn(
+                "h-full rounded-full transition-all duration-500",
+                isExhausted ? "bg-red-500/50" : pct > 80 ? "bg-amber-500/70" : "bg-violet-400",
+              )}
+              style={{ width: `${pct}%` }}
+            />
+          )}
+        </div>
+      </div>
+      <div className="text-right shrink-0 min-w-[64px]">
+        {isUnlimited ? (
+          <span className="text-[10px] text-white/25">Unlimited</span>
+        ) : (
+          <span className={cn("text-[10px] tabular-nums", isExhausted ? "text-red-400/70" : "text-white/40")}>
+            <span className={cn("font-semibold", isExhausted ? "text-red-400" : "text-white/70")}>{used}</span>
+            {" / "}{effectiveLimit}
+            {addonCredits > 0 && (
+              <span className="text-violet-400/70 ml-1">+{addonCredits}</span>
+            )}
+          </span>
+        )}
+      </div>
+    </div>
+  );
+}
+
 // ── Skill heading ─────────────────────────────────────────────────────────────
 
 function SkillHeading({ skill }: { skill: "speaking" | "writing" }) {
@@ -142,13 +196,27 @@ export function UsageTab() {
   const speaking = useQuota("speaking");
   const writing  = useQuota("writing");
 
-  const speakingUsed   = speaking.speaking_used_per_task          ?? {};
-  const writingUsed    = writing.writing_used_per_task            ?? {};
-  const speakingAddons = speaking.speaking_addon_credits_per_task ?? {};
-  const writingAddons  = writing.writing_addon_credits_per_task   ?? {};
+  const speakingUsed    = speaking.speaking_used_per_task          ?? {};
+  const writingUsed     = writing.writing_used_per_task            ?? {};
+  const speakingAddons  = speaking.speaking_addon_credits_per_task ?? {};
+  const writingAddons   = writing.writing_addon_credits_per_task   ?? {};
 
-  const isPro         = plan === "pro";
-  const planTaskLimit = isPro ? 5 : 2;  // mirrors backend get_plan_limits
+  const isPro = plan === "pro";
+  const fallbackLimit = isPro ? 5 : 2;
+
+  // Mock test quota fields — use constants as fallback when API doesn't return them yet.
+  // Backend returns 0 for Starter (no plan mock quota), real number for Pro.
+  const sMockUsed    = speaking.speaking_mock_tests_used    ?? 0;
+  const wMockUsed    = writing.writing_mock_tests_used      ?? 0;
+  const sMockLimit   = speaking.speaking_mock_tests_limit   ?? (isPro ? PRO_PLAN_LIMITS.speaking_mock_tests : 0);
+  const wMockLimit   = writing.writing_mock_tests_limit     ?? (isPro ? PRO_PLAN_LIMITS.writing_mock_tests  : 0);
+  const sMockAddon   = speaking.speaking_mock_addon_credits ?? 0;
+  const wMockAddon   = writing.writing_mock_addon_credits   ?? 0;
+
+  // Read plan limits from the live API response (speaking_limit_per_task /
+  // writing_limit_per_task) so we never duplicate backend config values here.
+  const speakingPlanLimit: number = speaking.speaking_limit_per_task ?? fallbackLimit;
+  const writingPlanLimit:  number = writing.writing_limit_per_task   ?? fallbackLimit;
 
   const isLoading = speaking.isLoading || writing.isLoading;
 
@@ -174,7 +242,7 @@ export function UsageTab() {
                     taskNum={n}
                     taskLabel={SPEAKING_LABELS[n] ?? `Task ${n}`}
                     used={speakingUsed[n] ?? 0}
-                    limit={planTaskLimit}
+                    limit={speakingPlanLimit}
                     addonCredits={speakingAddons[n] ?? 0}
                   />
                 ))}
@@ -191,10 +259,26 @@ export function UsageTab() {
                     taskNum={n}
                     taskLabel={WRITING_LABELS[n] ?? `Task ${n}`}
                     used={writingUsed[n] ?? 0}
-                    limit={planTaskLimit}
+                    limit={writingPlanLimit}
                     addonCredits={writingAddons[n] ?? 0}
                   />
                 ))}
+              </div>
+            </div>
+
+            {/* Mock Tests */}
+            <div className="space-y-2.5">
+              <div className="flex items-center gap-1.5 pb-1">
+                <div className="w-5 h-5 rounded-md bg-violet-400/10 flex items-center justify-center">
+                  <ClipboardList className="w-3 h-3 text-violet-400" />
+                </div>
+                <span className="text-[11px] font-semibold uppercase tracking-widest text-violet-400">
+                  Mock Tests
+                </span>
+              </div>
+              <div className="space-y-2.5 pl-1">
+                <MockRow skill="Speaking" used={sMockUsed} limit={sMockLimit} addonCredits={sMockAddon} />
+                <MockRow skill="Writing"  used={wMockUsed} limit={wMockLimit} addonCredits={wMockAddon} />
               </div>
             </div>
           </div>

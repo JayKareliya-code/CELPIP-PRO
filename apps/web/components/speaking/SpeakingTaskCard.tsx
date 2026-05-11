@@ -30,7 +30,6 @@ interface SpeakingTaskCardProps {
   promptCount: number;
   attemptsUsed: number;
   attemptsLimit: number | null;
-  isBonusRetryMode: boolean;
   isLocked: boolean;
   href: string;
 }
@@ -61,7 +60,6 @@ export function SpeakingTaskCard({
   promptCount,
   attemptsUsed,
   attemptsLimit,
-  isBonusRetryMode,
   isLocked,
   href,
 }: SpeakingTaskCardProps) {
@@ -69,25 +67,19 @@ export function SpeakingTaskCard({
   const taskLabel = taskNumber === "practice" ? "Practice" : `Task ${taskNumber}`;
   const meta      = TASK_META[key] ?? TASK_META["1"];
 
-  // ── Progress fill ──────────────────────────────────────────────────────────
+  // ── Progress fill ──────────────────────────────────────────────────────
   const fillPct = isLocked
     ? 0
-    : isBonusRetryMode
-      ? 100
-      : attemptsLimit && attemptsLimit > 0
-        ? Math.min((attemptsUsed / attemptsLimit) * 100, 100)
-        : 0;
+    : attemptsLimit && attemptsLimit > 0
+      ? Math.min((attemptsUsed / attemptsLimit) * 100, 100)
+      : 0;
 
-  const fillColor = isBonusRetryMode ? "rgba(245,158,11,0.12)" : meta.fill;
-
-  // ── Attempts chip label ───────────────────────────────────────────────────
+  // ── Attempts chip label ───────────────────────────────────────────────
   const chipLabel = isLocked
     ? null
-    : isBonusRetryMode
-      ? "∞ retries"
-      : attemptsLimit !== null
-        ? `${attemptsUsed}/${attemptsLimit}`
-        : null;
+    : attemptsLimit !== null
+      ? `${attemptsUsed}/${attemptsLimit}`
+      : null;
 
   const inner = (
     <div
@@ -107,7 +99,7 @@ export function SpeakingTaskCard({
           className="absolute inset-y-0 left-0 pointer-events-none transition-all duration-700 ease-out"
           style={{ width: `${fillPct}%` }}
         >
-          <div className="absolute inset-0" style={{ background: fillColor }} />
+          <div className="absolute inset-0" style={{ background: meta.fill }} />
         </div>
       )}
 
@@ -128,11 +120,9 @@ export function SpeakingTaskCard({
               className={cn(
                 "shrink-0 inline-flex items-center rounded-full border px-2.5 py-1",
                 "text-xs font-semibold tabular-nums select-none",
-                isBonusRetryMode
-                  ? "bg-amber-900/30 border-amber-700/40 text-amber-300"
-                  : fillPct >= 100
-                    ? "bg-white/[0.07] border-white/[0.12] text-white/50"
-                    : "bg-white/[0.06] border-white/[0.10] text-white/40",
+                fillPct >= 100
+                  ? "bg-white/[0.07] border-white/[0.12] text-white/50"
+                  : "bg-white/[0.06] border-white/[0.10] text-white/40",
               )}
             >
               {chipLabel}
@@ -187,7 +177,7 @@ export function SpeakingTaskCard({
         <div className="absolute inset-0 bg-black/20 flex items-end justify-center pb-4 rounded-xl">
           <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-black/50 border border-white/10 text-xs text-white/40 font-medium backdrop-blur-sm">
             <Lock className="w-3 h-3" />
-            Requires Pro or Ultra
+            Requires Pro
           </div>
         </div>
       )}

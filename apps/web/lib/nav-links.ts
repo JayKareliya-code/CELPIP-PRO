@@ -14,7 +14,7 @@ export const NAV_LINKS = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
   { href: "/speaking",  label: "Speaking",  icon: Mic             },
   { href: "/writing",   label: "Writing",   icon: PenLine         },
-  { href: "/practice",  label: "Practice",  icon: PlayCircle      },
+  { href: "/mock-test", label: "Mock Test", icon: PlayCircle      },
   { href: "/history",   label: "History",   icon: History         },
   { href: "/progress",  label: "Progress",  icon: TrendingUp      },
   { href: "/billing",   label: "Billing",   icon: CreditCard      },

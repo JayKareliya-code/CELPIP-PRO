@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { ShoppingBag, Package, Loader2 } from "lucide-react";
+import { ShoppingBag, Package, LayoutGrid, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { PageWrapper } from "@/components/layout/PageWrapper";
 import { PlanCard } from "@/components/billing/PlanCard";
@@ -75,59 +75,77 @@ export function BillingPageClient({ success, canceled, planParam, addonOnly = fa
         <div className="animate-fade-in space-y-12">
           <div>
             <div className="flex items-center gap-2 mb-1">
-              <ShoppingBag className="w-4 h-4 text-amber-400/70" />
+              <ShoppingBag className="w-4 h-4 text-primary/70" />
               <h1 className="text-2xl font-bold text-white/90 tracking-tight">Billing & Store</h1>
             </div>
-            <p className="text-sm text-white/40">
+            <p className="text-sm text-white/55">
               Choose your plan and boost your prep with targeted practice add-ons.
             </p>
           </div>
 
-          {/* lg: 3 equal columns — Starter | Pro | Add-ons */}
-          <div
-            id="plans"
-            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 items-start scroll-mt-8"
-          >
-            <PlanCard
-              plan={starterPlan}
-              currentPlan={currentPlan}
-              isCheckingOut={false}
-              onUpgrade={handleUpgrade}
-            />
-            <PlanCard
-              plan={proPlan}
-              currentPlan={currentPlan}
-              isCheckingOut={checkingOutPlan === "pro"}
-              onUpgrade={handleUpgrade}
-            />
-
-            <div className="flex flex-col gap-3">
-              <div className="pb-1">
-                <div className="flex items-center gap-2 mb-0.5">
-                  <Package className="w-4 h-4 text-white/30" />
-                  <h3 className="text-sm font-semibold text-white/60 uppercase tracking-widest">Practice Add-ons</h3>
+          {/* ── Unified 4-column card row ── */}
+          <div id="store-grid" className="space-y-3">
+            {/* Section label row */}
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-5">
+              {/* Feature Plans label */}
+              <div className="md:col-span-2 flex items-center gap-2.5">
+                <div className="w-6 h-6 rounded-md bg-primary/10 flex items-center justify-center shrink-0">
+                  <Package className="w-3.5 h-3.5 text-primary" />
                 </div>
-        <p className="text-xs text-white/35">
-            One-time question packs — use any time.
-          </p>
+                <div>
+                  <p className="text-xs font-bold text-white/70 uppercase tracking-widest leading-none">Feature Plans</p>
+                  <p className="text-[11px] text-white/35 mt-0.5">Choose your subscription tier</p>
+                </div>
               </div>
+              {/* Add-Ons label */}
+              <div className="md:col-span-2 flex items-center gap-2.5">
+                <div className="w-6 h-6 rounded-md bg-primary/10 flex items-center justify-center shrink-0">
+                  <LayoutGrid className="w-3.5 h-3.5 text-primary" />
+                </div>
+                <div>
+                  <p className="text-xs font-bold text-white/70 uppercase tracking-widest leading-none">Add-Ons</p>
+                  <p className="text-[11px] text-white/35 mt-0.5">One-time packs — use any time</p>
+                </div>
+              </div>
+            </div>
 
-              {ADDONS.map((addon) => (
-                <AddonRow
-                  key={addon.id}
-                  config={addon}
-                  onAddToCart={handleAddToCart}
-                />
-              ))}
+            {/* 4-column card row */}
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-5 items-stretch">
+              {/* Col 1: Starter plan */}
+              <PlanCard
+                plan={starterPlan}
+                currentPlan={currentPlan}
+                isCheckingOut={false}
+                onUpgrade={handleUpgrade}
+              />
+
+              {/* Col 2: Pro plan */}
+              <PlanCard
+                plan={proPlan}
+                currentPlan={currentPlan}
+                isCheckingOut={checkingOutPlan === "pro"}
+                onUpgrade={handleUpgrade}
+              />
+
+              {/* Cols 3–4: 2×2 addon grid — row heights auto-align */}
+              <div className="md:col-span-2 grid grid-cols-2 gap-5 items-stretch">
+                {ADDONS.map((addon) => (
+                  <AddonRow
+                    key={addon.id}
+                    config={addon}
+                    onAddToCart={handleAddToCart}
+                  />
+                ))}
+              </div>
             </div>
           </div>
 
           <BillingFAQ />
 
-          <p className="text-xs text-white/30 pb-8">
+          <p className="text-xs text-white/40 pb-8">
             Prices in CAD. Not affiliated with Paragon Testing Enterprises Inc.{" "}
             By purchasing you agree to our{" "}
-            <a href="/terms" className="underline hover:text-white/60 transition-colors">Terms of Service</a>.
+            <a href="/terms" className="underline hover:text-white/70 transition-colors">Terms of Service</a>.
           </p>
         </div>
       </PageWrapper>

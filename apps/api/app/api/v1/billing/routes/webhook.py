@@ -23,8 +23,6 @@ from app.models.addon_credit import AddonCredit
 from app.api.v1.billing.constants import (
     PLAN_CHANNEL_PREFIX,
     ADDON_MODULE_TASK_KEYS,
-    MOCK_TEST_SPEAKING_KEYS,
-    MOCK_TEST_WRITING_KEYS,
 )
 
 logger = logging.getLogger(__name__)
@@ -235,43 +233,24 @@ async def _handle_checkout_completed(
             )
 
         elif item_type == "mock_bundle":
-            # task_key_raw carries the mock_test_number as a string (e.g. "3").
-            try:
-                mock_num = int(task_key_raw) if task_key_raw and task_key_raw != "null" else None
-            except ValueError:
-                mock_num = None
-
-            if mock_num is None:
-                logger.error(
-                    "Webhook: mock_bundle missing valid mock_test_number in segment %r", segment
-                )
-                continue
-
-            # One speaking slot row + one writing slot row per purchase.
-            # credits_total=1 — one full mock exam attempt.
-            for skill_prefix, known_keys in (
-                ("mock-test-speaking", MOCK_TEST_SPEAKING_KEYS),
-                ("mock-test-writing",  MOCK_TEST_WRITING_KEYS),
-            ):
-                slot_key = f"{skill_prefix}-{mock_num}"
-                if slot_key not in known_keys:
-                    logger.error(
-                        "Webhook: mock_bundle slot_key %r not in known keys — skipping", slot_key
-                    )
-                    continue
+            # Provision general-pool credits for speaking and writing.
+            # Each purchase of qty=1 adds 1 credit to each pool key.
+            # The quota enforcer consumes from these pool keys when the plan quota is exhausted.
+            for skill in ("speaking", "writing"):
+                pool_key = f"mock-test-{skill}-addon"
                 db.add(AddonCredit(
                     user_id=user.id,
                     stripe_pi_id=pi_str or "unknown",
                     addon_type="mock_bundle",
-                    task_key=slot_key,
-                    credits_total=qty,   # qty mock tests purchased
+                    task_key=pool_key,
+                    credits_total=qty,
                     credits_used=0,
                     status="active",
                 ))
 
             logger.info(
-                "Webhook: provisioned mock_bundle speaking+writing slot %d (%d credit) for user=%s",
-                mock_num, qty, user_id_str,
+                "Webhook: provisioned mock_bundle +%d speaking + %d writing pool credits for user=%s",
+                qty, qty, user_id_str,
             )
 
     # Upsert Subscription row for plan purchases.

@@ -29,7 +29,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.config import settings
 from app.core.deps import get_db, get_redis_pool
-from app.core.quota import enforce_mock_exam_plan_access
+from app.core.quota import enforce_speaking_mock_quota
 from app.core.rate_limit import limiter
 from app.core.security import get_current_user
 from app.models.mock_exam_attempt import MockExamTaskAttempt
@@ -155,9 +155,12 @@ async def get_mock_task_upload_url(
     """
     session_id = _validate_session_id(session_id)
 
-    # Plan-access gate — starters cannot use mock exams.
-    # Pro/Ultra users get unlimited retries (no session counting).
-    await enforce_mock_exam_plan_access(user=user)
+    # Quota gate — enforced here (at URL-request time) so that:
+    #   • New sessions: consume one slot from plan quota OR addon pool.
+    #   • Redo sessions: session_id already in mock_exam_task_attempts → free.
+    # Called once per task but only charges on the FIRST task of a new session
+    # (subsequent tasks share the same session_id and pass the redo check).
+    await enforce_speaking_mock_quota(user=user, session_id=session_id, db=db)
 
     s3_key = _mock_s3_key(str(user.id), session_id, task_number)
     try:
@@ -201,9 +204,6 @@ async def confirm_mock_task_upload(
     BEFORE consuming Celery resources.
     """
     session_id = _validate_session_id(session_id)
-
-    # Plan-access gate — mirrors the upload-url check.
-    await enforce_mock_exam_plan_access(user=user)
 
     # s3_key ownership check — prevent the client from referencing someone else's upload.
     expected_prefix = f"{MOCK_AUDIO_PREFIX}{user.id}/{session_id}/"

@@ -64,12 +64,13 @@ export function useAddonCredits(): AddonCreditsResult {
     refetchOnWindowFocus: true,
   });
 
-  const empty: AddonCreditSummary = { speaking: {}, writing: {} };
+  const empty: AddonCreditSummary = { speaking: {}, writing: {}, mock: {} };
   const summary = data ?? empty;
 
   const hasAnyCredits =
     Object.keys(summary.speaking).length > 0 ||
-    Object.keys(summary.writing).length  > 0;
+    Object.keys(summary.writing).length  > 0 ||
+    Object.keys(summary.mock ?? {}).length > 0;
 
   return { summary, hasAnyCredits, isLoading };
 }

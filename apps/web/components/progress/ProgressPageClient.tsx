@@ -71,7 +71,7 @@ function StarterGate() {
       <div className="space-y-2 max-w-sm">
         <h2 className="text-xl font-bold text-foreground">Track Your Progress</h2>
         <p className="text-sm text-subtle">
-          Upgrade to Pro or Ultra to access per-task score tracking, trend charts, and
+          Upgrade to Pro to access per-task score tracking, trend charts, and
           personalised improvement insights across all 8 Speaking and 2 Writing tasks.
         </p>
       </div>
@@ -162,7 +162,7 @@ export function ProgressPageClient() {
           </p>
         </div>
 
-        {/* Skill tabs — only shown for Pro/Ultra */}
+        {/* Skill tabs — only shown for Pro users */}
         {!userLoading && user?.plan !== "starter" && (
           <div className="flex gap-2">
             <SkillTab skill="speaking" active={activeSkill} onSelect={setActiveSkill} />
@@ -202,7 +202,7 @@ export function ProgressPageClient() {
     );
   }
 
-  // ── Pro / Ultra: full page ─────────────────────────────────────────────────
+  // ── Pro plan: full page ──────────────────────────────────────────────────────
   return (
     <div className="space-y-6">
       {header}

@@ -79,7 +79,7 @@ export function PracticeTestList({ skill, user: serverUser }: PracticeTestListPr
           className="flex items-center gap-1.5 text-sm text-subtle hover:text-foreground transition-colors"
         >
           <ChevronLeft className="w-4 h-4" />
-          Back to Practice
+          Back to Mock Tests
         </button>
 
         <div className="flex items-center gap-3">
@@ -113,7 +113,7 @@ export function PracticeTestList({ skill, user: serverUser }: PracticeTestListPr
       {/* ── Test slot list ────────────────────────────────────────────────── */}
       <div className="space-y-3">
         <h2 className="text-sm font-semibold uppercase tracking-wide text-foreground/50">
-          Your practice tests
+          Your mock tests
         </h2>
 
         <div className="space-y-3">
@@ -126,7 +126,7 @@ export function PracticeTestList({ skill, user: serverUser }: PracticeTestListPr
                   key={slot.slotNumber}
                   slot={slot}
                   skill={skill}
-                  href={slot.isLocked ? undefined : `/practice/${skill}/${slot.slotNumber}`}
+                  href={slot.isLocked ? undefined : `/mock-test/${skill}/${slot.slotNumber}`}
                 />
               ))}
         </div>

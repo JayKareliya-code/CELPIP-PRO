@@ -274,7 +274,7 @@ export function useMockExamSession(): UseMockExamSessionReturn {
     if (confirmed) {
       forceStop();
       reset();
-      router.push("/practice/speaking");
+      router.push("/mock-test/speaking");
     }
   }, [forceStop, reset, router]);
 

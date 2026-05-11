@@ -13,8 +13,16 @@
 //   - Prep time + response time badges
 //   - Start Practice CTA → /speaking/[taskNumber]/[promptId]/practice
 //
+// Quota logic:
+//   - effectiveLimit = planLimit + addonCredits (from useSpeakingQuota)
+//   - used = distinct prompts with a COMPLETED attempt
+//   - quotaExhausted = used >= effectiveLimit
+//   - A prompt is FREE to redo if user has already completed it (any time)
+//   - A prompt is LOCKED if quota is exhausted AND user has NOT completed it yet
+//   - "Coming soon" placeholders fill the grid up to effectiveLimit
+//
 // Empty/coming-soon state:
-//   - If DB has N prompts < plan limit: show all + N "Coming Soon" placeholders
+//   - If DB has N prompts < effectiveLimit: show all + N "Coming Soon" placeholders
 //   - If DB has 0 prompts: show full empty state with "New prompts coming soon"
 // ─────────────────────────────────────────────────────────────────────────────
 
@@ -31,6 +39,7 @@ import {
   RotateCcw,
   Timer,
   ImageIcon,
+  Lock,
 } from "lucide-react";
 import { BreadcrumbNav }    from "@/components/layout/BreadcrumbNav";
 import { useCurrentUser }   from "@/lib/hooks/useCurrentUser";
@@ -46,12 +55,6 @@ import type { SpeakingTask, Difficulty } from "@/lib/types";
 
 /** Task numbers that use a scene image (Tasks 3, 4, 8). */
 const IMAGE_TASKS = new Set([3, 4, 8]);
-
-// TASK_LABELS and TASK_DESCRIPTIONS are imported from @/lib/speaking-constants
-// (single source of truth — no local duplicates).
-//
-// Note: TASK_LABELS in this file previously formatted as "Task N — Title"; we
-// now build that format inline where needed to avoid a separate derived map.
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
@@ -77,18 +80,17 @@ interface TaskPromptsFolderProps {
 
 // ── Shared Card Header ──────────────────────────────────────────────────────
 // Extracted to eliminate the copy-paste between image-split and stacked layouts.
-// Any badge change only needs to happen here once.
 
 function CardHeader({
   index,
   prompt,
   isAlreadyAttempted,
-  isBonusRetry,
+  isQuotaLocked,
 }: {
   index:              number;
   prompt:             SpeakingTask;
   isAlreadyAttempted: boolean;
-  isBonusRetry:       boolean;
+  isQuotaLocked:      boolean;
 }) {
   const diffCfg = DIFFICULTY_CONFIG[prompt.difficulty];
   return (
@@ -102,13 +104,13 @@ function CardHeader({
             {diffCfg.label}
           </span>
           {isAlreadyAttempted && (
-            <span className={cn(BADGE_BASE, "bg-amber-900/30 text-amber-400 border-amber-700/40")}>
-              Attempted
+            <span className={cn(BADGE_BASE, "bg-emerald-900/30 text-emerald-400 border-emerald-700/40")}>
+              Completed
             </span>
           )}
-          {isBonusRetry && (
-            <span className={cn(BADGE_BASE, "bg-amber-900/30 text-amber-400 border-amber-700/40")}>
-              Retry mode
+          {isQuotaLocked && !isAlreadyAttempted && (
+            <span className={cn(BADGE_BASE, "bg-white/[0.05] text-white/30 border-white/[0.08]")}>
+              Quota reached
             </span>
           )}
         </div>
@@ -139,101 +141,113 @@ function PromptCard({
   index,
   taskNumber,
   isAlreadyAttempted,
-  isBonusRetry,
+  isQuotaLocked,
 }: {
   prompt: SpeakingTask;
   index: number;
   taskNumber: number;
   isAlreadyAttempted: boolean;
-  isBonusRetry: boolean;
+  isQuotaLocked: boolean;
 }) {
   const isImageTask = IMAGE_TASKS.has(taskNumber);
   const imageUrl = prompt.context_image_url;
+
+  const cardContent = (
+    <div className={cn(
+      "flex flex-col h-full w-full rounded-xl border bg-surface transition-all duration-200 overflow-hidden",
+      isQuotaLocked
+        ? "border-border opacity-60 cursor-not-allowed"
+        : "border-border hover:border-white/[0.18] hover:shadow-[0_4px_24px_rgba(0,0,0,0.35)]"
+    )}>
+      {isImageTask ? (
+        /* ── Split layout: image-left / content-right (Tasks 3, 4, 8) ─── */
+        <div className="flex flex-1 min-h-[180px]">
+          {/* Left – scene image pane (fixed-width: 38%) */}
+          <div className="relative w-[38%] shrink-0 self-stretch min-h-[160px] max-h-[220px] overflow-hidden">
+            {imageUrl ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                src={imageUrl}
+                alt="Scene"
+                className="absolute inset-0 w-full h-full object-contain bg-white/[0.03] blur-sm scale-105 transition-[filter] duration-300"
+                draggable={false}
+              />
+            ) : (
+              <div className="absolute inset-0 bg-white/[0.03] border-r border-dashed border-white/[0.08] flex items-center justify-center">
+                <div className="flex flex-col items-center gap-1 text-subtle/30">
+                  <ImageIcon className="w-5 h-5" />
+                  <span className="text-[10px]">Scene image</span>
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Right – content pane */}
+          <div className="flex flex-col flex-1 min-w-0 border-l border-white/[0.06]">
+            <CardHeader
+              index={index}
+              prompt={prompt}
+              isAlreadyAttempted={isAlreadyAttempted}
+              isQuotaLocked={isQuotaLocked}
+            />
+            <div className="px-4 py-3 flex-1">
+              <p className="text-sm text-foreground/80 leading-relaxed">{prompt.prompt_text}</p>
+            </div>
+            <div className="px-4 pb-4 pt-1 shrink-0">
+              <CtaButton isAlreadyAttempted={isAlreadyAttempted} isQuotaLocked={isQuotaLocked} />
+            </div>
+          </div>
+        </div>
+
+      ) : (
+        /* ── Stacked layout for text-only tasks ── */
+        <>
+          <CardHeader
+            index={index}
+            prompt={prompt}
+            isAlreadyAttempted={isAlreadyAttempted}
+            isQuotaLocked={isQuotaLocked}
+          />
+          <div className="px-4 py-3 flex-1">
+            <p className="text-sm text-foreground/80 leading-relaxed">{prompt.prompt_text}</p>
+          </div>
+          <div className="px-4 pb-4 pt-1 shrink-0">
+            <CtaButton isAlreadyAttempted={isAlreadyAttempted} isQuotaLocked={isQuotaLocked} />
+          </div>
+        </>
+      )}
+    </div>
+  );
+
+  // Locked prompts are not links — quota is exhausted for new prompts.
+  if (isQuotaLocked) {
+    return <div className="group flex h-full">{cardContent}</div>;
+  }
 
   return (
     <Link
       href={`/speaking/${prompt.id}/practice`}
       className="group flex h-full"
     >
-      <div className="flex flex-col h-full w-full rounded-xl border border-border bg-surface hover:border-white/[0.18] hover:shadow-[0_4px_24px_rgba(0,0,0,0.35)] transition-all duration-200 overflow-hidden">
-
-        {isImageTask ? (
-          /* ── Split layout: image-left / content-right (Tasks 3, 4, 8) ─── */
-          <div className="flex flex-1 min-h-[180px]">
-
-            {/* Left – scene image pane (fixed-width: 38%) */}
-            <div className="relative w-[38%] shrink-0 self-stretch min-h-[160px] max-h-[220px] overflow-hidden">
-              {imageUrl ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img
-                  src={imageUrl}
-                  alt="Scene"
-                  className="absolute inset-0 w-full h-full object-contain bg-white/[0.03] blur-sm scale-105 transition-[filter] duration-300"
-                  draggable={false}
-                />
-              ) : (
-                <div className="absolute inset-0 bg-white/[0.03] border-r border-dashed border-white/[0.08] flex items-center justify-center">
-                  <div className="flex flex-col items-center gap-1 text-subtle/30">
-                    <ImageIcon className="w-5 h-5" />
-                    <span className="text-[10px]">Scene image</span>
-                  </div>
-                </div>
-              )}
-            </div>
-
-            {/* Right – content pane */}
-            <div className="flex flex-col flex-1 min-w-0 border-l border-white/[0.06]">
-              <CardHeader
-                index={index}
-                prompt={prompt}
-                isAlreadyAttempted={isAlreadyAttempted}
-                isBonusRetry={isBonusRetry}
-              />
-              <div className="px-4 py-3 flex-1">
-                <p className="text-sm text-foreground/80 leading-relaxed">{prompt.prompt_text}</p>
-              </div>
-              <div className="px-4 pb-4 pt-1 shrink-0">
-                <CtaButton isAlreadyAttempted={isAlreadyAttempted} isBonusRetry={isBonusRetry} />
-              </div>
-            </div>
-          </div>
-
-        ) : (
-          /* ── Stacked layout for text-only tasks ── */
-          <>
-            <CardHeader
-              index={index}
-              prompt={prompt}
-              isAlreadyAttempted={isAlreadyAttempted}
-              isBonusRetry={isBonusRetry}
-            />
-            <div className="px-4 py-3 flex-1">
-              <p className="text-sm text-foreground/80 leading-relaxed">{prompt.prompt_text}</p>
-            </div>
-            <div className="px-4 pb-4 pt-1 shrink-0">
-              <CtaButton isAlreadyAttempted={isAlreadyAttempted} isBonusRetry={isBonusRetry} />
-            </div>
-          </>
-        )}
-      </div>
+      {cardContent}
     </Link>
   );
 }
 
 // ── CTA Button ───────────────────────────────────────────────────────────────
 // Three states:
-//   isAlreadyAttempted → green "Redo" button
-//   isBonusRetry       → amber "Practice Again (Free Retry)"
+//   isAlreadyAttempted → amber "Redo" button
+//   isQuotaLocked      → greyed "Quota Reached" (not a link)
 //   default            → indigo "Start Practice"
 
 function CtaButton({
   isAlreadyAttempted,
-  isBonusRetry,
+  isQuotaLocked,
 }: {
   isAlreadyAttempted: boolean;
-  isBonusRetry:       boolean;
+  isQuotaLocked:      boolean;
 }) {
-  if (isAlreadyAttempted && !isBonusRetry) {
+  if (isAlreadyAttempted) {
     return (
       <div className={cn(
         "w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg",
@@ -246,16 +260,15 @@ function CtaButton({
       </div>
     );
   }
-  if (isBonusRetry) {
+  if (isQuotaLocked) {
     return (
       <div className={cn(
         "w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg",
-        "text-sm font-semibold transition-all duration-150",
-        "bg-amber-700/60 group-hover:bg-amber-700/80",
-        "text-amber-100 border border-amber-600/40 group-hover:border-amber-500/60",
+        "text-sm font-semibold",
+        "bg-white/[0.03] text-white/25 border border-white/[0.06]",
       )}>
-        <RotateCcw className="w-4 h-4" />
-        Practice Again (Free Retry)
+        <Lock className="w-4 h-4" />
+        Quota Reached
       </div>
     );
   }
@@ -313,17 +326,21 @@ export function TaskPromptsFolder({ taskNumber, prompts }: TaskPromptsFolderProp
   const { getToken } = useAuth();
 
   // Centralised quota: effectiveLimit = planLimit + addonCredits for THIS task.
-  // - speaking_pack purchase → adds credits to all tasks (webhook expands per-task)
-  // - custom_bundle for Task N → only raises effectiveLimit for Task N
+  // "used" counts COMPLETED attempts only — quota consumed at completion.
+  // Redo of any completed prompt is always free.
   const {
     plan,
     effectiveLimit: attemptsLimit,
+    addonCredits,
     used,
     remaining,
-    isBonusRetry,
     isLoading: quotaLoading,
   } = useSpeakingQuota(taskNumber);
-  const isStarter = plan === "starter";
+
+  const isStarter          = plan === "starter";
+  const quotaExhausted     = used >= attemptsLimit;
+  const hasTaskAddonCredit = addonCredits > 0;
+
   const { data: attemptedPromptIds } = useQuery<string[]>({
     queryKey: ["attemptedPrompts", taskNumber, user?.id],
     queryFn: async () => {
@@ -334,7 +351,8 @@ export function TaskPromptsFolder({ taskNumber, prompts }: TaskPromptsFolderProp
       );
     },
     enabled: !!user,
-    staleTime: 30_000,
+    staleTime: 10_000,          // 10 s — stay fresh after returning from a session
+    refetchOnWindowFocus: true, // re-check after returning from practice or billing
   });
   const attemptedSet = new Set(attemptedPromptIds ?? []);
 
@@ -346,6 +364,7 @@ export function TaskPromptsFolder({ taskNumber, prompts }: TaskPromptsFolderProp
   const isImageTask     = IMAGE_TASKS.has(taskNumber);
 
   // How many "coming soon" placeholders to show?
+  // Fill up to effectiveLimit so users know how many prompts they'll eventually get.
   const comingSoonCount = Math.max(0, attemptsLimit - prompts.length);
   const hasAnyPrompts   = prompts.length > 0;
 
@@ -389,8 +408,10 @@ export function TaskPromptsFolder({ taskNumber, prompts }: TaskPromptsFolderProp
         </div>
       </div>
 
-      {/* ── Starter info banner ──────────────────────────────────────────────── */}
-      {isStarter && (
+      {/* ── Context-aware info banner ─────────────────────────────────────── */}
+
+      {/* A: Starter with NO addon credits → show plan limit + upgrade CTA */}
+      {isStarter && !hasTaskAddonCredit && (
         <div className="rounded-xl border border-amber-700/30 bg-amber-950/40 p-4 flex items-center gap-4">
           <Sparkles className="w-5 h-5 text-amber-400 shrink-0" />
           <div className="flex-1">
@@ -410,29 +431,41 @@ export function TaskPromptsFolder({ taskNumber, prompts }: TaskPromptsFolderProp
         </div>
       )}
 
+      {/* B: Starter WITH addon credits → show effective limit */}
+      {isStarter && hasTaskAddonCredit && (
+        <div className="rounded-xl border border-primary/30 bg-primary/[0.07] p-4 flex items-center gap-4">
+          <Sparkles className="w-5 h-5 text-primary shrink-0" />
+          <div className="flex-1">
+            <p className="text-sm font-semibold text-primary">
+              {attemptsLimit} attempts available — pack credits active
+            </p>
+            <p className="text-xs text-primary/70 mt-0.5">
+              Your purchased add-on includes {addonCredits} extra question{addonCredits !== 1 ? "s" : ""} for this task.
+            </p>
+          </div>
+          <Link
+            href="/billing"
+            className="shrink-0 text-xs text-primary/60 hover:text-primary transition-colors"
+          >
+            View billing →
+          </Link>
+        </div>
+      )}
+
       {/* ── Attempt progress bar (all plans) ────────────────────────────────── */}
       <div className="rounded-xl border border-white/[0.07] bg-surface px-4 py-3 flex items-center gap-4">
         <div className="flex-1 space-y-1.5">
           <div className="flex items-center justify-between text-xs">
             <span className="text-subtle font-medium">
-              {isBonusRetry
-                ? "Quota used — free retries active"
-                : `${used} of ${attemptsLimit} attempts used`}
+              {`${used} of ${attemptsLimit} attempts used`}
             </span>
-            {isBonusRetry ? (
-              <span className="text-amber-400 font-semibold">Retry mode ⚡</span>
-            ) : (
-              <span className="text-subtle">
-                {remaining} remaining
-              </span>
-            )}
+            <span className="text-subtle">
+              {remaining} remaining
+            </span>
           </div>
           <div className="h-1.5 bg-white/[0.06] rounded-full overflow-hidden">
             <div
-              className={cn(
-                "h-full rounded-full transition-all duration-500",
-                isBonusRetry ? "bg-amber-500" : "bg-primary"
-              )}
+              className="h-full rounded-full transition-all duration-500 bg-primary"
               style={{ width: `${Math.min((used / attemptsLimit) * 100, 100)}%` }}
             />
           </div>
@@ -482,36 +515,50 @@ export function TaskPromptsFolder({ taskNumber, prompts }: TaskPromptsFolderProp
 
           {/* Prompt grid */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {prompts.map((prompt, i) => (
-              <PromptCard
-                key={prompt.id}
-                prompt={prompt}
-                index={i}
-                taskNumber={taskNumber}
-                isAlreadyAttempted={attemptedSet.has(prompt.id)}
-                isBonusRetry={isBonusRetry}
-              />
-            ))}
+            {prompts.map((prompt, i) => {
+              const isAlreadyAttempted = attemptedSet.has(prompt.id);
+              // Lock new (not yet completed) prompts when quota is exhausted.
+              // Completed prompts are always accessible as free redos.
+              const isQuotaLocked = quotaExhausted && !isAlreadyAttempted;
 
-            {/* Coming soon placeholders */}
-            {!isBonusRetry && comingSoonCount > 0 && Array.from({ length: comingSoonCount }).map((_, i) => (
+              return (
+                <PromptCard
+                  key={prompt.id}
+                  prompt={prompt}
+                  index={i}
+                  taskNumber={taskNumber}
+                  isAlreadyAttempted={isAlreadyAttempted}
+                  isQuotaLocked={isQuotaLocked}
+                />
+              );
+            })}
+
+            {/* Coming soon placeholders — fill up to effectiveLimit */}
+            {comingSoonCount > 0 && Array.from({ length: comingSoonCount }).map((_, i) => (
               <ComingSoonCard key={`cs-${i}`} index={prompts.length + i} />
             ))}
           </div>
 
-          {/* Bonus retry info note */}
-          {isBonusRetry && (
-            <div className="rounded-xl border border-amber-700/30 bg-amber-950/30 px-4 py-3 flex items-start gap-3 mt-2">
-              <span className="text-amber-400 shrink-0 mt-0.5">⚡</span>
+          {/* Quota exhausted note */}
+          {quotaExhausted && (
+            <div className="rounded-xl border border-white/[0.08] bg-surface/60 px-4 py-3 flex items-start gap-3 mt-2">
+              <Lock className="w-4 h-4 text-white/30 shrink-0 mt-0.5" />
               <div>
-                <p className="text-sm font-semibold text-amber-200">
-                  Free retry mode — your quota is fully used
+                <p className="text-sm font-semibold text-foreground/70">
+                  All {attemptsLimit} attempts used for this task
                 </p>
-                <p className="text-xs text-amber-300/70 mt-0.5">
-                  You&apos;ve used all {attemptsLimit} attempts for this task. You can still
-                  practice as many times as you like — your prompt will stay the same
-                  and these attempts don&apos;t count against your quota.
+                <p className="text-xs text-subtle mt-0.5">
+                  You can still redo any completed prompt for free.
+                  {isStarter && !hasTaskAddonCredit
+                    ? " Upgrade to Pro or purchase an add-on for more new prompts."
+                    : " Purchase an add-on pack to unlock additional questions."}
                 </p>
+                <Link
+                  href="/billing"
+                  className="inline-flex items-center gap-1 mt-2 text-xs text-primary/70 hover:text-primary transition-colors font-medium"
+                >
+                  Get more attempts →
+                </Link>
               </div>
             </div>
           )}

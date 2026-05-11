@@ -1,7 +1,7 @@
 "use client";
 
 import { PenLine, Mic, SlidersHorizontal, ClipboardList } from "lucide-react";
-import { AddonCard } from "./AddonCard";
+import { AddonRow } from "./AddonRow";
 import type { AddonCardConfig } from "./AddonCard";
 import type { CartItem } from "@/store/billingCartStore";
 
@@ -27,14 +27,6 @@ export const CUSTOM_BUNDLE_MODULES: Record<string, Record<string, string>> = {
   Writing: WRITING_TASK_OPTIONS,
 };
 
-// Mock test slot options (1–5)
-export const MOCK_TEST_OPTIONS: Record<string, string> = {
-  "1": "Mock Test 1",
-  "2": "Mock Test 2",
-  "3": "Mock Test 3",
-  "4": "Mock Test 4",
-  "5": "Mock Test 5",
-};
 
 export const ADDONS: AddonCardConfig[] = [
   {
@@ -44,8 +36,7 @@ export const ADDONS: AddonCardConfig[] = [
     iconBg: "border-white/[0.10] bg-transparent",
     name: "Writing Pack",
     price: 2.99,
-    quantityLabel: "5 questions",
-    description: "Use across writing tasks to get more detailed AI feedback and improvement tips.",
+    quantityLabel: ["Adds 5 questions per task", "Total 10 writing questions"],
   },
   {
     id: "speaking-pack",
@@ -54,19 +45,7 @@ export const ADDONS: AddonCardConfig[] = [
     iconBg: "border-white/[0.10] bg-transparent",
     name: "Speaking Pack",
     price: 6.99,
-    quantityLabel: "5 questions",
-    description: "Use across speaking tasks to practise more without changing your plan.",
-  },
-  {
-    id: "custom-bundle",
-    cartType: "custom_bundle",
-    icon: <SlidersHorizontal className="w-4 h-4 text-amber-400" />,
-    iconBg: "border-white/[0.10] bg-transparent",
-    name: "Custom Task Bundle",
-    price: 1.99,
-    quantityLabel: "5 questions",
-    description: "Choose any specific Speaking or Writing task for focused practice exactly where you need it.",
-    moduleTaskOptions: CUSTOM_BUNDLE_MODULES,
+    quantityLabel: ["Adds 5 questions per task", "Total 40 speaking questions"],
   },
   {
     id: "mock-bundle",
@@ -75,9 +54,17 @@ export const ADDONS: AddonCardConfig[] = [
     iconBg: "border-white/[0.10] bg-transparent",
     name: "Mock Test Bundle",
     price: 2.99,
-    quantityLabel: "1 Speaking + 1 Writing mock",
-    description: "Add an extra full mock test slot — one complete speaking session and one writing session.",
-    mockTestOptions: MOCK_TEST_OPTIONS,
+    quantityLabel: ["Adds 1 Full Speaking Test", "Adds 1 Full Writing Test"],
+  },
+  {
+    id: "custom-bundle",
+    cartType: "custom_bundle",
+    icon: <SlidersHorizontal className="w-4 h-4 text-primary" />,
+    iconBg: "border-white/[0.10] bg-transparent",
+    name: "Custom Task Bundle",
+    price: 1.99,
+    quantityLabel: ["Adds 5 questions for any"],
+    moduleTaskOptions: CUSTOM_BUNDLE_MODULES,
   },
 ];
 
@@ -95,9 +82,9 @@ export function AddonGrid({ onAddToCart }: AddonGridProps) {
         </p>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 items-stretch">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 items-stretch">
         {ADDONS.map((addon) => (
-          <AddonCard
+          <AddonRow
             key={addon.id}
             config={addon}
             onAddToCart={onAddToCart}

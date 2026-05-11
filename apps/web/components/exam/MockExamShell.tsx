@@ -117,7 +117,7 @@ export function MockExamShell({ slotNumber }: MockExamShellProps) {
   }, [promptsLoading, prompts.length, phase]);
 
   // Invalidate the practiceQuota cache so the slot counter updates immediately
-  // on the /practice/speaking page after the user finishes an exam.
+  // on the /mock-test/speaking page after the user finishes an exam.
   useEffect(() => {
     if (phase === "COMPLETE") {
       queryClient.invalidateQueries({ queryKey: ["practiceQuota"] });
@@ -170,10 +170,10 @@ export function MockExamShell({ slotNumber }: MockExamShellProps) {
             </>
           )}
           <button
-            onClick={() => window.location.href = "/practice/speaking"}
+            onClick={() => window.location.href = "/mock-test/speaking"}
             className="mt-2 px-5 py-2.5 rounded-lg bg-primary hover:bg-primary/90 text-primary-foreground text-sm font-semibold transition-colors"
           >
-            Back to Practice
+            Back to Mock Tests
           </button>
         </div>
       );
@@ -316,10 +316,10 @@ export function MockExamShell({ slotNumber }: MockExamShellProps) {
             {uploadError ?? "An unexpected error occurred during the exam."}
           </p>
           <button
-            onClick={() => window.location.href = "/practice/speaking"}
+            onClick={() => window.location.href = "/mock-test/speaking"}
             className="mt-2 px-5 py-2.5 rounded-lg bg-primary hover:bg-primary/90 text-primary-foreground text-sm font-semibold transition-colors"
           >
-            Back to Practice
+            Back to Mock Tests
           </button>
         </div>
       );

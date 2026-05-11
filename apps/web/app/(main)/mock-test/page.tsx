@@ -5,9 +5,9 @@ import { PracticeHub }  from "@/components/practice/PracticeHub";
 import type { AppUser } from "@/lib/types";
 
 export const metadata: Metadata = {
-  title: "Practice Tests — CELPIPBRO",
+  title: "Mock Tests — CELPIPBRO",
   description:
-    "Take timed full-length speaking and writing practice tests. Your quota depends on your plan.",
+    "Take timed full-length speaking and writing mock exams. Your quota depends on your plan.",
 };
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";

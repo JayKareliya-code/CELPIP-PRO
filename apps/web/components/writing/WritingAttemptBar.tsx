@@ -54,7 +54,7 @@ export function WritingAttemptBar({
           <div
             className={cn(
               "h-full rounded-full transition-all duration-500",
-              isBonusRetry ? "bg-amber-500" : "bg-amber-500"
+              isBonusRetry ? "bg-amber-500" : "bg-primary"
             )}
             style={{ width: `${fillPct}%` }}
           />

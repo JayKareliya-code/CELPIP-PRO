@@ -140,6 +140,13 @@ export interface QuotaStatusResponse {
    */
   speaking_addon_credits_per_task: Record<number, number>;
   writing_addon_credits_per_task:  Record<number, number>;
+  // ── Mock exam counts + limits + addon pool ─────────────────────────────────
+  speaking_mock_tests_used:        number;
+  writing_mock_tests_used:         number;
+  speaking_mock_tests_limit:       number | null;
+  writing_mock_tests_limit:        number | null;
+  speaking_mock_addon_credits:     number;
+  writing_mock_addon_credits:      number;
 }
 
 /** One task's credit balance — from GET /api/v1/billing/addon-credits */
@@ -150,8 +157,14 @@ export interface TaskCreditStat {
   purchased: number;
 }
 
+/** Aggregate mock test bundle credit balance (not task-specific). */
+export interface MockCreditStat {
+  available: number;
+  purchased: number;
+}
+
 /**
- * Per-skill, per-task addon credit inventory.
+ * Per-skill, per-task addon credit inventory plus mock bundle balances.
  * Returned by GET /api/v1/billing/addon-credits.
  *
  * Keys are task_number integers; missing tasks have no credits.
@@ -161,6 +174,8 @@ export interface TaskCreditStat {
 export interface AddonCreditSummary {
   speaking: Record<number, TaskCreditStat>;
   writing:  Record<number, TaskCreditStat>;
+  /** Mock bundle credits: { speaking: {...}, writing: {...} } — omitted if none purchased. */
+  mock?:    Record<string, MockCreditStat>;
 }
 
 // ── Attempts ─────────────────────────────────────────────────────────────────

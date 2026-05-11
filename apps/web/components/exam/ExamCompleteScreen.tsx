@@ -166,7 +166,7 @@ export function ExamCompleteScreen({ tasks, sessionId }: ExamCompleteScreenProps
             Go to Dashboard
           </Link>
           <Link
-            href="/practice/speaking"
+            href="/speaking"
             id="exam-complete-practice-btn"
             className={cn(
               "flex-1 flex items-center justify-center gap-2 px-5 py-3.5 rounded-xl",

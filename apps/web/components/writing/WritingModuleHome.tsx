@@ -5,23 +5,23 @@
 //
 // Layout mirrors SpeakingModuleHome exactly:
 //   • Header strip with module title
-//   • Starter plan upgrade banner (when plan === "starter")
-//   • 3-stat info strip (Tasks, Attempts/task, Bonus retries)
+//   • Context-aware banner:
+//       - Starter → "2 free attempts" info + upgrade CTA
+//       - Pro     → hidden
+//   • Stats strip
 //   • 2-col grid of WritingTaskCards (Task 1 + Task 2)
 //
-// Data:
-//   • tasks: passed in from server component
-//   • quota: centralised via useWritingQuota — effectiveLimit = planLimit + addonCredits
-//   • plan:  derived from useWritingQuota (no separate useCurrentUser needed)
+// Quota: Starter always gets 2 free writing attempts per task — tasks are
+// NEVER locked by plan alone. Addon credits stack on top.
 // ─────────────────────────────────────────────────────────────────────────────
 
-import { PenLine, ArrowRight, BookOpen } from "lucide-react";
+import { PenLine, ArrowRight } from "lucide-react";
 import Link from "next/link";
-import { BreadcrumbNav }    from "@/components/layout/BreadcrumbNav";
-import { WritingTaskGrid }  from "@/components/writing/WritingTaskGrid";
-import { useQuota }         from "@/lib/hooks/useQuota";
-import { useWritingQuota }  from "@/lib/hooks/useWritingQuota";
-import type { WritingTask } from "@/lib/types";
+import { BreadcrumbNav }         from "@/components/layout/BreadcrumbNav";
+import { WritingTaskGrid }       from "@/components/writing/WritingTaskGrid";
+import { useTaskModuleAccess }   from "@/lib/hooks/useTaskModuleAccess";
+import { useWritingQuota }       from "@/lib/hooks/useWritingQuota";
+import type { WritingTask }      from "@/lib/types";
 
 // ── Props ─────────────────────────────────────────────────────────────────────
 
@@ -32,18 +32,16 @@ interface WritingModuleHomeProps {
 // ── Component ─────────────────────────────────────────────────────────────────
 
 export function WritingModuleHome({ tasks }: WritingModuleHomeProps) {
-  // Plan-level quota (null taskNumber = overview mode: effectiveLimit = planLimit only,
-  // addonCredits = 0 because we can't sum across tasks here).
-  const {
-    effectiveLimit: attemptsLimit,
-    plan,
-    isLoading,
-  } = useWritingQuota(null);
+  // useTaskModuleAccess provides addon credit info (hasAddonCredits, addonCreditsPerTask)
+  // and the plan. We no longer use isModuleLocked — writing is always accessible.
+  const access = useTaskModuleAccess("writing");
 
-  // Full quota response — gives us per-task used counts AND per-task addon credits.
-  const quotaResult  = useQuota("writing");
-  const quotaLoading = quotaResult.isLoading;
-  const isStarter    = plan === "starter";
+  // Plan-level quota for the stats strip (taskNumber=null → addonCredits=0,
+  // effectiveLimit = planLimit only, which is correct for the overview tile).
+  const { plan, effectiveLimit: planAttemptsLimit, isLoading } = useWritingQuota(null);
+
+  const isStarter = plan === "starter";
+  const isLoaded   = !access.isLoading && !isLoading;
 
   return (
     <div className="space-y-6">
@@ -65,19 +63,18 @@ export function WritingModuleHome({ tasks }: WritingModuleHomeProps) {
         </div>
       </div>
 
-      {/* ── Starter upgrade banner ─────────────────────────────────────────── */}
+      {/* ── Context-aware banner ─────────────────────────────────────────── */}
+
+      {/* A: Starter → show plan limit + upgrade CTA */}
       {isStarter && (
-        <div className="relative overflow-hidden rounded-xl border border-amber-700/40 bg-gradient-to-r from-amber-950/60 via-amber-950/40 to-yellow-950/40 p-4 flex items-center gap-4 flex-wrap">
-          <div className="w-9 h-9 rounded-lg bg-amber-600/20 border border-amber-500/30 flex items-center justify-center shrink-0">
-            <BookOpen className="w-4.5 h-4.5 text-amber-400" />
-          </div>
+        <div className="rounded-xl border border-amber-700/30 bg-amber-950/40 p-4 flex items-center gap-4 flex-wrap">
+          <PenLine className="w-5 h-5 text-amber-400 shrink-0" />
           <div className="flex-1 min-w-0">
             <p className="text-sm font-semibold text-amber-200">
-              Unlock individual task practice
+              {planAttemptsLimit} free attempts per task included with your Starter plan
             </p>
             <p className="text-xs text-amber-300/70 mt-0.5">
-              Starter plan includes 1 full writing mock test. Upgrade to Pro to
-              practice each task individually and get AI scoring.
+              Upgrade to Pro for 5 attempts per task, AI scoring, and mock tests.
             </p>
           </div>
           <Link
@@ -91,7 +88,7 @@ export function WritingModuleHome({ tasks }: WritingModuleHomeProps) {
       )}
 
       {/* ── Stats strip ───────────────────────────────────────────────────── */}
-      {!isStarter && !quotaLoading && !isLoading && (
+      {isLoaded && (
         <div className="grid grid-cols-3 sm:grid-cols-3 gap-3">
           {[
             {
@@ -101,13 +98,13 @@ export function WritingModuleHome({ tasks }: WritingModuleHomeProps) {
             },
             {
               label: "Attempts / task",
-              value: String(attemptsLimit),
+              value: String(planAttemptsLimit),
               sub:   `Included in ${plan}`,
             },
             {
-              label: "Bonus retries",
-              value: "Unlimited",
-              sub:   "After quota used",
+              label: "Redos",
+              value: "Free",
+              sub:   "Retry any completed prompt",
             },
           ].map(({ label, value, sub }) => (
             <div
@@ -125,10 +122,8 @@ export function WritingModuleHome({ tasks }: WritingModuleHomeProps) {
       {/* ── Task grid ─────────────────────────────────────────────────────── */}
       <WritingTaskGrid
         tasks={tasks}
-        writingUsedPerTask={quotaResult.writing_used_per_task}
-        writingAddonCreditsPerTask={quotaResult.writing_addon_credits_per_task}
-        planAttemptsLimit={attemptsLimit}
-        isLocked={isStarter}
+        addonCreditsPerTask={access.addonCreditsPerTask}
+        planAttemptsLimit={planAttemptsLimit}
       />
     </div>
   );

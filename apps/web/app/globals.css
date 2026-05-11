@@ -5,8 +5,8 @@
 /* ── shadcn/ui CSS variables — Dark Theme Default ─────────────────────────── */
 @layer base {
   :root {
-    /* page bg  — #0D0F17 */
-    --background:         225 25% 7%;
+    /* page bg  — #000000 */
+    --background:         0 0% 0%;
     /* primary text — #E2E6F0 */
     --foreground:         220 20% 92%;
     /* card bg — #151824 */
@@ -21,8 +21,8 @@
     /* secondary surfaces — slightly lighter than card */
     --secondary:          228 20% 16%;
     --secondary-foreground: 220 15% 75%;
-    /* muted — same layer as secondary */
-    --muted:              228 20% 16%;
+    /* muted — page background layer */
+    --muted:              0 0% 0%;
     --muted-foreground:   220 10% 55%;
     /* accent — same as secondary */
     --accent:             228 20% 16%;

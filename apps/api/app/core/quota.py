@@ -10,6 +10,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.user import User
 from app.repositories.attempt_repo import AttemptRepository
+from app.repositories.mock_exam_repo import MockExamRepository
 from app.core.config import settings
 
 logger = logging.getLogger(__name__)
@@ -70,6 +71,85 @@ async def _acquire_user_lock(db: AsyncSession, user_id) -> None:
         pass
 
 
+
+async def enforce_speaking_mock_quota(
+    *,
+    user: User,
+    session_id: str,
+    db: AsyncSession,
+) -> None:
+    """Full quota gate for speaking mock exam sessions.
+
+    Called once per upload-url request (i.e. once per task in the session).
+    Quota is consumed on the FIRST request for a new session_id so that
+    abandon-and-restart behaviour counts against the quota — but re-entering
+    the same session (redo) is always free.
+
+    Waterfall
+    ─────────
+    1. Redo check  → session_id already in mock_exam_task_attempts → free (return).
+    2. Plan quota  → count DISTINCT sessions < plan.mock_tests → free (return).
+    3. Addon pool  → consume one credit from mock-test-speaking-addon → free (return).
+    4. HTTP 402    → all exhausted.
+    """
+    from app.services.addon_credit_service import get_available_credits, consume_credit  # local import
+
+    limits   = get_plan_limits(user.plan, "speaking")
+    pool_key = "mock-test-speaking-addon"
+
+    # Serialise concurrent quota checks for this user.
+    await _acquire_user_lock(db, user.id)
+
+    repo = MockExamRepository(db)
+
+    # Step 1 — Redo: this session already started → always free.
+    if await repo.has_session(user.id, session_id):
+        return
+
+    # Step 2 — Plan quota: check distinct sessions used vs plan limit.
+    if limits.mock_tests:
+        used = await repo.count_distinct_sessions(user.id)
+        if used < limits.mock_tests:
+            return  # within plan allocation
+
+    # Step 3 — Addon pool fallback.
+    available = await get_available_credits(user.id, pool_key, db)
+    if available > 0:
+        consumed = await consume_credit(user_id=user.id, task_key=pool_key, db=db)
+        if consumed:
+            logger.info(
+                "enforce_speaking_mock_quota: addon credit consumed for user=%s",
+                user.id,
+            )
+            return
+        # Race condition: credits were > 0 but consume failed → reject.
+        raise HTTPException(
+            status_code=402,
+            detail={
+                "code":        "QUOTA_EXCEEDED",
+                "message":     "No mock exam credits remaining. Purchase a Mock Test Bundle to continue.",
+                "upgrade_url": "/billing",
+            },
+        )
+
+    # Step 4 — All exhausted.
+    used = await repo.count_distinct_sessions(user.id)
+    raise HTTPException(
+        status_code=402,
+        detail={
+            "code":        "MOCK_EXAM_LOCKED",
+            "used":        used,
+            "limit":       limits.mock_tests,
+            "message":     (
+                "You have used all your mock exam slots. "
+                "Purchase a Mock Test Bundle from the billing page to unlock more, "
+                "or upgrade to Pro."
+            ),
+            "upgrade_url": "/billing",
+        },
+    )
+
+
 async def enforce_quota(
     user: User,
     skill: str,
@@ -109,16 +189,37 @@ async def enforce_quota(
     # ── Mock exam path ────────────────────────────────────────────────────────
 
     if is_mock_test:
-        if not limits.mock_tests:
-            raise HTTPException(
-                status_code=402,
-                detail={
-                    "code":        "MOCK_EXAM_LOCKED",
-                    "message":     "Mock exams require a Pro plan.",
-                    "upgrade_url": "/billing",
-                },
-            )
+        from app.services.addon_credit_service import get_available_credits  # local import
+        pool_key = f"mock-test-{skill}-addon"
 
+        if not limits.mock_tests:
+            # Starter plan — no plan-level mock quota. Check addon pool first.
+            addon_credits = await get_available_credits(user.id, pool_key, db)
+            if addon_credits <= 0:
+                raise HTTPException(
+                    status_code=402,
+                    detail={
+                        "code":        "MOCK_EXAM_LOCKED",
+                        "message":     "Mock exams require a Pro plan or a Mock Test Bundle purchase.",
+                        "upgrade_url": "/billing",
+                    },
+                )
+            # Starter has addon credits — fall through to consume one.
+            consumed = await consume_credit(user_id=user.id, task_key=pool_key, db=db)
+            if consumed:
+                logger.info(
+                    "enforce_quota: mock_bundle pool credit consumed (starter) for user=%s skill=%s",
+                    user.id, skill,
+                )
+                return
+            # Credits were present but consume failed (race) — reject.
+            raise HTTPException(status_code=402, detail={
+                "code":    "QUOTA_EXCEEDED",
+                "message": "No mock exam credits remaining. Purchase a Mock Test Bundle to continue.",
+                "upgrade_url": "/billing",
+            })
+
+        # Pro plan — check plan quota first.
         if mock_exam_number is not None:
             already_used = await repo.has_used_mock_slot(user.id, skill, mock_exam_number)
             if already_used:
@@ -128,16 +229,14 @@ async def enforce_quota(
         if used < limits.mock_tests:
             return  # within plan quota
 
-        # Plan quota exhausted — try mock_bundle addon credit for this slot.
-        if mock_exam_number is not None:
-            slot_key = f"mock-test-{skill}-{mock_exam_number}"
-            consumed = await consume_credit(user_id=user.id, task_key=slot_key, db=db)
-            if consumed:
-                logger.info(
-                    "enforce_quota: mock_bundle credit consumed for user=%s skill=%s slot=%d",
-                    user.id, skill, mock_exam_number,
-                )
-                return
+        # Plan quota exhausted — try addon pool credit.
+        consumed = await consume_credit(user_id=user.id, task_key=pool_key, db=db)
+        if consumed:
+            logger.info(
+                "enforce_quota: mock_bundle pool credit consumed for user=%s skill=%s",
+                user.id, skill,
+            )
+            return
 
         raise HTTPException(status_code=402, detail={
             "code":        "QUOTA_EXCEEDED",
@@ -191,19 +290,29 @@ async def enforce_quota(
     )
 
 
-async def enforce_mock_exam_plan_access(*, user: User) -> None:
-    """Plan-access gate for mock exam uploads.
+async def enforce_mock_exam_plan_access(
+    *, user: User, db: AsyncSession | None = None, skill: str = "speaking"
+) -> None:
+    """DEPRECATED — use enforce_speaking_mock_quota for speaking mocks.
 
-    Starter plan: mock exams are locked (402).
-    Pro plan: unlimited — retrying the same exam is always free.
+    Kept as a shim so any remaining callers do not break during migration.
+    For speaking mock exams, mock_exam.py now calls enforce_speaking_mock_quota
+    directly. This stub raises 402 for Starter users with no credits as before,
+    but does NOT consume credits (the new function handles that).
     """
-    limits = get_plan_limits(user.plan, "speaking")
+    limits = get_plan_limits(user.plan, skill)
     if not limits.mock_tests:
+        if db is not None:
+            from app.services.addon_credit_service import get_available_credits
+            pool_key = f"mock-test-{skill}-addon"
+            available = await get_available_credits(user.id, pool_key, db)
+            if available > 0:
+                return
         raise HTTPException(
             status_code=402,
             detail={
                 "code":        "MOCK_EXAM_LOCKED",
-                "message":     "Mock exams require a Pro plan.",
+                "message":     "Mock exams require a Pro plan or a Mock Test Bundle purchase.",
                 "upgrade_url": "/billing",
             },
         )

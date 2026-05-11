@@ -70,7 +70,7 @@ export interface TaskQuotaResult {
   effectiveLimit: number;
 
   /**
-   * Distinct prompts attempted for this task.
+   * Distinct prompts COMPLETED for this task (quota-consumed count).
    * Always 0 when taskNumber is null.
    */
   used:           number;
@@ -80,14 +80,6 @@ export interface TaskQuotaResult {
    * Always 0 when taskNumber is null.
    */
   remaining:      number;
-
-  /**
-   * True when used >= effectiveLimit — the user has exhausted both plan quota
-   * AND any add-on credits.  In this state they can still practice but it
-   * counts as a "bonus retry" (no quota charge, prompt stays fixed).
-   * Always false when taskNumber is null.
-   */
-  isBonusRetry:   boolean;
 
   /** True while quota data is loading from the server. */
   isLoading:      boolean;
@@ -136,8 +128,7 @@ export function useSpeakingQuota(taskNumber: number | null): TaskQuotaResult {
       : 0;
 
   // ── Step 5: Derived fields ──────────────────────────────────────────────────
-  const remaining    = Math.max(0, effectiveLimit - used);
-  const isBonusRetry = taskNumber !== null && used >= effectiveLimit;
+  const remaining = Math.max(0, effectiveLimit - used);
 
   return {
     plan,
@@ -146,7 +137,6 @@ export function useSpeakingQuota(taskNumber: number | null): TaskQuotaResult {
     effectiveLimit,
     used,
     remaining,
-    isBonusRetry,
     isLoading: quotaResult.isLoading,
   };
 }

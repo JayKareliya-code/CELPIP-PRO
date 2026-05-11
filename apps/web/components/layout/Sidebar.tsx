@@ -61,7 +61,7 @@ export function Sidebar({ open, onClose }: MobileSidebarProps) {
       <aside
         className={cn(
           "fixed top-0 left-0 z-50 h-full w-72 flex flex-col",
-          "bg-[#0D0F17] border-r border-white/[0.07]",
+          "bg-[#000000] border-r border-white/[0.07]",
           "shadow-[4px_0_32px_rgba(0,0,0,0.6)]",
           "transition-transform duration-300 ease-in-out",
           open ? "translate-x-0" : "-translate-x-full",

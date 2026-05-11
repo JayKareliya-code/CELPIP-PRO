@@ -54,9 +54,9 @@ export function PracticeHub({ user: serverUser }: PracticeHubProps) {
             <PlayCircle className="w-5 h-5 text-amber-400" />
           </div>
           <div>
-            <h1 className="text-2xl font-bold text-foreground">Practice Tests</h1>
+            <h1 className="text-2xl font-bold text-foreground">Mock Tests</h1>
             <p className="text-sm text-subtle mt-0.5">
-              Full-length timed tests · Speaking &amp; Writing · AI scored
+              Full-length timed mock exams · Speaking &amp; Writing · AI scored
             </p>
           </div>
         </div>
@@ -70,11 +70,11 @@ export function PracticeHub({ user: serverUser }: PracticeHubProps) {
           </div>
           <div className="flex-1 min-w-0">
             <p className="text-sm font-semibold text-amber-200">
-              Unlock more practice tests
+              Unlock more mock tests
             </p>
             <p className="text-xs text-amber-300/70 mt-0.5">
-              Starter plan includes 1 practice test per skill. Upgrade to Pro or Ultra
-              for up to 5 full-length timed tests with AI scoring.
+              Starter plan includes 1 mock test per skill. Upgrade to Pro
+              for more full-length timed exams with AI scoring.
             </p>
           </div>
           <Link

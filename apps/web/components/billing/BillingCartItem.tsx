@@ -52,9 +52,9 @@ const TYPE_META: Record<
   },
   custom_bundle: {
     label:       "Task Bundle",
-    textColor:   "text-amber-400",
-    bgColor:     "bg-amber-500/10",
-    borderColor: "border-amber-500/20",
+    textColor:   "text-primary",
+    bgColor:     "bg-primary/10",
+    borderColor: "border-primary/20",
   },
   mock_bundle: {
     label:       "Mock Test",
@@ -83,7 +83,7 @@ export function BillingCartItem({
 
   return (
     // ── Card shell — gives each item a distinct visual boundary ───────────────
-    <div className="rounded-xl border border-white/[0.07] bg-white/[0.03] p-3 space-y-2.5">
+    <div className="rounded-xl border border-white/[0.14] bg-white/[0.03] p-3 space-y-2.5">
 
       {/* ── Row 1: Category pill + Price + Remove ─────────────────────────── */}
       <div className="flex items-center justify-between gap-2">

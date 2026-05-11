@@ -52,8 +52,8 @@ export function BillingCartPanel({ embedded = false }: BillingCartPanelProps) {
     <div className="space-y-5">
       {isEmpty ? (
         <div className="flex flex-col items-center gap-2 py-10 text-center">
-          <ShoppingCart className="w-10 h-10 text-white/10" />
-          <p className="text-sm text-white/35 leading-snug max-w-[220px]">
+          <ShoppingCart className="w-10 h-10 text-white/20" />
+          <p className="text-sm text-white/50 leading-snug max-w-[220px]">
             Your cart is empty. Choose a plan or add a practice pack to continue.
           </p>
         </div>
@@ -73,9 +73,9 @@ export function BillingCartPanel({ embedded = false }: BillingCartPanelProps) {
 
       <PromoCodeForm />
 
-      <div className="space-y-2 border-t border-white/[0.06] pt-4">
+      <div className="space-y-2 border-t border-white/[0.08] pt-4">
         <div className="flex justify-between text-sm">
-          <span className="text-white/40">Subtotal</span>
+          <span className="text-white/55">Subtotal</span>
           <span className="text-white/80 tabular-nums">${formatCAD(subtotal)} CAD</span>
         </div>
 
@@ -86,14 +86,14 @@ export function BillingCartPanel({ embedded = false }: BillingCartPanelProps) {
           </div>
         )}
 
-        <div className="flex justify-between items-baseline text-base font-bold pt-2 border-t border-white/[0.06]">
+        <div className="flex justify-between items-baseline text-sm font-bold pt-2 border-t border-white/[0.08]">
           <div>
-            <span className="text-white/90">Total</span>
-            <p className="text-[10px] font-normal text-white/30 mt-0.5">
+            <span className="text-white/75">Total</span>
+            <p className="text-[10px] font-normal text-white/40 mt-0.5">
               Applicable taxes calculated at checkout
             </p>
           </div>
-          <span className="text-amber-400 tabular-nums">${formatCAD(total)} CAD</span>
+          <span className="text-primary tabular-nums">${formatCAD(total)} CAD</span>
         </div>
       </div>
 
@@ -103,7 +103,7 @@ export function BillingCartPanel({ embedded = false }: BillingCartPanelProps) {
         disabled={isEmpty || isPending}
         className={cn(
           "w-full flex items-center justify-center gap-2 py-3.5 rounded-lg",
-          "bg-amber-500 hover:bg-amber-400 text-black font-semibold text-sm transition-all duration-200",
+          "bg-primary hover:bg-primary-hover text-primary-foreground font-semibold text-sm transition-all duration-200",
           "disabled:opacity-40 disabled:cursor-not-allowed",
         )}
       >
@@ -122,7 +122,7 @@ export function BillingCartPanel({ embedded = false }: BillingCartPanelProps) {
         )}
       </button>
 
-      <p className="text-center text-[11px] text-white/30">
+      <p className="text-center text-[11px] text-white/45">
         Secure checkout powered by Stripe
       </p>
 
