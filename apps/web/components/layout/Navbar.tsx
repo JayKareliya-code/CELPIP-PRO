@@ -232,7 +232,7 @@ export function Navbar() {
       <header
         className={cn(
           "sticky top-0 z-50 w-full transition-all duration-300",
-          "bg-[#000000]/95 backdrop-blur-md border-b border-white/[0.06]",
+          "bg-[#000000]/95 backdrop-blur-md border-b border-white/[0.18]",
         )}
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">

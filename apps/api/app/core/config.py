@@ -159,7 +159,7 @@ class Settings(BaseSettings):
     STRIPE_MOCK_BUNDLE_PRICE_ID:   str = ""
 
     # ── Compliance / Terms ────────────────────────────────────────────────────
-    TOS_CURRENT_VERSION: str = "2026-04-22"
+    TOS_CURRENT_VERSION: str = "2026-05-14"
 
     # ── Observability ─────────────────────────────────────────────────────────
     SENTRY_DSN:                  str = ""

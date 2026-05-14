@@ -29,7 +29,7 @@ export function Footer() {
 
           {/* Copyright */}
           <p className="text-xs text-white/35 text-center">
-            © {new Date().getFullYear()} CELPIPBRO · Not affiliated with Paragon Testing Enterprises.
+            © {new Date().getFullYear()} CELPIPBRO. All rights reserved.
           </p>
 
           {/* Legal links */}

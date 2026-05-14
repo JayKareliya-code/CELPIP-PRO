@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { ChevronDown, Wrench, HelpCircle, Zap, BookOpen } from "lucide-react";
 import type { ReportImprovementTip } from "@/lib/types";
+import { LockedBlurOverlay } from "./LockedBlurOverlay";
 
 // Priority is index-based — AI already orders tips by importance.
 // High = tip 0, Medium = tip 1, Good to Fix = tip 2+
@@ -17,7 +18,8 @@ function priorityBadge(index: number, total: number): {
 }
 
 interface Props {
-  tips: ReportImprovementTip[];
+  tips:    ReportImprovementTip[];
+  locked?: boolean;
 }
 
 function TipCard({ tip, index, total, defaultOpen }: {
@@ -154,14 +156,14 @@ function TipCard({ tip, index, total, defaultOpen }: {
   );
 }
 
-export function ImprovementTipsAccordion({ tips }: Props) {
+export function ImprovementTipsAccordion({ tips, locked }: Props) {
   const [parentOpen, setParentOpen] = useState(true);
 
   if (!tips.length) return null;
 
   return (
     <div className="rounded-2xl border border-border bg-surface overflow-hidden">
-      {/* Parent header */}
+      {/* Parent header — always visible: title + count badge */}
       <button
         onClick={() => setParentOpen((o) => !o)}
         className="flex w-full items-center justify-between px-5 py-4 text-left hover:bg-white/[0.02] transition-colors"
@@ -188,15 +190,24 @@ export function ImprovementTipsAccordion({ tips }: Props) {
       >
         <div className="overflow-hidden">
           <div className="border-t border-border px-4 py-4 flex flex-col gap-2.5">
-            {tips.map((tip, i) => (
-              <TipCard
-                key={i}
-                tip={tip}
-                index={i}
-                total={tips.length}
-                defaultOpen={i === 0}
-              />
-            ))}
+            {locked ? (
+              /* Locked: show number badges + structure blurred, tip text hidden */
+              tips.map((tip, i) => (
+                <LockedBlurOverlay key={i} label={`Tip ${i + 1}`} blurPx={4} opacity={0.28}>
+                  <TipCard tip={tip} index={i} total={tips.length} defaultOpen={false} />
+                </LockedBlurOverlay>
+              ))
+            ) : (
+              tips.map((tip, i) => (
+                <TipCard
+                  key={i}
+                  tip={tip}
+                  index={i}
+                  total={tips.length}
+                  defaultOpen={i === 0}
+                />
+              ))
+            )}
           </div>
         </div>
       </div>

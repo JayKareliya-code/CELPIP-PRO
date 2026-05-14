@@ -15,6 +15,7 @@ export function CartFAB() {
     <button
       id="billing-cart-fab"
       onClick={open}
+      suppressHydrationWarning
       aria-label={`Open cart${totalQty > 0 ? ` — ${totalQty} item${totalQty > 1 ? "s" : ""}` : ""}`}
       className={cn(
         "fixed top-[72px] right-6 z-30",

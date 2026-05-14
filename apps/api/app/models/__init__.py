@@ -13,6 +13,7 @@ from app.models.mock_exam_attempt import MockExamTaskAttempt
 from app.models.stripe_event import StripeEvent
 from app.models.reconciliation_run import ReconciliationRun
 from app.models.addon_credit import AddonCredit
+from app.models.tos_acceptance import TosAcceptance
 
 __all__ = [
     "Base",
@@ -27,4 +28,5 @@ __all__ = [
     "MockExamTaskAttempt",
     "StripeEvent",
     "ReconciliationRun",
+    "TosAcceptance",
 ]

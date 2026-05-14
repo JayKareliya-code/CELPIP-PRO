@@ -65,7 +65,7 @@ export default function SettingsPage() {
     <PageWrapper>
       {/* ── Page header ─────────────────────────────────────────────────── */}
       <div className="mb-8">
-        <h1 className="text-2xl sm:text-3xl font-bold text-white/90 tracking-tight">
+        <h1 className="text-2xl font-bold text-white/90 tracking-tight">
           Settings
         </h1>
         <p className="mt-1 text-sm text-white/40">
@@ -77,7 +77,7 @@ export default function SettingsPage() {
       <div className="flex flex-col lg:flex-row gap-6">
         <SettingsNav active={activeTab} onChange={handleTabChange} />
 
-        <div className="flex-1 min-w-0">
+        <div key={activeTab} className="flex-1 min-w-0 animate-in fade-in slide-in-from-bottom-2 duration-200">
           {TAB_COMPONENTS[activeTab]}
         </div>
       </div>

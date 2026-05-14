@@ -17,14 +17,25 @@ interface SectionProps {
  */
 export function Section({ title, description, children }: SectionProps) {
   return (
-    <div className="rounded-2xl border border-white/[0.08] bg-[#111318]/80 p-6 space-y-5">
-      <div>
-        <h2 className="text-base font-semibold text-white/90">{title}</h2>
+    <div className="relative rounded-2xl border border-white/[0.09] bg-surface overflow-hidden">
+      {/* Subtle amber top accent */}
+      <div className="absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r from-transparent via-primary/40 to-transparent" />
+
+      {/* Header */}
+      <div className="px-6 pt-6 pb-4">
+        <h2 className="text-lg font-semibold text-white">{title}</h2>
         {description && (
-          <p className="mt-0.5 text-sm text-white/40 leading-relaxed">{description}</p>
+          <p className="mt-1 text-sm text-white/45 leading-relaxed">{description}</p>
         )}
       </div>
-      {children}
+
+      {/* Divider */}
+      <div className="border-t border-white/[0.07]" />
+
+      {/* Content */}
+      <div className="px-6 py-5 space-y-5">
+        {children}
+      </div>
     </div>
   );
 }

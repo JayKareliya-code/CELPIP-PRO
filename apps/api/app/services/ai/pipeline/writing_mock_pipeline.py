@@ -139,7 +139,7 @@ async def _load_prompt(db: AsyncSession, prompt_id: UUID) -> tuple[str, int, str
 _BAND_ESTIMATOR_SYSTEM = """\
 You are a certified CELPIP writing examiner.
 Given a candidate's essay and the task prompt, return ONLY a JSON object
-with one key: "estimated_band" — a float from 1.0 to 12.0 in 0.5 steps
+with one key: "estimated_band" — a whole integer from 1 to 12 (no decimals, no .5 values)
 representing the overall CELPIP writing band score.
 
 Scoring criteria:
@@ -149,7 +149,7 @@ Scoring criteria:
 - Vocabulary range and accuracy
 - Grammatical accuracy and complexity
 
-Return strictly: {"estimated_band": <float>}"""
+Return strictly: {"estimated_band": <integer>}"""
 
 
 async def _estimate_band(
@@ -158,7 +158,7 @@ async def _estimate_band(
     task_number:        int,
     sample_band12:      str = "",
     time_limit_seconds: int = 1800,
-) -> tuple[float | None, str]:
+) -> tuple[int | None, str]:
     """Lightweight LLM call — returns a single band score, no dimensions.
 
     When a prompt-specific Band 12 sample is available, it is appended to the
@@ -227,9 +227,9 @@ async def _estimate_band(
 
                 body = resp.json()
                 data = json.loads(body["choices"][0]["message"]["content"])
-                band = float(data.get("estimated_band", 0))
-                # Clamp to valid CELPIP range in 0.5 steps
-                band = max(1.0, min(12.0, round(band * 2) / 2))
+                band = int(data.get("estimated_band", 0))
+                # Clamp to valid CELPIP range — whole integers only
+                band = max(1, min(12, band))
                 return band, model  # success — exit retry loop
 
             except Exception as exc:
@@ -265,7 +265,7 @@ async def _estimate_band(
 async def _save_result(
     db:              AsyncSession,
     attempt_id:      UUID,
-    estimated_band:  float | None,
+    estimated_band:  int | None,
     scoring_model:   str,
 ) -> None:
     """Write a ScoreReport with just the band estimate — no dimensions.

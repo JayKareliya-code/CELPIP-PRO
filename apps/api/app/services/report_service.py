@@ -17,7 +17,13 @@ from app.models.feedback_report import FeedbackReport
 from app.models.prompt import SpeakingPrompt, WritingPrompt
 from app.models.score_report import ScoreReport, ScoreDimension
 from app.models.transcript import Transcript
-from app.schemas.report import DimensionScore, FeedbackItemSchema, ImprovementTipSchema, ReportResponse
+from app.schemas.report import (
+    DimensionScore,
+    FeedbackItemSchema,
+    ImprovementTipSchema,
+    ReportAccess,
+    ReportResponse,
+)
 from app.api.v1._prompt_helpers import sign_prompt_dict
 
 logger = logging.getLogger(__name__)
@@ -207,6 +213,26 @@ async def fetch_report(
 
     # 9 — Determine whether to return Pro-only fields
     is_pro = plan in ("pro", "ultra")
+    normalised_plan = plan if plan in ("starter", "pro", "ultra") else "starter"
+
+    # Stable section identifiers for the UI to key off when rendering locked
+    # overlays. Mirrored on the frontend in components/report — keep in sync.
+    locked_sections: list[str] = [] if is_pro else [
+        "dimensions",
+        "strengths",
+        "weaknesses",
+        "improvement_tips",
+        "sample_response",
+        "transcript",
+        "next_milestone",
+        "analytics",
+    ]
+
+    access = ReportAccess(
+        has_full_report=is_pro,
+        plan=normalised_plan,  # type: ignore[arg-type]
+        locked_sections=locked_sections,
+    )
 
     return ReportResponse(
         attempt_id=attempt_id,
@@ -221,8 +247,9 @@ async def fetch_report(
         curveball_option=curveball_option,
         curveball_instruction_text=curveball_instruction_text,
         user_response_text=user_response_text,   # always returned (user's own data)
-        estimated_band=float(score_report.estimated_band),
-        # Starter plan: empty lists/strings so the frontend renders a locked report
+        estimated_band=int(round(score_report.estimated_band)),
+        # Starter plan: empty lists/strings so the frontend renders a locked
+        # report. Pro-only coaching content NEVER reaches a starter client.
         dimensions=dimensions             if is_pro else [],
         strengths=strengths               if is_pro else [],
         weaknesses=weaknesses             if is_pro else [],
@@ -231,4 +258,5 @@ async def fetch_report(
         transcript=transcript_text        if is_pro else None,
         next_milestone=next_milestone      if is_pro else "",
         completed_at=attempt.updated_at,
+        access=access,
     )

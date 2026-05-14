@@ -363,6 +363,26 @@ export interface ReportDimensionScore {
   commentary:  string;   // One-sentence explanation of why this score was given
 }
 
+/**
+ * Explicit gating signal from the API.
+ *
+ * `has_full_report` is the single source of truth for whether the UI should
+ * render the full coaching report or locked overlays. The pro-only fields
+ * (dimensions, strengths, …) are stripped server-side for starter users, so
+ * they cannot be inspected via DevTools — this object just tells the UI
+ * which sections to show as locked.
+ *
+ * Marked optional for forward/backwards compatibility during rolling deploys:
+ * an older backend that hasn't shipped this field yet will look like
+ * `access === undefined`, and the report page falls back to deriving access
+ * from the user's plan.
+ */
+export interface ReportAccess {
+  has_full_report: boolean;
+  plan:            "starter" | "pro" | "ultra";
+  locked_sections: string[];
+}
+
 /** Full report returned by GET /api/v1/attempts/{id}/report */
 export interface ReportResponse {
   attempt_id:                 string;
@@ -387,6 +407,7 @@ export interface ReportResponse {
   transcript:                 string | null;
   next_milestone:             string;    // One-sentence next-step coaching note
   completed_at:               string;
+  access?:                    ReportAccess;  // optional during rolling deploys
 }
 
 /**

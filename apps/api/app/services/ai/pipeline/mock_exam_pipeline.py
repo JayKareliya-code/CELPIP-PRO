@@ -191,7 +191,7 @@ async def _transcribe(audio: bytes) -> str:
 
 _BAND_ESTIMATOR_SYSTEM = """You are a certified CELPIP speaking examiner.
 Given a candidate's transcript and the task prompt, return ONLY a JSON object
-with one key: "estimated_band" — a float from 1.0 to 12.0 in 0.5 steps
+with one key: "estimated_band" — a whole integer from 1 to 12 (no decimals, no .5 values)
 representing the overall CELPIP speaking band score.
 
 Scoring criteria:
@@ -201,7 +201,7 @@ Scoring criteria:
 - Fluency (no excessive pauses implied by transcription gaps)
 - Grammatical accuracy
 
-Return strictly: {"estimated_band": <float>}"""
+Return strictly: {"estimated_band": <integer>}"""
 
 
 async def _estimate_band(
@@ -211,7 +211,7 @@ async def _estimate_band(
     image_url: str | None,
     sample_band12: str = "",
     response_time_seconds: int = 60,
-) -> tuple[float, str]:
+) -> tuple[int, str]:
     """Call the LLM with a lightweight prompt that returns only estimated_band.
 
     Uses vision model for image tasks (3/4/8) so the model can cross-check
@@ -266,12 +266,12 @@ async def _estimate_band(
         resp.raise_for_status()
         body = resp.json()
         data = json.loads(body["choices"][0]["message"]["content"])
-        band = float(data.get("estimated_band", 0))
-        # Clamp to valid CELPIP range in 0.5 steps
-        band = max(1.0, min(12.0, round(band * 2) / 2))
+        band = int(data.get("estimated_band", 0))
+        # Clamp to valid CELPIP range — whole integers only
+        band = max(1, min(12, band))
     except Exception:
         logger.exception("Band estimation failed for task %d; defaulting to 0", task_number)
-        band = 0.0
+        band = 0
     finally:
         await provider.aclose()
 
@@ -281,7 +281,7 @@ async def _estimate_band(
 async def _save_result(
     db: AsyncSession,
     attempt_id: UUID,
-    estimated_band: float,
+    estimated_band: int,
     scoring_model: str,
 ) -> None:
     await db.execute(

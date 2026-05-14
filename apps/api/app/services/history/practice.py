@@ -108,7 +108,7 @@ async def get_practice_history(
             is_mock_test=False,
             status=row.Attempt.status,
             estimated_band=(
-                float(row.estimated_band) if row.estimated_band is not None else None
+                int(round(row.estimated_band)) if row.estimated_band is not None else None
             ),
             created_at=row.Attempt.created_at,
         )
@@ -186,7 +186,7 @@ async def get_recent_task_scores(
         scores=[
             TaskScorePoint(
                 attempt_id=row.id,
-                estimated_band=float(row.estimated_band),
+                estimated_band=int(round(row.estimated_band)),
                 completed_at=row.updated_at,
                 dimensions=[
                     DimensionScorePoint(

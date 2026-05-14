@@ -84,7 +84,7 @@ async def get_writing_mock_sessions(
                 task_number=t["task_number"],
                 status=t["status"],
                 estimated_band=(
-                    float(t["estimated_band"]) if t["estimated_band"] is not None else None
+                    int(round(t["estimated_band"])) if t["estimated_band"] is not None else None
                 ),
             )
             for t in task_list
@@ -139,7 +139,7 @@ async def get_writing_mock_sessions(
                 task_number=r["task_number"],
                 status=r["status"],
                 estimated_band=(
-                    float(r["estimated_band"]) if r["estimated_band"] is not None else None
+                    int(round(r["estimated_band"])) if r["estimated_band"] is not None else None
                 ),
             )
             for r in legacy_rows

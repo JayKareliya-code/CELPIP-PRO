@@ -30,6 +30,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@clerk/nextjs";
 import { useQuery } from "@tanstack/react-query";
+import { useState } from "react";
 import {
   Clock,
   Mic,
@@ -40,6 +41,11 @@ import {
   Timer,
   ImageIcon,
   Lock,
+  Check,
+  PenLine,
+  Sliders,
+  ShoppingCart,
+  ArrowRight,
 } from "lucide-react";
 import { BreadcrumbNav }    from "@/components/layout/BreadcrumbNav";
 import { useCurrentUser }   from "@/lib/hooks/useCurrentUser";
@@ -47,10 +53,13 @@ import { useSpeakingQuota } from "@/lib/hooks/useSpeakingQuota";
 import { cn }               from "@/lib/utils";
 import { formatShortDuration } from "@/lib/utils";
 import { API_V1, api, authHeaders } from "@/lib/api";
+import { useBillingCartStore } from "@/store/billingCartStore";
+import { toast }               from "sonner";
 import {
   SPEAKING_TASK_TITLES,
   SPEAKING_TASK_DESCRIPTIONS,
 } from "@/lib/speaking-constants";
+import { TaskUpsellCard } from "@/components/billing/TaskUpsellCard";
 import type { SpeakingTask, Difficulty } from "@/lib/types";
 
 /** Task numbers that use a scene image (Tasks 3, 4, 8). */
@@ -285,7 +294,9 @@ function CtaButton({
   );
 }
 
+
 // ── Coming Soon Placeholder ───────────────────────────────────────────────────
+
 
 function ComingSoonCard({ index }: { index: number }) {
   return (
@@ -363,118 +374,89 @@ export function TaskPromptsFolder({ taskNumber, prompts }: TaskPromptsFolderProp
   const taskDescription = SPEAKING_TASK_DESCRIPTIONS[taskNumber] ?? "";
   const isImageTask     = IMAGE_TASKS.has(taskNumber);
 
+  // Slice prompts to effectiveLimit — Starter users (quota=2) should only see
+  // as many prompt cards as their plan allows, not every prompt in the DB.
+  // Pro users (quota=5) see up to 5; addon credits expand both plans equally.
+  // Gated on !quotaLoading to prevent a flash of all prompts before quota resolves.
+  const visiblePrompts  = quotaLoading ? prompts : prompts.slice(0, attemptsLimit);
+
   // How many "coming soon" placeholders to show?
   // Fill up to effectiveLimit so users know how many prompts they'll eventually get.
-  const comingSoonCount = Math.max(0, attemptsLimit - prompts.length);
-  const hasAnyPrompts   = prompts.length > 0;
+  const comingSoonCount = Math.max(0, attemptsLimit - visiblePrompts.length);
+  const hasAnyPrompts   = visiblePrompts.length > 0;
 
   return (
     <div className="space-y-6">
       {/* Breadcrumb */}
       <BreadcrumbNav />
 
-      {/* ── Back + Header ──────────────────────────────────────────────────── */}
-      <div className="space-y-3">
-        <button
-          onClick={() => router.back()}
-          className="flex items-center gap-1.5 text-sm text-subtle hover:text-foreground transition-colors"
-        >
-          <ChevronLeft className="w-4 h-4" />
-          Back to Speaking
-        </button>
+      {/* ── Back + Header + Progress — col 1 | Upsell card — col 2 ──────────── */}
+      <div className="grid grid-cols-1 md:grid-cols-[65%_1fr] gap-4 items-end">
 
-        <div className="flex items-start gap-4">
-          <div className={cn(
-            "w-12 h-12 rounded-xl border flex items-center justify-center shrink-0",
-            isImageTask
-              ? "bg-teal-600/20 border-teal-500/30"
-              : "bg-amber-600/20 border-amber-500/30"
-          )}>
-            {isImageTask
-              ? <ImageIcon className="w-6 h-6 text-teal-400" />
-              : <Mic className="w-6 h-6 text-amber-400" />}
+        {/* Col 1: back button + task identity + progress bar */}
+        <div className="space-y-4">
+          <button
+            onClick={() => router.back()}
+            className="flex items-center gap-1.5 text-sm text-subtle hover:text-foreground transition-colors"
+          >
+            <ChevronLeft className="w-4 h-4" />
+            Back to Speaking
+          </button>
+
+          {/* Task identity */}
+          <div className="flex items-start gap-4">
+            <div className={cn(
+              "w-12 h-12 rounded-xl border flex items-center justify-center shrink-0",
+              isImageTask
+                ? "bg-teal-600/20 border-teal-500/30"
+                : "bg-amber-600/20 border-amber-500/30"
+            )}>
+              {isImageTask
+                ? <ImageIcon className="w-6 h-6 text-teal-400" />
+                : <Mic className="w-6 h-6 text-amber-400" />}
+            </div>
+            <div className="flex-1 min-w-0">
+              <h1 className="text-2xl font-bold text-foreground">{taskLabel}</h1>
+              <p className="text-sm text-subtle mt-1">{taskDescription}</p>
+              {isImageTask && (
+                <span className={cn(BADGE_BASE, "mt-2 bg-teal-900/30 text-teal-400 border-teal-700/40 py-0.5 px-2")}>
+                  <ImageIcon className="w-3 h-3 mr-1" />
+                  Image-based task
+                </span>
+              )}
+            </div>
           </div>
-          <div className="flex-1 min-w-0">
-            <h1 className="text-2xl font-bold text-foreground">{taskLabel}</h1>
-            <p className="text-sm text-subtle mt-1">{taskDescription}</p>
-            {isImageTask && (
-              <span className={cn(BADGE_BASE, "mt-2 bg-teal-900/30 text-teal-400 border-teal-700/40 py-0.5 px-2")}
-              >
-                <ImageIcon className="w-3 h-3 mr-1" />
-                Image-based task
-              </span>
-            )}
+
+          {/* Attempt progress bar */}
+          <div className="rounded-xl border border-white/[0.07] bg-surface px-4 py-3 flex items-center gap-4">
+            <div className="flex-1 space-y-1.5">
+              <div className="flex items-center justify-between text-xs">
+                <span className="text-subtle font-medium">
+                  {`${used} of ${attemptsLimit} attempts used`}
+                </span>
+                <span className="text-subtle">{remaining} remaining</span>
+              </div>
+              <div className="h-1.5 bg-white/[0.06] rounded-full overflow-hidden">
+                <div
+                  className="h-full rounded-full transition-all duration-500 bg-primary"
+                  style={{ width: `${Math.min((used / attemptsLimit) * 100, 100)}%` }}
+                />
+              </div>
+            </div>
+            <div className="text-right shrink-0">
+              <p className="text-xs text-subtle">Plan</p>
+              <p className="text-sm font-bold text-foreground capitalize">{plan}</p>
+            </div>
           </div>
         </div>
+
+        {/* Col 2: task pack upsell card */}
+        <TaskUpsellCard skill="speaking" taskNumber={taskNumber} />
       </div>
 
-      {/* ── Context-aware info banner ─────────────────────────────────────── */}
+      {/* ── Divider ──────────────────────────────────────────────────────────── */}
+      <div className="border-t border-white/[0.18]" />
 
-      {/* A: Starter with NO addon credits → show plan limit + upgrade CTA */}
-      {isStarter && !hasTaskAddonCredit && (
-        <div className="rounded-xl border border-amber-700/30 bg-amber-950/40 p-4 flex items-center gap-4">
-          <Sparkles className="w-5 h-5 text-amber-400 shrink-0" />
-          <div className="flex-1">
-            <p className="text-sm font-semibold text-amber-200">
-              {attemptsLimit} free attempts included with your Starter plan
-            </p>
-            <p className="text-xs text-amber-300/70 mt-0.5">
-              Upgrade to Pro for 5 attempts per task, AI scoring, and mock tests.
-            </p>
-          </div>
-          <Link
-            href="/billing"
-            className="shrink-0 flex items-center gap-1.5 px-4 py-2 rounded-lg bg-primary hover:bg-primary/90 text-primary-foreground text-sm font-semibold transition-colors border border-amber-400/30"
-          >
-            Upgrade
-          </Link>
-        </div>
-      )}
-
-      {/* B: Starter WITH addon credits → show effective limit */}
-      {isStarter && hasTaskAddonCredit && (
-        <div className="rounded-xl border border-primary/30 bg-primary/[0.07] p-4 flex items-center gap-4">
-          <Sparkles className="w-5 h-5 text-primary shrink-0" />
-          <div className="flex-1">
-            <p className="text-sm font-semibold text-primary">
-              {attemptsLimit} attempts available — pack credits active
-            </p>
-            <p className="text-xs text-primary/70 mt-0.5">
-              Your purchased add-on includes {addonCredits} extra question{addonCredits !== 1 ? "s" : ""} for this task.
-            </p>
-          </div>
-          <Link
-            href="/billing"
-            className="shrink-0 text-xs text-primary/60 hover:text-primary transition-colors"
-          >
-            View billing →
-          </Link>
-        </div>
-      )}
-
-      {/* ── Attempt progress bar (all plans) ────────────────────────────────── */}
-      <div className="rounded-xl border border-white/[0.07] bg-surface px-4 py-3 flex items-center gap-4">
-        <div className="flex-1 space-y-1.5">
-          <div className="flex items-center justify-between text-xs">
-            <span className="text-subtle font-medium">
-              {`${used} of ${attemptsLimit} attempts used`}
-            </span>
-            <span className="text-subtle">
-              {remaining} remaining
-            </span>
-          </div>
-          <div className="h-1.5 bg-white/[0.06] rounded-full overflow-hidden">
-            <div
-              className="h-full rounded-full transition-all duration-500 bg-primary"
-              style={{ width: `${Math.min((used / attemptsLimit) * 100, 100)}%` }}
-            />
-          </div>
-        </div>
-        <div className="text-right shrink-0">
-          <p className="text-xs text-subtle">Plan</p>
-          <p className="text-sm font-bold text-foreground capitalize">{plan}</p>
-        </div>
-      </div>
 
       {/* ── Prompts ─────────────────────────────────────────────────────────── */}
       {/* Gate on quotaLoading to prevent stale-quota UI flash */}
@@ -509,13 +491,13 @@ export function TaskPromptsFolder({ taskNumber, prompts }: TaskPromptsFolderProp
               Available Prompts
             </h2>
             <span className="text-xs text-subtle">
-              {prompts.length} prompt{prompts.length === 1 ? "" : "s"} available
+              {visiblePrompts.length} prompt{visiblePrompts.length === 1 ? "" : "s"} available
             </span>
           </div>
 
           {/* Prompt grid */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {prompts.map((prompt, i) => {
+            {visiblePrompts.map((prompt, i) => {
               const isAlreadyAttempted = attemptedSet.has(prompt.id);
               // Lock new (not yet completed) prompts when quota is exhausted.
               // Completed prompts are always accessible as free redos.
@@ -535,7 +517,7 @@ export function TaskPromptsFolder({ taskNumber, prompts }: TaskPromptsFolderProp
 
             {/* Coming soon placeholders — fill up to effectiveLimit */}
             {comingSoonCount > 0 && Array.from({ length: comingSoonCount }).map((_, i) => (
-              <ComingSoonCard key={`cs-${i}`} index={prompts.length + i} />
+              <ComingSoonCard key={`cs-${i}`} index={visiblePrompts.length + i} />
             ))}
           </div>
 

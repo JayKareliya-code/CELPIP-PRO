@@ -7,13 +7,13 @@
 // the "View all" link sends the user to /history for the full table.
 // ─────────────────────────────────────────────────────────────────────────────
 
-import Link              from "next/link";
+import Link from "next/link";
 import { ArrowRight, ArrowUpRight } from "lucide-react";
-import { useHistory }    from "@/lib/hooks/useHistory";
-import { ScoreBadge }   from "@/components/common/ScoreBadge";
-import { SkillBadge }   from "@/components/common/SkillBadge";
-import { StatusBadge }  from "@/components/common/StatusBadge";
-import { timeAgo }      from "@/lib/utils";
+import { useHistory } from "@/lib/hooks/useHistory";
+import { ScoreBadge } from "@/components/common/ScoreBadge";
+import { SkillBadge } from "@/components/common/SkillBadge";
+import { StatusBadge } from "@/components/common/StatusBadge";
+import { timeAgo } from "@/lib/utils";
 import type { HistoryItem } from "@/lib/types";
 
 // ── Skeleton ──────────────────────────────────────────────────────────────────
@@ -34,30 +34,34 @@ function SkeletonRow() {
 function AttemptRow({ item }: { item: HistoryItem }) {
   return (
     <div className="flex items-center gap-3 py-3 border-t border-border group">
-      <SkillBadge skill={item.skill} />
+      {/* Icon only — no pill background */}
+      <SkillBadge skill={item.skill} iconOnly />
 
       <div className="flex-1 min-w-0">
         <p className="text-sm font-medium text-foreground truncate">{item.task_title}</p>
         <p className="text-xs text-subtle">{timeAgo(item.created_at)}</p>
       </div>
 
-      {item.estimated_band != null ? (
-        <ScoreBadge band={item.estimated_band} size="sm" />
-      ) : (
-        <StatusBadge status={item.status} />
-      )}
+      {/* Score + View — fixed tab gap between them */}
+      <div className="flex items-center gap-12 shrink-0">
+        {item.estimated_band != null ? (
+          <ScoreBadge band={item.estimated_band} plain />
+        ) : (
+          <StatusBadge status={item.status} />
+        )}
 
-      {item.status === "complete" ? (
-        <Link
-          href={`/attempts/${item.attempt_id}/report`}
-          aria-label={`View report for ${item.task_title}`}
-          className="text-xs font-medium text-primary hover:text-primary-hover inline-flex items-center gap-0.5 transition-colors shrink-0"
-        >
-          View <ArrowUpRight className="h-3 w-3" />
-        </Link>
-      ) : (
-        <span className="w-10 shrink-0" /> /* spacer to keep layout stable */
-      )}
+        {item.status === "complete" ? (
+          <Link
+            href={`/attempts/${item.attempt_id}/report`}
+            aria-label={`View report for ${item.task_title}`}
+            className="text-xs font-medium text-primary hover:text-primary-hover inline-flex items-center gap-0.5 transition-colors shrink-0"
+          >
+            View <ArrowUpRight className="h-3 w-3" />
+          </Link>
+        ) : (
+          <span className="w-10 shrink-0" />
+        )}
+      </div>
     </div>
   );
 }

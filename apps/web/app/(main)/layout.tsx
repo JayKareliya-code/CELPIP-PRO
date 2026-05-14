@@ -3,16 +3,16 @@ import { redirect } from "next/navigation";
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
 import { TosGateWrapper } from "@/components/common/TosGateWrapper";
+import { GlobalCartProvider } from "@/components/billing/GlobalCartProvider";
 
 /**
  * Persistent authenticated app layout.
- * Navbar and Footer mount ONCE here and never re-render on
- * navigation between child routes — eliminating the header flicker.
+ * Navbar and Footer mount ONCE here — no re-render on route changes.
  * Auth guard lives here so individual pages don't need to duplicate it.
- * Sidebar has been removed — all navigation lives in the Navbar.
  *
- * TosGateWrapper renders a non-dismissable overlay whenever the current
- * user has not yet accepted the latest Terms of Service version.
+ * GlobalCartProvider mounts CartFAB + BillingCartDrawer once globally,
+ * so any page/component can call addItem() and the "View Cart" FAB
+ * appears automatically without per-page wiring.
  */
 export default async function MainLayout({
   children,
@@ -25,11 +25,12 @@ export default async function MainLayout({
   return (
     <div className="flex flex-col min-h-screen">
       <Navbar />
-      <div className="flex flex-col flex-1 overflow-auto">
-        {/* TosGateWrapper is a client component — it reads the current user
-            from React Query and shows the TOS modal when required. */}
+      <div className="flex flex-col flex-1">
+        {/* TosGateWrapper shows a non-dismissable TOS overlay when required. */}
         <TosGateWrapper>
-          {children}
+          <GlobalCartProvider>
+            {children}
+          </GlobalCartProvider>
         </TosGateWrapper>
       </div>
       <Footer />

@@ -60,23 +60,19 @@ export function CountdownOverlay({ className }: CountdownOverlayProps) {
       )}
       aria-live="assertive"
       role="status"
-      aria-label={isGo ? "Begin speaking now" : `Starting in ${currentStep}`}
+      aria-label={isGo ? "GO!" : `Starting in ${currentStep}`}
     >
       {/* Step display with bounce-in animation */}
       <div
         key={animKey}
         className={cn(
           "text-[9rem] font-black leading-none select-none animate-countdown-in",
-          isGo ? "text-success" : "text-canvas-text"
+          isGo ? "text-amber-400" : "text-canvas-text"
         )}
       >
         {currentStep}
       </div>
 
-      {/* Subtitle */}
-      <p className="text-canvas-subtle text-lg tracking-widest uppercase font-medium">
-        {isGo ? "Begin speaking now" : "Get ready…"}
-      </p>
 
       {/* Step pip indicators */}
       <div className="flex gap-2 mt-4" aria-hidden="true">

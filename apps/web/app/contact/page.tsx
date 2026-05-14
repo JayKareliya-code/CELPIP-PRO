@@ -1,35 +1,71 @@
 "use client";
 
 import Link from "next/link";
-import { Mail, MessageSquare, ArrowLeft, ChevronDown, Clock, ShieldCheck, HelpCircle } from "lucide-react";
+import {
+  Mail,
+  MessageSquare,
+  ArrowLeft,
+  ChevronDown,
+  Clock,
+  HelpCircle,
+  CreditCard,
+  ShieldCheck,
+  Wrench,
+  BookOpen,
+} from "lucide-react";
 import { useState } from "react";
 
 // ── Static FAQ data ────────────────────────────────────────────────────────────
 
 const FAQS = [
   {
-    q: "How do I cancel or change my subscription?",
-    a: "Log in and head to Billing → Manage Subscription. You can cancel or change your plan at any time. Access continues until the end of your current billing period.",
+    q: "What plans does CELPIPBRO offer?",
+    a: "CELPIPBRO offers a free Starter plan and paid one-time purchases — including practice bundles, mock test credits, and add-ons. All purchases are one-time and do not automatically renew. The specific features, limits, and prices are shown at checkout and on the pricing page.",
   },
   {
     q: "Can I get a refund?",
-    a: "All purchases are final by default. If the platform failed to deliver the described service, reach out to support@celpipbro.ca within 7 days of purchase and we'll review your case.",
+    a: "All purchases are generally final because AI-powered features may be used immediately after purchase. We may consider a refund if a duplicate payment was made, a paid feature was not delivered due to a technical issue on our end, or a billing error occurred. To request a review, contact support@celpipbro.ca.",
   },
   {
     q: "My audio recording isn't working. What should I do?",
-    a: "Make sure your browser has microphone permission enabled for CELPIPBRO.com. Chrome and Edge work best. Safari may require you to allow mic access in System Preferences → Security & Privacy.",
+    a: "Make sure your browser has microphone permission enabled for CELPIPBRO. Chrome and Edge work best. Safari may require you to allow mic access in System Preferences → Security & Privacy. If the issue persists, email support@celpipbro.ca with your browser and device details.",
   },
   {
     q: "Are the scores I get official CELPIP scores?",
-    a: "No. Scores on CELPIPBRO are AI-estimated for practice purposes only and are not official CELPIP results from Paragon Testing Enterprises.",
+    a: "No. CELPIPBRO is an independent practice platform and is not affiliated with Paragon Testing Enterprises or any official CELPIP test administrator. All scores are AI-estimated for practice purposes only and are not official CELPIP results.",
   },
   {
     q: "How do I delete my account and data?",
-    a: "Email support@celpipbro.ca with the subject line 'Account Deletion Request' and we will process it within 30 days.",
+    a: "You can delete your account directly from your account settings if the option is available. You may also email support@celpipbro.ca to request deletion. We will take reasonable steps to delete or anonymize your personal information, except where retention is required for legal, tax, or fraud-prevention purposes.",
   },
   {
     q: "I found a bug or the app is broken. How do I report it?",
-    a: "Email support@celpipbro.ca with a short description of the issue, your browser/device, and any screenshots or screen recordings if possible. We aim to respond within 1–2 business days.",
+    a: "Email support@celpipbro.ca with a short description of the issue, your browser and device details, and any screenshots or recordings if possible. We aim to respond within 1–2 business days.",
+  },
+];
+
+// ── Topic tags ─────────────────────────────────────────────────────────────────
+
+const TOPICS = [
+  {
+    icon: <CreditCard className="h-3.5 w-3.5" />,
+    label: "Billing & Purchases",
+    hint: "Include your registered email and order details",
+  },
+  {
+    icon: <ShieldCheck className="h-3.5 w-3.5" />,
+    label: "Privacy & Data Requests",
+    hint: "Access, correction, or deletion under Quebec Law 25",
+  },
+  {
+    icon: <Wrench className="h-3.5 w-3.5" />,
+    label: "Technical Issues",
+    hint: "Include your browser, device, and a description of the problem",
+  },
+  {
+    icon: <BookOpen className="h-3.5 w-3.5" />,
+    label: "General Questions",
+    hint: "Platform features, AI feedback, or anything else",
   },
 ];
 
@@ -48,9 +84,12 @@ export default function ContactPage() {
           <div className="inline-flex items-center justify-center h-16 w-16 rounded-2xl bg-amber-500/10 ring-1 ring-amber-500/30 mb-6">
             <MessageSquare className="h-8 w-8 text-amber-400" />
           </div>
-          <h1 className="text-4xl font-black tracking-tight mb-3">Contact Us</h1>
+          <h1 className="text-4xl font-black tracking-tight mb-3">
+            Contact Us
+          </h1>
           <p className="text-white/50 text-sm max-w-sm mx-auto leading-relaxed">
-            Have a question or need help? We&apos;re here for you. Check the FAQ below or send us a message.
+            One inbox for everything — billing, privacy, technical issues, and
+            general questions. Check the FAQ below or send us an email.
           </p>
         </div>
       </div>
@@ -67,32 +106,69 @@ export default function ContactPage() {
           Back to CELPIPBRO
         </Link>
 
-        {/* Contact cards */}
-        <div className="grid sm:grid-cols-2 gap-4">
-          <ContactCard
-            icon={<Mail className="h-5 w-5 text-amber-400" />}
-            title="General Support"
-            description="Questions about the platform, billing, or your account."
-            email="support@celpipbro.ca"
-          />
-          <ContactCard
-            icon={<ShieldCheck className="h-5 w-5 text-amber-400" />}
-            title="Privacy & Data"
-            description="Data deletion, export requests, or privacy concerns."
-            email="support@celpipbro.ca"
-          />
-        </div>
+        {/* ── Main contact block ── */}
+        <div className="rounded-2xl border border-amber-500/20 bg-amber-500/[0.04] p-8">
+          {/* Email CTA */}
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6">
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-widest text-amber-500/70 mb-2">
+                Support &amp; Privacy Officer
+              </p>
+              <a
+                href="mailto:support@celpipbro.ca"
+                className="group inline-flex items-center gap-2.5 text-2xl font-bold text-white hover:text-amber-400 transition-colors"
+                id="contact-email-link"
+              >
+                <Mail className="h-6 w-6 text-amber-400 shrink-0" />
+                support@celpipbro.ca
+                <span className="opacity-0 group-hover:opacity-100 transition-opacity text-amber-400 text-lg">
+                  ↗
+                </span>
+              </a>
+              <p className="mt-2 text-sm text-white/40">
+                We typically respond within{" "}
+                <strong className="text-white/70">1–2 business days</strong>.
+              </p>
+            </div>
 
-        {/* Response time notice */}
-        <div className="flex items-start gap-3 rounded-xl border border-white/[0.07] bg-white/[0.03] px-5 py-4 text-sm text-white/55">
-          <Clock className="h-4 w-4 shrink-0 mt-0.5 text-amber-500/70" />
-          <p>
-            We typically respond within <strong className="text-white/80">1–2 business days</strong>.
-            For urgent billing issues, please include your registered email address and order details to help us assist you faster.
+            {/* Response time badge */}
+            <div className="flex items-center gap-2 shrink-0 rounded-xl border border-white/[0.07] bg-white/[0.03] px-4 py-3 text-sm text-white/50">
+              <Clock className="h-4 w-4 text-amber-500/70 shrink-0" />
+              <span>
+                Mon – Fri<br />
+                <strong className="text-white/70">1–2 business days</strong>
+              </span>
+            </div>
+          </div>
+
+          {/* Divider */}
+          <div className="my-6 border-t border-white/[0.06]" />
+
+          {/* Topic tags */}
+          <p className="text-xs font-semibold uppercase tracking-widest text-white/30 mb-4">
+            What you can reach us about
           </p>
+          <div className="grid sm:grid-cols-2 gap-3">
+            {TOPICS.map((t) => (
+              <div
+                key={t.label}
+                className="flex items-start gap-3 rounded-xl border border-white/[0.06] bg-white/[0.02] px-4 py-3 hover:border-white/[0.12] transition-colors"
+              >
+                <span className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-lg bg-amber-500/10 text-amber-400">
+                  {t.icon}
+                </span>
+                <div>
+                  <p className="text-sm font-medium text-white/80">
+                    {t.label}
+                  </p>
+                  <p className="text-xs text-white/40 mt-0.5">{t.hint}</p>
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
 
-        {/* FAQ */}
+        {/* ── FAQ ── */}
         <div>
           <div className="flex items-center gap-2 mb-5">
             <HelpCircle className="h-5 w-5 text-amber-400" />
@@ -109,9 +185,15 @@ export default function ContactPage() {
         <div className="border-t border-white/[0.06] pt-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-white/30">
           <span>© {new Date().getFullYear()} CELPIPBRO. All rights reserved.</span>
           <div className="flex gap-4">
-            <Link href="/terms" className="hover:text-amber-400 transition-colors">Terms of Service</Link>
-            <Link href="/privacy" className="hover:text-amber-400 transition-colors">Privacy Policy</Link>
-            <Link href="/contact" className="hover:text-amber-400 transition-colors">Contact</Link>
+            <Link href="/terms" className="hover:text-amber-400 transition-colors">
+              Terms of Service
+            </Link>
+            <Link href="/privacy" className="hover:text-amber-400 transition-colors">
+              Privacy Policy
+            </Link>
+            <Link href="/contact" className="hover:text-amber-400 transition-colors">
+              Contact
+            </Link>
           </div>
         </div>
       </div>
@@ -119,39 +201,7 @@ export default function ContactPage() {
   );
 }
 
-// ── Sub-components ─────────────────────────────────────────────────────────────
-
-function ContactCard({
-  icon,
-  title,
-  description,
-  email,
-}: {
-  icon: React.ReactNode;
-  title: string;
-  description: string;
-  email: string;
-}) {
-  return (
-    <div className="rounded-2xl border border-white/[0.08] bg-white/[0.03] hover:border-amber-500/25 hover:bg-amber-500/[0.04] transition-all duration-200 p-6 flex flex-col gap-4">
-      <div className="flex items-center gap-3">
-        <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-amber-500/10 ring-1 ring-amber-500/20 shrink-0">
-          {icon}
-        </div>
-        <h3 className="font-semibold text-white">{title}</h3>
-      </div>
-      <p className="text-sm text-white/50 leading-relaxed">{description}</p>
-      <a
-        href={`mailto:${email}`}
-        className="mt-auto inline-flex items-center gap-2 text-sm font-medium text-amber-400 hover:text-amber-300 transition-colors group"
-      >
-        <Mail className="h-4 w-4" />
-        {email}
-        <span className="opacity-0 group-hover:opacity-100 transition-opacity">↗</span>
-      </a>
-    </div>
-  );
-}
+// ── FAQ accordion ──────────────────────────────────────────────────────────────
 
 function FaqItem({ question, answer }: { question: string; answer: string }) {
   const [open, setOpen] = useState(false);
@@ -165,8 +215,9 @@ function FaqItem({ question, answer }: { question: string; answer: string }) {
       >
         <span className="text-sm font-medium text-white/80">{question}</span>
         <ChevronDown
-          className={`h-4 w-4 shrink-0 text-white/30 transition-transform duration-200 ${open ? "rotate-180 text-amber-400" : ""
-            }`}
+          className={`h-4 w-4 shrink-0 text-white/30 transition-transform duration-200 ${
+            open ? "rotate-180 text-amber-400" : ""
+          }`}
         />
       </button>
       {open && (

@@ -16,7 +16,7 @@ import { TosGateModal }           from "@/components/common/TosGateModal";
 import { TargetBandGateModal }    from "@/components/common/TargetBandGateModal";
 
 // Must match settings.TOS_CURRENT_VERSION on the backend.
-const TOS_CURRENT_VERSION = "2026-04-22";
+const TOS_CURRENT_VERSION = "2026-05-14";
 
 export function TosGateWrapper({ children }: { children: React.ReactNode }) {
   const { user, isLoading } = useCurrentUser();

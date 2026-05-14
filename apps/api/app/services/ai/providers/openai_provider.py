@@ -100,8 +100,8 @@ _SPEAKING_SCHEMA = {
             "vocabulary":           {"type": "integer"},
             "listenability":        {"type": "integer"},
             "task_fulfillment":     {"type": "integer"},
-            # Overall band (holistic)
-            "estimated_band":       {"type": "number"},
+            # Overall band (holistic) — integer only, 1–12
+            "estimated_band":       {"type": "integer"},
             # Official CELPIP output format: likely range e.g. "7-8"
             "likely_range":         {"type": "string"},
             # Rich feedback
@@ -147,8 +147,8 @@ _WRITING_SCHEMA = {
             "vocabulary":           {"type": "integer"},
             "readability":          {"type": "integer"},
             "task_fulfillment":     {"type": "integer"},
-            # Overall band (holistic)
-            "estimated_band":       {"type": "number"},
+            # Overall band (holistic) — integer only, 1–12
+            "estimated_band":       {"type": "integer"},
             # Official CELPIP output format: likely range e.g. "7-8"
             "likely_range":         {"type": "string"},
             # Rich feedback
@@ -248,12 +248,12 @@ def _guard_low_band(result: ScoringResult) -> ScoringResult:
     being given descriptors for those bands, we catch and normalise it here
     rather than letting a spuriously low score reach the database.
     """
-    if result.estimated_band < 4.0:
+    if result.estimated_band < 4:
         logger.info(
-            "estimated_band %.1f < 4.0 — marking as below-threshold (sentinel 3.0)",
+            "estimated_band %d < 4 — marking as below-threshold (sentinel 3)",
             result.estimated_band,
         )
-        result.estimated_band = 3.0   # sentinel: UI shows 'too low to assess'
+        result.estimated_band = 3   # sentinel: UI shows 'too low to assess'
         result.likely_range = "1-3"
     return result
 
@@ -394,7 +394,7 @@ class OpenAIProvider:
             vocabulary=_clamp_score(raw.get("vocabulary", 6)),
             listenability=_clamp_score(raw.get("listenability", 6)),
             task_fulfillment=_clamp_score(raw.get("task_fulfillment", 6)),
-            estimated_band=max(1.0, min(12.0, float(raw.get("estimated_band", 0.0)))),
+            estimated_band=_clamp_score(raw.get("estimated_band", 6)),
             likely_range=raw.get("likely_range", ""),
             strengths=_parse_feedback_items(raw.get("strengths", [])),
             weaknesses=_parse_feedback_items(raw.get("weaknesses", []), with_fix=True),
@@ -502,7 +502,7 @@ class OpenAIProvider:
             vocabulary=_clamp_score(raw.get("vocabulary", 6)),
             readability=_clamp_score(raw.get("readability", 6)),
             task_fulfillment=_clamp_score(raw.get("task_fulfillment", 6)),
-            estimated_band=max(1.0, min(12.0, float(raw.get("estimated_band", 0.0)))),
+            estimated_band=_clamp_score(raw.get("estimated_band", 6)),
             likely_range=raw.get("likely_range", ""),
             strengths=_parse_feedback_items(raw.get("strengths", [])),
             weaknesses=_parse_feedback_items(raw.get("weaknesses", []), with_fix=True),

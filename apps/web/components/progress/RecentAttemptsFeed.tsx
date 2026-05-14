@@ -30,25 +30,26 @@ function AttemptRow({ item }: { item: HistoryItem }) {
         <p className="text-xs text-subtle">{timeAgo(item.created_at)}</p>
       </div>
 
-      {/* Score or status */}
-      {item.estimated_band != null ? (
-        <ScoreBadge band={item.estimated_band} size="sm" />
-      ) : (
-        <StatusBadge status={item.status} />
-      )}
+      {/* Score + Report — fixed tab gap for column alignment */}
+      <div className="flex items-center gap-12 shrink-0">
+        {item.estimated_band != null ? (
+          <ScoreBadge band={item.estimated_band} plain />
+        ) : (
+          <StatusBadge status={item.status} />
+        )}
 
-      {/* Report link */}
-      {item.status === "complete" ? (
-        <Link
-          href={`/attempts/${item.attempt_id}/report`}
-          aria-label={`View report for ${item.task_title}`}
-          className="text-xs font-medium text-primary hover:text-primary-hover inline-flex items-center gap-0.5 transition-colors shrink-0"
-        >
-          Report <ArrowUpRight className="h-3 w-3" />
-        </Link>
-      ) : (
-        <span className="w-14 shrink-0" />
-      )}
+        {item.status === "complete" ? (
+          <Link
+            href={`/attempts/${item.attempt_id}/report?from=/progress`}
+            aria-label={`View report for ${item.task_title}`}
+            className="text-xs font-medium text-primary hover:text-primary-hover inline-flex items-center gap-0.5 transition-colors shrink-0"
+          >
+            View <ArrowUpRight className="h-3 w-3" />
+          </Link>
+        ) : (
+          <span className="w-14 shrink-0" />
+        )}
+      </div>
     </div>
   );
 }
@@ -77,8 +78,9 @@ interface RecentAttemptsFeedProps {
 export function RecentAttemptsFeed({ items, skill, isLoading }: RecentAttemptsFeedProps) {
   return (
     <section>
-      <div className="flex items-center justify-between mb-0">
-        <h2 className="text-sm font-semibold uppercase tracking-wider text-subtle">
+      {/* Header — matches RecentAttemptsCompact style */}
+      <div className="flex items-center justify-between mb-1">
+        <h2 className="text-sm font-semibold text-foreground">
           Recent {skill === "speaking" ? "Speaking" : "Writing"} Attempts
         </h2>
         <Link
@@ -89,7 +91,8 @@ export function RecentAttemptsFeed({ items, skill, isLoading }: RecentAttemptsFe
         </Link>
       </div>
 
-      <div className="rounded-xl border border-border bg-surface px-5 mt-4">
+      {/* Table body */}
+      <div className="rounded-xl border border-border bg-surface px-5">
         {isLoading && (
           <>
             {[1, 2, 3, 4, 5].map((i) => <SkeletonRow key={i} />)}

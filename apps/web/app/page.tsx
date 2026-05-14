@@ -81,13 +81,23 @@ export default async function LandingPage() {
 
         <section
           id="cta-band"
-          className="py-20 sm:py-28 bg-gradient-to-br from-primary/20 via-muted to-indigo-900/20 border-t border-border"
+          className="relative overflow-hidden py-20 sm:py-28 bg-black border-t border-white/[0.08]"
         >
-          <div className="max-w-3xl mx-auto px-4 sm:px-6 text-center">
-            <h2 className="text-3xl sm:text-4xl font-bold text-foreground">
+          {/* Ambient glow */}
+          <div
+            aria-hidden
+            className="pointer-events-none absolute inset-0"
+          >
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[300px] rounded-full bg-amber-500/10 blur-[120px]" />
+          </div>
+          <div className="relative max-w-3xl mx-auto px-4 sm:px-6 text-center">
+            <p className="text-xs font-bold text-amber-400 uppercase tracking-widest mb-4">
+              Get Started Today
+            </p>
+            <h2 className="text-3xl sm:text-4xl font-bold text-white/90">
               Try It Free. Upgrade When You&apos;re Ready to Go Further.
             </h2>
-            <p className="mt-4 text-lg text-subtle leading-relaxed">
+            <p className="mt-5 text-base sm:text-lg text-white/45 leading-relaxed max-w-xl mx-auto">
               Create a free account, complete a Speaking and Writing mock test,
               and see how CELPIPBRO scores your responses with targeted AI
               feedback.
@@ -96,7 +106,7 @@ export default async function LandingPage() {
               <Link
                 id="cta-band-signup"
                 href="/sign-up"
-                className="inline-flex items-center justify-center gap-2 px-8 py-4 rounded-xl bg-primary text-white font-bold text-base hover:bg-primary-hover transition-colors"
+                className="inline-flex items-center justify-center gap-2 px-8 py-4 rounded-xl bg-amber-500 hover:bg-amber-400 text-black font-bold text-base transition-all duration-200 shadow-[0_0_28px_rgba(245,158,11,0.40)] hover:shadow-[0_0_45px_rgba(245,158,11,0.60)]"
               >
                 Start Free
                 <ArrowRight className="w-4 h-4" />
@@ -104,16 +114,17 @@ export default async function LandingPage() {
               <Link
                 id="cta-band-pricing"
                 href="#pricing"
-                className="inline-flex items-center justify-center gap-2 px-8 py-4 rounded-xl border border-border text-foreground font-semibold text-base hover:border-primary/50 transition-colors"
+                className="inline-flex items-center justify-center gap-2 px-8 py-4 rounded-xl bg-white/[0.05] border border-white/[0.14] hover:border-white/[0.28] text-white/70 hover:text-white font-semibold text-base transition-all duration-200"
               >
                 See Plans
               </Link>
             </div>
-            <p className="mt-5 text-xs text-subtle">
-              No credit card to start &middot; No subscription &middot; Practice band scores are AI estimates — not official CELPIP results
+            <p className="mt-5 text-xs text-white/30">
+              No credit card to start &middot; Free mock test included &middot; AI scores are practice estimates — not official CELPIP results
             </p>
           </div>
         </section>
+
       </main>
 
       <Footer />

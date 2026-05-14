@@ -1,12 +1,16 @@
 // ─────────────────────────────────────────────────────────────────────────────
-// app/attempts/[id]/report/page.tsx — Full AI feedback report page (Phase 2)
+// app/attempts/[id]/report/page.tsx — Full AI feedback report page
 //
-// Replaces the Phase 1 ReportPlaceholder stub with the real ReportPage shell.
-// ReportPage is a client component that calls useReport → GET /attempts/{id}/report.
+// ReportPage is a client component that:
+//   - Calls useReport → GET /attempts/{id}/report
+//   - Reads ?from= search param to resolve the back-link destination
+//     (e.g. /progress → "Back to Progress", /history → "Back to History")
 // ─────────────────────────────────────────────────────────────────────────────
 
+import { Suspense }     from "react";
 import type { Metadata } from "next";
-import { ReportPage }   from "@/components/report/ReportPage";
+import { ReportPage }  from "@/components/report/ReportPage";
+import { ReportSkeleton } from "@/components/report/ReportSkeleton";
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -24,15 +28,20 @@ export function generateMetadata(): Metadata {
   };
 }
 
-// ── Page (Server Component shell — ReportPage is client) ─────────────────────
+// ── Page (Server Component shell) ─────────────────────────────────────────────
+//
+// Wrapped in <Suspense> because ReportPage calls useSearchParams(), which
+// requires a Suspense boundary in Next.js App Router when used in a page
+// that is otherwise a server component.
 
-/**
- * Attempt report page — /attempts/[id]/report
- *
- * This is a thin server-component shell. All data fetching happens inside
- * <ReportPage /> via TanStack Query (useReport hook) so we get client-side
- * loading/error states, skeleton UI, and stale-while-revalidate caching.
- */
 export default function AttemptReportPage({ params }: PageProps) {
-  return <ReportPage attemptId={params.id} />;
+  return (
+    <Suspense fallback={
+      <div className="flex-1 mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8 py-8">
+        <ReportSkeleton />
+      </div>
+    }>
+      <ReportPage attemptId={params.id} />
+    </Suspense>
+  );
 }

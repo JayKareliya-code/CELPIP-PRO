@@ -1,65 +1,91 @@
 import Link from "next/link";
-import { ArrowRight, BookOpen, ClipboardCheck, Mic, PenLine } from "lucide-react";
+import { ArrowRight, Mic, PenLine, PlayCircle, Sparkles } from "lucide-react";
 
-const SPEAKING_TASK_COUNT = 8;
-const WRITING_TASK_COUNT = 2;
+const STATS = [
+  { value: "8", label: "Speaking task types" },
+  { value: "2", label: "Writing task types" },
+  { value: "AI", label: "Scored feedback" },
+];
 
 export function HeroSection() {
   return (
     <section
       id="hero"
-      className="relative overflow-hidden bg-muted pt-20 pb-24 sm:pt-28 sm:pb-32"
+      className="relative overflow-hidden bg-black pt-20 pb-20 sm:pt-20 sm:pb-28"
     >
-      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-12 items-center">
-          <div className="animate-fade-in text-center lg:text-left">
-            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-primary/10 border border-primary/20 text-primary text-sm font-medium mb-5">
-              <ClipboardCheck className="w-3.5 h-3.5" />
-              AI-Scored CELPIP Practice
-            </div>
+      {/* Ambient background glow */}
+      <div aria-hidden className="pointer-events-none absolute inset-0">
+        <div className="absolute -top-40 left-1/4 w-[800px] h-[500px] rounded-full bg-amber-500/12 blur-[140px]" />
+        <div className="absolute bottom-0 right-0 w-[500px] h-[500px] rounded-full bg-indigo-500/6 blur-[130px]" />
+        {/* Grid overlay */}
+        <div
+          className="absolute inset-0 opacity-[0.025]"
+          style={{
+            backgroundImage: `
+              linear-gradient(rgba(255,255,255,0.1) 1px, transparent 1px),
+              linear-gradient(90deg, rgba(255,255,255,0.1) 1px, transparent 1px)
+            `,
+            backgroundSize: "56px 56px",
+          }}
+        />
+      </div>
 
-            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight text-foreground leading-[1.1]">
-              Practice Your{" "}
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-indigo-400">
-                Target CELPIP Band
+      <div className="relative w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20 items-center">
+
+          {/* ── LEFT COLUMN — Copy & CTAs ──────────────────────────────── */}
+          <div className="flex flex-col items-start">
+            {/* Pill badge */}
+            <span className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/[0.06] border border-white/[0.12] text-white/65 text-sm font-medium mb-8">
+              <Sparkles className="w-4 h-4 text-amber-400" />
+              AI-Scored CELPIP Practice
+            </span>
+
+            {/* Headline */}
+            <h1 className="text-4xl sm:text-5xl lg:text-[3.25rem] xl:text-[3.75rem] font-extrabold tracking-tight text-white leading-[1.08]">
+              Reach Your{" "}
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-400 via-amber-300 to-yellow-200">
+                CELPIP Target Band
               </span>{" "}
-              With Focused AI Feedback
+              Faster With AI Feedback
             </h1>
 
-            <p className="mt-5 text-base sm:text-lg text-subtle leading-relaxed max-w-lg mx-auto lg:mx-0">
-              Train on every CELPIP Speaking and Writing task with timed
-              practice, AI feedback aligned to official CELPIP scoring criteria,
-              and a sample response after every attempt. Start with a free mock
-              test.
+            {/* Subheading */}
+            <p className="mt-7 text-base sm:text-lg text-white/50 leading-relaxed max-w-lg">
+              Practice every CELPIP Speaking and Writing task type with timed
+              conditions, AI-scored feedback, and a full mock test — completely
+              free to start.
             </p>
 
-            <div className="mt-8 flex flex-col sm:flex-row gap-3 justify-center lg:justify-start">
+            {/* CTAs */}
+            <div className="mt-10 flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
               <Link
                 id="hero-cta-signup"
                 href="/sign-up"
-                className="inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl bg-primary text-white font-semibold text-base hover:bg-primary-hover transition-colors"
+                className="inline-flex items-center justify-center gap-2 px-8 py-4 rounded-xl bg-amber-500 hover:bg-amber-400 text-black font-bold text-base transition-all duration-200 shadow-[0_0_32px_rgba(245,158,11,0.45)] hover:shadow-[0_0_48px_rgba(245,158,11,0.65)]"
               >
                 Start Free
-                <ArrowRight className="w-4 h-4" />
+                <ArrowRight className="w-5 h-5" />
               </Link>
               <Link
                 id="hero-cta-pricing"
                 href="#pricing"
-                className="inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl bg-surface border border-border text-foreground font-semibold text-base hover:border-primary/50 transition-colors"
+                className="inline-flex items-center justify-center gap-2 px-8 py-4 rounded-xl bg-white/[0.05] border border-white/[0.14] hover:border-white/[0.30] text-white/80 hover:text-white font-semibold text-base transition-all duration-200"
               >
                 See Plans
               </Link>
             </div>
 
-            <div className="mt-8 flex flex-wrap gap-2 justify-center lg:justify-start">
+            {/* Trust chips */}
+            <div className="mt-7 flex flex-wrap gap-2">
               {[
+                "No credit card to start",
                 "Free mock test included",
-                "One-time payment",
-                "Independent CELPIP practice platform",
+                "One-time payment to unlock Pro",
               ].map((chip) => (
                 <span
                   key={chip}
-                  className="text-xs px-3 py-1 rounded-full bg-surface border border-border text-subtle"
+                  className="text-xs px-3.5 py-1.5 rounded-full bg-white/[0.05] border border-white/[0.09] text-white/40"
                 >
                   {chip}
                 </span>
@@ -67,60 +93,74 @@ export function HeroSection() {
             </div>
           </div>
 
-          <div className="hidden sm:block relative lg:pl-8 animate-fade-in animation-delay-150">
-            <div className="space-y-4">
-              <div className="group celpip-card card-interactive flex items-start gap-4">
-                <div className="flex-shrink-0 w-11 h-11 rounded-xl bg-primary/15 flex items-center justify-center group-hover:bg-primary/20 transition-colors">
-                  <Mic className="w-5 h-5 text-primary" />
+          {/* ── RIGHT COLUMN — Visual cards ──────────────────────────── */}
+          <div className="flex flex-col gap-4">
+
+            {/* Stat strip — always 3 equal columns */}
+            <div className="grid grid-cols-3 gap-4">
+              {STATS.map(({ value, label }) => (
+                <div
+                  key={label}
+                  className="rounded-xl border border-white/[0.10] bg-white/[0.03] p-5 sm:p-6 text-center"
+                >
+                  <p className="text-4xl sm:text-5xl font-extrabold text-amber-400 tabular-nums leading-none">
+                    {value}
+                  </p>
+                  <p className="mt-2 text-xs sm:text-sm text-white/40 font-medium leading-snug">
+                    {label}
+                  </p>
+                </div>
+              ))}
+            </div>
+
+            {/* Skill cards — 2-column grid, tall */}
+            <div className="grid grid-cols-2 gap-4">
+              {/* Speaking */}
+              <div className="flex flex-col gap-4 rounded-xl border border-white/[0.10] bg-white/[0.03] hover:border-white/[0.22] hover:bg-white/[0.05] transition-all duration-200 p-6">
+                <div className="w-12 h-12 rounded-xl bg-amber-500/15 border border-amber-500/25 flex items-center justify-center shrink-0">
+                  <Mic className="w-6 h-6 text-amber-400" />
                 </div>
                 <div>
-                  <h3 className="font-semibold text-foreground">
-                    Speaking — All 8 CELPIP Task Types
-                  </h3>
-                  <p className="text-sm text-subtle mt-0.5">
-                    Timed prep, recording, transcript, and AI feedback after
-                    each practice attempt.
+                  <p className="text-base font-semibold text-white/90 leading-snug">
+                    Speaking
+                  </p>
+                  <p className="text-sm text-white/40 mt-2 leading-relaxed">
+                    All 8 task types · Timed prep · AI transcript · Band-level feedback
                   </p>
                 </div>
               </div>
 
-              <div className="group celpip-card card-interactive flex items-start gap-4">
-                <div className="flex-shrink-0 w-11 h-11 rounded-xl bg-success/15 flex items-center justify-center group-hover:bg-success/20 transition-colors">
-                  <PenLine className="w-5 h-5 text-success" />
+              {/* Writing */}
+              <div className="flex flex-col gap-4 rounded-xl border border-white/[0.10] bg-white/[0.03] hover:border-white/[0.22] hover:bg-white/[0.05] transition-all duration-200 p-6">
+                <div className="w-12 h-12 rounded-xl bg-emerald-500/15 border border-emerald-500/25 flex items-center justify-center shrink-0">
+                  <PenLine className="w-6 h-6 text-emerald-400" />
                 </div>
                 <div>
-                  <h3 className="font-semibold text-foreground">
-                    Writing — Email &amp; Opinion Response
-                  </h3>
-                  <p className="text-sm text-subtle mt-0.5">
-                    Practice the two CELPIP Writing tasks with a timed editor,
-                    word counter, and improved sample responses.
+                  <p className="text-base font-semibold text-white/90 leading-snug">
+                    Writing
+                  </p>
+                  <p className="text-sm text-white/40 mt-2 leading-relaxed">
+                    Email &amp; Opinion · Timed editor · Word counter · Sample responses
                   </p>
                 </div>
               </div>
+            </div>
 
-              <div className="grid grid-cols-3 gap-3">
-                {[
-                  { value: `${SPEAKING_TASK_COUNT}`, label: "Speaking task types" },
-                  { value: `${WRITING_TASK_COUNT}`, label: "Writing task types" },
-                  { value: "Free", label: "To start" },
-                ].map(({ value, label }) => (
-                  <div key={label} className="celpip-card text-center p-4">
-                    <p className="text-2xl font-bold text-primary">{value}</p>
-                    <p className="text-xs text-subtle mt-1">{label}</p>
-                  </div>
-                ))}
+            {/* Mock test banner */}
+            <div className="flex items-center gap-4 rounded-xl border border-white/[0.10] bg-white/[0.03] px-6 py-5">
+              <div className="w-10 h-10 rounded-lg bg-amber-500/15 border border-amber-500/25 flex items-center justify-center shrink-0">
+                <PlayCircle className="w-5 h-5 text-amber-400" />
               </div>
-
-              <div className="celpip-card flex items-start gap-3">
-                <BookOpen className="w-5 h-5 text-warning mt-0.5 flex-shrink-0" />
-                <p className="text-sm text-subtle leading-relaxed">
-                  Practice Speaking and Writing under accurate exam timing.
-                  Review AI feedback and a sample response before your
-                  next attempt.
+              <div>
+                <p className="text-sm font-semibold text-white/85">
+                  Free mock test included
+                </p>
+                <p className="text-sm text-white/45 mt-0.5 leading-relaxed">
+                  Full speaking &amp; writing exam in one session — same structure as the real CELPIP.
                 </p>
               </div>
             </div>
+
           </div>
         </div>
       </div>

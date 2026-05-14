@@ -2,7 +2,7 @@ import logging
 from datetime import datetime, timezone
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, HTTPException, Response
+from fastapi import APIRouter, Depends, HTTPException, Request, Response
 from pydantic import BaseModel, Field
 from sqlalchemy import text, func, distinct
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -17,6 +17,7 @@ from app.repositories.user_repo import UserRepository
 from app.schemas.user import UserMeResponse, SetTargetScoreRequest, WeakAreaItem
 from app.schemas.attempt import QuotaStatusResponse
 from app.services.addon_credit_service import get_credits_per_task, get_available_credits
+from app.models.tos_acceptance import TosAcceptance
 
 logger = logging.getLogger(__name__)
 
@@ -208,11 +209,20 @@ class AcceptTosRequest(BaseModel):
 
 @router.post("/me/accept-tos", response_model=UserMeResponse)
 async def accept_tos(
-    body: AcceptTosRequest,
-    user: Annotated[User, Depends(get_current_user)],
-    db:   Annotated[AsyncSession, Depends(get_db)],
+    request: Request,
+    body:    AcceptTosRequest,
+    user:    Annotated[User, Depends(get_current_user)],
+    db:      Annotated[AsyncSession, Depends(get_db)],
 ) -> UserMeResponse:
-    """Record the Terms-of-Service version the user has accepted."""
+    """Record the Terms-of-Service version the user has accepted.
+
+    Writes to two places:
+    - users.tos_accepted_at / tos_version  — fast gate-check field (overwritten)
+    - tos_acceptances                       — append-only audit log (never deleted)
+
+    The audit row captures the client IP and User-Agent as legal evidence of
+    consent under Quebec's Law 25.
+    """
     if body.version != settings.TOS_CURRENT_VERSION:
         raise HTTPException(
             status_code=400,
@@ -221,14 +231,45 @@ async def accept_tos(
                 f"Current version is {settings.TOS_CURRENT_VERSION}."
             ),
         )
-    user.tos_accepted_at = datetime.now(timezone.utc)
+
+    now = datetime.now(timezone.utc)
+
+    # ── 1. Resolve client IP ──────────────────────────────────────────────────
+    # Prefer X-Forwarded-For (set by Render / reverse proxies) over the
+    # raw socket address, which is the proxy IP in production.
+    forwarded_for = request.headers.get("X-Forwarded-For")
+    if forwarded_for:
+        # X-Forwarded-For may be "client, proxy1, proxy2" — take the first
+        ip_address: str | None = forwarded_for.split(",")[0].strip()
+    else:
+        ip_address = request.client.host if request.client else None
+
+    user_agent: str | None = request.headers.get("User-Agent")
+
+    # ── 2. Append to audit log (immutable compliance record) ─────────────────
+    audit_row = TosAcceptance(
+        user_id=user.id,
+        tos_version=body.version,
+        accepted_at=now,
+        ip_address=ip_address,
+        user_agent=user_agent,
+    )
+    db.add(audit_row)
+
+    # ── 3. Update fast gate-check fields on the user row ─────────────────────
+    user.tos_accepted_at = now
     user.tos_version = body.version
     db.add(user)
+
     await db.flush()
+    logger.info(
+        "ToS accepted: user_id=%s version=%s ip=%s",
+        user.id, body.version, ip_address,
+    )
     return _build_user_response(user)
 
 
-# ── GDPR / CCPA: account deletion ─────────────────────────────────────────────
+# ── Account deletion (Quebec Law 25 / PIPEDA) ─────────────────────────────────
 
 class DeleteAccountRequest(BaseModel):
     confirm: str = Field(..., description="Must equal 'DELETE' to confirm.")

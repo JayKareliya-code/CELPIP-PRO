@@ -3,6 +3,7 @@
 import { useState }                        from "react";
 import { Check, AlertTriangle, Wrench }    from "lucide-react";
 import type { ReportFeedbackItem }          from "@/lib/types";
+import { LockedBlurOverlay }               from "./LockedBlurOverlay";
 
 // ── Strength Card ─────────────────────────────────────────────────────────────
 
@@ -110,9 +111,10 @@ type FeedbackTab = "weaknesses" | "strengths";
 interface ToggleProps {
   strengths:  ReportFeedbackItem[];
   weaknesses: ReportFeedbackItem[];
+  locked?:    boolean;
 }
 
-export function FeedbackToggle({ strengths, weaknesses }: ToggleProps) {
+export function FeedbackToggle({ strengths, weaknesses, locked }: ToggleProps) {
   const [active, setActive] = useState<FeedbackTab>("weaknesses");
 
   const hasStrengths  = strengths.length  > 0;
@@ -123,13 +125,23 @@ export function FeedbackToggle({ strengths, weaknesses }: ToggleProps) {
   if (!hasStrengths) return <WeaknessesPanel items={weaknesses} />;
   if (!hasWeaknesses) return <StrengthsPanel  items={strengths}  />;
 
+  // The card list — shared between unlocked and locked renders
+  const cardList = (
+    <div className="flex flex-col gap-2.5">
+      {active === "weaknesses"
+        ? weaknesses.map((item, i) => <WeaknessCard key={i} item={item} index={i} />)
+        : strengths.map((item,  i) => <StrengthCard key={i} item={item} index={i} />)
+      }
+    </div>
+  );
+
   return (
     <div className="rounded-2xl border border-border bg-surface p-5 flex flex-col gap-4">
 
-      {/* ── Toggle pill ────────────────────────────────────────────────────── */}
+      {/* ── Toggle pill — always visible (counts are useful even when locked) */}
       <div className="flex items-center gap-1.5 self-start rounded-xl border border-border/60 bg-white/[0.03] p-1">
         <button
-          onClick={() => setActive("weaknesses")}
+          onClick={() => !locked && setActive("weaknesses")}
           className={[
             "flex items-center gap-1.5 rounded-lg px-3.5 py-2 text-xs font-semibold transition-all duration-150",
             active === "weaknesses"
@@ -148,7 +160,7 @@ export function FeedbackToggle({ strengths, weaknesses }: ToggleProps) {
         </button>
 
         <button
-          onClick={() => setActive("strengths")}
+          onClick={() => !locked && setActive("strengths")}
           className={[
             "flex items-center gap-1.5 rounded-lg px-3.5 py-2 text-xs font-semibold transition-all duration-150",
             active === "strengths"
@@ -167,13 +179,14 @@ export function FeedbackToggle({ strengths, weaknesses }: ToggleProps) {
         </button>
       </div>
 
-      {/* ── Full-width cards ───────────────────────────────────────────────── */}
-      <div className="flex flex-col gap-2.5">
-        {active === "weaknesses"
-          ? weaknesses.map((item, i) => <WeaknessCard key={i} item={item} index={i} />)
-          : strengths.map((item,  i) => <StrengthCard key={i} item={item} index={i} />)
-        }
-      </div>
+      {/* Card list — locked = blurred overlay, unlocked = full content */}
+      {locked ? (
+        <LockedBlurOverlay label="Feedback Details" blurPx={4} opacity={0.3}>
+          {cardList}
+        </LockedBlurOverlay>
+      ) : (
+        cardList
+      )}
     </div>
   );
 }

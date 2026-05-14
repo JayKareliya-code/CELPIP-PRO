@@ -28,13 +28,13 @@ export default function sitemap(): MetadataRoute.Sitemap {
     },
     {
       url: `${BASE_URL}/privacy`,
-      lastModified: new Date("2026-04-22"),
+      lastModified: new Date("2026-05-14"),
       changeFrequency: "yearly",
       priority: 0.5,
     },
     {
       url: `${BASE_URL}/terms`,
-      lastModified: new Date("2026-04-22"),
+      lastModified: new Date("2026-05-14"),
       changeFrequency: "yearly",
       priority: 0.5,
     },

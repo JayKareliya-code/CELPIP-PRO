@@ -90,7 +90,7 @@ class ScoringResult:
     tone_register: int = 0         # Deprecated: merged into readability
 
     # ── Shared output fields ──────────────────────────────────────────────────
-    estimated_band: float = 0.0
+    estimated_band: int = 0
 
     # Band range string: e.g. "7-8" or "9-10" (§9 official output format)
     likely_range: str = ""

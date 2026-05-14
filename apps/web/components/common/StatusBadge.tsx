@@ -1,3 +1,4 @@
+import React from "react";
 import { Clock, Loader2, CheckCircle2, XCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { AttemptStatus } from "@/lib/types";
@@ -5,6 +6,8 @@ import type { AttemptStatus } from "@/lib/types";
 interface StatusBadgeProps {
   status: AttemptStatus;
   size?: "sm" | "md";
+  /** Render icon only — no pill background, no label text */
+  iconOnly?: boolean;
   className?: string;
 }
 
@@ -44,8 +47,18 @@ const statusConfig: Record<
  * Attempt status pill — pending / processing / complete / failed.
  * "processing" spins its icon to communicate activity.
  */
-export function StatusBadge({ status, size = "md", className }: StatusBadgeProps) {
+export function StatusBadge({ status, size = "md", iconOnly = false, className }: StatusBadgeProps) {
   const { label, icon: Icon, classes, spin } = statusConfig[status];
+
+  if (iconOnly) {
+    // Extract text color from classes string (e.g. "text-success")
+    const textColor = classes.split(" ").find((c) => c.startsWith("text-")) ?? "text-subtle";
+    return (
+      <span className={cn("flex items-center justify-center shrink-0", className)}>
+        <Icon className={cn("w-5 h-5", textColor, spin && "animate-spin")} />
+      </span>
+    );
+  }
 
   return (
     <span

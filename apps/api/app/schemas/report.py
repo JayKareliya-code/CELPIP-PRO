@@ -6,10 +6,29 @@ GET /api/v1/attempts/{attempt_id}/report → ReportResponse
 from __future__ import annotations
 
 from datetime import datetime
-from typing import Any
+from typing import Any, Literal
 from uuid import UUID
 
 from pydantic import BaseModel
+
+
+# ── Access gate ───────────────────────────────────────────────────────────────
+
+class ReportAccess(BaseModel):
+    """
+    Explicit gating signal for the frontend.
+
+    The API still strips pro-only fields from the payload for starter users
+    (so paid coaching content never reaches an unauthorised client). This
+    object tells the frontend WHY a field is empty: structural absence vs.
+    plan gating. Without it, the UI has to guess from `len(arr) == 0` which
+    is ambiguous (a real report may legitimately have zero strengths).
+    """
+    has_full_report: bool
+    plan: Literal["starter", "pro", "ultra"]
+    # Section keys the client should render as locked. Stable identifiers —
+    # safe to reference in UI code.
+    locked_sections: list[str] = []
 
 
 # ── Rich feedback item schemas ────────────────────────────────────────────────
@@ -58,7 +77,7 @@ class ReportResponse(BaseModel):
     curveball_option: Any | None           # {name, image_url?, details:[{label,value}]}
     curveball_instruction_text: str | None
     user_response_text: str | None         # speaking → transcript; writing → essay_text
-    estimated_band: float
+    estimated_band: int                    # 1–12, whole numbers only
     dimensions: list[DimensionScore]
     strengths: list[FeedbackItemSchema]
     weaknesses: list[FeedbackItemSchema]
@@ -67,3 +86,4 @@ class ReportResponse(BaseModel):
     transcript: str | None                 # speaking only (pro plan)
     next_milestone: str = ""              # One-sentence next-step coaching note
     completed_at: datetime
+    access: ReportAccess                   # explicit gate — see ReportAccess docstring

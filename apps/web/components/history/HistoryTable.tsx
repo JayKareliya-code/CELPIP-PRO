@@ -34,15 +34,15 @@ function AttemptStateBadge({
   status: PaginatedHistory["items"][number]["status"];
   band:   number | null | undefined;
 }) {
-  // Scored result
+  // Scored result — plain large colored text, no pill
   if (status === "complete" && band !== null && band !== undefined) {
     const colour =
-      band >= 9 ? "bg-success-light text-success border-success/30"
-    : band >= 6 ? "bg-warning-light text-warning border-warning/30"
-    :             "bg-danger-light  text-danger  border-danger/30";
+      band >= 9 ? "text-success"
+    : band >= 6 ? "text-warning"
+    :             "text-danger";
     return (
-      <span className={`inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-bold tabular-nums ${colour}`}>
-        {formatBand(band)}
+      <span className={`text-xl font-bold tabular-nums ${colour}`}>
+        {band}
       </span>
     );
   }
@@ -131,7 +131,7 @@ function AttemptCard({ item }: { item: PaginatedHistory["items"][number] }) {
       {/* Left: skill + task info */}
       <div className="flex-1 min-w-0 space-y-1">
         <div className="flex items-center gap-2 flex-wrap">
-          <SkillBadge skill={item.skill} />
+          <SkillBadge skill={item.skill} iconOnly />
           <span className="text-[10px] text-subtle">· {timeAgo(item.created_at)}</span>
         </div>
         <p className="text-sm font-semibold text-foreground truncate">{item.task_title}</p>
@@ -182,12 +182,12 @@ export function HistoryTable({
           <Table>
             <TableHeader>
               <TableRow className="bg-muted hover:bg-muted">
-                <TableHead className="w-32">Date</TableHead>
-                <TableHead className="w-28">Skill</TableHead>
+                <TableHead className="w-32 text-center">Date</TableHead>
+                <TableHead className="w-28 text-center">Skill</TableHead>
                 <TableHead>Task</TableHead>
                 <TableHead className="w-24 text-center">Band</TableHead>
-                <TableHead className="w-32">Status</TableHead>
-                <TableHead className="w-20 text-right">Report</TableHead>
+                <TableHead className="w-32 text-center">Status</TableHead>
+                <TableHead className="w-20 text-center">Report</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -251,12 +251,12 @@ export function HistoryTable({
         <Table>
           <TableHeader>
             <TableRow className="bg-muted hover:bg-muted">
-              <TableHead className="w-32">Date</TableHead>
-              <TableHead className="w-28">Skill</TableHead>
+              <TableHead className="w-32 text-center">Date</TableHead>
+              <TableHead className="w-28 text-center">Skill</TableHead>
               <TableHead>Task</TableHead>
               <TableHead className="w-24 text-center">Band</TableHead>
-              <TableHead className="w-32">Status</TableHead>
-              <TableHead className="w-20 text-right">Report</TableHead>
+              <TableHead className="w-32 text-center">Status</TableHead>
+              <TableHead className="w-20 text-center">Report</TableHead>
             </TableRow>
           </TableHeader>
 
@@ -264,16 +264,16 @@ export function HistoryTable({
             {items.map((item) => (
               <TableRow key={item.attempt_id} className="group">
                 {/* Date */}
-                <TableCell className="text-sm text-subtle">
+                <TableCell className="text-sm text-subtle text-center">
                   {timeAgo(item.created_at)}
                 </TableCell>
 
                 {/* Skill */}
-                <TableCell>
-                  <SkillBadge skill={item.skill} />
+                <TableCell className="text-center">
+                  <SkillBadge skill={item.skill} iconOnly />
                 </TableCell>
 
-                {/* Task title */}
+                {/* Task title — left-aligned for readability */}
                 <TableCell className="font-medium text-foreground text-sm">
                   <div className="flex flex-col gap-0.5">
                     <span>{item.task_title}</span>
@@ -284,19 +284,19 @@ export function HistoryTable({
                 {/* Band score */}
                 <TableCell className="text-center">
                   {item.estimated_band !== null && item.estimated_band !== undefined ? (
-                    <ScoreBadge band={item.estimated_band} size="sm" />
+                    <ScoreBadge band={item.estimated_band} plain />
                   ) : (
                     <span className="text-subtle text-xs">—</span>
                   )}
                 </TableCell>
 
                 {/* Status */}
-                <TableCell>
-                  <StatusBadge status={item.status} />
+                <TableCell className="text-center">
+                  <StatusBadge status={item.status} iconOnly />
                 </TableCell>
 
                 {/* Report link */}
-                <TableCell className="text-right">
+                <TableCell className="text-center">
                   {item.status === "complete" ? (
                     <Link
                       href={`/attempts/${item.attempt_id}/report`}

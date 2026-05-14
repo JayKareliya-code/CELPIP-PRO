@@ -21,7 +21,7 @@ class HistoryItem(BaseModel):
     task_title: str               # human-readable prompt title
     is_mock_test: bool
     status: str                   # "pending" | "processing" | "complete" | "failed"
-    estimated_band: float | None  # None if not yet scored
+    estimated_band: int | None       # None if not yet scored; whole number 1–12
     created_at: datetime
 
 
@@ -40,7 +40,7 @@ class MockExamTaskResult(BaseModel):
     """Per-task band score within one mock exam session."""
     task_number:    int
     status:         str            # pending | processing | complete | failed
-    estimated_band: float | None
+    estimated_band: int | None      # whole number 1–12, or None if not scored
 
 
 class MockExamSession(BaseModel):
@@ -75,7 +75,7 @@ class DimensionScorePoint(BaseModel):
 class TaskScorePoint(BaseModel):
     """One historical band score for a specific skill + task_number."""
     attempt_id:     UUID
-    estimated_band: float
+    estimated_band: int             # whole number 1–12
     completed_at:   datetime
     dimensions:     list[DimensionScorePoint] = []   # empty for legacy rows
 

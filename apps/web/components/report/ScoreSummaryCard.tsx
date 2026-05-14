@@ -79,8 +79,17 @@ export function ScoreSummaryCard({ estimatedBand, skill, completedAt, nextMilest
   }, [displayBand]);
 
   // SVG arc gauge
-  const radius      = 60;
+  // The arc occupies 75% of the circle (270°) — the remaining 25° is the gap
+  // at the bottom-left of the gauge (after the -135° rotation on the <svg>).
+  const radius        = 60;
   const circumference = 2 * Math.PI * radius;
+  const trackLength   = circumference * 0.75;
+  // Progress reveals the dash from path-position 0 outward by shrinking the
+  // offset toward 0. The gap after the dash is `circumference` long so the
+  // pattern never wraps around the closed circle path — without this guard,
+  // a single-value dasharray would slide the dash around the gap region as
+  // the offset changes (the original bug).
+  const progressOffset = trackLength * (1 - animated / 12);
 
   const hasWords     = typeof wordCount === "number" && wordCount > 0;
   const hasMilestone = typeof nextMilestone === "string" && nextMilestone.trim().length > 0;
@@ -100,7 +109,7 @@ export function ScoreSummaryCard({ estimatedBand, skill, completedAt, nextMilest
             <circle
               cx="76" cy="76" r={radius}
               fill="none" stroke="#252836" strokeWidth="10"
-              strokeDasharray={circumference * 0.75}
+              strokeDasharray={`${trackLength} ${circumference}`}
               strokeDashoffset="0"
               strokeLinecap="round"
             />
@@ -108,8 +117,8 @@ export function ScoreSummaryCard({ estimatedBand, skill, completedAt, nextMilest
             <circle
               cx="76" cy="76" r={radius}
               fill="none" stroke={palette.stroke} strokeWidth="10"
-              strokeDasharray={circumference * 0.75}
-              strokeDashoffset={circumference * 0.75 * (1 - animated / 12)}
+              strokeDasharray={`${trackLength} ${circumference}`}
+              strokeDashoffset={progressOffset}
               strokeLinecap="round"
               style={{ filter: `drop-shadow(0 0 6px ${palette.stroke}80)` }}
             />

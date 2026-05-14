@@ -1,9 +1,13 @@
 import uuid
 from datetime import date, datetime
+from typing import TYPE_CHECKING
 from sqlalchemy import Boolean, CheckConstraint, Date, DateTime, Integer, Numeric, String, Text
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.models.base import Base, TimestampMixin
+
+if TYPE_CHECKING:
+    from app.models.tos_acceptance import TosAcceptance
 
 
 class User(Base, TimestampMixin):
@@ -25,4 +29,12 @@ class User(Base, TimestampMixin):
 
     __table_args__ = (
         CheckConstraint("plan IN ('starter', 'pro')", name="check_user_plan"),
+    )
+
+    # Audit log of every ToS acceptance event (append-only)
+    tos_acceptances: Mapped[list["TosAcceptance"]] = relationship(
+        "TosAcceptance",
+        back_populates="user",
+        cascade="all, delete-orphan",
+        lazy="dynamic",
     )

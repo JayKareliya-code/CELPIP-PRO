@@ -113,10 +113,17 @@ export function usePlanEvents(): void {
           // Non-critical — we still invalidate the cache below.
         }
 
-        // Immediately re-fetch both queries so the UI reflects the new plan
+        // Immediately re-fetch the queries so the UI reflects the new plan
         // without the user needing to reload.
+        //
+        // The report query uses staleTime: Infinity (reports are immutable),
+        // so invalidation is the ONLY way it will re-fetch. Without this,
+        // a freshly-upgraded user would still see locked overlays on their
+        // previously-loaded report — the new pro-only fields would not be
+        // pulled from the backend until they hard-refreshed.
         queryClient.invalidateQueries({ queryKey: ["current-user", userId] });
         queryClient.invalidateQueries({ queryKey: billingStatusKey(userId) });
+        queryClient.invalidateQueries({ queryKey: ["report"] });
       });
 
       // ── Event: server-side error ───────────────────────────────────────────

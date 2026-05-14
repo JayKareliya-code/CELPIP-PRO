@@ -5,6 +5,10 @@
 //
 // Phase 1 redesign: replaces the 60/40 split-screen with 3 focused tabs:
 //
+// Both Starter and Pro render through this component.
+//   isPro=true  → full coaching report: all data visible, no overlays.
+//   isPro=false → advanced sections replaced with LockedSection placeholders.
+//
 //   📊 Coaching Report (default)
 //      Score summary → Dimension breakdown → Strengths/Weaknesses →
 //      Coaching drills → Sample response
@@ -22,6 +26,7 @@
 
 import { useState }                        from "react";
 import Link                                from "next/link";
+import { ArrowRight }                      from "lucide-react";
 import { formatBand }                      from "@/lib/utils";
 
 import { ReportTabNav }                    from "./ReportTabNav";
@@ -35,6 +40,8 @@ import { ImprovementTipsAccordion }        from "./ImprovementTipsAccordion";
 import { TranscriptAnalysisCard }          from "./TranscriptAnalysisCard";
 import { EssayAnalysisCard }              from "./EssayAnalysisCard";
 import { SampleResponseCard }              from "./SampleResponseCard";
+import { LockedDimensionPreview }          from "./LockedDimensionPreview";
+import { LockedSection }                   from "./LockedSection";
 
 import type { ReportResponse }             from "@/lib/types";
 
@@ -52,6 +59,8 @@ type TabId = "coaching" | "response" | "analytics";
 interface Props {
   report:     ReportResponse;
   targetBand: number | null;
+  /** When false (Starter plan) advanced sections are locked with upgrade prompts. */
+  isPro:      boolean;
 }
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
@@ -63,7 +72,7 @@ function countWords(text: string | null | undefined): number {
 
 // ── Component ─────────────────────────────────────────────────────────────────
 
-export function ProReport({ report, targetBand }: Props) {
+export function ProReport({ report, targetBand, isPro }: Props) {
   const [activeTab, setActiveTab] = useState<TabId>("coaching");
 
   const isSpeak       = report.skill === "speaking";
@@ -77,12 +86,17 @@ export function ProReport({ report, targetBand }: Props) {
     ? report.dimensions.reduce((min, d) => d.score < min.score ? d : min)
     : null;
 
-  // Build tab list — Analytics tab only exists for speaking attempts
+  // Build tab list — Analytics tab always shows; locked for Starter.
   const tabs: ReportTab[] = [
     { id: "coaching",  label: "Coaching Report" },
     { id: "response",  label: "My Response"     },
     { id: "analytics", label: "Analytics" },
   ];
+
+  // Starter: Analytics tab label gets a lock hint
+  const displayTabs: ReportTab[] = isPro
+    ? tabs
+    : tabs.map((t) => t.id === "analytics" ? { ...t, label: "Analytics 🔒" } : t);
 
   return (
     <div className="flex flex-col gap-0">
@@ -93,7 +107,7 @@ export function ProReport({ report, targetBand }: Props) {
       */}
       <div className="sticky top-[3.5rem] z-20 -mx-4 sm:-mx-6 lg:-mx-8 px-4 sm:px-6 lg:px-8 pt-3 pb-3 backdrop-blur-md bg-background/80 border-b border-border/40">
         <ReportTabNav
-          tabs={tabs}
+          tabs={displayTabs}
           activeTab={activeTab}
           onChange={(id) => setActiveTab(id as TabId)}
         />
@@ -102,7 +116,6 @@ export function ProReport({ report, targetBand }: Props) {
       {/* ── Tab content ─────────────────────────────────────────────────────── */}
       <div className="pt-5">
 
-        {/* ── COACHING REPORT ─────────────────────────────────────────────── */}
         {activeTab === "coaching" && (
           <div
             id="report-panel-coaching"
@@ -110,44 +123,79 @@ export function ProReport({ report, targetBand }: Props) {
             aria-labelledby="tab-coaching"
             className="flex flex-col gap-4 animate-fade-in"
           >
-            {/* 1 — Score summary */}
+            {/* 1 — Score summary (always visible) */}
             <ScoreSummaryCard
               estimatedBand={report.estimated_band}
               skill={report.skill}
               completedAt={report.completed_at}
-              nextMilestone={report.next_milestone || undefined}
-              wordCount={wordCount}
+              nextMilestone={isPro ? (report.next_milestone || undefined) : undefined}
+              wordCount={isPro ? wordCount : undefined}
             />
 
             {/* 2 — Rubric dimension bars */}
-            {report.dimensions.length > 0 && (
-              <DimensionBreakdown dimensions={report.dimensions} />
+            {isPro ? (
+              report.dimensions.length > 0 && (
+                <DimensionBreakdown dimensions={report.dimensions} />
+              )
+            ) : (
+              <LockedDimensionPreview skill={report.skill} />
             )}
 
-            {/* 3 — Strengths / Weaknesses toggle (Phase 2) */}
-            {(report.strengths.length > 0 || report.weaknesses.length > 0) && (
-              <FeedbackToggle
-                strengths={report.strengths}
-                weaknesses={report.weaknesses}
-              />
+            {/* 3 — Strengths / Weaknesses */}
+            {isPro ? (
+              (report.strengths.length > 0 || report.weaknesses.length > 0) && (
+                <FeedbackToggle
+                  strengths={report.strengths}
+                  weaknesses={report.weaknesses}
+                />
+              )
+            ) : (
+              <div className="grid grid-cols-2 gap-3 sm:gap-4">
+                <LockedSection
+                  title="Strengths"
+                  description="Pro shows what you did well, with specific examples from your response."
+                />
+                <LockedSection
+                  title="Areas to Improve"
+                  description="Pro highlights your exact gaps with actionable, task-specific guidance."
+                />
+              </div>
             )}
 
             {/* 4 — Coaching drills */}
-            {report.improvement_tips.length > 0 && (
-              <ImprovementTipsAccordion tips={report.improvement_tips} />
-            )}
-
-            {/* 5 — Band-targeted sample response */}
-            {report.sample_response && (
-              <SampleResponseCard
-                sampleResponse={report.sample_response}
-                targetBand={targetBand}
-                taskNumber={report.task_number}
+            {isPro ? (
+              report.improvement_tips.length > 0 && (
+                <ImprovementTipsAccordion tips={report.improvement_tips} />
+              )
+            ) : (
+              <LockedSection
+                title="Improvement Tips"
+                description="Pro gives you a numbered action plan to raise your band on the next attempt."
               />
             )}
 
-            {/* 6 — Footer CTA (Phase 3: personalized) */}
-            <ReportFooterCta report={report} weakestDim={weakestDim} />
+            {/* 5 — Band-targeted sample response */}
+            {isPro ? (
+              report.sample_response && (
+                <SampleResponseCard
+                  sampleResponse={report.sample_response}
+                  targetBand={targetBand}
+                  taskNumber={report.task_number}
+                />
+              )
+            ) : (
+              <LockedSection
+                title="Band-Targeted Sample Response"
+                description="Pro shows a sample response written to your target band — not a generic Band 12 example."
+              />
+            )}
+
+            {/* 6 — Upgrade CTA (Starter only) or Footer CTA (Pro) */}
+            {isPro ? (
+              <ReportFooterCta report={report} weakestDim={weakestDim} />
+            ) : (
+              <StarterUpgradeCta />
+            )}
           </div>
         )}
 
@@ -188,43 +236,63 @@ export function ProReport({ report, targetBand }: Props) {
             aria-labelledby="tab-analytics"
             className="flex flex-col gap-4 animate-fade-in"
           >
-            {/* Score trend vs previous attempts — deferred network call fires
-                only when the user opens this tab (conditional render). */}
-            <ScoreProgressCard
-              currentBand={report.estimated_band}
-              skill={report.skill as "speaking" | "writing"}
-              taskNumber={report.task_number}
-              currentAttemptId={report.attempt_id}
-              currentDimensions={report.dimensions}
-            />
+            {isPro ? (
+              <>
+                {/* Score trend vs previous attempts */}
+                <ScoreProgressCard
+                  currentBand={report.estimated_band}
+                  skill={report.skill as "speaking" | "writing"}
+                  taskNumber={report.task_number}
+                  currentAttemptId={report.attempt_id}
+                  currentDimensions={report.dimensions}
+                />
 
-            {/* Speaking: transcript analysis */}
-            {hasTranscript && (
-              <TranscriptAnalysisCard
-                transcript={report.transcript!}
-                taskDurationS={taskDurationS}
-              />
+                {/* Speaking: transcript analysis */}
+                {hasTranscript && (
+                  <TranscriptAnalysisCard
+                    transcript={report.transcript!}
+                    taskDurationS={taskDurationS}
+                  />
+                )}
+
+                {/* Writing: essay analysis */}
+                {hasEssay && (
+                  <EssayAnalysisCard
+                    essayText={report.user_response_text!}
+                    taskNumber={report.task_number}
+                  />
+                )}
+
+                {/* Nudge back to coaching */}
+                <p className="text-center text-xs text-white/25 pb-2">
+                  Switch to{" "}
+                  <button
+                    onClick={() => setActiveTab("coaching")}
+                    className="underline text-white/40 hover:text-amber-400 transition-colors"
+                  >
+                    Coaching Report
+                  </button>{" "}
+                  to see your strengths, weaknesses, and drills.
+                </p>
+              </>
+            ) : (
+              /* Starter: locked analytics placeholder */
+              <div className="flex flex-col gap-4">
+                <LockedSection
+                  title="Score Progress Chart"
+                  description="Pro tracks your band score across every attempt so you can see your improvement over time."
+                />
+                <LockedSection
+                  title={report.skill === "speaking" ? "Transcript Analysis" : "Essay Analysis"}
+                  description={
+                    report.skill === "speaking"
+                      ? "Pro analyses your speaking speed, filler words, and fluency patterns."
+                      : "Pro breaks down your essay structure, vocabulary range, and sentence variety."
+                  }
+                />
+                <StarterUpgradeCta />
+              </div>
             )}
-
-            {/* Writing: essay analysis */}
-            {hasEssay && (
-              <EssayAnalysisCard
-                essayText={report.user_response_text!}
-                taskNumber={report.task_number}
-              />
-            )}
-
-            {/* Nudge back to coaching if they land here first */}
-            <p className="text-center text-xs text-white/25 pb-2">
-              Switch to{" "}
-              <button
-                onClick={() => setActiveTab("coaching")}
-                className="underline text-white/40 hover:text-amber-400 transition-colors"
-              >
-                Coaching Report
-              </button>{" "}
-              to see your strengths, weaknesses, and drills.
-            </p>
           </div>
         )}
 
@@ -294,6 +362,60 @@ function ReportFooterCta({ report, weakestDim }: FooterProps) {
             Practice Again →
           </Link>
         )}
+      </div>
+    </div>
+  );
+}
+
+// ── Starter Upgrade CTA ──────────────────────────────────────────────────────────────
+// Shown in place of ReportFooterCta for Starter users.
+
+const PRO_FEATURES = [
+  "Per-dimension rubric scores (Task Completion, Coherence, Vocabulary…)",
+  "Detailed strengths & specific areas to improve",
+  "Numbered improvement tips tailored to your response",
+  "Band-targeted sample response matched to your goal",
+  "Score progress chart and full analytics",
+];
+
+function StarterUpgradeCta() {
+  return (
+    <div className="rounded-2xl border border-amber-700/30 bg-gradient-to-br from-amber-950/40 via-amber-950/20 to-transparent p-6 flex flex-col gap-5">
+      <div>
+        <p className="text-[10px] font-bold uppercase tracking-wider text-amber-400/70 mb-1">
+          Unlock Full Report
+        </p>
+        <h3 className="text-lg font-bold text-foreground">
+          You&rsquo;re seeing the Starter summary
+        </h3>
+        <p className="mt-1 text-sm text-subtle leading-relaxed">
+          Upgrade to Pro for the complete coaching report — rubric breakdown,
+          feedback panels, improvement plan, and a sample response tuned to your target band.
+        </p>
+      </div>
+
+      <ul className="space-y-2">
+        {PRO_FEATURES.map((feat) => (
+          <li key={feat} className="flex items-start gap-2.5 text-sm text-foreground/75">
+            <span className="mt-0.5 h-4 w-4 flex-shrink-0 rounded-full bg-amber-500/20 flex items-center justify-center">
+              <span className="block h-1.5 w-1.5 rounded-full bg-amber-400" />
+            </span>
+            {feat}
+          </li>
+        ))}
+      </ul>
+
+      <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 pt-4 border-t border-amber-700/20">
+        <div>
+          <p className="text-sm font-bold text-foreground">Pro Plan — $9.99 CAD</p>
+          <p className="text-xs text-subtle">One-time payment · Never expires</p>
+        </div>
+        <Link
+          href="/billing"
+          className="ml-auto inline-flex items-center gap-2 rounded-xl bg-primary px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-primary-hover"
+        >
+          Upgrade to Pro <ArrowRight className="h-4 w-4" />
+        </Link>
       </div>
     </div>
   );

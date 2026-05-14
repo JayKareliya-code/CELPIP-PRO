@@ -22,7 +22,7 @@ import { useAcceptTos }   from "@/lib/hooks/useAccount";
 import { Loader2, ShieldCheck } from "lucide-react";
 
 // Must match settings.TOS_CURRENT_VERSION on the backend.
-const TOS_CURRENT_VERSION = "2026-04-22";
+const TOS_CURRENT_VERSION = "2026-05-14";
 
 interface TosGateModalProps {
   tosVersion:    string | null | undefined;
@@ -71,8 +71,8 @@ export function TosGateModal({ tosVersion, tosAcceptedAt }: TosGateModalProps) {
           Terms of Service
         </h2>
         <p className="mb-6 text-center text-sm text-gray-400">
-          Before you continue, please review and accept our updated Terms of Service
-          and Privacy Policy.
+          Before you continue, please review and accept our Terms of Service
+          and Privacy Policy, effective May 14, 2026.
         </p>
 
         {/* Summary box */}
@@ -81,10 +81,12 @@ export function TosGateModal({ tosVersion, tosAcceptedAt }: TosGateModalProps) {
             <strong className="text-white">What you&rsquo;re agreeing to:</strong>
           </p>
           <ul className="list-disc pl-5 space-y-1">
-            <li>Use CELPIPBRO for personal study purposes only.</li>
-            <li>Not share, resell, or redistribute AI-generated feedback.</li>
-            <li>Understand that scores are AI-estimated and not official CELPIP results.</li>
-            <li>Our collection and use of usage data as described in our Privacy Policy.</li>
+            <li>Use CELPIPBRO for personal, lawful study purposes only.</li>
+            <li>Not share, resell, or redistribute AI-generated content or paid access.</li>
+            <li>Scores are AI-estimated practice scores — not official CELPIP results.</li>
+            <li>You must be at least 14 years old to use CELPIPBRO.</li>
+            <li>Voice recordings may be collected and transcribed to provide feedback.</li>
+            <li>We handle your personal information under Quebec&rsquo;s Law 25. We do not sell your data.</li>
           </ul>
         </div>
 
@@ -154,7 +156,7 @@ export function TosGateModal({ tosVersion, tosAcceptedAt }: TosGateModalProps) {
         </button>
 
         <p className="mt-4 text-center text-xs text-gray-600">
-          Version {TOS_CURRENT_VERSION} · Last updated April 2026
+          Version {TOS_CURRENT_VERSION} · Last updated May 2026
         </p>
       </div>
     </div>

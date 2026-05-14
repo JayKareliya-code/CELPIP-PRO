@@ -15,12 +15,13 @@
 // ─────────────────────────────────────────────────────────────────────────────
 
 import { useMemo } from "react";
-import { Mic, ArrowRight, BookOpen, Sparkles } from "lucide-react";
+import { Mic } from "lucide-react";
 import Link from "next/link";
-import { BreadcrumbNav }        from "@/components/layout/BreadcrumbNav";
-import { SpeakingTaskCard }    from "@/components/speaking/SpeakingTaskCard";
-import { useSpeakingQuota }    from "@/lib/hooks/useSpeakingQuota";
-import { useQuota }            from "@/lib/hooks/useQuota";
+import { BreadcrumbNav } from "@/components/layout/BreadcrumbNav";
+import { SpeakingTaskCard } from "@/components/speaking/SpeakingTaskCard";
+import { StarterUpsellCards } from "@/components/upgrade/StarterUpsellCards";
+import { useSpeakingQuota } from "@/lib/hooks/useSpeakingQuota";
+import { useQuota } from "@/lib/hooks/useQuota";
 import { useTaskModuleAccess } from "@/lib/hooks/useTaskModuleAccess";
 import {
   SPEAKING_TASK_TITLES,
@@ -97,112 +98,39 @@ export function SpeakingModuleHome({ tasks }: SpeakingModuleHomeProps) {
       {/* Breadcrumb */}
       <BreadcrumbNav />
 
-      {/* ── Header ────────────────────────────────────────────────────────── */}
+      {/* ── Header row: title on left, upsell cards on right ──────────────── */}
       <div className="flex items-center justify-between gap-4 flex-wrap">
-        <div className="flex items-center gap-3">
+        {/* Title */}
+        <div className="flex items-center gap-3 shrink-0">
           <div className="w-11 h-11 rounded-xl bg-amber-600/20 border border-amber-500/30 flex items-center justify-center shrink-0">
             <Mic className="w-5 h-5 text-amber-400" />
           </div>
           <div>
             <h1 className="text-2xl font-bold text-foreground">Speaking Module</h1>
-            <p className="text-sm text-subtle mt-0.5">
-              8 tasks · Tasks 1–8 · Scored 1–12
-            </p>
+            <p className="text-sm text-subtle mt-0.5">8 tasks | Tasks 1-8</p>
           </div>
         </div>
 
+        {/* Upsell / stat cards — StarterUpsellCards handles both starter & pro */}
+        <div className="flex-1 min-w-0 max-w-xl">
+          <StarterUpsellCards module="speaking" />
+        </div>
       </div>
 
-      {/* ── Context-aware banner ─────────────────────────────────────── */}
-
-      {/* A: Starter with NO addon credits → show plan info + upgrade CTA */}
-      {access.plan === "starter" && !access.hasAddonCredits && (
-        <div className="relative overflow-hidden rounded-xl border border-amber-700/40 bg-gradient-to-r from-amber-950/60 via-amber-950/40 to-yellow-950/40 p-4 flex items-center gap-4 flex-wrap">
-          <div className="w-9 h-9 rounded-lg bg-amber-600/20 border border-amber-500/30 flex items-center justify-center shrink-0">
-            <BookOpen className="w-4.5 h-4.5 text-amber-400" />
-          </div>
-          <div className="flex-1 min-w-0">
-            <p className="text-sm font-semibold text-amber-200">
-              {planAttemptsLimit} free attempts per task included
-            </p>
-            <p className="text-xs text-amber-300/70 mt-0.5">
-              Upgrade to Pro for 5 attempts per task, mock tests, and AI scoring.
-            </p>
-          </div>
-          <Link
-            href="/billing"
-            className="shrink-0 flex items-center gap-1.5 px-4 py-2 rounded-lg bg-amber-600 hover:bg-amber-500 text-white text-sm font-semibold transition-colors"
-          >
-            Upgrade
-            <ArrowRight className="w-3.5 h-3.5" />
-          </Link>
-        </div>
-      )}
-
-      {/* B: Starter WITH addon credits → Speaking Pack active info */}
-      {access.plan === "starter" && access.hasAddonCredits && (
-        <div className="rounded-xl border border-primary/30 bg-primary/[0.07] p-4 flex items-center gap-4 flex-wrap">
-          <div className="w-9 h-9 rounded-lg bg-primary/10 border border-primary/20 flex items-center justify-center shrink-0">
-            <Sparkles className="w-4 h-4 text-primary" />
-          </div>
-          <div className="flex-1 min-w-0">
-            <p className="text-sm font-semibold text-primary">Speaking Pack active</p>
-            <p className="text-xs text-primary/70 mt-0.5">
-              Your purchased credits are available. Use them any time.
-            </p>
-          </div>
-          <Link
-            href="/billing"
-            className="shrink-0 text-xs text-primary/60 hover:text-primary transition-colors"
-          >
-            View billing →
-          </Link>
-        </div>
-      )}
-
-      {/* ── Task stats strip ──────────────────────────────────────────────────── */}
-      {quotaReady && (
-        <div className="grid grid-cols-3 sm:grid-cols-3 gap-3">
-          {[
-            {
-              label: "Tasks",
-              value: String(uniqueTasks.length),
-              sub: `Practice + ${uniqueTasks.filter((t) => t.task_number > 0).length} scored`,
-            },
-            {
-              label: "Attempts / task",
-              value: String(planAttemptsLimit),
-              sub: `Included in ${plan}`,
-            },
-            {
-              label: "Redos",
-              value: "Free",
-              sub: "Retry any completed prompt",
-            },
-          ].map(({ label, value, sub }) => (
-            <div
-              key={label}
-              className="rounded-xl border border-white/[0.07] bg-surface px-4 py-3"
-            >
-              <p className="text-lg font-bold text-foreground">{value}</p>
-              <p className="text-xs font-medium text-subtle">{label}</p>
-              <p className="text-[0.65rem] text-white/25 mt-0.5">{sub}</p>
-            </div>
-          ))}
-        </div>
-      )}
+      {/* ── Divider ────────────────────────────────────────────────────────── */}
+      <div className="border-t border-white/[0.18]" />
 
       {/* ── Task grid ─────────────────────────────────────────────────────── */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         {taskNumbers.map((taskNum) => {
-          const task        = uniqueTasks.find((t) => t.task_number === taskNum);
+          const task = uniqueTasks.find((t) => t.task_number === taskNum);
           const promptCount = promptCountByTask[taskNum] ?? 0;
-          const used        = quotaResult.speaking_used_per_task?.[taskNum] ?? 0;
+          const used = quotaResult.speaking_used_per_task?.[taskNum] ?? 0;
 
           // Per-task effectiveLimit: planLimit + any addon credits for this specific task.
           // This means a custom_bundle for Task 4 only changes Task 4's limit,
           // while a speaking_pack (expanded to all tasks at webhook time) raises all.
-          const taskAddonCredits   = addonCreditsMap[taskNum] ?? 0;
+          const taskAddonCredits = addonCreditsMap[taskNum] ?? 0;
           const taskEffectiveLimit = planAttemptsLimit + taskAddonCredits;
 
           return (

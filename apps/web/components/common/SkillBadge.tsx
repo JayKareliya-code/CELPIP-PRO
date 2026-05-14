@@ -5,6 +5,8 @@ import type { Skill } from "@/lib/types";
 interface SkillBadgeProps {
   skill: Skill;
   size?: "sm" | "md";
+  /** Render icon only — no pill background, no label text */
+  iconOnly?: boolean;
   className?: string;
 }
 
@@ -25,8 +27,18 @@ const skillConfig = {
  * "Speaking" or "Writing" pill badge with matching icon and colour.
  * Keeps skill identification visually consistent across all pages.
  */
-export function SkillBadge({ skill, size = "md", className }: SkillBadgeProps) {
+export function SkillBadge({ skill, size = "md", iconOnly = false, className }: SkillBadgeProps) {
   const { label, icon: Icon, classes } = skillConfig[skill];
+
+  // Icon-only: just the coloured icon, no pill chrome
+  if (iconOnly) {
+    const iconColor = skill === "speaking" ? "text-primary" : "text-success";
+    return (
+      <span className={cn("flex items-center justify-center shrink-0", className)}>
+        <Icon className={cn("w-5 h-5", iconColor)} />
+      </span>
+    );
+  }
 
   return (
     <span

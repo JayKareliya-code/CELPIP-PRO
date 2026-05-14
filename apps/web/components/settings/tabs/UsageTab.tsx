@@ -36,13 +36,13 @@ const WRITING_LABELS: Record<number, string> = {
 
 function SkeletonRow() {
   return (
-    <div className="flex items-center gap-3 animate-pulse">
-      <div className="w-5 h-2 bg-white/[0.06] rounded shrink-0" />
-      <div className="flex-1 space-y-1.5">
-        <div className="h-2 bg-white/[0.06] rounded w-2/3" />
-        <div className="h-1 bg-white/[0.04] rounded" />
+    <div className="flex items-center gap-4 animate-pulse">
+      <div className="w-8 h-3 bg-white/[0.06] rounded shrink-0" />
+      <div className="flex-1 space-y-2">
+        <div className="h-3 bg-white/[0.06] rounded w-2/3" />
+        <div className="h-1.5 bg-white/[0.04] rounded" />
       </div>
-      <div className="w-10 h-2 bg-white/[0.06] rounded shrink-0" />
+      <div className="w-16 h-3 bg-white/[0.06] rounded shrink-0" />
     </div>
   );
 }
@@ -65,21 +65,25 @@ function QuotaRow({ taskNum, taskLabel, used, limit, addonCredits }: QuotaRowPro
   const isExhausted    = remaining === 0 && !isUnlimited;
 
   return (
-    <div className="flex items-center gap-3">
-      <span className="text-[10px] font-bold text-white/25 w-5 shrink-0 text-right tabular-nums">
+    <div className="flex items-center gap-4 group">
+      {/* Task badge */}
+      <span className="text-[11px] font-bold text-white/30 w-7 shrink-0 text-right tabular-nums">
         T{taskNum}
       </span>
 
-      <div className="flex-1 min-w-0 space-y-1">
-        <p className="text-xs text-white/60 truncate">{taskLabel}</p>
-        <div className="h-1 bg-white/[0.06] rounded-full overflow-hidden">
+      {/* Label + progress */}
+      <div className="flex-1 min-w-0 space-y-1.5">
+        <p className="text-sm font-medium text-white/70 truncate group-hover:text-white/90 transition-colors duration-150">
+          {taskLabel}
+        </p>
+        <div className="h-1.5 bg-white/[0.07] rounded-full overflow-hidden">
           {isUnlimited ? (
             <div className="h-full w-full bg-primary/30 rounded-full" />
           ) : (
             <div
               className={cn(
                 "h-full rounded-full transition-all duration-500",
-                isExhausted ? "bg-red-500/50" : pct > 80 ? "bg-amber-500/70" : "bg-primary",
+                isExhausted ? "bg-red-500/60" : pct > 80 ? "bg-amber-500/80" : "bg-primary",
               )}
               style={{ width: `${pct}%` }}
             />
@@ -87,20 +91,21 @@ function QuotaRow({ taskNum, taskLabel, used, limit, addonCredits }: QuotaRowPro
         </div>
       </div>
 
-      <div className="text-right shrink-0 min-w-[64px]">
+      {/* Counter */}
+      <div className="text-right shrink-0 min-w-[80px]">
         {isUnlimited ? (
-          <span className="text-[10px] text-white/25">Unlimited</span>
+          <span className="text-xs text-white/30">Unlimited</span>
         ) : (
           <span className={cn(
-            "text-[10px] tabular-nums",
+            "text-xs tabular-nums",
             isExhausted ? "text-red-400/70" : "text-white/40",
           )}>
-            <span className={cn("font-semibold", isExhausted ? "text-red-400" : "text-white/70")}>
+            <span className={cn("font-bold text-sm", isExhausted ? "text-red-400" : "text-white/80")}>
               {used}
             </span>
-            {" / "}{effectiveLimit}
+            <span className="text-white/30">{" / "}{effectiveLimit}</span>
             {addonCredits > 0 && (
-              <span className="text-primary/70 ml-1">+{addonCredits}</span>
+              <span className="text-primary/80 ml-1 font-semibold">+{addonCredits}</span>
             )}
           </span>
         )}
@@ -125,35 +130,37 @@ function MockRow({ skill, used, limit, addonCredits }: MockRowProps) {
   const isExhausted    = effectiveLimit !== null && used >= effectiveLimit;
 
   return (
-    <div className="flex items-center gap-3">
-      <span className="text-[10px] font-bold text-white/25 w-5 shrink-0 text-right">
+    <div className="flex items-center gap-4 group">
+      <span className="text-[11px] font-bold text-white/30 w-7 shrink-0 text-right">
         {skill.slice(0, 2).toUpperCase()}
       </span>
-      <div className="flex-1 min-w-0 space-y-1">
-        <p className="text-xs text-white/60">{skill} Mock</p>
-        <div className="h-1 bg-white/[0.06] rounded-full overflow-hidden">
+      <div className="flex-1 min-w-0 space-y-1.5">
+        <p className="text-sm font-medium text-white/70 group-hover:text-white/90 transition-colors duration-150">
+          {skill} Mock
+        </p>
+        <div className="h-1.5 bg-white/[0.07] rounded-full overflow-hidden">
           {isUnlimited ? (
             <div className="h-full w-full bg-violet-400/30 rounded-full" />
           ) : (
             <div
               className={cn(
                 "h-full rounded-full transition-all duration-500",
-                isExhausted ? "bg-red-500/50" : pct > 80 ? "bg-amber-500/70" : "bg-violet-400",
+                isExhausted ? "bg-red-500/60" : pct > 80 ? "bg-amber-500/80" : "bg-violet-400",
               )}
               style={{ width: `${pct}%` }}
             />
           )}
         </div>
       </div>
-      <div className="text-right shrink-0 min-w-[64px]">
+      <div className="text-right shrink-0 min-w-[80px]">
         {isUnlimited ? (
-          <span className="text-[10px] text-white/25">Unlimited</span>
+          <span className="text-xs text-white/30">Unlimited</span>
         ) : (
-          <span className={cn("text-[10px] tabular-nums", isExhausted ? "text-red-400/70" : "text-white/40")}>
-            <span className={cn("font-semibold", isExhausted ? "text-red-400" : "text-white/70")}>{used}</span>
-            {" / "}{effectiveLimit}
+          <span className={cn("text-xs tabular-nums", isExhausted ? "text-red-400/70" : "text-white/40")}>
+            <span className={cn("font-bold text-sm", isExhausted ? "text-red-400" : "text-white/80")}>{used}</span>
+            <span className="text-white/30">{" / "}{effectiveLimit}</span>
             {addonCredits > 0 && (
-              <span className="text-violet-400/70 ml-1">+{addonCredits}</span>
+              <span className="text-violet-400/80 ml-1 font-semibold">+{addonCredits}</span>
             )}
           </span>
         )}
@@ -167,21 +174,36 @@ function MockRow({ skill, used, limit, addonCredits }: MockRowProps) {
 function SkillHeading({ skill }: { skill: "speaking" | "writing" }) {
   const isSpeaking = skill === "speaking";
   return (
-    <div className="flex items-center gap-1.5 pb-1">
+    <div className="flex items-center gap-2 mb-3">
       <div className={cn(
-        "w-5 h-5 rounded-md flex items-center justify-center",
-        isSpeaking ? "bg-emerald-400/10" : "bg-blue-400/10",
+        "w-6 h-6 rounded-lg flex items-center justify-center",
+        isSpeaking ? "bg-emerald-400/15 border border-emerald-400/20" : "bg-blue-400/15 border border-blue-400/20",
       )}>
         {isSpeaking
-          ? <Mic     className="w-3 h-3 text-emerald-400" />
-          : <PenLine className="w-3 h-3 text-blue-400"    />
+          ? <Mic     className="w-3.5 h-3.5 text-emerald-400" />
+          : <PenLine className="w-3.5 h-3.5 text-blue-400"    />
         }
       </div>
       <span className={cn(
-        "text-[11px] font-semibold uppercase tracking-widest",
+        "text-xs font-bold uppercase tracking-widest",
         isSpeaking ? "text-emerald-400" : "text-blue-400",
       )}>
         {isSpeaking ? "Speaking" : "Writing"}
+      </span>
+    </div>
+  );
+}
+
+// ── Mock heading ──────────────────────────────────────────────────────────────
+
+function MockHeading() {
+  return (
+    <div className="flex items-center gap-2 mb-3">
+      <div className="w-6 h-6 rounded-lg bg-violet-400/15 border border-violet-400/20 flex items-center justify-center">
+        <ClipboardList className="w-3.5 h-3.5 text-violet-400" />
+      </div>
+      <span className="text-xs font-bold uppercase tracking-widest text-violet-400">
+        Mock Tests
       </span>
     </div>
   );
@@ -204,8 +226,6 @@ export function UsageTab() {
   const isPro = plan === "pro";
   const fallbackLimit = isPro ? 5 : 2;
 
-  // Mock test quota fields — use constants as fallback when API doesn't return them yet.
-  // Backend returns 0 for Starter (no plan mock quota), real number for Pro.
   const sMockUsed    = speaking.speaking_mock_tests_used    ?? 0;
   const wMockUsed    = writing.writing_mock_tests_used      ?? 0;
   const sMockLimit   = speaking.speaking_mock_tests_limit   ?? (isPro ? PRO_PLAN_LIMITS.speaking_mock_tests : 0);
@@ -213,8 +233,6 @@ export function UsageTab() {
   const sMockAddon   = speaking.speaking_mock_addon_credits ?? 0;
   const wMockAddon   = writing.writing_mock_addon_credits   ?? 0;
 
-  // Read plan limits from the live API response (speaking_limit_per_task /
-  // writing_limit_per_task) so we never duplicate backend config values here.
   const speakingPlanLimit: number = speaking.speaking_limit_per_task ?? fallbackLimit;
   const writingPlanLimit:  number = writing.writing_limit_per_task   ?? fallbackLimit;
 
@@ -227,15 +245,16 @@ export function UsageTab() {
         description="Attempts used per task this period. Retrying the same prompt is free and doesn't count."
       >
         {isLoading ? (
-          <div className="space-y-3">
+          <div className="space-y-4">
             {Array.from({ length: 5 }).map((_, i) => <SkeletonRow key={i} />)}
           </div>
         ) : (
-          <div className="space-y-5">
+          <div className="space-y-7">
+
             {/* Speaking tasks 1–8 */}
-            <div className="space-y-2.5">
+            <div>
               <SkillHeading skill="speaking" />
-              <div className="space-y-2.5 pl-1">
+              <div className="space-y-3 pl-1">
                 {[1, 2, 3, 4, 5, 6, 7, 8].map((n) => (
                   <QuotaRow
                     key={n}
@@ -249,10 +268,13 @@ export function UsageTab() {
               </div>
             </div>
 
+            {/* Divider */}
+            <div className="border-t border-white/[0.06]" />
+
             {/* Writing tasks 1–2 */}
-            <div className="space-y-2.5">
+            <div>
               <SkillHeading skill="writing" />
-              <div className="space-y-2.5 pl-1">
+              <div className="space-y-3 pl-1">
                 {[1, 2].map((n) => (
                   <QuotaRow
                     key={n}
@@ -266,33 +288,34 @@ export function UsageTab() {
               </div>
             </div>
 
+            {/* Divider */}
+            <div className="border-t border-white/[0.06]" />
+
             {/* Mock Tests */}
-            <div className="space-y-2.5">
-              <div className="flex items-center gap-1.5 pb-1">
-                <div className="w-5 h-5 rounded-md bg-violet-400/10 flex items-center justify-center">
-                  <ClipboardList className="w-3 h-3 text-violet-400" />
-                </div>
-                <span className="text-[11px] font-semibold uppercase tracking-widest text-violet-400">
-                  Mock Tests
-                </span>
-              </div>
-              <div className="space-y-2.5 pl-1">
+            <div>
+              <MockHeading />
+              <div className="space-y-3 pl-1">
                 <MockRow skill="Speaking" used={sMockUsed} limit={sMockLimit} addonCredits={sMockAddon} />
                 <MockRow skill="Writing"  used={wMockUsed} limit={wMockLimit} addonCredits={wMockAddon} />
               </div>
             </div>
+
           </div>
         )}
 
         {/* Legend */}
-        <div className="flex items-center gap-4 pt-1 border-t border-white/[0.05]">
-          <div className="flex items-center gap-1.5">
-            <div className="w-2 h-2 rounded-full bg-primary" />
-            <span className="text-[10px] text-white/30">Plan attempts</span>
+        <div className="flex items-center gap-5 pt-4 border-t border-white/[0.06]">
+          <div className="flex items-center gap-2">
+            <div className="w-2.5 h-2.5 rounded-full bg-primary" />
+            <span className="text-xs text-white/35">Plan attempts</span>
           </div>
-          <div className="flex items-center gap-1.5">
-            <span className="text-[10px] font-bold text-primary/70">+N</span>
-            <span className="text-[10px] text-white/30">Addon bonus attempts</span>
+          <div className="flex items-center gap-2">
+            <span className="text-xs font-bold text-primary/70">+N</span>
+            <span className="text-xs text-white/35">Addon bonus attempts</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <div className="w-2.5 h-2.5 rounded-full bg-red-500/60" />
+            <span className="text-xs text-white/35">Exhausted</span>
           </div>
         </div>
       </Section>
