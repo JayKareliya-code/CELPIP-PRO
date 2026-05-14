@@ -9,7 +9,7 @@ class CartItemRequest(BaseModel):
     """A single line item in a cart checkout request."""
     id:       str               = Field(description="Client-side item ID (e.g. 'speaking-pack')")
     type:     str               = Field(description="'plan' | 'writing_pack' | 'speaking_pack' | 'custom_bundle'")
-    quantity: int               = Field(ge=1, description="Must be >= 1")
+    quantity: int               = Field(ge=1, le=50, description="Per-line quantity, 1–50")
     metadata: dict[str, str]   = Field(default_factory=dict, description="task_key for custom_bundle; ignored otherwise")
 
 

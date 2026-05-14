@@ -44,7 +44,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 import structlog
 
 from app.core.deps import get_db, get_redis_pool
-from app.core.pubsub import PlanEventBus
+from app.core.pubsub import PlanEventBus, PlanEventBusOverloaded
 from app.models.user import User
 from app.api.v1.billing.constants import (
     SSE_KEEPALIVE_SECONDS,
@@ -165,7 +165,15 @@ async def _event_generator(
     5. Exits after SSE_MAX_DURATION_SECONDS; the browser reconnects.
     6. Always unsubscribes from the bus in the finally block.
     """
-    q = await bus.subscribe(user_id_str)
+    try:
+        q = await bus.subscribe(user_id_str)
+    except PlanEventBusOverloaded:
+        # User is holding too many concurrent SSE connections — refuse this one
+        # cleanly instead of letting the stream fail mid-flight.
+        log.warning("SSE rejected — connection cap reached", user_id=user_id_str)
+        yield 'event: error\ndata: {"detail": "Too many open connections"}\n\n'
+        return
+
     try:
         # Confirm auth + subscription to the client immediately.
         yield f'event: connected\ndata: {{"user_id": "{user_id_str}"}}\n\n'

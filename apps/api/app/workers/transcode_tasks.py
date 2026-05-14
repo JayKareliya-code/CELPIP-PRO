@@ -23,10 +23,12 @@ from typing import Literal
 
 import structlog
 from celery import shared_task
-from sqlalchemy import create_engine, text
+from sqlalchemy import text
 from sqlalchemy.orm import Session
 
 from app.core.config import settings
+from app.services.storage.presigner import get_s3_client
+from app.workers._sync_db import get_sync_engine
 
 log = structlog.get_logger(__name__)
 
@@ -36,32 +38,6 @@ _TABLE_MAP: dict[AttemptType, tuple[str, str]] = {
     "speaking":  ("speaking_attempts", "attempt_id"),
     "mock_exam": ("mock_exam_task_attempts", "id"),
 }
-
-
-def _get_sync_engine():
-    """Sync SQLAlchemy engine for Celery workers."""
-    from functools import lru_cache
-
-    @lru_cache(maxsize=1)
-    def _engine():
-        from sqlalchemy import create_engine as _ce
-        sync_url = settings.DATABASE_URL.replace(
-            "postgresql+asyncpg://", "postgresql+psycopg2://"
-        )
-        return _ce(sync_url, pool_pre_ping=True)
-
-    return _engine()
-
-
-def _get_s3():
-    import boto3
-    return boto3.client(
-        "s3",
-        region_name=settings.S3_REGION,
-        endpoint_url=settings.S3_ENDPOINT_URL or None,
-        aws_access_key_id=settings.AWS_ACCESS_KEY_ID,
-        aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY,
-    )
 
 
 @shared_task(
@@ -89,7 +65,7 @@ def transcode_audio_to_m4a(
     Returns:
         The S3 key of the uploaded .m4a file.
     """
-    s3 = _get_s3()
+    s3 = get_s3_client()
     m4a_key = s3_key_webm.rsplit(".", 1)[0] + ".m4a"
     log.info("transcode: starting", attempt_id=attempt_id, src=s3_key_webm)
 
@@ -147,7 +123,7 @@ def transcode_audio_to_m4a(
 
     # ── Update DB ───────────────────────────────────────────────────────────
     table, id_col = _TABLE_MAP.get(attempt_type, ("speaking_attempts", "attempt_id"))
-    engine = _get_sync_engine()
+    engine = get_sync_engine()
     with Session(engine) as db:
         db.execute(
             text(

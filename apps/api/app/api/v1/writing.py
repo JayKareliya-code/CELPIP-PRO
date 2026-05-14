@@ -35,6 +35,10 @@ class WritingMockResultsResponse(BaseModel):
 
 router = APIRouter()
 
+# A writing mock exam has 2 tasks; 20 is a generous ceiling that still caps a
+# caller from forcing an unbounded IN (...) query.
+_MAX_MOCK_RESULT_IDS = 20
+
 
 @router.get("/mock-prompts", response_model=list[WritingTaskResponse])
 async def list_writing_mock_prompts(
@@ -179,7 +183,18 @@ async def get_writing_mock_results(
     all_scored is True.  Mirrors GET /mock-exam/attempts/{session_id}/results
     for speaking mock exams.
     """
-    ids = [uuid.UUID(a.strip()) for a in attempt_ids.split(",") if a.strip()]
+    raw_ids = [a.strip() for a in attempt_ids.split(",") if a.strip()]
+    if not raw_ids:
+        raise HTTPException(status_code=422, detail="No attempt_ids provided.")
+    if len(raw_ids) > _MAX_MOCK_RESULT_IDS:
+        raise HTTPException(
+            status_code=422,
+            detail=f"Too many attempt_ids (max {_MAX_MOCK_RESULT_IDS}).",
+        )
+    try:
+        ids = [uuid.UUID(a) for a in raw_ids]
+    except ValueError:
+        raise HTTPException(status_code=422, detail="attempt_ids must be valid UUIDs.")
 
     # Fetch Attempt rows (ownership check: user_id must match)
     rows = (

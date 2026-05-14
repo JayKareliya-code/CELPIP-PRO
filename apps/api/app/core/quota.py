@@ -248,7 +248,6 @@ async def enforce_quota(
             ),
             "upgrade_url": "/billing",
         })
-        return
 
     # ── Practice attempt path ─────────────────────────────────────────────────
 
@@ -288,31 +287,3 @@ async def enforce_quota(
             "upgrade_url": "/billing",
         },
     )
-
-
-async def enforce_mock_exam_plan_access(
-    *, user: User, db: AsyncSession | None = None, skill: str = "speaking"
-) -> None:
-    """DEPRECATED — use enforce_speaking_mock_quota for speaking mocks.
-
-    Kept as a shim so any remaining callers do not break during migration.
-    For speaking mock exams, mock_exam.py now calls enforce_speaking_mock_quota
-    directly. This stub raises 402 for Starter users with no credits as before,
-    but does NOT consume credits (the new function handles that).
-    """
-    limits = get_plan_limits(user.plan, skill)
-    if not limits.mock_tests:
-        if db is not None:
-            from app.services.addon_credit_service import get_available_credits
-            pool_key = f"mock-test-{skill}-addon"
-            available = await get_available_credits(user.id, pool_key, db)
-            if available > 0:
-                return
-        raise HTTPException(
-            status_code=402,
-            detail={
-                "code":        "MOCK_EXAM_LOCKED",
-                "message":     "Mock exams require a Pro plan or a Mock Test Bundle purchase.",
-                "upgrade_url": "/billing",
-            },
-        )

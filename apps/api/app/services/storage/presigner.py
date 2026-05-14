@@ -11,7 +11,6 @@ from __future__ import annotations
 
 import hashlib
 import logging
-from functools import lru_cache
 from typing import TYPE_CHECKING
 
 import boto3
@@ -32,18 +31,29 @@ _PRESIGN_CACHE_SAFETY_MARGIN_S = 300
 _PRESIGN_CACHE_MIN_TTL_S = 60
 
 
-@lru_cache(maxsize=1)
-def _get_s3_client():
-    """Cached boto3 S3 client (supports AWS S3 + Cloudflare R2)."""
-    kwargs: dict = dict(
+def get_s3_client():
+    """Canonical boto3 S3 client for the whole app (AWS S3 + Cloudflare R2).
+
+    Single source of truth — imported by storage_service, mock_exam, and the
+    export/transcode Celery workers so client construction never drifts.
+
+    Always sets an explicit regional/custom endpoint so presigned PUT URLs go
+    straight to the correct datacenter, avoiding 307 redirects that strip CORS
+    headers in browsers.
+
+    Deliberately NOT cached: boto3 client construction is a cheap local
+    operation (no network call), and caching would bake in credentials at first
+    use — silently breaking on IAM-role refresh or secret rotation.
+    """
+    endpoint = settings.S3_ENDPOINT_URL or f"https://s3.{settings.S3_REGION}.amazonaws.com"
+    return boto3.client(
+        "s3",
         region_name=settings.S3_REGION,
         aws_access_key_id=settings.AWS_ACCESS_KEY_ID,
         aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY,
         config=BotoCoreConfig(signature_version="s3v4"),
+        endpoint_url=endpoint,
     )
-    if settings.S3_ENDPOINT_URL:
-        kwargs["endpoint_url"] = settings.S3_ENDPOINT_URL
-    return boto3.client("s3", **kwargs)
 
 
 def build_public_url(s3_key: str) -> str:
@@ -66,7 +76,7 @@ def generate_presigned_upload(key: str, content_type: str, expires_in: int = 300
         content_type: MIME type the browser must include as Content-Type on the PUT.
         expires_in:   Lifetime in seconds (default 5 min).
     """
-    return _get_s3_client().generate_presigned_url(
+    return get_s3_client().generate_presigned_url(
         "put_object",
         Params={"Bucket": settings.S3_BUCKET_NAME, "Key": key, "ContentType": content_type},
         ExpiresIn=expires_in,
@@ -84,7 +94,7 @@ def generate_presigned_get(key: str, expires_in: int = 3600) -> str:
         key:        Full S3 key, e.g. 'speaking-task-3/uuid-scene.jpg'
         expires_in: Lifetime in seconds (default 1 hour).
     """
-    return _get_s3_client().generate_presigned_url(
+    return get_s3_client().generate_presigned_url(
         "get_object",
         Params={"Bucket": settings.S3_BUCKET_NAME, "Key": key},
         ExpiresIn=expires_in,

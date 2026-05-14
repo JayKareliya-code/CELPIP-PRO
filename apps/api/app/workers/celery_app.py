@@ -54,5 +54,11 @@ celery_app.conf.update(
             "task": "app.workers.metrics_polling.poll_queue_depths",
             "schedule": 30.0,  # seconds
         },
+        # Delete GDPR export zips whose 24 h download window has passed so
+        # personal-data archives don't accumulate in S3 forever.
+        "purge-expired-exports": {
+            "task": "app.workers.export_tasks.purge_expired_exports",
+            "schedule": crontab(hour=3, minute=0),
+        },
     },
 )

@@ -318,9 +318,9 @@ async def delete_my_account(
 
     # ── 2. Delete S3 audio objects (best-effort) ──────────────────────────────
     try:
-        from app.services.storage_service import _get_s3_client  # noqa: PLC0415
+        from app.services.storage.presigner import get_s3_client  # noqa: PLC0415
 
-        client = _get_s3_client()
+        client = get_s3_client()
         for prefix in (
             f"{settings.S3_AUDIO_PREFIX}{user.id}/",
             f"mock-tests/{user.id}/",

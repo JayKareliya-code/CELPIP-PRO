@@ -25,11 +25,12 @@ import secrets
 import logging
 from typing import Annotated
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Request, Response
 from pydantic import BaseModel
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.deps import get_db, get_redis_pool
+from app.core.rate_limit import limiter
 from app.core.security import get_current_user
 from app.models.user import User
 
@@ -48,7 +49,10 @@ class SSETokenResponse(BaseModel):
 
 
 @router.post("/billing/sse-token", response_model=SSETokenResponse)
+@limiter.limit("30/minute")
 async def mint_sse_token(
+    request: Request,
+    response: Response,   # required by slowapi to inject rate-limit headers
     user: Annotated[User, Depends(get_current_user)],
     db:   Annotated[AsyncSession, Depends(get_db)],   # noqa: ARG001 — triggers auth middleware
 ) -> SSETokenResponse:

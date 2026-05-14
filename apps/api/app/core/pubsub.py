@@ -48,6 +48,15 @@ log = structlog.get_logger(__name__)
 # by the Stripe webhook handler: f"celpip:plan_updates:{user_id}".
 _CHANNEL_PATTERN = "celpip:plan_updates:*"
 
+# Cap concurrent SSE connections per user. A normal user has 1–2 browser tabs;
+# this bounds the asyncio.Queue / task fan-out a single account can hold open.
+_MAX_CONNECTIONS_PER_USER = 10
+
+
+class PlanEventBusOverloaded(Exception):
+    """Raised by subscribe() when a user already holds the maximum number of
+    concurrent SSE connections."""
+
 
 class PlanEventBus:
     """
@@ -69,9 +78,11 @@ class PlanEventBus:
     # ── Lifecycle ─────────────────────────────────────────────────────────────
 
     async def start(self) -> None:
-        """Subscribe to the Redis pattern channel and start the dispatch loop."""
-        self._pubsub = self._redis.pubsub()
-        await self._pubsub.psubscribe(_CHANNEL_PATTERN)
+        """Start the dispatch loop.
+
+        The loop itself owns Redis (re)subscription, so a Redis blip at startup
+        — or any time after — is retried rather than fatal.
+        """
         self._task = asyncio.create_task(self._run(), name="plan-event-bus")
         log.info("PlanEventBus started", pattern=_CHANNEL_PATTERN)
 
@@ -99,7 +110,13 @@ class PlanEventBus:
 
         Returns a queue the caller should read from.  Each message is the raw
         JSON string published by the webhook (e.g. ``'{"plan": "pro"}'``).
+
+        Raises ``PlanEventBusOverloaded`` when the user already holds
+        ``_MAX_CONNECTIONS_PER_USER`` open connections.
         """
+        if len(self._subs.get(user_id, ())) >= _MAX_CONNECTIONS_PER_USER:
+            log.warning("SSE connection cap reached — rejecting", user_id=user_id)
+            raise PlanEventBusOverloaded(user_id)
         q: asyncio.Queue[str] = asyncio.Queue(maxsize=32)
         self._subs[user_id].add(q)
         log.debug(
@@ -124,55 +141,87 @@ class PlanEventBus:
         """
         Single Redis pubsub loop — runs for the lifetime of the process.
 
-        Reads psubscribe messages and dispatches the data payload to every
-        queue registered for the matching user_id.
+        Owns Redis (re)subscription: on any Redis error the loop closes the
+        dead pubsub connection, backs off, re-subscribes and resumes — so a
+        transient Redis outage cannot permanently kill SSE plan-update
+        delivery. Only an explicit cancel (process shutdown) ends the loop.
         """
+        backoff = 1.0
+        _MAX_BACKOFF = 30.0
         log.debug("PlanEventBus._run: dispatch loop starting")
-        try:
-            async for raw in self._pubsub.listen():
-                if raw is None:
-                    continue
-                msg_type = raw.get("type", "")
-                if msg_type != "pmessage":
-                    # subscribe/psubscribe confirmation frames — ignore
-                    continue
 
-                channel: str = raw.get("channel", "")
-                data: str = raw.get("data", "")
+        while True:
+            try:
+                if self._pubsub is None:
+                    self._pubsub = self._redis.pubsub()
+                    await self._pubsub.psubscribe(_CHANNEL_PATTERN)
+                    log.info("PlanEventBus subscribed", pattern=_CHANNEL_PATTERN)
+                backoff = 1.0  # connected — reset backoff
 
-                # Extract user_id from channel name "celpip:plan_updates:<uid>"
-                parts = channel.split(":", maxsplit=2)
-                if len(parts) < 3:
-                    log.warning("Unexpected channel format", channel=channel)
-                    continue
-                user_id = parts[2]
+                async for raw in self._pubsub.listen():
+                    if raw is None:
+                        continue
+                    if raw.get("type", "") != "pmessage":
+                        # subscribe/psubscribe confirmation frames — ignore
+                        continue
 
-                queues = self._subs.get(user_id)
-                if not queues:
-                    log.debug(
-                        "PlanEventBus: no SSE subscribers for user — message dropped",
-                        user_id=user_id,
-                    )
-                    continue
+                    channel: str = raw.get("channel", "")
+                    data: str = raw.get("data", "")
 
-                dispatched = 0
-                for q in list(queues):  # snapshot to allow concurrent mutation
-                    try:
-                        q.put_nowait(data)
-                        dispatched += 1
-                    except asyncio.QueueFull:
-                        log.warning(
-                            "SSE queue full — message dropped for user",
+                    # Extract user_id from channel name "celpip:plan_updates:<uid>"
+                    parts = channel.split(":", maxsplit=2)
+                    if len(parts) < 3:
+                        log.warning("Unexpected channel format", channel=channel)
+                        continue
+                    user_id = parts[2]
+
+                    queues = self._subs.get(user_id)
+                    if not queues:
+                        log.debug(
+                            "PlanEventBus: no SSE subscribers for user — message dropped",
                             user_id=user_id,
                         )
+                        continue
 
-                log.debug(
-                    "PlanEventBus dispatched",
-                    user_id=user_id,
-                    dispatched=dispatched,
+                    dispatched = 0
+                    for q in list(queues):  # snapshot to allow concurrent mutation
+                        try:
+                            q.put_nowait(data)
+                            dispatched += 1
+                        except asyncio.QueueFull:
+                            log.warning(
+                                "SSE queue full — message dropped for user",
+                                user_id=user_id,
+                            )
+
+                    log.debug(
+                        "PlanEventBus dispatched",
+                        user_id=user_id,
+                        dispatched=dispatched,
+                    )
+
+                # listen() returned without raising — connection closed.
+                log.warning("PlanEventBus: Redis listen() ended — reconnecting")
+
+            except asyncio.CancelledError:
+                log.debug("PlanEventBus._run: cancelled")
+                return
+            except Exception:
+                log.exception(
+                    "PlanEventBus._run: dispatch loop error — reconnecting in %.0fs",
+                    backoff,
                 )
 
-        except asyncio.CancelledError:
-            log.debug("PlanEventBus._run: cancelled")
-        except Exception:
-            log.exception("PlanEventBus._run: unexpected error — dispatch loop exited")
+            # Drop the dead pubsub so the next iteration re-creates it.
+            if self._pubsub is not None:
+                try:
+                    await self._pubsub.aclose()
+                except Exception:
+                    pass
+                self._pubsub = None
+
+            try:
+                await asyncio.sleep(backoff)
+            except asyncio.CancelledError:
+                return
+            backoff = min(backoff * 2, _MAX_BACKOFF)

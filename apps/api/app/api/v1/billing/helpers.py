@@ -20,7 +20,7 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.config import settings
-from app.core.security import _get_jwks, _DEV_TOKEN_PREFIX
+from app.core.security import _get_jwks, _DEV_TOKEN_PREFIX, _check_authorized_party
 from app.models.user import User
 from app.models.subscription import Subscription
 
@@ -164,6 +164,7 @@ async def resolve_user_from_token(token: str, db: AsyncSession) -> User | None:
             algorithms=["RS256"],
             options={"verify_aud": False},
         )
+        _check_authorized_party(payload)
         clerk_user_id: str = payload["sub"]
 
         # Clerk JWT templates vary — check common claim locations in priority order.

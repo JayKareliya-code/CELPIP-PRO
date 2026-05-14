@@ -23,10 +23,42 @@ from app.models.addon_credit import AddonCredit
 from app.api.v1.billing.constants import (
     PLAN_CHANNEL_PREFIX,
     ADDON_MODULE_TASK_KEYS,
+    PLAN_PRICE_IDS,
 )
 
 logger = logging.getLogger(__name__)
 router = APIRouter()
+
+
+class WebhookPermanentError(Exception):
+    """Webhook payload is malformed in a way that retrying cannot fix.
+
+    The Stripe event is recorded as 'failed' and acknowledged with HTTP 200 so
+    Stripe stops retrying — the failure needs manual investigation, not a retry.
+    """
+
+
+# Plans that can legitimately appear in a paid checkout. 'starter' is the free
+# default tier and is never *purchased*, so it is intentionally excluded.
+_VALID_PURCHASED_PLANS: frozenset[str] = frozenset(PLAN_PRICE_IDS.keys())
+
+
+def _normalize_plan_slug(raw: str | None) -> str:
+    """Normalize a cart plan slug and validate it against known plans.
+
+    Checkout encodes the plan slug into session metadata; client ids such as
+    'pro-plan' or 'Pro' must resolve to the canonical 'pro'. An unrecognised
+    slug is a permanent metadata defect (it would also violate the users.plan
+    CHECK constraint), so raise rather than persist a bad value.
+    """
+    candidate = (raw or "pro").strip().lower().replace("-", "_")
+    if candidate.endswith("_plan"):
+        candidate = candidate[: -len("_plan")]
+    if candidate not in _VALID_PURCHASED_PLANS:
+        raise WebhookPermanentError(
+            f"Unknown plan slug in checkout metadata: {raw!r} (normalized: {candidate!r})"
+        )
+    return candidate
 
 
 # ── Route ──────────────────────────────────────────────────────────────────────
@@ -113,10 +145,31 @@ async def stripe_webhook(
         await db.commit()
         return JSONResponse({"status": "ok"})
 
+    except WebhookPermanentError as exc:
+        # Payload is malformed beyond repair — retrying will never succeed.
+        # Discard partial writes, re-record the event as 'failed' so duplicate
+        # deliveries still short-circuit, and ACK with 200 to stop Stripe
+        # retrying. A human needs to investigate via the logged CRITICAL line.
+        await db.rollback()
+        db.add(StripeEvent(
+            event_id=event_id,
+            event_type=event_type,
+            status="failed",
+            error_message=str(exc)[:2000],
+        ))
+        await db.commit()
+        logger.critical(
+            "Stripe webhook permanently failed: id=%s type=%s — %s",
+            event_id, event_type, exc,
+        )
+        return JSONResponse({"status": "failed", "detail": str(exc)})
+
     except HTTPException:
         await db.rollback()
         raise
     except Exception as exc:
+        # Unexpected / transient failure — roll back so the event row is gone
+        # and Stripe's retry re-processes the delivery from scratch.
         await db.rollback()
         logger.exception("Failed to process Stripe event %s (%s): %s", event_id, event_type, exc)
         raise HTTPException(status_code=500, detail="Webhook processing failed.")
@@ -140,6 +193,18 @@ async def _handle_checkout_completed(
        - custom_bundle                → one row for the specified task key
     4. Publish a Redis SSE event so the browser updates live.
     """
+    # Only provision once Stripe confirms the money actually moved. For card
+    # checkouts payment_status is 'paid' on completion; async payment methods
+    # can fire 'completed' while still 'unpaid' — those must NOT provision.
+    payment_status = getattr(session_obj, "payment_status", None)
+    if payment_status not in ("paid", "no_payment_required"):
+        logger.warning(
+            "Webhook: checkout.session.completed with payment_status=%r — "
+            "skipping provisioning for session=%s",
+            payment_status, getattr(session_obj, "id", "unknown"),
+        )
+        return
+
     try:
         raw_metadata      = getattr(session_obj, "metadata", None)
         user_id_str       = getattr(raw_metadata, "celpipbro_user_id", None)
@@ -148,29 +213,27 @@ async def _handle_checkout_completed(
         customer_id       = getattr(session_obj, "customer", None)
         payment_intent_id = getattr(session_obj, "payment_intent", None)
     except (AttributeError, TypeError) as exc:
-        logger.error(
-            "Webhook: could not parse session fields — %s | session=%s",
-            exc, getattr(session_obj, "id", "unknown"),
-        )
-        return
+        raise WebhookPermanentError(
+            f"Could not parse session fields for session "
+            f"{getattr(session_obj, 'id', 'unknown')}: {exc}"
+        ) from exc
 
     if not user_id_str or not items_str:
-        logger.error(
-            "Webhook: missing required metadata: user_id=%r items=%r",
-            user_id_str, items_str,
+        raise WebhookPermanentError(
+            f"Missing required metadata: user_id={user_id_str!r} items={items_str!r}"
         )
-        return
 
     try:
         user_uuid = uuid.UUID(str(user_id_str))
     except ValueError:
-        logger.error("Webhook: invalid user UUID %r", user_id_str)
-        return
+        raise WebhookPermanentError(f"Invalid user UUID in metadata: {user_id_str!r}")
 
     user = await db.get(User, user_uuid)
     if not user:
-        logger.error("Webhook: user %s not found in DB", user_id_str)
-        return
+        # The user row is created at checkout time on the primary DB, so this
+        # should not happen. Raise (→ 500 → Stripe retry) rather than silently
+        # dropping a paid order.
+        raise RuntimeError(f"Webhook: user {user_id_str} not found in DB — cannot provision")
 
     pi_str      = str(payment_intent_id) if payment_intent_id else None
     plan_in_cart: str | None = None
@@ -178,21 +241,21 @@ async def _handle_checkout_completed(
     for segment in items_str.split("|"):
         parts = segment.split(":")
         if len(parts) < 3:
-            logger.warning("Webhook: malformed cart segment %r — skipping", segment)
-            continue
+            # Cart metadata is server-generated; a malformed segment is a code
+            # defect, not user input. Fail loudly rather than under-provision.
+            raise WebhookPermanentError(f"Malformed cart segment in metadata: {segment!r}")
 
         item_type, qty_str, task_key_raw = parts[0], parts[1], parts[2]
 
         try:
             qty = int(qty_str)
         except ValueError:
-            logger.warning("Webhook: non-integer quantity in segment %r — skipping", segment)
-            continue
+            raise WebhookPermanentError(f"Non-integer quantity in cart segment: {segment!r}")
 
         task_key = None if task_key_raw == "null" else task_key_raw
 
         if item_type == "plan":
-            plan_slug    = task_key or "pro"
+            plan_slug    = _normalize_plan_slug(task_key)
             plan_in_cart = plan_slug
             old_plan  = user.plan
             user.plan = plan_slug
@@ -208,10 +271,9 @@ async def _handle_checkout_completed(
 
             if item_type == "custom_bundle":
                 if not task_key:
-                    logger.error(
-                        "Webhook: custom_bundle has no task_key in segment %r", segment
+                    raise WebhookPermanentError(
+                        f"custom_bundle has no task_key in segment {segment!r}"
                     )
-                    continue
                 task_keys_to_provision = [task_key]
             else:
                 task_keys_to_provision = list(ADDON_MODULE_TASK_KEYS.get(item_type, frozenset()))

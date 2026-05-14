@@ -58,9 +58,9 @@ def _seed(conn, *, plan: str = "pro") -> tuple[uuid.UUID, uuid.UUID, str]:
 
 @pytest.fixture()
 def sync_engine():
-    """Return the task's cached sync engine (reuses existing pool)."""
-    from app.workers.reconciliation_tasks import _get_sync_engine
-    return _get_sync_engine()
+    """Return the workers' shared sync engine (reuses existing pool)."""
+    from app.workers._sync_db import get_sync_engine
+    return get_sync_engine()
 
 
 # ── Tests ─────────────────────────────────────────────────────────────────────
@@ -93,7 +93,7 @@ class TestReconcileStripePlans:
     def test_canceled_pi_downgrades_user(self, sync_engine):
         """A user whose PI status is 'canceled' should also be downgraded."""
         with sync_engine.begin() as conn:
-            uid, sid, pi_id = _seed(conn, plan="ultra")
+            uid, sid, pi_id = _seed(conn, plan="pro")
 
         mock_pi = _make_pi(status="canceled", refunded=False)
 
@@ -158,7 +158,7 @@ class TestReconcileStripePlans:
 
         with patch(
             "stripe.PaymentIntent.retrieve",
-            side_effect=stripe.error.StripeError("timeout"),
+            side_effect=stripe.StripeError("timeout"),
         ):
             from app.workers.reconciliation_tasks import reconcile_stripe_plans
             result = reconcile_stripe_plans()

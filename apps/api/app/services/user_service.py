@@ -5,7 +5,7 @@ from app.models.user import User
 from app.repositories.user_repo import UserRepository
 
 
-def _update_streak(user: User, today: date) -> None:
+def _update_streak(user: User, today: date) -> bool:
     """Increment, maintain, or reset the user's practice streak.
 
     Rules:
@@ -16,15 +16,20 @@ def _update_streak(user: User, today: date) -> None:
 
     ``today`` is the caller-provided local date (from X-User-Date header)
     so that streak logic is based on the user's clock, not the server's UTC date.
+
+    Returns ``True`` if the user row was actually modified. The same-day case
+    returns ``False`` without touching the row — otherwise every authenticated
+    request would mark the row dirty and trigger an UPDATE.
     """
     last = user.last_active_date
+
+    if last == today:
+        # Already counted today — nothing to do, no write.
+        return False
 
     if last is None:
         # Brand new first session
         user.streak_days = 1
-    elif last == today:
-        # Already counted today — nothing to do
-        pass
     elif last == today - timedelta(days=1):
         # Consecutive day — keep the chain going
         user.streak_days = (user.streak_days or 0) + 1
@@ -33,6 +38,7 @@ def _update_streak(user: User, today: date) -> None:
         user.streak_days = 1
 
     user.last_active_date = today
+    return True
 
 
 async def get_or_create_user(
@@ -63,13 +69,18 @@ async def get_or_create_user(
             await db.rollback()
             user = await repo.get_by_clerk_id(clerk_user_id)
     else:
-        _update_streak(user, today)
+        changed = _update_streak(user, today)
         # Sync email / name in case they were previously stored as the
         # clerk.local fallback (before the JWT template included email).
         if email and not email.endswith("@clerk.local") and user.email != email:
             user.email = email
+            changed = True
         if full_name and user.full_name != full_name:
             user.full_name = full_name
-        await db.flush()
+            changed = True
+        # Only flush when something actually changed — avoids an UPDATE on
+        # every authenticated request.
+        if changed:
+            await db.flush()
 
     return user

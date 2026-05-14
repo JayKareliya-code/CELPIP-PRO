@@ -12,31 +12,16 @@ from uuid import UUID
 
 import sqlalchemy as sa
 from celery import shared_task
-from sqlalchemy import create_engine
 
-from app.core.config import settings
 from app.services.ai.pipeline.speaking_pipeline import run_speaking_pipeline
+from app.workers._sync_db import get_sync_engine
 
 logger = logging.getLogger(__name__)
-
-# ── Sync engine for fail-path status update ───────────────────────────────────
-
-_sync_engine: sa.engine.Engine | None = None
-
-
-def _get_sync_engine() -> sa.engine.Engine:
-    global _sync_engine
-    if _sync_engine is None:
-        _sync_engine = create_engine(
-            settings.DATABASE_URL.replace("+asyncpg", ""),
-            pool_size=2, max_overflow=2,
-        )
-    return _sync_engine
 
 
 def _mark_failed(attempt_id: str, error: str) -> None:
     """Synchronous failure status write — runs outside the asyncio event loop."""
-    with _get_sync_engine().begin() as conn:
+    with get_sync_engine().begin() as conn:
         conn.execute(
             sa.text(
                 "UPDATE attempts SET status='failed', error_message=:msg, "
@@ -48,7 +33,7 @@ def _mark_failed(attempt_id: str, error: str) -> None:
 
 def _get_audio_s3_key(attempt_id: str) -> str | None:
     """Fetch audio_s3_key from speaking_attempts for the given attempt_id."""
-    with _get_sync_engine().connect() as conn:
+    with get_sync_engine().connect() as conn:
         row = conn.execute(
             sa.text("SELECT audio_s3_key FROM speaking_attempts WHERE attempt_id = :id"),
             {"id": UUID(attempt_id)},

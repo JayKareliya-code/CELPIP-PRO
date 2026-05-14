@@ -4,6 +4,7 @@ import pytest
 from unittest.mock import AsyncMock, patch
 from httpx import AsyncClient
 
+from app.core.config import settings
 from tests.conftest import auth_headers
 
 
@@ -45,11 +46,13 @@ async def test_start_speaking_attempt_missing_prompt(client: AsyncClient) -> Non
 
 
 @pytest.mark.asyncio
-async def test_start_speaking_attempt_starter_task_practice_blocked(
+async def test_start_speaking_attempt_starter_first_attempt(
     client: AsyncClient,
 ) -> None:
-    """Starter plan users cannot start a task-practice speaking attempt (402)."""
-    # Patch the repo to return a fake prompt so quota check is reached
+    """A starter user's first task-practice attempt is governed by the plan's
+    per-task allocation: allowed (201) when STARTER_SPEAKING_PER_TASK > 0,
+    otherwise blocked with HTTP 402 QUOTA_EXCEEDED."""
+    # Patch the repo to return a fake prompt so the quota check is reached.
     fake_prompt_id = uuid.uuid4()
 
     with patch(
@@ -65,6 +68,9 @@ async def test_start_speaking_attempt_starter_task_practice_blocked(
             headers=auth_headers("starter_user"),
         )
 
-    # Starter plan → task practice locked → 402
-    assert response.status_code == 402
-    assert response.json()["detail"]["code"] == "STARTER_TASK_PRACTICE_LOCKED"
+    if settings.STARTER_SPEAKING_PER_TASK:
+        assert response.status_code == 201
+        assert response.json()["status"] == "pending"
+    else:
+        assert response.status_code == 402
+        assert response.json()["detail"]["code"] == "QUOTA_EXCEEDED"

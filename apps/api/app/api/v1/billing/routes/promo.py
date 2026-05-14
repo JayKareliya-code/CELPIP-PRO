@@ -5,7 +5,7 @@ import logging
 import stripe
 
 from typing import Annotated
-from fastapi import APIRouter, Depends, Request
+from fastapi import APIRouter, Depends, Request, Response
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.deps import get_db
@@ -24,6 +24,7 @@ _RATE_LIMIT = "10/minute"
 @limiter.limit(_RATE_LIMIT)
 async def validate_promo_code(
     request: Request,
+    response: Response,   # required by slowapi to inject rate-limit headers
     body:    PromoValidateRequest,
     user:    Annotated[User, Depends(get_current_user)],
     db:      Annotated[AsyncSession, Depends(get_db)],

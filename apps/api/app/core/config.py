@@ -76,6 +76,11 @@ class Settings(BaseSettings):
             )
 
         if self.APP_ENV == "production":
+            if self.DEBUG:
+                raise ValueError(
+                    "DEBUG must be False in production — it enables SQLAlchemy "
+                    "echo (logs every query and its parameters) and exposes /docs."
+                )
             bad = [o for o in self.CORS_ORIGINS if "localhost" in o]
             if bad:
                 raise ValueError(
@@ -92,6 +97,11 @@ class Settings(BaseSettings):
                 raise ValueError("STRIPE_WEBHOOK_SECRET is required in production.")
             if self.AWS_ACCESS_KEY_ID == "REPLACE_ME" or self.AWS_SECRET_ACCESS_KEY == "REPLACE_ME":
                 raise ValueError("AWS credentials are not configured for production.")
+            if not self.METRICS_AUTH_TOKEN:
+                raise ValueError(
+                    "METRICS_AUTH_TOKEN is required in production to protect the "
+                    "/metrics endpoint from public access."
+                )
 
         return self
 

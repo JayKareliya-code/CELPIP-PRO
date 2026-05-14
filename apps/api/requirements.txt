@@ -1,3 +1,11 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# requirements.txt — human-edited dependency manifest (loose >= ranges).
+# The Docker image installs from requirements.lock (fully pinned) for
+# reproducible builds. After editing this file, regenerate the lock:
+#   docker compose exec api pip install -r requirements.txt
+#   docker compose exec api pip freeze | sort > requirements.lock
+# ─────────────────────────────────────────────────────────────────────────────
+
 # ── Web framework ──────────────────────────────────────────────────────────────
 fastapi>=0.111.0
 uvicorn[standard]>=0.29.0

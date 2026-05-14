@@ -1,33 +1,7 @@
 """S3 / Cloudflare R2 pre-signed URL generation for audio uploads and playback."""
-import boto3
-from botocore.config import Config as BotoCoreConfig
 from app.core.config import settings
-
-
-def _get_s3_client():
-    """Return a boto3 S3 client built from current settings.
-
-    Supports both AWS S3 and Cloudflare R2 via S3_ENDPOINT_URL config override.
-    Always uses the region-specific endpoint for AWS S3 so presigned PUT URLs
-    go directly to the correct datacenter — avoiding 307 redirects that strip
-    CORS headers in browsers.
-
-    Not cached: presigned URL generation is a local HMAC signing operation with no
-    network call, so the client construction cost is negligible. Caching with
-    lru_cache bakes in credentials at startup and silently breaks when AWS credentials
-    are rotated (e.g., IAM role refresh, secret rotation).
-    """
-    # Default to regional endpoint to prevent browser CORS issues on redirects
-    endpoint = settings.S3_ENDPOINT_URL or f"https://s3.{settings.S3_REGION}.amazonaws.com"
-
-    kwargs: dict = dict(
-        region_name=settings.S3_REGION,
-        aws_access_key_id=settings.AWS_ACCESS_KEY_ID,
-        aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY,
-        config=BotoCoreConfig(signature_version="s3v4"),
-        endpoint_url=endpoint,
-    )
-    return boto3.client("s3", **kwargs)
+# Canonical S3 client — single source of truth in app.services.storage.presigner.
+from app.services.storage.presigner import get_s3_client as _get_s3_client
 
 
 def generate_upload_url(user_id: str, attempt_id: str) -> tuple[str, str]:

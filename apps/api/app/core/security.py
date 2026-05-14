@@ -23,8 +23,22 @@ _clerk_role_cache: dict[str, tuple[str | None, float]] = {}  # {clerk_id: (role,
 _CLERK_ROLE_TTL = 60.0  # seconds
 
 
+class _ClerkRoleUnavailable(Exception):
+    """Raised when the Clerk role lookup could not be completed.
+
+    Signals an outage / network failure with no cached value to fall back on —
+    callers MUST NOT interpret this as 'user is not an admin'.
+    """
+
+
 async def _get_clerk_role(clerk_user_id: str) -> str | None:
-    """Fetch publicMetadata.role from Clerk Backend API with a 60-second TTL cache."""
+    """Fetch publicMetadata.role from Clerk Backend API with a 60-second TTL cache.
+
+    Returns the role string, or None when Clerk definitively reports no role.
+    Raises ``_ClerkRoleUnavailable`` when the lookup failed and no cached value
+    is available — distinct from a confirmed "no role" so callers never revoke
+    admin access during a Clerk outage.
+    """
     cached = _clerk_role_cache.get(clerk_user_id)
     if cached and (time.monotonic() - cached[1]) < _CLERK_ROLE_TTL:
         return cached[0]
@@ -38,10 +52,13 @@ async def _get_clerk_role(clerk_user_id: str) -> str | None:
             resp.raise_for_status()
             data = resp.json()
             role: str | None = (data.get("public_metadata") or {}).get("role")
-    except Exception:
+    except Exception as exc:
         logger.warning("Failed to fetch Clerk user metadata for %s", clerk_user_id, exc_info=True)
-        # On failure, fall back to whatever is cached (even stale), or None
-        return cached[0] if cached else None
+        # Fall back to a stale cached value if we have one; otherwise the role
+        # is genuinely unknown — signal that so callers don't revoke admin.
+        if cached:
+            return cached[0]
+        raise _ClerkRoleUnavailable(clerk_user_id) from exc
 
     _clerk_role_cache[clerk_user_id] = (role, time.monotonic())
     return role
@@ -73,6 +90,23 @@ async def _get_jwks() -> dict:
         _jwks_cache = response.json()
         _jwks_fetched_at = time.monotonic()
     return _jwks_cache
+
+
+def _check_authorized_party(payload: dict) -> None:
+    """Reject tokens minted for an origin this API does not serve.
+
+    Clerk sets the ``azp`` (authorized party) claim to the frontend origin that
+    requested the session token. When present, it must match one of our
+    configured CORS origins — this blocks a token issued for a different app on
+    the same Clerk instance from being replayed against this API.
+
+    Tokens without ``azp`` (e.g. some custom JWT templates) are allowed through;
+    the signature and expiry are still enforced by the caller's ``jwt.decode``.
+    """
+    azp = payload.get("azp")
+    if azp and azp not in settings.CORS_ORIGINS:
+        logger.warning("JWT rejected: azp %r not in allowed origins", azp)
+        raise JWTError(f"Unauthorized party: {azp}")
 
 
 async def get_current_user(
@@ -122,6 +156,7 @@ async def get_current_user(
             algorithms=["RS256"],
             options={"verify_aud": False},
         )
+        _check_authorized_party(payload)
         clerk_user_id: str = payload["sub"]
 
         # Clerk JWT templates vary — try common claim locations in order.
@@ -158,21 +193,36 @@ async def require_admin(
     extra round-trip.
     """
     # ── 1. Check Clerk Backend API for the live role ───────────────────────────
-    clerk_role = await _get_clerk_role(user.clerk_user_id)
-    is_clerk_admin = clerk_role == "admin"
+    try:
+        clerk_role = await _get_clerk_role(user.clerk_user_id)
+        is_clerk_admin = clerk_role == "admin"
+        clerk_known = True
+    except _ClerkRoleUnavailable:
+        # Clerk is unreachable and we have no cached role. Fall back to the
+        # last-known DB flag WITHOUT mutating it — treating an outage as
+        # "role revoked" would strip admin from everyone and persist it.
+        logger.warning(
+            "Clerk role lookup unavailable for %s — falling back to DB is_admin=%s",
+            user.clerk_user_id, user.is_admin,
+        )
+        is_clerk_admin = False
+        clerk_known = False
 
-    # ── 2. Sync DB flag if it drifted from Clerk truth ─────────────────────────
-    if is_clerk_admin and not user.is_admin:
-        user.is_admin = True
-        await db.flush()
-        logger.info("Synced is_admin=True from Clerk for user %s", user.clerk_user_id)
-    elif not is_clerk_admin and user.is_admin:
-        # Clerk role was revoked — honour that immediately
-        user.is_admin = False
-        await db.flush()
-        logger.info("Synced is_admin=False from Clerk for user %s", user.clerk_user_id)
+    # ── 2. Sync DB flag — ONLY when Clerk gave a definitive answer ─────────────
+    if clerk_known:
+        if is_clerk_admin and not user.is_admin:
+            user.is_admin = True
+            await db.flush()
+            logger.info("Synced is_admin=True from Clerk for user %s", user.clerk_user_id)
+        elif not is_clerk_admin and user.is_admin:
+            # Clerk role was revoked — honour that immediately
+            user.is_admin = False
+            await db.flush()
+            logger.info("Synced is_admin=False from Clerk for user %s", user.clerk_user_id)
 
     # ── 3. Gate ────────────────────────────────────────────────────────────────
+    # During a Clerk outage (clerk_known=False) this falls back to the
+    # last-synced DB flag so existing admins keep working.
     if not (is_clerk_admin or user.is_admin):
         raise HTTPException(status_code=403, detail="Admin only")
 

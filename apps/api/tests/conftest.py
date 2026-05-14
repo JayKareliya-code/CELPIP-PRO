@@ -3,6 +3,8 @@ import asyncio
 import pytest
 import pytest_asyncio
 from httpx import AsyncClient, ASGITransport
+from sqlalchemy import ARRAY, JSON
+from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker, AsyncSession
 
 from app.main import create_app
@@ -11,6 +13,19 @@ from app.models.base import Base
 
 # Use an in-memory SQLite database for tests (asyncpg → aiosqlite)
 TEST_DATABASE_URL = "sqlite+aiosqlite:///:memory:"
+
+
+# ── SQLite compatibility shim ────────────────────────────────────────────────
+# The production schema uses Postgres-only column types (ARRAY, JSONB) that
+# SQLite supports for neither DDL nor parameter binding. Swap them for the
+# dialect-agnostic JSON type in the shared metadata before any table is
+# created — JSON stores lists and dicts natively, so create_all(), inserts,
+# and reads all work under SQLite. Test-only: this process never talks to
+# Postgres, so mutating the metadata here is safe.
+for _table in Base.metadata.tables.values():
+    for _col in _table.columns:
+        if isinstance(_col.type, (ARRAY, JSONB)):
+            _col.type = JSON()
 
 
 @pytest.fixture(scope="session")

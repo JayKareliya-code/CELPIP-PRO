@@ -19,12 +19,11 @@ Endpoints:
 import uuid
 from typing import Annotated
 
-import boto3
 import redis.asyncio as aioredis
-from botocore.config import Config as BotoCoreConfig
 from fastapi import APIRouter, Depends, HTTPException, Path, Query, Request, Response
 from pydantic import BaseModel, Field
 from sqlalchemy import select
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.config import settings
@@ -37,6 +36,7 @@ from app.models.user import User
 from app.schemas.prompt import SpeakingTaskResponse
 from app.services import prompt_service
 from app.services.storage_service import validate_uploaded_audio
+from app.services.storage.presigner import get_s3_client
 from app.api.v1.speaking import _sign_prompt   # reuse existing presign helper
 
 router = APIRouter()
@@ -99,18 +99,6 @@ def _mock_s3_key(user_id: str, session_id: str, task_number: int) -> str:
     return f"{MOCK_AUDIO_PREFIX}{user_id}/{session_id}/task-{task_number}.webm"
 
 
-def _get_s3_client():
-    endpoint = settings.S3_ENDPOINT_URL or f"https://s3.{settings.S3_REGION}.amazonaws.com"
-    return boto3.client(
-        "s3",
-        region_name=settings.S3_REGION,
-        aws_access_key_id=settings.AWS_ACCESS_KEY_ID,
-        aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY,
-        config=BotoCoreConfig(signature_version="s3v4"),
-        endpoint_url=endpoint,
-    )
-
-
 # ── Endpoints ──────────────────────────────────────────────────────────────────
 
 @router.get("/mock-exam/prompts", response_model=list[SpeakingTaskResponse])
@@ -164,7 +152,7 @@ async def get_mock_task_upload_url(
 
     s3_key = _mock_s3_key(str(user.id), session_id, task_number)
     try:
-        upload_url: str = _get_s3_client().generate_presigned_url(
+        upload_url: str = get_s3_client().generate_presigned_url(
             "put_object",
             Params={
                 "Bucket": settings.S3_BUCKET_NAME,
@@ -210,19 +198,61 @@ async def confirm_mock_task_upload(
     if not body.s3_key.startswith(expected_prefix):
         raise HTTPException(status_code=400, detail="s3_key does not belong to this session.")
 
+    # Idempotency / redo — exactly one row per (user, session, task), enforced by
+    # the uq_mock_exam_user_session_task DB constraint:
+    #   • already pending/processing → 409, so a double-click cannot enqueue a
+    #     duplicate (and separately billed) AI-scoring job.
+    #   • already complete/failed    → treat as an explicit redo: reuse the row.
+    # FOR UPDATE serialises concurrent confirms for the same slot so two
+    # simultaneous redo clicks can't both pass the status check below (the DB
+    # unique constraint only guards the INSERT path, not the redo UPDATE).
+    existing = (await db.execute(
+        select(MockExamTaskAttempt).where(
+            MockExamTaskAttempt.user_id == user.id,
+            MockExamTaskAttempt.session_id == session_id,
+            MockExamTaskAttempt.task_number == task_number,
+        ).with_for_update()
+    )).scalar_one_or_none()
+
+    if existing is not None and existing.status in ("pending", "processing"):
+        raise HTTPException(
+            status_code=409,
+            detail="This task has already been submitted and is being scored.",
+        )
+
     # Validate the object in S3 (size, content-type) before queueing expensive work.
     validate_uploaded_audio(body.s3_key)
 
-    attempt = MockExamTaskAttempt(
-        session_id=session_id,
-        user_id=user.id,
-        task_number=task_number,
-        audio_s3_key=body.s3_key,
-        audio_duration_ms=body.audio_duration_ms or None,
-        status="pending",
-    )
-    db.add(attempt)
-    await db.flush()
+    if existing is not None:
+        # Redo of a finished task — reuse the row, reset scoring state.
+        existing.audio_s3_key = body.s3_key
+        existing.audio_duration_ms = body.audio_duration_ms or None
+        existing.status = "pending"
+        existing.estimated_band = None
+        existing.error_message = None
+        existing.celery_task_id = None
+        attempt = existing
+    else:
+        attempt = MockExamTaskAttempt(
+            session_id=session_id,
+            user_id=user.id,
+            task_number=task_number,
+            audio_s3_key=body.s3_key,
+            audio_duration_ms=body.audio_duration_ms or None,
+            status="pending",
+        )
+        db.add(attempt)
+
+    try:
+        await db.flush()
+    except IntegrityError:
+        # Concurrent confirm for the same task slot won the race.
+        await db.rollback()
+        raise HTTPException(
+            status_code=409,
+            detail="This task has already been submitted and is being scored.",
+        )
+
     await db.refresh(attempt)
 
     from app.workers.mock_exam_tasks import score_mock_exam_task  # noqa: PLC0415

@@ -18,40 +18,16 @@ from datetime import datetime, timedelta, timezone
 
 import structlog
 from celery import shared_task
-from sqlalchemy import create_engine, text
+from sqlalchemy import text
 from sqlalchemy.orm import Session
 
 from app.core.config import settings
+from app.services.storage.presigner import get_s3_client
+from app.workers._sync_db import get_sync_engine
 
 log = structlog.get_logger(__name__)
 
 # ── Helpers ───────────────────────────────────────────────────────────────────
-
-def _get_sync_engine():
-    """Return a synchronous SQLAlchemy engine for use inside Celery tasks."""
-    sync_url = settings.DATABASE_URL.replace(
-        "postgresql+asyncpg://", "postgresql+psycopg2://"
-    )
-    from functools import lru_cache
-
-    @lru_cache(maxsize=1)
-    def _engine():
-        from sqlalchemy import create_engine as _ce
-        return _ce(sync_url, pool_pre_ping=True)
-
-    return _engine()
-
-
-def _get_s3():
-    import boto3
-    return boto3.client(
-        "s3",
-        region_name=settings.S3_REGION,
-        endpoint_url=settings.S3_ENDPOINT_URL or None,
-        aws_access_key_id=settings.AWS_ACCESS_KEY_ID,
-        aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY,
-    )
-
 
 def _rows_to_list(rows) -> list[dict]:
     """Convert SQLAlchemy RowMapping results to plain dicts."""
@@ -65,6 +41,14 @@ def _serialize(obj):
     if isinstance(obj, datetime):
         return obj.isoformat()
     raise TypeError(f"Object of type {type(obj)} is not JSON serializable")
+
+
+# Columns excluded from the export — internal system flags, not the user's
+# personal data. Add new internal-only columns here as they are introduced so
+# a future column can never silently leak into the SELECT * dumps below.
+_EXCLUDE_COLUMNS: dict[str, set[str]] = {
+    "user": {"is_admin"},
+}
 
 
 # ── Task ──────────────────────────────────────────────────────────────────────
@@ -89,7 +73,7 @@ def build_user_export(self, job_id: str, user_id: str) -> None:  # noqa: ANN001
       6. Update export_jobs: status='complete', s3_url=..., expires_at=...
     On failure: status='failed', error_message=...
     """
-    engine = _get_sync_engine()
+    engine = get_sync_engine()
     uid = uuid.UUID(user_id)
     jid = uuid.UUID(job_id)
     log.info("export: starting", job_id=job_id, user_id=user_id)
@@ -183,6 +167,12 @@ def build_user_export(self, job_id: str, user_id: str) -> None:  # noqa: ANN001
             buf = io.BytesIO()
             with zipfile.ZipFile(buf, mode="w", compression=zipfile.ZIP_DEFLATED) as zf:
                 for table_name, rows in tables.items():
+                    drop = _EXCLUDE_COLUMNS.get(table_name)
+                    if drop:
+                        rows = [
+                            {k: v for k, v in r.items() if k not in drop}
+                            for r in rows
+                        ]
                     zf.writestr(
                         f"{table_name}.json",
                         json.dumps(rows, default=_serialize, indent=2),
@@ -203,7 +193,7 @@ def build_user_export(self, job_id: str, user_id: str) -> None:  # noqa: ANN001
             buf.seek(0)
 
             # ── 4. Upload to S3 ────────────────────────────────────────────
-            s3 = _get_s3()
+            s3 = get_s3_client()
             s3_key = f"exports/{user_id}/{job_id}.zip"
             s3.upload_fileobj(
                 buf,
@@ -245,3 +235,57 @@ def build_user_export(self, job_id: str, user_id: str) -> None:  # noqa: ANN001
             )
             db.commit()
             raise self.retry(exc=exc)
+
+
+@shared_task(
+    name="app.workers.export_tasks.purge_expired_exports",
+    queue="export",
+    acks_late=True,
+    max_retries=0,
+)
+def purge_expired_exports() -> dict:
+    """Delete GDPR export zips whose 24-hour download window has passed.
+
+    The presigned URL expires after 24 h but the S3 object itself does not —
+    without this nightly sweep, export archives (full copies of a user's
+    personal data) would accumulate in the bucket indefinitely.
+
+    Runs via Celery Beat (see celery_app.py). Idempotent: an already-purged
+    job is skipped because its status is no longer 'complete'.
+    """
+    engine = get_sync_engine()
+    s3 = get_s3_client()
+    purged = 0
+
+    with Session(engine) as db:
+        rows = db.execute(
+            text(
+                "SELECT id, user_id FROM export_jobs "
+                "WHERE status = 'complete' "
+                "AND expires_at IS NOT NULL AND expires_at < NOW()"
+            )
+        ).mappings().all()
+
+        for row in rows:
+            s3_key = f"exports/{row['user_id']}/{row['id']}.zip"
+            try:
+                s3.delete_object(Bucket=settings.S3_BUCKET_NAME, Key=s3_key)
+            except Exception as exc:
+                log.warning(
+                    "purge_expired_exports: S3 delete failed",
+                    key=s3_key, error=str(exc),
+                )
+                continue
+            db.execute(
+                text(
+                    "UPDATE export_jobs SET status='expired', s3_url=NULL "
+                    "WHERE id = :id"
+                ),
+                {"id": row["id"]},
+            )
+            purged += 1
+
+        db.commit()
+
+    log.info("purge_expired_exports: done", purged=purged, candidates=len(rows))
+    return {"purged": purged}

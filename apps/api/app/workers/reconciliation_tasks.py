@@ -29,23 +29,9 @@ import structlog
 from celery import shared_task
 
 from app.core.config import settings
+from app.workers._sync_db import get_sync_engine
 
 logger = structlog.get_logger(__name__)
-
-# ── Sync engine (module-level singleton) ──────────────────────────────────────
-
-_sync_engine: sa.engine.Engine | None = None
-
-
-def _get_sync_engine() -> sa.engine.Engine:
-    global _sync_engine
-    if _sync_engine is None:
-        _sync_engine = sa.create_engine(
-            settings.DATABASE_URL.replace("+asyncpg", ""),
-            pool_size=2,
-            max_overflow=2,
-        )
-    return _sync_engine
 
 
 # ── Task ──────────────────────────────────────────────────────────────────────
@@ -65,7 +51,7 @@ def reconcile_stripe_plans() -> dict:
 
     stripe.api_key = settings.STRIPE_SECRET_KEY
 
-    engine = _get_sync_engine()
+    engine = get_sync_engine()
     users_checked = 0
     corrections_made = 0
     error_message: str | None = None
@@ -113,7 +99,7 @@ def reconcile_stripe_plans() -> dict:
                         pi_id,
                         expand=["charges.data"],
                     )
-                except stripe.error.StripeError as exc:
+                except stripe.StripeError as exc:
                     log.warning(
                         "reconciliation_run.stripe_error",
                         user_id=str(user_id),

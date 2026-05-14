@@ -1,6 +1,7 @@
+import secrets
 from contextlib import asynccontextmanager
 
-from fastapi import FastAPI, Request
+from fastapi import FastAPI, Request, Response
 from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 from slowapi import Limiter, _rate_limit_exceeded_handler
@@ -71,13 +72,26 @@ def create_app() -> FastAPI:
         lifespan = lifespan,
     )
 
-    # ── Prometheus metrics: expose /metrics (hidden from OpenAPI schema) ───────
+    # ── Prometheus metrics ────────────────────────────────────────────────────
+    # Instrument the app, then expose /metrics behind METRICS_AUTH_TOKEN.
+    # The metrics endpoint leaks internal signal (request volumes, latencies,
+    # AI spend in USD, queue depths) and must never be publicly reachable.
+    # When a token is configured, callers must present it as a Bearer token;
+    # a mismatch returns 404 so the endpoint isn't even advertised.
     from prometheus_fastapi_instrumentator import Instrumentator
-    Instrumentator().instrument(app).expose(
-        app,
-        endpoint="/metrics",
-        include_in_schema=False,
-    )
+    from prometheus_client import generate_latest, CONTENT_TYPE_LATEST
+
+    Instrumentator().instrument(app)
+
+    @app.get("/metrics", include_in_schema=False)
+    def metrics_endpoint(request: Request) -> Response:
+        token = settings.METRICS_AUTH_TOKEN
+        if token:
+            auth = request.headers.get("authorization", "")
+            provided = auth[7:].strip() if auth[:7].lower() == "bearer " else ""
+            if not (provided and secrets.compare_digest(provided, token)):
+                return Response(status_code=404)
+        return Response(generate_latest(), media_type=CONTENT_TYPE_LATEST)
 
     # ── Request-ID: first middleware so the ID is available for all subsequent layers ──
     app.add_middleware(RequestIDMiddleware)
@@ -126,9 +140,15 @@ def create_app() -> FastAPI:
         if origin in allowed or "*" in allowed:
             headers["Access-Control-Allow-Origin"] = origin
             headers["Access-Control-Allow-Credentials"] = "true"
+        # Never leak raw exception text to clients — it can carry SQL fragments,
+        # file paths, or user data. The full traceback is logged above; the raw
+        # message is surfaced in the response only when DEBUG is enabled.
+        content: dict = {"detail": "Internal server error"}
+        if settings.DEBUG:
+            content["error"] = str(exc)
         return JSONResponse(
             status_code=500,
-            content={"detail": "Internal server error", "error": str(exc)},
+            content=content,
             headers=headers,
         )
 

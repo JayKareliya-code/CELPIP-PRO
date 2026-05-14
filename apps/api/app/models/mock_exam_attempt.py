@@ -7,7 +7,7 @@ Celery queue; the `estimated_band` column is NULL until the pipeline finishes.
 import uuid
 from decimal import Decimal
 
-from sqlalchemy import CheckConstraint, Index, Integer, Numeric, Text, ForeignKey
+from sqlalchemy import CheckConstraint, Index, Integer, Numeric, Text, ForeignKey, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.models.base import Base, TimestampMixin
@@ -72,4 +72,11 @@ class MockExamTaskAttempt(Base, TimestampMixin):
         Index("idx_mock_exam_session", "session_id"),
         # Composite: quota / history per user
         Index("idx_mock_exam_user_session", "user_id", "session_id"),
+        # Exactly one row per task slot per session — makes confirm-upload
+        # idempotent (a double-click cannot enqueue duplicate scoring jobs)
+        # while still allowing an explicit redo to overwrite the row.
+        UniqueConstraint(
+            "user_id", "session_id", "task_number",
+            name="uq_mock_exam_user_session_task",
+        ),
     )
