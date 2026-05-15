@@ -4,7 +4,7 @@
 // WeakAreasCompact.tsx — Pro-only focus area list on the dashboard
 //
 // Renders only when:
-//   1. plan is "pro" or "ultra"
+//   1. plan is "pro"
 //   2. The API returns at least one item (i.e., user has scored attempts)
 //
 // Returns null silently in all other cases — no locked teaser, no placeholder.

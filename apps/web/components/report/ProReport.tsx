@@ -123,14 +123,27 @@ export function ProReport({ report, targetBand, isPro }: Props) {
             aria-labelledby="tab-coaching"
             className="flex flex-col gap-4 animate-fade-in"
           >
-            {/* 1 — Score summary (always visible) */}
-            <ScoreSummaryCard
-              estimatedBand={report.estimated_band}
-              skill={report.skill}
-              completedAt={report.completed_at}
-              nextMilestone={isPro ? (report.next_milestone || undefined) : undefined}
-              wordCount={isPro ? wordCount : undefined}
-            />
+            {/* 1 — Score summary + Starter upsell side-by-side */}
+            {isPro ? (
+              <ScoreSummaryCard
+                estimatedBand={report.estimated_band}
+                skill={report.skill}
+                completedAt={report.completed_at}
+                nextMilestone={report.next_milestone || undefined}
+                wordCount={wordCount}
+              />
+            ) : (
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                <ScoreSummaryCard
+                  estimatedBand={report.estimated_band}
+                  skill={report.skill}
+                  completedAt={report.completed_at}
+                  nextMilestone={undefined}
+                  wordCount={undefined}
+                />
+                <StarterUpgradeSideCard />
+              </div>
+            )}
 
             {/* 2 — Rubric dimension bars */}
             {isPro ? (
@@ -190,11 +203,9 @@ export function ProReport({ report, targetBand, isPro }: Props) {
               />
             )}
 
-            {/* 6 — Upgrade CTA (Starter only) or Footer CTA (Pro) */}
-            {isPro ? (
+            {/* 6 — Footer CTA (Pro only — Starter upsell is beside the score gauge now) */}
+            {isPro && (
               <ReportFooterCta report={report} weakestDim={weakestDim} />
-            ) : (
-              <StarterUpgradeCta />
             )}
           </div>
         )}
@@ -367,8 +378,7 @@ function ReportFooterCta({ report, weakestDim }: FooterProps) {
   );
 }
 
-// ── Starter Upgrade CTA ──────────────────────────────────────────────────────────────
-// Shown in place of ReportFooterCta for Starter users.
+// ── Starter Upgrade CTA — compact side card beside score gauge ───────────────
 
 const PRO_FEATURES = [
   "Per-dimension rubric scores (Task Completion, Coherence, Vocabulary…)",
@@ -377,6 +387,56 @@ const PRO_FEATURES = [
   "Band-targeted sample response matched to your goal",
   "Score progress chart and full analytics",
 ];
+
+function StarterUpgradeSideCard() {
+  return (
+    <div className="relative overflow-hidden rounded-2xl border border-amber-700/30 bg-gradient-to-br from-amber-950/50 via-amber-950/25 to-transparent p-5 flex flex-col gap-4">
+      {/* Ambient glow */}
+      <div className="absolute -top-10 -right-10 h-40 w-40 rounded-full bg-amber-500/10 blur-3xl pointer-events-none" />
+
+      {/* Header */}
+      <div>
+        <p className="text-[10px] font-bold uppercase tracking-wider text-amber-400/70 mb-1">
+          Unlock Full Report
+        </p>
+        <h3 className="text-base font-bold text-foreground leading-snug">
+          You&rsquo;re on the Starter plan
+        </h3>
+        <p className="mt-1 text-xs text-subtle leading-relaxed">
+          Upgrade to Pro to unlock the complete coaching report.
+        </p>
+      </div>
+
+      {/* Feature list */}
+      <ul className="space-y-1.5 flex-1">
+        {PRO_FEATURES.map((feat) => (
+          <li key={feat} className="flex items-start gap-2 text-xs text-foreground/70">
+            <span className="mt-0.5 h-3.5 w-3.5 flex-shrink-0 rounded-full bg-amber-500/20 flex items-center justify-center">
+              <span className="block h-1 w-1 rounded-full bg-amber-400" />
+            </span>
+            {feat}
+          </li>
+        ))}
+      </ul>
+
+      {/* CTA */}
+      <div className="pt-3 border-t border-amber-700/20">
+        <div className="mb-2">
+          <p className="text-xs font-bold text-foreground">Pro Plan — $9.99 CAD</p>
+          <p className="text-[10px] text-subtle">One-time payment · Never expires</p>
+        </div>
+        <Link
+          href="/billing"
+          className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-amber-400 hover:bg-amber-300 px-5 py-2.5 text-sm font-bold text-black transition-colors duration-200"
+        >
+          Upgrade to Pro <ArrowRight className="h-4 w-4" />
+        </Link>
+      </div>
+    </div>
+  );
+}
+
+// ── Legacy bottom CTA (kept for Analytics tab Starter gate) ──────────────────
 
 function StarterUpgradeCta() {
   return (
@@ -412,7 +472,7 @@ function StarterUpgradeCta() {
         </div>
         <Link
           href="/billing"
-          className="ml-auto inline-flex items-center gap-2 rounded-xl bg-primary px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-primary-hover"
+          className="ml-auto inline-flex items-center gap-2 rounded-xl bg-amber-400 hover:bg-amber-300 px-5 py-2.5 text-sm font-semibold text-black transition-colors"
         >
           Upgrade to Pro <ArrowRight className="h-4 w-4" />
         </Link>

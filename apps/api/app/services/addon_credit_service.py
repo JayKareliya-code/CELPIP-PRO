@@ -153,7 +153,7 @@ async def consume_credit(
 async def get_addon_credit_summary(
     user_id: uuid.UUID,
     db:      AsyncSession,
-) -> dict[str, dict[int, dict[str, int]]]:
+) -> tuple[dict[str, dict[int, dict[str, int]]], dict[str, dict[str, int]]]:
     """Return a per-skill, per-task credit summary for the billing inventory card.
 
     Includes both ``active`` and ``exhausted`` rows so the UI can display
@@ -161,7 +161,13 @@ async def get_addon_credit_summary(
     are excluded — they were reversed and should not count toward total.
 
     Returns:
-        Nested dict:  ``{skill: {task_number: {"available": int, "purchased": int}}}``
+        A ``(summary, mock)`` tuple.
+
+        ``summary`` — practice-pack credits, nested as
+        ``{skill: {task_number: {"available": int, "purchased": int}}}``
+
+        ``mock`` — mock-bundle pool credits, nested as
+        ``{skill: {"available": int, "purchased": int}}``
 
         ``available``  = credits_total - credits_used  (clamped to 0)
         ``purchased``  = credits_total  (original grant)
@@ -171,7 +177,7 @@ async def get_addon_credit_summary(
 
     Example::
 
-        {
+        summary = {
           "speaking": {
             1: {"available": 4, "purchased": 5},
             3: {"available": 0, "purchased": 5},
@@ -180,6 +186,10 @@ async def get_addon_credit_summary(
             1: {"available": 5, "purchased": 5},
             2: {"available": 2, "purchased": 5},
           },
+        }
+        mock = {
+          "speaking": {"available": 2, "purchased": 2},
+          "writing":  {"available": 1, "purchased": 2},
         }
     """
     result = await db.execute(

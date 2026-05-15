@@ -16,7 +16,6 @@
 
 import { useMemo } from "react";
 import { Mic } from "lucide-react";
-import Link from "next/link";
 import { BreadcrumbNav } from "@/components/layout/BreadcrumbNav";
 import { SpeakingTaskCard } from "@/components/speaking/SpeakingTaskCard";
 import { StarterUpsellCards } from "@/components/upgrade/StarterUpsellCards";
@@ -29,17 +28,56 @@ import {
 } from "@/lib/speaking-constants";
 import type { SpeakingTask } from "@/lib/types";
 
-// TASK_TITLES and TASK_DESCRIPTIONS are now imported from @/lib/speaking-constants
-// (single source of truth — no local duplicates).
-
 // ── Props ─────────────────────────────────────────────────────────────────────
 
 interface SpeakingModuleHomeProps {
-  /**
-   * All active speaking prompts from the DB (may contain multiple per task_number).
-   * We group by task_number to count available prompts per task.
-   */
   tasks: SpeakingTask[];
+}
+
+// ── Full-page skeleton ────────────────────────────────────────────────────────
+// Rendered while user/quota data is loading. Matches the exact layout of the
+// real page so there is zero layout shift when data arrives.
+
+function ModuleHomeSkeleton({ taskCount }: { taskCount: number }) {
+  return (
+    <div className="space-y-6">
+      {/* Breadcrumb */}
+      <BreadcrumbNav />
+
+      {/* Header row skeleton */}
+      <div className="flex items-center justify-between gap-4 flex-wrap">
+        {/* Title skeleton */}
+        <div className="flex items-center gap-3 shrink-0">
+          <div className="w-11 h-11 rounded-xl bg-white/[0.05] border border-white/[0.07] animate-pulse" />
+          <div className="space-y-2">
+            <div className="h-6 w-44 rounded-lg bg-white/[0.05] animate-pulse" />
+            <div className="h-3.5 w-28 rounded bg-white/[0.04] animate-pulse" />
+          </div>
+        </div>
+
+        {/* Upsell cards skeleton */}
+        <div className="flex-1 min-w-0 max-w-xl">
+          <div className="grid grid-cols-2 gap-3">
+            <div className="h-[118px] rounded-2xl border border-white/[0.07] bg-white/[0.03] animate-pulse" />
+            <div className="h-[118px] rounded-2xl border border-white/[0.07] bg-white/[0.03] animate-pulse" />
+          </div>
+        </div>
+      </div>
+
+      {/* Divider */}
+      <div className="border-t border-white/[0.18]" />
+
+      {/* Task grid skeleton */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        {Array.from({ length: taskCount }).map((_, i) => (
+          <div
+            key={i}
+            className="h-36 rounded-2xl border border-white/[0.07] bg-white/[0.03] animate-pulse"
+          />
+        ))}
+      </div>
+    </div>
+  );
 }
 
 // ── Component ─────────────────────────────────────────────────────────────────
@@ -53,10 +91,9 @@ export function SpeakingModuleHome({ tasks }: SpeakingModuleHomeProps) {
   } = useSpeakingQuota(null);
 
   // Centralised access gate — single source of truth for locking logic.
-  // Handles the "Starter + addon credits = unlocked" rule.
   const access = useTaskModuleAccess("speaking");
 
-  // Full quota response — per-task USED counts (access hook only holds credits, not usage).
+  // Full quota response — per-task USED counts.
   const quotaResult = useQuota("speaking");
 
   const quotaReady = !isLoading && !access.isLoading;
@@ -77,7 +114,6 @@ export function SpeakingModuleHome({ tasks }: SpeakingModuleHomeProps) {
   const uniqueTasks = useMemo(() => {
     const seen = new Set<number>();
     const result: SpeakingTask[] = [];
-    // Sort by task_number so practice (0) comes first
     const sorted = [...tasks].sort((a, b) => a.task_number - b.task_number);
     for (const t of sorted) {
       if (!seen.has(t.task_number)) {
@@ -92,6 +128,13 @@ export function SpeakingModuleHome({ tasks }: SpeakingModuleHomeProps) {
   const taskNumbers = uniqueTasks.length > 0
     ? uniqueTasks.map((t) => t.task_number).filter((n) => n > 0)
     : [1, 2, 3, 4, 5, 6, 7, 8];
+
+  // ── Full-page skeleton while loading ─────────────────────────────────────────
+  // Render NOTHING real until both user and quota are resolved — prevents the
+  // "2/2 starter default" flash and the jarring partial-content state.
+  if (!quotaReady) {
+    return <ModuleHomeSkeleton taskCount={taskNumbers.length || 8} />;
+  }
 
   return (
     <div className="space-y-6">
@@ -111,7 +154,7 @@ export function SpeakingModuleHome({ tasks }: SpeakingModuleHomeProps) {
           </div>
         </div>
 
-        {/* Upsell / stat cards — StarterUpsellCards handles both starter & pro */}
+        {/* Upsell / stat cards */}
         <div className="flex-1 min-w-0 max-w-xl">
           <StarterUpsellCards module="speaking" />
         </div>
@@ -127,9 +170,6 @@ export function SpeakingModuleHome({ tasks }: SpeakingModuleHomeProps) {
           const promptCount = promptCountByTask[taskNum] ?? 0;
           const used = quotaResult.speaking_used_per_task?.[taskNum] ?? 0;
 
-          // Per-task effectiveLimit: planLimit + any addon credits for this specific task.
-          // This means a custom_bundle for Task 4 only changes Task 4's limit,
-          // while a speaking_pack (expanded to all tasks at webhook time) raises all.
           const taskAddonCredits = addonCreditsMap[taskNum] ?? 0;
           const taskEffectiveLimit = planAttemptsLimit + taskAddonCredits;
 

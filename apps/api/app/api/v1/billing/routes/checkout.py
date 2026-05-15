@@ -17,7 +17,6 @@ from app.api.v1.billing.constants import (
     PLAN_PRICE_IDS,
     ADDON_PRICE_IDS,
     KNOWN_TASK_KEYS,
-    MOCK_TEST_NUMBERS,
 )
 from app.api.v1.billing.schemas import CartCheckoutRequest, CheckoutResponse
 from app.api.v1.billing.helpers import get_or_create_stripe_customer
@@ -47,9 +46,9 @@ def _encode_cart_metadata(items: list, promo_code: str | None) -> dict[str, str]
             extra = item.metadata.get("plan_slug") or item.id
         elif item.type == "custom_bundle":
             extra = item.metadata.get("task_key", "null")
-        elif item.type == "mock_bundle":
-            extra = str(item.metadata.get("mock_test_number", "null"))
         else:
+            # module packs + mock_bundle carry no per-item slot; the webhook
+            # assigns mock_bundle credits to the general pool.
             extra = "null"
         segments.append(f"{item.type}:{item.quantity}:{extra}")
 

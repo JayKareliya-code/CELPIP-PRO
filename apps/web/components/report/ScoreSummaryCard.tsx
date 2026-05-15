@@ -95,7 +95,7 @@ export function ScoreSummaryCard({ estimatedBand, skill, completedAt, nextMilest
   const hasMilestone = typeof nextMilestone === "string" && nextMilestone.trim().length > 0;
 
   return (
-    <div className="relative overflow-hidden rounded-2xl border border-border bg-surface p-6 shadow-panel">
+    <div className="relative overflow-hidden rounded-2xl border border-border bg-surface p-6 shadow-panel h-full flex flex-col justify-center">
       {/* Ambient glow — primary top-right */}
       <div className={`absolute -top-16 -right-16 h-56 w-56 rounded-full blur-3xl opacity-25 ${palette.bg}`} />
       {/* Secondary glow near gauge */}
@@ -173,7 +173,10 @@ export function ScoreSummaryCard({ estimatedBand, skill, completedAt, nextMilest
           {hasMilestone && (
             <div className="flex items-start gap-2 rounded-xl border border-amber-500/20 bg-amber-500/[0.06] px-3 py-2.5 mt-1">
               <Target className="flex-shrink-0 h-4 w-4 text-amber-400 mt-0.5" />
-              <p className="text-xs leading-relaxed text-amber-200/85">{nextMilestone}</p>
+              <div>
+                <p className="text-[10px] font-bold uppercase tracking-wider text-amber-400/60 mb-0.5">Next goal</p>
+                <p className="text-xs leading-relaxed text-amber-200/85">{nextMilestone}</p>
+              </div>
             </div>
           )}
         </div>

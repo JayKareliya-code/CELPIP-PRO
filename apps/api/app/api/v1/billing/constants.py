@@ -39,18 +39,6 @@ WRITING_TASK_KEYS: frozenset[str] = frozenset({
 KNOWN_TASK_KEYS: frozenset[str] = SPEAKING_TASK_KEYS | WRITING_TASK_KEYS
 """All valid task keys accepted in a custom_bundle cart item."""
 
-# ── Mock test slot constants ──────────────────────────────────────────────────
-
-MOCK_TEST_NUMBERS: frozenset[int] = frozenset(range(1, 6))  # 1–5
-"""Valid mock test slot numbers offered in the billing store."""
-
-MOCK_TEST_SPEAKING_KEYS: frozenset[str] = frozenset(
-    f"mock-test-speaking-{n}" for n in MOCK_TEST_NUMBERS
-)
-MOCK_TEST_WRITING_KEYS: frozenset[str] = frozenset(
-    f"mock-test-writing-{n}" for n in MOCK_TEST_NUMBERS
-)
-
 # ── Module pack → task keys expansion ────────────────────────────────────────
 
 ADDON_MODULE_TASK_KEYS: dict[str, frozenset[str]] = {

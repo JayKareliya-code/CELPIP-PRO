@@ -101,16 +101,6 @@ export const PRO_PLAN_LIMITS = {
   history_tracking: true,
 } as const;
 
-// Ultra plan has been removed — CELPIPBRO now uses a Free + Pro two-tier model.
-
-// ── Legacy aliases (kept for backward-compat during migration) ───────────────
-/** @deprecated Use STARTER_PLAN_LIMITS */
-export const FREE_PLAN_LIMITS = STARTER_PLAN_LIMITS;
-/** @deprecated Use PRO_PLAN_LIMITS */
-export const PREMIUM_PLAN_LIMITS = PRO_PLAN_LIMITS;
-/** @deprecated Ultra plan removed — use PRO_PLAN_LIMITS */
-export const ULTRA_PLAN_LIMITS = PRO_PLAN_LIMITS;
-
 // ── Timer Warning Thresholds ──────────────────────────────────────────────────
 
 /** Seconds remaining when timer turns yellow */

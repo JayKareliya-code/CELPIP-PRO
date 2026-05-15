@@ -114,8 +114,8 @@ export function ResponsePanel({
     <div className="flex flex-col gap-4">
 
       {/* ── Question Prompt card ─────────────────────────────────────────── */}
-      <div className="rounded-2xl border border-amber-500/40 bg-amber-500/[0.06] p-5 flex flex-col gap-3 relative overflow-hidden">
-        <div className="absolute -top-10 -right-10 h-32 w-32 rounded-full bg-amber-400/10 blur-2xl pointer-events-none" />
+      <div className="rounded-2xl border border-white/[0.08] bg-white/[0.02] p-5 flex flex-col gap-3 relative overflow-hidden">
+
 
         {/* Badge row */}
         <div className="relative flex items-center gap-2 flex-wrap">
@@ -145,13 +145,11 @@ export function ResponsePanel({
 
         {/* Context image (Tasks 3, 4, 8) */}
         {contextImageUrl && (
-          <div className="relative rounded-xl overflow-hidden border border-white/[0.08]">
-            <img
-              src={contextImageUrl}
-              alt="Scene for this task"
-              className="block mx-auto w-4/5 h-auto object-contain rounded-xl"
-            />
-          </div>
+          <img
+            src={contextImageUrl}
+            alt="Scene for this task"
+            className="block max-w-full max-h-80 w-auto h-auto object-contain rounded-xl"
+          />
         )}
 
         {/* Primary prompt text */}

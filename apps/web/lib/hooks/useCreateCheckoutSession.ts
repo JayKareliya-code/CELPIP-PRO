@@ -10,9 +10,6 @@
 //   • Applying the promo code discount
 //   • Enforcing user plan eligibility
 //   • Creating the Stripe Checkout Session
-//
-// NOTE: Backend cart support is a follow-up task. Until then, the existing
-// single-plan checkout path continues to work via useBilling.startCheckout.
 // ─────────────────────────────────────────────────────────────────────────────
 
 "use client";

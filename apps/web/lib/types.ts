@@ -379,7 +379,7 @@ export interface ReportDimensionScore {
  */
 export interface ReportAccess {
   has_full_report: boolean;
-  plan:            "starter" | "pro" | "ultra";
+  plan:            "starter" | "pro";
   locked_sections: string[];
 }
 

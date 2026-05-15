@@ -1,13 +1,18 @@
 // ─────────────────────────────────────────────────────────────────────────────
-// useQuota.ts — Check remaining practice attempt quota for the current user
+// useQuota.ts — Module-level practice-quota snapshot for the current user
 //
-// Phase 1: derives quota from MOCK_USER and the plan limits in constants.ts.
-// Phase 2: fetches GET /api/v1/users/me/quota — returns per-task can_attempt
-//          maps so the UI knows exactly which tasks are still available.
+// Fetches GET /api/v1/users/me/quota once per user (the response carries every
+// skill) and projects it down to a single skill via React Query's `select`.
+// `useQuota("speaking")` and `useQuota("writing")` share one network request.
+//
+// SCOPE: the `canAttempt` / `showPaywall` flags here are MODULE-level — true
+// when *any* task in the skill is still available, not a specific one. For
+// per-task gating (a single task card or prompt page) use
+// useSpeakingQuota(taskNumber) / useWritingQuota(taskNumber), which resolve
+// effectiveLimit / used / remaining for one task.
 //
 // Usage:
-//   const { canAttempt, remaining, showPaywall }       = useQuota("speaking");
-//   const { canAttemptTask, speaking_used_per_task }   = useQuota("speaking");
+//   const { canAttemptTask, speaking_used_per_task } = useQuota("speaking");
 // ─────────────────────────────────────────────────────────────────────────────
 
 "use client";
@@ -16,12 +21,8 @@ import { useAuth }   from "@clerk/nextjs";
 import { useQuery }  from "@tanstack/react-query";
 import { USE_MOCK, API_V1, api, authHeaders } from "@/lib/api";
 import { MOCK_USER } from "@/lib/mockData";
-import {
-  STARTER_PLAN_LIMITS,
-  PRO_PLAN_LIMITS,
-  ULTRA_PLAN_LIMITS,
-} from "@/lib/constants";
-import type { Skill, UserPlan, QuotaStatusResponse } from "@/lib/types";
+import { STARTER_PLAN_LIMITS, PRO_PLAN_LIMITS } from "@/lib/constants";
+import type { Skill, QuotaStatusResponse } from "@/lib/types";
 import { useCurrentUser } from "@/lib/hooks/useCurrentUser";
 
 // ── Types ─────────────────────────────────────────────────────────────────────
@@ -61,113 +62,102 @@ export interface QuotaStatus {
   writing_mock_addon_credits?:  number;
 }
 
-// ── Mock quota resolver ────────────────────────────────────────────────────────
+// ── USE_MOCK quota resolver (dev mode, no backend) ────────────────────────────
 
 function getMockQuota(skill: Skill): QuotaStatus {
-  const plan: UserPlan = MOCK_USER.plan;
+  const limits = MOCK_USER.plan === "pro" ? PRO_PLAN_LIMITS : STARTER_PLAN_LIMITS;
+  const remaining =
+    skill === "speaking"
+      ? limits.speaking_attempts_per_task
+      : limits.writing_attempts_per_task;
+  return { remaining, canAttempt: true, showPaywall: false };
+}
 
-  if (plan === "starter") {
-    const limit = STARTER_PLAN_LIMITS.speaking_mock_tests;
-    return { remaining: limit, canAttempt: true, showPaywall: false };
-  }
-  if (plan === "pro") {
-    const limit =
-      skill === "speaking"
-        ? PRO_PLAN_LIMITS.speaking_attempts_per_task
-        : PRO_PLAN_LIMITS.writing_attempts_per_task;
-    return { remaining: limit, canAttempt: true, showPaywall: false };
-  }
-  if (plan === "ultra") {
-    const limit =
-      skill === "speaking"
-        ? ULTRA_PLAN_LIMITS.speaking_attempts_per_task
-        : ULTRA_PLAN_LIMITS.writing_attempts_per_task;
-    return { remaining: limit, canAttempt: true, showPaywall: false };
-  }
-  return { remaining: 0, canAttempt: false, showPaywall: true };
+// ── Per-skill projection of the full /me/quota response ───────────────────────
+
+function selectSkillQuota(resp: QuotaStatusResponse, skill: Skill): QuotaStatus {
+  const canAttemptMap =
+    skill === "speaking" ? resp.can_attempt_speaking : resp.can_attempt_writing;
+  const canAttempt = Object.values(canAttemptMap).some(Boolean);
+
+  const usedMap =
+    skill === "speaking" ? resp.speaking_used_per_task : resp.writing_used_per_task;
+  const limit =
+    skill === "speaking" ? resp.speaking_limit_per_task : resp.writing_limit_per_task;
+
+  // Per-task addon credits — used to compute accurate effectiveLimit per task.
+  const addonMap =
+    skill === "speaking"
+      ? (resp.speaking_addon_credits_per_task ?? {})
+      : (resp.writing_addon_credits_per_task  ?? {});
+
+  // Sum remaining slots using the EFFECTIVE limit (plan + addons) per task, so
+  // users with purchased addon packs see accurate remaining counts.
+  const remaining = limit === null
+    ? -1
+    : Object.entries(usedMap).reduce((sum, [taskKey, used]) => {
+        const addonCredits   = addonMap[Number(taskKey)] ?? 0;
+        const effectiveLimit = limit + addonCredits;
+        return sum + Math.max(0, effectiveLimit - used);
+      }, 0);
+
+  return {
+    remaining,
+    canAttempt,
+    showPaywall:    !canAttempt,
+    canAttemptTask: canAttemptMap,
+    speaking_used_per_task:
+      skill === "speaking" ? resp.speaking_used_per_task : undefined,
+    writing_used_per_task:
+      skill === "writing"  ? resp.writing_used_per_task  : undefined,
+    speaking_addon_credits_per_task:
+      skill === "speaking" ? resp.speaking_addon_credits_per_task : undefined,
+    writing_addon_credits_per_task:
+      skill === "writing"  ? resp.writing_addon_credits_per_task  : undefined,
+    speaking_limit_per_task:
+      skill === "speaking" ? resp.speaking_limit_per_task : undefined,
+    writing_limit_per_task:
+      skill === "writing"  ? resp.writing_limit_per_task  : undefined,
+    speaking_mock_tests_used:    resp.speaking_mock_tests_used,
+    writing_mock_tests_used:     resp.writing_mock_tests_used,
+    speaking_mock_tests_limit:   resp.speaking_mock_tests_limit,
+    writing_mock_tests_limit:    resp.writing_mock_tests_limit,
+    speaking_mock_addon_credits: resp.speaking_mock_addon_credits,
+    writing_mock_addon_credits:  resp.writing_mock_addon_credits,
+  };
 }
 
 // ── Hook ──────────────────────────────────────────────────────────────────────
 
 /**
- * Returns the quota status for the given skill for the current user.
+ * Returns the module-level quota snapshot for `skill`.
  *
- * Phase 1: computed from mock user + plan constants (no fetch).
- * Phase 2: fetches GET /api/v1/users/me/quota and derives canAttempt from the
- *          per-task `can_attempt_*` maps returned by the server.
- *
- * `showPaywall` is the primary flag — connect it to <PaywallModal open={showPaywall} />.
+ * `canAttempt` / `showPaywall` are module-wide — true when *any* task in the
+ * skill is available. For per-task enforcement use useSpeakingQuota /
+ * useWritingQuota.
  */
 export function useQuota(skill: Skill): QuotaStatus & { isLoading: boolean } {
   const { user }     = useCurrentUser();
   const { getToken } = useAuth();
 
-  const { data, isLoading } = useQuery<QuotaStatus>({
-    queryKey: ["quota", skill, user?.id],
+  const { data, isLoading } = useQuery<QuotaStatusResponse | null, Error, QuotaStatus>({
+    // Keyed only by user — the /me/quota response carries every skill, so the
+    // speaking and writing hooks share a single fetch instead of issuing two.
+    queryKey: ["quota", user?.id ?? "anonymous"],
 
-    queryFn: async (): Promise<QuotaStatus> => {
-      if (USE_MOCK || !user) return getMockQuota(skill);
-
+    queryFn: async (): Promise<QuotaStatusResponse | null> => {
+      if (USE_MOCK || !user) return null;
       const token = await getToken();
-      const resp  = await api.get<QuotaStatusResponse>(
+      return api.get<QuotaStatusResponse>(
         `${API_V1}/users/me/quota`,
         { headers: authHeaders(token) },
       );
-
-      const canAttemptMap =
-        skill === "speaking" ? resp.can_attempt_speaking : resp.can_attempt_writing;
-      const canAttempt = Object.values(canAttemptMap).some(Boolean);
-
-      const usedMap =
-        skill === "speaking" ? resp.speaking_used_per_task : resp.writing_used_per_task;
-      const limit =
-        skill === "speaking" ? resp.speaking_limit_per_task : resp.writing_limit_per_task;
-
-      // Per-task addon credits — used to compute accurate effectiveLimit per task.
-      const addonMap =
-        skill === "speaking"
-          ? (resp.speaking_addon_credits_per_task ?? {})
-          : (resp.writing_addon_credits_per_task  ?? {});
-
-      // Sum remaining slots using the EFFECTIVE limit (plan + addons) per task.
-      // This ensures users with purchased addon packs see accurate remaining counts.
-      const remaining = limit === null
-        ? -1
-        : Object.entries(usedMap).reduce((sum, [taskKey, used]) => {
-            const addonCredits  = addonMap[Number(taskKey)] ?? 0;
-            const effectiveLimit = limit + addonCredits;
-            return sum + Math.max(0, effectiveLimit - used);
-          }, 0);
-
-      return {
-        remaining,
-        canAttempt,
-        showPaywall:    !canAttempt,
-        canAttemptTask: canAttemptMap,
-        // Expose per-task usage counts for attempt rings and bars
-        speaking_used_per_task:
-          skill === "speaking" ? resp.speaking_used_per_task : undefined,
-        writing_used_per_task:
-          skill === "writing"  ? resp.writing_used_per_task  : undefined,
-        // Expose per-task addon credits so useSpeakingQuota can compute effectiveLimit
-        speaking_addon_credits_per_task:
-          skill === "speaking" ? resp.speaking_addon_credits_per_task : undefined,
-        writing_addon_credits_per_task:
-          skill === "writing"  ? resp.writing_addon_credits_per_task  : undefined,
-        // Expose plan limits so consumers don't duplicate backend config values
-        speaking_limit_per_task:
-          skill === "speaking" ? resp.speaking_limit_per_task : undefined,
-        writing_limit_per_task:
-          skill === "writing"  ? resp.writing_limit_per_task  : undefined,
-        // Mock test usage + limits + addon pool (forwarded for UsageTab)
-        speaking_mock_tests_used:    resp.speaking_mock_tests_used,
-        writing_mock_tests_used:     resp.writing_mock_tests_used,
-        speaking_mock_tests_limit:   resp.speaking_mock_tests_limit,
-        writing_mock_tests_limit:    resp.writing_mock_tests_limit,
-        speaking_mock_addon_credits: resp.speaking_mock_addon_credits,
-        writing_mock_addon_credits:  resp.writing_mock_addon_credits,
-      };
     },
+
+    // `select` runs per hook instance — speaking and writing project the same
+    // cached response down to their own skill without re-fetching.
+    select: (resp): QuotaStatus =>
+      resp === null ? getMockQuota(skill) : selectSkillQuota(resp, skill),
 
     enabled:            USE_MOCK || !!user,
     staleTime:          15_000,   // 15 s — refreshes quickly after a pack purchase

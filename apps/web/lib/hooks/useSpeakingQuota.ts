@@ -94,7 +94,7 @@ export interface TaskQuotaResult {
  *                    overview (used / remaining / isBonusRetry will be 0 / 0 / false).
  */
 export function useSpeakingQuota(taskNumber: number | null): TaskQuotaResult {
-  const { user }     = useCurrentUser();
+  const { user, isLoading: userLoading } = useCurrentUser();
   const quotaResult  = useQuota("speaking");
 
   const plan: UserPlan = user?.plan ?? "starter";
@@ -137,6 +137,6 @@ export function useSpeakingQuota(taskNumber: number | null): TaskQuotaResult {
     effectiveLimit,
     used,
     remaining,
-    isLoading: quotaResult.isLoading,
+    isLoading: userLoading || quotaResult.isLoading,
   };
 }

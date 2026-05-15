@@ -1,17 +1,12 @@
 // ─────────────────────────────────────────────────────────────────────────────
 // lib/hooks/usePracticeQuota.ts
 //
-// Custom hook: returns quota status for a given skill.
+// Returns the mock-test quota for a given skill: plan allocation + purchased
+// mock-bundle pool credits, minus mock sessions already used.
 //
-// Architecture:
-//  • Phase 1 (now):  reads plan from the app user, computes quota from
-//                    constants. No API call — `used` is always 0 until
-//                    attempt history is wired.
-//  • Phase 2 (TODO): swap `queryFn` body to call
-//                    GET /api/v1/users/me/quota and read
-//                    `speaking_used_per_task` / `writing_used_per_task`.
-//
-// The hook signature and return type never change between phases.
+// Fetches GET /api/v1/users/me/quota. In USE_MOCK mode (or before the user
+// loads) it falls back to the plan default from lib/practice/config.
+// On API error it fails closed — the skill is reported as exhausted.
 // ─────────────────────────────────────────────────────────────────────────────
 
 "use client";
@@ -59,14 +54,12 @@ export function usePracticeQuota(skill: Skill): {
       const plan  = user?.plan ?? "starter";
       const limit = getPlanMockLimit(plan, skill);
 
-      // ── Phase 1: mock / no backend ────────────────────────────────────────
+      // USE_MOCK / no backend — fall back to the plan default.
       if (USE_MOCK || !user) {
         return buildQuota(skill, limit, 0);
       }
 
-      // ── Phase 2: real API ─────────────────────────────────────────────────
-      // Fetches the full quota response and reads mock_tests_used if available.
-      // Falls back to 0 used until the backend returns this field.
+      // Real API — effective limit = plan allocation + mock-bundle pool credits.
       try {
         const token = await getToken();
         const resp  = await api.get<QuotaStatusResponse>(

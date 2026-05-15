@@ -38,12 +38,6 @@ export interface BillingStatus {
 export const billingStatusKey = (userId: string | null | undefined) =>
   ["billing-status", userId ?? "anonymous"] as const;
 
-/**
- * @deprecated Use `billingStatusKey(userId)` instead.
- * Kept for any call sites that haven't been updated yet.
- */
-export const BILLING_STATUS_KEY = ["billing-status"] as const;
-
 // ── Hook ──────────────────────────────────────────────────────────────────────
 
 export function useBilling() {

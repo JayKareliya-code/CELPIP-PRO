@@ -96,7 +96,7 @@ export interface TaskModuleAccess {
  * @param skill  "speaking" | "writing"
  */
 export function useTaskModuleAccess(skill: Skill): TaskModuleAccess {
-  const { user }    = useCurrentUser();
+  const { user, isLoading: userLoading } = useCurrentUser();
   const quotaResult = useQuota(skill);
 
   const plan: UserPlan = user?.plan ?? "starter";
@@ -129,6 +129,6 @@ export function useTaskModuleAccess(skill: Skill): TaskModuleAccess {
     isTaskLocked,
     hasAddonCredits,
     addonCreditsPerTask,
-    isLoading: quotaResult.isLoading,
+    isLoading: userLoading || quotaResult.isLoading,
   };
 }

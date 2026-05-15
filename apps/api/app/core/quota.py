@@ -193,7 +193,9 @@ async def enforce_quota(
         pool_key = f"mock-test-{skill}-addon"
 
         if not limits.mock_tests:
-            # Starter plan — no plan-level mock quota. Check addon pool first.
+            # No plan-level mock allocation. Both Starter and Pro carry a mock
+            # quota, so this path only fires as a safety net for a plan that
+            # resolves to zero access — check the addon pool first.
             addon_credits = await get_available_credits(user.id, pool_key, db)
             if addon_credits <= 0:
                 raise HTTPException(

@@ -88,7 +88,7 @@ export function ReportPage({ attemptId }: Props) {
   // deploy where the frontend ships before the backend.
   const targetBand = user?.target_band ?? null;
   const plan       = user?.plan ?? "starter";
-  const isPro      = report.access?.has_full_report ?? (plan === "pro" || plan === "ultra");
+  const isPro      = report.access?.has_full_report ?? (plan === "pro");
 
   // ── Render ─────────────────────────────────────────────────────────────────
   // Both plans use the same ProReport shell — Starter sees locked sections

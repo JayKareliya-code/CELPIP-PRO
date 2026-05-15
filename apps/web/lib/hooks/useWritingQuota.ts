@@ -83,7 +83,7 @@ export interface WritingTaskQuotaResult {
  *                    overview (used / remaining / isBonusRetry will be 0 / 0 / false).
  */
 export function useWritingQuota(taskNumber: number | null): WritingTaskQuotaResult {
-  const { user }    = useCurrentUser();
+  const { user, isLoading: userLoading } = useCurrentUser();
   const quotaResult = useQuota("writing");
 
   const plan: UserPlan = user?.plan ?? "starter";
@@ -126,6 +126,6 @@ export function useWritingQuota(taskNumber: number | null): WritingTaskQuotaResu
     effectiveLimit,
     used,
     remaining,
-    isLoading: quotaResult.isLoading,
+    isLoading: userLoading || quotaResult.isLoading,
   };
 }

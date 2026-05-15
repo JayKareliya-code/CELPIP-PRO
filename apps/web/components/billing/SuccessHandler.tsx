@@ -56,6 +56,14 @@ export function SuccessHandler({ success, canceled, plan, addonOnly = false }: S
       if (pollCount.current >= MAX_POLLS) {
         clearInterval(pollTimer.current!);
         pollTimer.current = null;
+        // Plan still hasn't flipped after the full poll window — the Stripe
+        // webhook is likely delayed. Tell the user instead of silently giving
+        // up; usePlanEvents (SSE) and refetchOnWindowFocus will still catch it.
+        toast.info("Still finalizing your upgrade…", {
+          description:
+            "Payment succeeded — this can take a moment. Refresh the page if your plan doesn't update shortly.",
+          duration: 8000,
+        });
       }
     }, POLL_INTERVAL_MS);
 

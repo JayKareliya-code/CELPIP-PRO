@@ -15,16 +15,14 @@ import { NAV_LINKS } from "@/lib/nav-links";
 
 // ── Plan badge ────────────────────────────────────────────────────────────────
 
-type Plan = "ultra" | "pro" | "starter" | string;
+type Plan = "pro" | "starter" | string;
 
 function PlanBadge({ plan, size = "sm" }: { plan: Plan; size?: "xs" | "sm" }) {
-  const label = plan === "ultra" ? "Ultra" : plan === "pro" ? "Pro" : "Starter";
+  const label = plan === "pro" ? "Pro" : "Starter";
   const cls =
-    plan === "ultra"
-      ? "bg-amber-900/40 border-amber-700/50 text-amber-300"
-      : plan === "pro"
-        ? "bg-amber-900/30 border-amber-700/40 text-amber-400"
-        : "bg-white/[0.05] border-white/[0.10] text-white/35";
+    plan === "pro"
+      ? "bg-amber-900/30 border-amber-700/40 text-amber-400"
+      : "bg-white/[0.05] border-white/[0.10] text-white/35";
   return (
     <span
       className={cn(
@@ -220,7 +218,7 @@ export function Navbar() {
   const closeSidebar = useCallback(() => setSidebarOpen(false), []);
 
   const showAuthNav   = isLoaded && !!isSignedIn;
-  const showPublicNav = !showAuthNav;
+  const showPublicNav = isLoaded && !isSignedIn;  // never true while loading → no flash
 
   return (
     <>

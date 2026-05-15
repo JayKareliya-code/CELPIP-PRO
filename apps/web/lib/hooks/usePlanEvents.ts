@@ -126,29 +126,26 @@ export function usePlanEvents(): void {
         queryClient.invalidateQueries({ queryKey: ["report"] });
       });
 
-      // ── Event: server-side error ───────────────────────────────────────────
+      // ── Error handler ──────────────────────────────────────────────────────
+      // EventSource dispatches the same "error" event for transport drops
+      // (plain Event) AND server-sent `event: error` frames (MessageEvent),
+      // so this single listener is the only place reconnects are scheduled.
+      // Registering both addEventListener("error") and es.onerror would fire
+      // the reconnect twice per failure.
       es.addEventListener("error", (ev: Event) => {
         if (ev instanceof MessageEvent) {
           try {
             const detail = JSON.parse(ev.data) as { detail: string };
-            if (detail.detail === "Unauthorized") {
-              // Token expired or invalid — reconnect to mint a fresh token.
-              console.warn("[usePlanEvents] Unauthorized — reconnecting for fresh token.");
-              cleanup();
-              scheduleReconnect();
-              return;
-            }
+            console.warn("[usePlanEvents] server error frame:", detail.detail);
           } catch {
-            // ignored
+            // non-JSON error frame — reconnect anyway
           }
         }
+        // Close the dead stream first so the browser's native retry doesn't
+        // race our manual reconnect, which mints a fresh single-use token.
+        cleanup();
         scheduleReconnect();
       });
-
-      // EventSource.onerror (transport-level, e.g. network down)
-      es.onerror = () => {
-        scheduleReconnect();
-      };
     }
 
     /** Schedule a reconnect attempt with simple linear backoff. */
