@@ -140,4 +140,7 @@ async def test_mock_over_quota_without_credits_raises_402():
                 is_mock_test=True, db=MagicMock(),
             )
     assert exc_info.value.status_code == 402
-    assert exc_info.value.detail["code"] == "QUOTA_EXCEEDED"
+    # Mock-test exhaustion uses MOCK_EXAM_LOCKED (the frontend renders a
+    # different upsell card for it); generic practice-attempt exhaustion
+    # uses QUOTA_EXCEEDED.
+    assert exc_info.value.detail["code"] == "MOCK_EXAM_LOCKED"

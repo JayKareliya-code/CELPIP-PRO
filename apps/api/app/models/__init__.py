@@ -13,11 +13,12 @@ from app.models.mock_exam_attempt import MockExamTaskAttempt
 from app.models.stripe_event import StripeEvent
 from app.models.reconciliation_run import ReconciliationRun
 from app.models.addon_credit import AddonCredit
+from app.models.retry_credit_ledger import RetryCreditLedger
 from app.models.tos_acceptance import TosAcceptance
 
 __all__ = [
     "Base",
-    "User", "Subscription", "AddonCredit",
+    "User", "Subscription", "AddonCredit", "RetryCreditLedger",
     "SpeakingPrompt", "WritingPrompt",
     "Attempt", "SpeakingAttempt", "WritingAttempt",
     "CalibrationSample",

@@ -1,66 +1,63 @@
 """
-Writing mock exam scoring pipeline — lightweight band-estimate only.
+Writing mock-exam scoring pipeline — band-only output, single-call method.
 
-Intentionally separate from writing_pipeline.py:
-  • Different Celery queue  (writing_mock, not writing)
-  • Produces only estimated_band — no rubric dimensions, no feedback report
-  • Links to the session via session_id stored in Attempt.session_id
+Stage 0 — load     : fetch attempt, essay, prompt
+Stage 1 — score    : single gpt-4o call (same rubric as practice)
+Stage 2 — persist  : write ScoreReport with estimated_band + likely_range ONLY.
+                     No ScoreDimension, no FeedbackReport.
 
-Steps
------
-1. mark_processing   — status = 'processing'
-2. load_attempt      — fetch Attempt + WritingAttempt, validate essay_text
-3. load_prompt       — fetch prompt_text + task_number from writing_prompts
-4. estimate_band     — lightweight GPT-4o-mini call: returns one float band score
-                       Retries up to 3× with exponential backoff on 429.
-5. save_result       — write estimated_band + scoring_model to ScoreReport
-6. mark_complete     — status = 'complete'
+Why no coach/feedback stage?
+----------------------------
+Mock exams simulate the real CELPIP test — the candidate sees only the overall
+band, no examiner feedback. We still run the full scoring call (rubric + tips +
+sample) because gpt-4o produces them in a single response anyway; we simply
+discard the coaching fields.
 
-Writing mock skips rubric dimensions, calibration, feedback, and cost logging
-(identical to how mock_exam_pipeline.py handles speaking mock tasks).
+Fail-soft contract
+------------------
+If the scoring call fails after all retries, the pipeline saves
+ScoreReport.estimated_band = NULL so the UI can render "scoring unavailable —
+please retry" instead of a misleading band=0.
 """
 from __future__ import annotations
 
-import asyncio
-import json
 import logging
+from functools import lru_cache
 from uuid import UUID
 
 import sqlalchemy as sa
 from sqlalchemy import update
-from functools import lru_cache
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 
 from app.core.config import settings
 from app.models.attempt import Attempt, WritingAttempt
 from app.models.score_report import ScoreReport
+from app.services.ai.base import ScoringResult
+from app.services.ai.cost_tracker import log_cost
 from app.services.ai.providers.openai_provider import OpenAIProvider
+from app.services.ai.rubric.writing_rubric import build_writing_system_prompt
 
 logger = logging.getLogger(__name__)
+
+# Same schema version as the practice pipeline so admin tools can read both.
+SCHEMA_VERSION = 2
+
 
 # ── Session factory ────────────────────────────────────────────────────────────
 
 @lru_cache(maxsize=1)
 def _get_engine():
-    """Return the shared async engine for this worker process.
-
-    @lru_cache is safe here because each Celery ForkPoolWorker runs on a
-    single persistent event loop (see app.core.async_worker).  The engine is
-    created once per worker process and reused across tasks, which avoids
-    both the per-task connection overhead and the 'Future attached to a
-    different loop' error that occurs when asyncio.run() creates a new loop.
-    """
     return create_async_engine(
         settings.DATABASE_URL,
         future=True,
-        pool_size=2,
-        max_overflow=2,
+        pool_size=3,
+        max_overflow=5,
         pool_pre_ping=True,
+        pool_recycle=1800,  # managed PG drops idle connections; recycle every 30 min
     )
 
 
 async def run_writing_mock_pipeline(attempt_id: str) -> None:
-    """Acquire a session from the process-wide engine and run the pipeline."""
     session_maker = async_sessionmaker(_get_engine(), expire_on_commit=False, autoflush=False)
     async with session_maker() as db:
         try:
@@ -74,22 +71,59 @@ async def run_writing_mock_pipeline(attempt_id: str) -> None:
 # ── Orchestrator ───────────────────────────────────────────────────────────────
 
 async def _pipeline(db: AsyncSession, attempt_id: UUID) -> None:
+    # Idempotency: see writing_pipeline._pipeline. If a ScoreReport already
+    # exists for this attempt, finalise the status and exit instead of
+    # re-running the LLM call.
+    from sqlalchemy import select as _select  # local to avoid touching imports
+    existing = await db.execute(
+        _select(ScoreReport.id).where(ScoreReport.attempt_id == attempt_id)
+    )
+    if existing.scalar_one_or_none() is not None:
+        logger.info(
+            "writing_mock_pipeline: ScoreReport already exists for attempt=%s — "
+            "skipping rescore and finalising status",
+            attempt_id,
+        )
+        await _mark_complete(db, attempt_id)
+        return
+
     await _mark_processing(db, attempt_id)
-    attempt, w_attempt      = await _load_attempt(db, attempt_id)
-    prompt_text, task_number, sample_band12, time_limit = await _load_prompt(db, attempt.prompt_id)
-    band, model_used        = await _estimate_band(
+    attempt, w_attempt = await _load_attempt(db, attempt_id)
+    prompt_text, task_number = await _load_prompt(db, attempt.prompt_id)
+
+    result = await _score_failsoft(
+        db=db,
+        attempt_id=attempt_id,
         essay_text=w_attempt.essay_text or "",
         prompt_text=prompt_text,
         task_number=task_number,
-        sample_band12=sample_band12,
-        time_limit_seconds=time_limit,
     )
-    await _save_result(db, attempt_id, band, model_used)
+
+    if result is None:
+        await _save_result(
+            db, attempt_id,
+            estimated_band=None,
+            likely_range=None,
+            raw_rubric_json={"score_error": True},
+        )
+        await _mark_complete(db, attempt_id)
+        logger.warning("Mock pipeline saved NULL band: attempt=%s", attempt_id)
+        return
+
+    await _save_result(
+        db, attempt_id,
+        estimated_band=result.estimated_band,
+        likely_range=result.likely_range or None,
+        raw_rubric_json=result.raw_json,
+    )
     await _mark_complete(db, attempt_id)
-    logger.info("Writing mock pipeline complete: attempt=%s band=%.1f", attempt_id, band)
+    logger.info(
+        "Mock pipeline complete: attempt=%s band=%d range=%s",
+        attempt_id, result.estimated_band, result.likely_range,
+    )
 
 
-# ── Steps ──────────────────────────────────────────────────────────────────────
+# ── Stage 0: load ──────────────────────────────────────────────────────────────
 
 async def _mark_processing(db: AsyncSession, attempt_id: UUID) -> None:
     await db.execute(
@@ -102,182 +136,87 @@ async def _load_attempt(db: AsyncSession, attempt_id: UUID) -> tuple[Attempt, Wr
     attempt = await db.get(Attempt, attempt_id)
     if not attempt:
         raise LookupError(f"Attempt {attempt_id} not found in DB")
-
     w_attempt = await db.get(WritingAttempt, attempt_id)
     if not w_attempt:
         raise LookupError(f"WritingAttempt {attempt_id} not found in DB")
-
     if not (w_attempt.essay_text or "").strip():
         raise ValueError(f"WritingAttempt {attempt_id} has empty essay_text")
-
     return attempt, w_attempt
 
 
-async def _load_prompt(db: AsyncSession, prompt_id: UUID) -> tuple[str, int, str, int]:
-    """Return (prompt_text, task_number, sample_response_text, time_limit_seconds)."""
+async def _load_prompt(db: AsyncSession, prompt_id: UUID) -> tuple[str, int]:
     row = (
         await db.execute(
             sa.text(
-                "SELECT prompt_text, task_number, sample_response_text, time_limit_seconds "
-                "FROM writing_prompts WHERE id = :pid"
+                "SELECT prompt_text, task_number FROM writing_prompts WHERE id = :pid"
             ),
             {"pid": prompt_id},
         )
     ).mappings().one_or_none()
     if row is None:
         raise LookupError(f"Writing prompt {prompt_id} not found")
-    return (
-        row["prompt_text"],
-        row["task_number"],
-        row["sample_response_text"] or "",
-        row["time_limit_seconds"] or 1800,
-    )
+    return row["prompt_text"], row["task_number"]
 
 
-# ── Band estimator ─────────────────────────────────────────────────────────────
+# ── Stage 1: scoring call ────────────────────────────────────────────────────
 
-_BAND_ESTIMATOR_SYSTEM = """\
-You are a certified CELPIP writing examiner.
-Given a candidate's essay and the task prompt, return ONLY a JSON object
-with one key: "estimated_band" — a whole integer from 1 to 12 (no decimals, no .5 values)
-representing the overall CELPIP writing band score.
+async def _score_failsoft(
+    *,
+    db: AsyncSession,
+    attempt_id: UUID,
+    essay_text: str,
+    prompt_text: str,
+    task_number: int,
+) -> ScoringResult | None:
+    """Score the essay; never propagate exceptions to the caller — return None
+    on persistent failure so the pipeline can save NULL band."""
+    system_prompt = build_writing_system_prompt(task_number=task_number, target_band=None)
 
-Scoring criteria:
-- Task fulfillment (did they address all required points?)
-- Organization and coherence
-- Appropriate tone and register
-- Vocabulary range and accuracy
-- Grammatical accuracy and complexity
-
-Return strictly: {"estimated_band": <integer>}"""
-
-
-async def _estimate_band(
-    essay_text:         str,
-    prompt_text:        str,
-    task_number:        int,
-    sample_band12:      str = "",
-    time_limit_seconds: int = 1800,
-) -> tuple[int | None, str]:
-    """Lightweight LLM call — returns a single band score, no dimensions.
-
-    When a prompt-specific Band 12 sample is available, it is appended to the
-    system prompt so the model calibrates against the ideal response for this
-    exact question.
-
-    Retries up to AI_MAX_RETRIES times on HTTP 429 (rate-limit) with
-    exponential backoff, honouring the Retry-After header when present.
-    All other HTTP errors are re-raised immediately.
-    Returns (None, model) on permanent failure so callers can store NULL
-    instead of a misleading band=0.
-    """
     provider = OpenAIProvider()
-    model    = settings.AI_SCORING_MODEL
-
-    # Scale max_chars: 3 chars/sec is a reasonable Band 12 writing rate.
-    max_chars = max(400, time_limit_seconds * 3)
-    system_prompt = _BAND_ESTIMATOR_SYSTEM
-    if sample_band12 and sample_band12.strip():
-        anchor = sample_band12.strip()[:max_chars]
-        system_prompt = (
-            system_prompt
-            + "\n\n### Prompt-Specific Band 12 Reference\n"
-            + "Use the following as your primary calibration anchor (do NOT copy it):\n"
-            + anchor
-        )
-
-    user_content = (
-        f"Task {task_number} prompt:\n{prompt_text}\n\n"
-        f"Candidate essay:\n{essay_text or '[no essay submitted]'}"
-    )
-
-    payload = {
-        "model":           model,
-        "response_format": {"type": "json_object"},
-        "messages": [
-            {"role": "system", "content": system_prompt},
-            {"role": "user",   "content": user_content},
-        ],
-        "max_tokens": 50,
-        "temperature": 0.1,
-    }
-
-    max_retries = settings.AI_MAX_RETRIES  # default 3, configurable in .env
-    last_exc: Exception | None = None
-
     try:
-        for attempt_num in range(max_retries):
-            try:
-                resp = await provider._client.post("/chat/completions", json=payload)
-
-                # Handle rate-limit: back off then retry
-                if resp.status_code == 429:
-                    retry_after = float(resp.headers.get("Retry-After", 2 ** attempt_num))
-                    wait = min(retry_after, 60.0)  # cap at 60s
-                    logger.warning(
-                        "OpenAI 429 for task %d (attempt %d/%d). Waiting %.1fs before retry.",
-                        task_number, attempt_num + 1, max_retries, wait,
-                    )
-                    await asyncio.sleep(wait)
-                    last_exc = Exception(f"429 Too Many Requests after {attempt_num + 1} attempts")
-                    continue
-
-                # All other HTTP errors surface immediately (no retry)
-                resp.raise_for_status()
-
-                body = resp.json()
-                data = json.loads(body["choices"][0]["message"]["content"])
-                band = int(data.get("estimated_band", 0))
-                # Clamp to valid CELPIP range — whole integers only
-                band = max(1, min(12, band))
-                return band, model  # success — exit retry loop
-
-            except Exception as exc:
-                if "429" in str(exc) or "Too Many Requests" in str(exc):
-                    # Raised by raise_for_status() on a 429 — same backoff
-                    wait = 2.0 ** attempt_num
-                    logger.warning(
-                        "OpenAI 429 exception for task %d (attempt %d/%d). Waiting %.1fs.",
-                        task_number, attempt_num + 1, max_retries, wait,
-                    )
-                    await asyncio.sleep(wait)
-                    last_exc = exc
-                    continue
-                # Non-retriable error — log and return None
-                logger.exception(
-                    "Band estimation failed (non-retriable) for task %d", task_number
-                )
-                return None, model
-
-        # Exhausted all retries
-        logger.error(
-            "Band estimation failed for task %d after %d retries: %s",
-            task_number, max_retries, last_exc,
-        )
-        return None, model
-
+        try:
+            result = await provider.score_writing(
+                essay_text=essay_text,
+                prompt_text=prompt_text,
+                system_prompt=system_prompt,
+            )
+        except Exception as exc:
+            logger.error(
+                "Mock scoring call failed (all retries exhausted): attempt=%s err=%s",
+                attempt_id, exc,
+            )
+            return None
+        try:
+            await log_cost(db, attempt_id, "openai", settings.AI_WRITING_MODEL, "scoring", result.usage)
+        except Exception:
+            logger.exception("Mock cost logging failed: attempt=%s", attempt_id)
+        return result
     finally:
         await provider.aclose()
 
 
-# ── Persist ────────────────────────────────────────────────────────────────────
+# ── Stage 2: persist + complete ────────────────────────────────────────────────
 
 async def _save_result(
-    db:              AsyncSession,
-    attempt_id:      UUID,
-    estimated_band:  int | None,
-    scoring_model:   str,
+    db: AsyncSession,
+    attempt_id: UUID,
+    *,
+    estimated_band: int | None,
+    likely_range: str | None,
+    raw_rubric_json: dict | None,
 ) -> None:
-    """Write a ScoreReport with just the band estimate — no dimensions.
+    """Write the ScoreReport with band + audit only (no dimensions, no feedback).
 
-    estimated_band is stored as NULL when scoring failed (e.g. persistent
-    rate-limit) so the UI can distinguish 'failed to score' from 'band = 0'.
+    estimated_band=NULL means the scoring run failed; the UI distinguishes this
+    from band=0.
     """
     report = ScoreReport(
         attempt_id=attempt_id,
-        estimated_band=estimated_band,  # None = scoring unavailable
-        scoring_model=scoring_model,
-        raw_rubric_json=None,
+        estimated_band=estimated_band,
+        scoring_model=settings.AI_WRITING_MODEL,
+        raw_rubric_json=raw_rubric_json,
+        schema_version=SCHEMA_VERSION,
+        likely_range=likely_range or None,
     )
     db.add(report)
     await db.flush()

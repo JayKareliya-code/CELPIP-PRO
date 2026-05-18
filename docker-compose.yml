@@ -82,7 +82,11 @@ services:
       jaeger:
         condition: service_healthy
     healthcheck:
-      test:     ["CMD-SHELL", "python -c \"import urllib.request; urllib.request.urlopen('http://localhost:8000/api/v1/health')\" || exit 1"]
+      # Point Docker's HEALTHCHECK at /health/live so a transient Redis or
+      # Postgres blip doesn't restart the container. The combined dependency
+      # probe (/health, /health/ready) belongs on the orchestrator's
+      # readinessProbe / load balancer, not on container liveness.
+      test:     ["CMD-SHELL", "python -c \"import urllib.request; urllib.request.urlopen('http://localhost:8000/api/v1/health/live')\" || exit 1"]
       interval: 10s
       timeout:  5s
       retries:  5

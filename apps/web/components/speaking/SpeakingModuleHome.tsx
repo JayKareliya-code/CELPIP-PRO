@@ -19,6 +19,8 @@ import { Mic } from "lucide-react";
 import { BreadcrumbNav } from "@/components/layout/BreadcrumbNav";
 import { SpeakingTaskCard } from "@/components/speaking/SpeakingTaskCard";
 import { StarterUpsellCards } from "@/components/upgrade/StarterUpsellCards";
+import { RetryCreditsBanner } from "@/components/retry-credits/RetryCreditsBanner";
+import { MicPermissionNotice } from "@/components/speaking/MicPermissionNotice";
 import { useSpeakingQuota } from "@/lib/hooks/useSpeakingQuota";
 import { useQuota } from "@/lib/hooks/useQuota";
 import { useTaskModuleAccess } from "@/lib/hooks/useTaskModuleAccess";
@@ -44,23 +46,24 @@ function ModuleHomeSkeleton({ taskCount }: { taskCount: number }) {
       {/* Breadcrumb */}
       <BreadcrumbNav />
 
-      {/* Header row skeleton */}
-      <div className="flex items-center justify-between gap-4 flex-wrap">
-        {/* Title skeleton */}
-        <div className="flex items-center gap-3 shrink-0">
-          <div className="w-11 h-11 rounded-xl bg-white/[0.05] border border-white/[0.07] animate-pulse" />
-          <div className="space-y-2">
-            <div className="h-6 w-44 rounded-lg bg-white/[0.05] animate-pulse" />
-            <div className="h-3.5 w-28 rounded bg-white/[0.04] animate-pulse" />
+      {/* Header row skeleton — 2-column grid with equal heights */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 items-stretch">
+        {/* Left: title + retry banner stacked */}
+        <div className="flex flex-col justify-between gap-3 min-w-0">
+          <div className="flex items-center gap-3">
+            <div className="w-11 h-11 rounded-xl bg-white/[0.05] border border-white/[0.07] animate-pulse" />
+            <div className="space-y-2">
+              <div className="h-6 w-44 rounded-lg bg-white/[0.05] animate-pulse" />
+              <div className="h-3.5 w-28 rounded bg-white/[0.04] animate-pulse" />
+            </div>
           </div>
+          <div className="h-[56px] rounded-2xl border border-white/[0.07] bg-white/[0.03] animate-pulse" />
         </div>
 
-        {/* Upsell cards skeleton */}
-        <div className="flex-1 min-w-0 max-w-xl">
-          <div className="grid grid-cols-2 gap-3">
-            <div className="h-[118px] rounded-2xl border border-white/[0.07] bg-white/[0.03] animate-pulse" />
-            <div className="h-[118px] rounded-2xl border border-white/[0.07] bg-white/[0.03] animate-pulse" />
-          </div>
+        {/* Right: upsell cards — stack on phones to match the real component */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div className="h-[118px] rounded-2xl border border-white/[0.07] bg-white/[0.03] animate-pulse" />
+          <div className="h-[118px] rounded-2xl border border-white/[0.07] bg-white/[0.03] animate-pulse" />
         </div>
       </div>
 
@@ -141,21 +144,36 @@ export function SpeakingModuleHome({ tasks }: SpeakingModuleHomeProps) {
       {/* Breadcrumb */}
       <BreadcrumbNav />
 
-      {/* ── Header row: title on left, upsell cards on right ──────────────── */}
-      <div className="flex items-center justify-between gap-4 flex-wrap">
-        {/* Title */}
-        <div className="flex items-center gap-3 shrink-0">
-          <div className="w-11 h-11 rounded-xl bg-amber-600/20 border border-amber-500/30 flex items-center justify-center shrink-0">
-            <Mic className="w-5 h-5 text-amber-400" />
+      {/* Mic permission prompt — only renders when permission is not granted */}
+      <MicPermissionNotice />
+
+      {/* ── Header row: 2-column grid, equal-height columns ────────────────
+          Left:  title block + retry-credits banner stacked vertically
+          Right: upsell / stat cards
+          items-stretch (grid default) keeps the column heights aligned so the
+          title + retry banner reads as a single cohesive panel matching the
+          upsell cards' height. */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 items-stretch">
+        {/* Left column */}
+        <div className="flex flex-col justify-between gap-3 min-w-0">
+          {/* Title */}
+          <div className="flex items-center gap-3">
+            <div className="w-11 h-11 rounded-xl bg-amber-600/20 border border-amber-500/30 flex items-center justify-center shrink-0">
+              <Mic className="w-5 h-5 text-amber-400" />
+            </div>
+            <div>
+              <h1 className="text-2xl font-bold text-foreground">Speaking Module</h1>
+              <p className="text-sm text-subtle mt-0.5">8 tasks | Tasks 1-8</p>
+            </div>
           </div>
-          <div>
-            <h1 className="text-2xl font-bold text-foreground">Speaking Module</h1>
-            <p className="text-sm text-subtle mt-0.5">8 tasks | Tasks 1-8</p>
-          </div>
+
+          {/* Retry credits banner — sits below the title, stretches to match
+              the upsell cards' height on the right. */}
+          <RetryCreditsBanner />
         </div>
 
-        {/* Upsell / stat cards */}
-        <div className="flex-1 min-w-0 max-w-xl">
+        {/* Right column — upsell / stat cards */}
+        <div className="min-w-0">
           <StarterUpsellCards module="speaking" />
         </div>
       </div>

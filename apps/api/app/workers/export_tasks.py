@@ -14,7 +14,8 @@ import io
 import json
 import uuid
 import zipfile
-from datetime import datetime, timedelta, timezone
+from datetime import date, datetime, timedelta, timezone
+from decimal import Decimal
 
 import structlog
 from celery import shared_task
@@ -35,19 +36,48 @@ def _rows_to_list(rows) -> list[dict]:
 
 
 def _serialize(obj):
-    """JSON default handler for UUID / datetime objects."""
+    """JSON default handler for non-standard Python types that show up in rows.
+
+    Covers every SQL column type we currently expose in the export:
+      UUID         — users.id, attempts.id, all *_id FKs
+      datetime     — created_at, updated_at, expires_at, etc. (TIMESTAMP cols)
+      date         — users.last_active_date (DATE col)
+      Decimal      — users.target_band, ai_cost_log.estimated_cost_usd (NUMERIC)
+      bytes        — defensive: rare, but bytea columns would crash json otherwise
+    """
     if isinstance(obj, uuid.UUID):
         return str(obj)
     if isinstance(obj, datetime):
         return obj.isoformat()
+    if isinstance(obj, date):
+        return obj.isoformat()
+    if isinstance(obj, Decimal):
+        # Use string to preserve precision; downstream tools that need a float
+        # can parse it back. Avoids silent float-rounding on the way out.
+        return str(obj)
+    if isinstance(obj, (bytes, bytearray)):
+        return obj.decode("utf-8", errors="replace")
     raise TypeError(f"Object of type {type(obj)} is not JSON serializable")
 
 
-# Columns excluded from the export — internal system flags, not the user's
-# personal data. Add new internal-only columns here as they are introduced so
-# a future column can never silently leak into the SELECT * dumps below.
+# Columns excluded from the export — internal system fields that aren't the
+# user's personal data. Add new internal-only columns here as they're introduced
+# so a future column can never silently leak into the SELECT * dumps below.
+#
+# Categories of redaction:
+#   - Admin flags                         → users.is_admin
+#   - AI / scoring internals              → raw rubric JSON, model names, schema
+#                                            version (reveals business logic)
+#   - Internal Stripe identifiers         → customer_id, payment_intent_id, pi_id
+#                                            (operational, not user-facing data)
+#   - Internal grant/spend source refs    → retry_credit_ledger.source_ref holds
+#                                            Stripe PI ids
 _EXCLUDE_COLUMNS: dict[str, set[str]] = {
     "user": {"is_admin"},
+    "score_reports": {"raw_rubric_json", "scoring_model", "schema_version"},
+    "subscriptions": {"stripe_customer_id", "stripe_payment_intent_id"},
+    "addon_credits": {"stripe_pi_id"},
+    "retry_credit_ledger": {"source_ref"},
 }
 
 
@@ -59,6 +89,11 @@ _EXCLUDE_COLUMNS: dict[str, set[str]] = {
     acks_late=True,
     max_retries=2,
     default_retry_delay=60,
+    # Building a full GDPR export (every attempt + audio + reports zipped and
+    # uploaded to S3) can legitimately take longer than the global 5-min cap
+    # for a heavy account. Override both limits to 20 / 25 minutes.
+    soft_time_limit=20 * 60,
+    time_limit=25 * 60,
 )
 def build_user_export(self, job_id: str, user_id: str) -> None:  # noqa: ANN001
     """
@@ -78,12 +113,46 @@ def build_user_export(self, job_id: str, user_id: str) -> None:  # noqa: ANN001
     jid = uuid.UUID(job_id)
     log.info("export: starting", job_id=job_id, user_id=user_id)
 
+    # ── 0. Fail fast on placeholder AWS credentials ───────────────────────
+    # The S3 upload silently hangs / times out for ~minutes if creds are the
+    # default REPLACE_ME sentinel. Catch this up front and surface a clear
+    # failure to the user instead of letting them sit on "Building your
+    # export…" indefinitely.
+    if not settings.AWS_ACCESS_KEY_ID or settings.AWS_ACCESS_KEY_ID == "REPLACE_ME":
+        msg = (
+            "AWS credentials are not configured. Set AWS_ACCESS_KEY_ID and "
+            "AWS_SECRET_ACCESS_KEY in the API .env (or wire up Cloudflare R2 "
+            "via S3_ENDPOINT_URL) before requesting a data export."
+        )
+        log.error("export: aborting — no AWS credentials", job_id=job_id)
+        with Session(engine) as db:
+            db.execute(
+                text(
+                    "UPDATE export_jobs SET status='failed', error_message=:msg "
+                    "WHERE id = :id"
+                ),
+                {"msg": msg, "id": jid},
+            )
+            db.commit()
+        return
+
     with Session(engine) as db:
-        # ── 1. Mark processing ─────────────────────────────────────────────
-        db.execute(
+        # ── 1. Verify the row exists + mark processing ─────────────────────
+        # If the producer's transaction hadn't committed when this task was
+        # picked up, the row would be invisible and the UPDATE would affect
+        # zero rows. The producer now commits before enqueueing, but this
+        # guard makes the failure mode loud instead of silent.
+        result = db.execute(
             text("UPDATE export_jobs SET status='processing' WHERE id = :id"),
             {"id": jid},
         )
+        if result.rowcount == 0:
+            db.rollback()
+            log.error(
+                "export: job row missing — refusing to do work",
+                job_id=job_id, user_id=user_id,
+            )
+            return
         db.commit()
 
         try:
@@ -147,10 +216,46 @@ def build_user_export(self, job_id: str, user_id: str) -> None:  # noqa: ANN001
                 ).mappings()
             )
 
-            # AI cost log
-            tables["ai_cost_log"] = _rows_to_list(
+            # Per-dimension scores — joined through score_reports → attempts.
+            # Gives the user their content_coherence / vocabulary / etc.
+            # breakdown alongside the overall band in score_reports.json.
+            tables["score_dimensions"] = _rows_to_list(
                 db.execute(
-                    text("SELECT * FROM ai_cost_log WHERE user_id = :uid ORDER BY created_at"),
+                    text(
+                        "SELECT sd.* FROM score_dimensions sd "
+                        "JOIN score_reports sr ON sr.id = sd.report_id "
+                        "JOIN attempts a       ON a.id  = sr.attempt_id "
+                        "WHERE a.user_id = :uid"
+                    ),
+                    {"uid": uid},
+                ).mappings()
+            )
+
+            # NOTE: ai_cost_log is intentionally NOT exported. It's our
+            # internal token/cost tracking — not user data. The user already
+            # sees their attempt history (attempts.json) and feedback
+            # (feedback_reports.json); they don't need our cost audit log.
+
+            # Feedback reports — joined through attempts
+            tables["feedback_reports"] = _rows_to_list(
+                db.execute(
+                    text(
+                        "SELECT fr.* FROM feedback_reports fr "
+                        "JOIN attempts a ON a.id = fr.attempt_id "
+                        "WHERE a.user_id = :uid"
+                    ),
+                    {"uid": uid},
+                ).mappings()
+            )
+
+            # Transcripts (speaking attempts) — joined through attempts
+            tables["transcripts"] = _rows_to_list(
+                db.execute(
+                    text(
+                        "SELECT t.* FROM transcripts t "
+                        "JOIN attempts a ON a.id = t.attempt_id "
+                        "WHERE a.user_id = :uid"
+                    ),
                     {"uid": uid},
                 ).mappings()
             )
@@ -159,6 +264,25 @@ def build_user_export(self, job_id: str, user_id: str) -> None:  # noqa: ANN001
             tables["subscriptions"] = _rows_to_list(
                 db.execute(
                     text("SELECT * FROM subscriptions WHERE user_id = :uid"),
+                    {"uid": uid},
+                ).mappings()
+            )
+
+            # Add-on credits — purchase history (per-user)
+            tables["addon_credits"] = _rows_to_list(
+                db.execute(
+                    text("SELECT * FROM addon_credits WHERE user_id = :uid ORDER BY created_at"),
+                    {"uid": uid},
+                ).mappings()
+            )
+
+            # Retry credit ledger — every grant/spend (per-user audit trail)
+            tables["retry_credit_ledger"] = _rows_to_list(
+                db.execute(
+                    text(
+                        "SELECT * FROM retry_credit_ledger "
+                        "WHERE user_id = :uid ORDER BY created_at"
+                    ),
                     {"uid": uid},
                 ).mappings()
             )
@@ -212,7 +336,7 @@ def build_user_export(self, job_id: str, user_id: str) -> None:  # noqa: ANN001
             expires_at = datetime.now(timezone.utc) + timedelta(hours=24)
 
             # ── 6. Mark complete ───────────────────────────────────────────
-            db.execute(
+            done = db.execute(
                 text(
                     "UPDATE export_jobs "
                     "SET status='complete', s3_url=:url, expires_at=:exp "
@@ -221,10 +345,29 @@ def build_user_export(self, job_id: str, user_id: str) -> None:  # noqa: ANN001
                 {"url": download_url, "exp": expires_at, "id": jid},
             )
             db.commit()
-            log.info("export: complete", job_id=job_id)
+            if done.rowcount == 0:
+                # Should never happen — the row was confirmed at task start.
+                # Log so we can investigate without the user being stuck.
+                log.error(
+                    "export: status='complete' UPDATE affected 0 rows; "
+                    "zip uploaded but row not updated",
+                    job_id=job_id,
+                )
+            else:
+                log.info("export: complete", job_id=job_id)
 
         except Exception as exc:  # noqa: BLE001
             log.exception("export: failed", job_id=job_id, error=str(exc))
+            # A psycopg2 error inside the try block leaves the transaction in
+            # an aborted state — subsequent statements raise InFailedSqlTransaction
+            # until we rollback. Roll back BEFORE trying to write the failed
+            # status, otherwise the user is stuck on "processing" forever.
+            try:
+                db.rollback()
+            except Exception:
+                # Rollback itself shouldn't fail, but never propagate over the
+                # original exception if it does.
+                log.exception("export: rollback failed", job_id=job_id)
             db.execute(
                 text(
                     "UPDATE export_jobs "

@@ -107,6 +107,12 @@ class ScoringResult:
     # Single sentence: what specific skill jump would move the user up 0.5 bands
     next_milestone: str = ""
 
+    # Judge's step-by-step reasoning trace (writing pipeline only; "" elsewhere).
+    # Walked the model through each dimension with quoted evidence before the
+    # numeric scores were assigned. Use this to diagnose mis-scoring without
+    # having to re-run the LLM.
+    scoring_rationale: str = ""
+
     # Raw JSON from the model (stored for debugging / re-scoring without re-calling)
     raw_json: dict = field(default_factory=dict)
 

@@ -14,6 +14,7 @@ import { PlayCircle } from "lucide-react";
 import { BreadcrumbNav }          from "@/components/layout/BreadcrumbNav";
 import { PracticeSkillCard }      from "@/components/practice/PracticeSkillCard";
 import { StarterUpsellCards }     from "@/components/upgrade/StarterUpsellCards";
+import { RetryCreditsBanner }     from "@/components/retry-credits/RetryCreditsBanner";
 import { usePracticeQuota }       from "@/lib/hooks/usePracticeQuota";
 import { useCurrentUser }         from "@/lib/hooks/useCurrentUser";
 import {
@@ -47,23 +48,33 @@ export function PracticeHub({ user: serverUser }: PracticeHubProps) {
     <div className="space-y-6">
       <BreadcrumbNav />
 
-      {/* ── Header row: title on left, upsell cards / stats on right ───────── */}
-      <div className="flex items-center justify-between gap-4 flex-wrap">
-        {/* Title */}
-        <div className="flex items-center gap-3 shrink-0">
-          <div className="w-11 h-11 rounded-xl bg-amber-600/20 border border-amber-500/30 flex items-center justify-center shrink-0">
-            <PlayCircle className="w-5 h-5 text-amber-400" />
+      {/* ── Header row: 2-column grid, equal-height columns ────────────────
+          Left:  title block + retry-credits banner stacked vertically
+          Right: upsell / stat cards
+          items-stretch keeps the column heights aligned so the title + retry
+          banner reads as a single cohesive panel matching the upsell cards. */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 items-stretch">
+        {/* Left column */}
+        <div className="flex flex-col justify-between gap-3 min-w-0">
+          {/* Title */}
+          <div className="flex items-center gap-3">
+            <div className="w-11 h-11 rounded-xl bg-amber-600/20 border border-amber-500/30 flex items-center justify-center shrink-0">
+              <PlayCircle className="w-5 h-5 text-amber-400" />
+            </div>
+            <div>
+              <h1 className="text-2xl font-bold text-foreground">Mock Tests</h1>
+              <p className="text-sm text-subtle mt-0.5">
+                Full-length timed mock exams · Speaking &amp; Writing · AI scored
+              </p>
+            </div>
           </div>
-          <div>
-            <h1 className="text-2xl font-bold text-foreground">Mock Tests</h1>
-            <p className="text-sm text-subtle mt-0.5">
-              Full-length timed mock exams · Speaking &amp; Writing · AI scored
-            </p>
-          </div>
+
+          {/* Retry credits banner */}
+          <RetryCreditsBanner />
         </div>
 
-        {/* Upsell / stat cards — StarterUpsellCards handles both starter & pro */}
-        <div className="flex-1 min-w-0 max-w-xl">
+        {/* Right column — upsell / stat cards */}
+        <div className="min-w-0">
           <StarterUpsellCards module="mock" />
         </div>
       </div>

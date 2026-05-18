@@ -39,6 +39,27 @@ celery_app.conf.update(
     worker_prefetch_multiplier=1,     # one task at a time per worker process
     task_track_started=True,
     result_expires=86_400,            # results expire after 24 h
+
+    # ── Time limits ──────────────────────────────────────────────────────────
+    # Hard caps so a stuck OpenAI call or a runaway pipeline cannot pin a
+    # worker indefinitely. Soft limit fires a SoftTimeLimitExceeded inside the
+    # task (so the pipeline can clean up DB rows and ack); hard limit kills
+    # the worker process if the soft limit is ignored.
+    #
+    #   AI scoring pipelines have an outer budget of ~5 min (Whisper STT can
+    #   take ~2 min on slow uploads + ~2 min scoring + retry slack).
+    #   The export task can legitimately run longer and overrides these.
+    task_soft_time_limit=300,
+    task_time_limit=360,
+
+    # ── Retry behaviour ──────────────────────────────────────────────────────
+    # The defaults below apply to every @shared_task that doesn't set its own.
+    # Exponential backoff prevents thundering-herd retries during a provider
+    # outage, and jitter spreads retries across workers. autoretry_for is
+    # intentionally NOT set here — providers narrow retryable exceptions in
+    # their own decorators (see openai_provider.py) so we don't blindly
+    # retry 4xx errors that will never succeed.
+    task_default_retry_delay=30,
     # Write the beat schedule DB to /tmp so the non-root container user
     # (appuser) has write permission on Render and other locked-down hosts.
     beat_schedule_filename="/tmp/celerybeat-schedule",

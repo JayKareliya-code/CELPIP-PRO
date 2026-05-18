@@ -1,26 +1,54 @@
 "use client";
 
+// ─────────────────────────────────────────────────────────────────────────────
+// ImprovementTipsAccordion.tsx — Coaching drill list
+//
+// Subtle theme-matched styling. Uses the site's amber-gold primary (#C8963E)
+// for accents — no bright tints, no colored fills. Priority is conveyed by a
+// thin left rule and a single muted dot rather than loud severity pills.
+// ─────────────────────────────────────────────────────────────────────────────
+
 import { useState } from "react";
 import { ChevronDown, Wrench, HelpCircle, Zap, BookOpen } from "lucide-react";
 import type { ReportImprovementTip } from "@/lib/types";
 import { LockedBlurOverlay } from "./LockedBlurOverlay";
 
-// Priority is index-based — AI already orders tips by importance.
-// High = tip 0, Medium = tip 1, Good to Fix = tip 2+
-function priorityBadge(index: number, total: number): {
-  label: string; text: string; bg: string; border: string;
-} {
+// ── Priority helpers ──────────────────────────────────────────────────────────
+//
+// Tips arrive ordered by impact (AI promise). We map index → a quiet priority
+// label and a tiny dot colour. The dot is the ONLY hue beyond the amber-gold
+// accent — it gives an at-a-glance scan without a loud pill.
+
+type Priority = { label: string; dotClass: string; railClass: string };
+
+function priorityFor(index: number, total: number): Priority {
   if (index === 0)
-    return { label: "High Impact",   text: "text-rose-400",  bg: "bg-rose-400/10",   border: "border-rose-400/20" };
-  if (index === 1 || index < Math.ceil(total / 2))
-    return { label: "Medium",        text: "text-amber-400", bg: "bg-amber-400/10",  border: "border-amber-400/20" };
-  return   { label: "Good to Fix",  text: "text-white/35",  bg: "bg-white/[0.04]",  border: "border-white/[0.08]" };
+    return {
+      label:     "High impact",
+      dotClass:  "bg-primary",                // amber-gold
+      railClass: "before:bg-primary/45",
+    };
+  if (index < Math.ceil(total / 2))
+    return {
+      label:     "Medium impact",
+      dotClass:  "bg-primary/55",
+      railClass: "before:bg-primary/20",
+    };
+  return {
+    label:     "Polish",
+    dotClass:  "bg-white/25",
+    railClass: "before:bg-white/[0.08]",
+  };
 }
+
+// ── Props ─────────────────────────────────────────────────────────────────────
 
 interface Props {
   tips:    ReportImprovementTip[];
   locked?: boolean;
 }
+
+// ── Tip card ──────────────────────────────────────────────────────────────────
 
 function TipCard({ tip, index, total, defaultOpen }: {
   tip: ReportImprovementTip;
@@ -29,11 +57,17 @@ function TipCard({ tip, index, total, defaultOpen }: {
   defaultOpen: boolean;
 }) {
   const [open, setOpen] = useState(defaultOpen);
-  const hasDetail = tip.why || tip.how || tip.example;
+  const hasDetail = Boolean(tip.why || tip.how || tip.example);
+  const p = priorityFor(index, total);
 
   return (
     <div
-      className="rounded-xl border border-border bg-white/[0.02] overflow-hidden border-l-2 border-l-amber-500 animate-fade-in"
+      className={[
+        "relative rounded-xl border border-border bg-white/[0.015] overflow-hidden animate-fade-in",
+        // Thin coloured rail on the left, drawn with a ::before
+        "before:content-[''] before:absolute before:left-0 before:top-0 before:bottom-0 before:w-[2px]",
+        p.railClass,
+      ].join(" ")}
       style={{ animationDelay: `${index * 60}ms`, animationFillMode: "both" }}
     >
       {/* Title row */}
@@ -41,34 +75,30 @@ function TipCard({ tip, index, total, defaultOpen }: {
         onClick={() => hasDetail && setOpen((o) => !o)}
         className={[
           "flex w-full items-center gap-3 px-4 py-3.5 text-left transition-colors",
-          hasDetail ? "hover:bg-white/[0.03] cursor-pointer" : "cursor-default",
+          hasDetail ? "hover:bg-white/[0.025] cursor-pointer" : "cursor-default",
         ].join(" ")}
         aria-expanded={open}
         disabled={!hasDetail}
       >
-        {/* Number badge */}
-        <span className="flex-shrink-0 h-6 w-6 flex items-center justify-center rounded-full bg-amber-500/15 border border-amber-500/30 text-[11px] font-bold tabular-nums text-amber-400">
+        {/* Number — outline only, no colour fill */}
+        <span className="flex-shrink-0 h-6 w-6 flex items-center justify-center rounded-full border border-white/15 text-[11px] font-bold tabular-nums text-white/55">
           {index + 1}
         </span>
 
-        {/* Priority badge */}
-        {(() => {
-          const p = priorityBadge(index, total);
-          return (
-            <span className={`flex-shrink-0 rounded-full border px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide ${p.text} ${p.bg} ${p.border}`}>
-              {p.label}
-            </span>
-          );
-        })()}
-
         {/* Title */}
-        <span className="flex-1 text-[15px] font-semibold text-white leading-snug">
+        <span className="flex-1 text-[15px] font-semibold text-white/90 leading-snug">
           {tip.title || tip.why || "Improvement Tip"}
+        </span>
+
+        {/* Subtle priority indicator — dot + label, hidden on small screens */}
+        <span className="hidden sm:flex flex-shrink-0 items-center gap-1.5 text-[10px] font-medium uppercase tracking-wider text-white/35">
+          <span className={`h-1.5 w-1.5 rounded-full ${p.dotClass}`} />
+          {p.label}
         </span>
 
         {hasDetail && (
           <ChevronDown
-            className={`h-4 w-4 flex-shrink-0 text-white/40 transition-transform duration-200 ${open ? "rotate-180" : ""}`}
+            className={`h-4 w-4 flex-shrink-0 text-white/35 transition-transform duration-200 ${open ? "rotate-180" : ""}`}
           />
         )}
       </button>
@@ -80,33 +110,32 @@ function TipCard({ tip, index, total, defaultOpen }: {
           style={{ gridTemplateRows: open ? "1fr" : "0fr" }}
         >
           <div className="overflow-hidden">
-            <div className="border-t border-border/60 flex flex-col divide-y divide-border/40">
+            <div className="border-t border-border/60 flex flex-col">
 
-              {/* WHY — context row: visible but clearly secondary */}
+              {/* WHY — context, secondary tone */}
               {tip.why && (
-                <div className="flex items-start gap-3 px-4 py-3">
+                <div className="flex items-start gap-3 px-4 py-3.5">
                   <div className="flex items-center gap-1.5 flex-shrink-0 w-20 pt-0.5">
-                    <HelpCircle className="h-3 w-3 text-white/35" />
+                    <HelpCircle className="h-3 w-3 text-white/30" />
                     <span className="text-[10px] font-bold uppercase tracking-widest text-white/35">Why</span>
                   </div>
                   <p className="text-sm leading-relaxed text-white/65">{tip.why}</p>
                 </div>
               )}
 
-              {/* HOW — the drill: loudest, most actionable */}
+              {/* HOW — the drill: most important, marked by a subtle amber inset */}
               {tip.how && (
-                <div className="flex items-start gap-3 px-4 py-3 bg-amber-500/[0.05]">
+                <div className="flex items-start gap-3 px-4 py-3.5 border-t border-border/40 bg-primary/[0.025]">
                   <div className="flex items-center gap-1.5 flex-shrink-0 w-20 pt-0.5">
-                    <Zap className="h-3 w-3 text-amber-400" />
-                    <span className="text-[10px] font-bold uppercase tracking-widest text-amber-400">How</span>
+                    <Zap className="h-3 w-3 text-primary/80" />
+                    <span className="text-[10px] font-bold uppercase tracking-widest text-primary/80">Drill</span>
                   </div>
-                  <p className="text-[15px] font-semibold leading-relaxed text-white">{tip.how}</p>
+                  <p className="text-[14px] leading-relaxed text-white/85">{tip.how}</p>
                 </div>
               )}
 
-              {/* EXAMPLE — BEFORE → AFTER rewrite block */}
+              {/* EXAMPLE — BEFORE → AFTER rewrite block, muted treatment */}
               {tip.example && (() => {
-                // Parse "BEFORE: ... → AFTER: ..." format
                 const arrowIdx = tip.example.indexOf(" → ");
                 const hasBefore = tip.example.toUpperCase().startsWith("BEFORE:");
                 const hasAfter  = arrowIdx !== -1 && tip.example.toUpperCase().includes("AFTER:");
@@ -115,35 +144,35 @@ function TipCard({ tip, index, total, defaultOpen }: {
                   const beforeRaw = tip.example.slice(0, arrowIdx).replace(/^BEFORE:\s*/i, "").trim();
                   const afterRaw  = tip.example.slice(arrowIdx + 3).replace(/^AFTER:\s*/i, "").trim();
                   return (
-                    <div className="flex items-start gap-3 px-4 py-3">
+                    <div className="flex items-start gap-3 px-4 py-3.5 border-t border-border/40">
                       <div className="flex items-center gap-1.5 flex-shrink-0 w-20 pt-0.5">
-                        <BookOpen className="h-3 w-3 text-white/50" />
-                        <span className="text-[10px] font-bold uppercase tracking-widest text-white/50">Rewrite</span>
+                        <BookOpen className="h-3 w-3 text-white/30" />
+                        <span className="text-[10px] font-bold uppercase tracking-widest text-white/35">Rewrite</span>
                       </div>
-                      <div className="flex flex-col gap-1.5 min-w-0">
-                        {/* BEFORE */}
+                      <div className="flex flex-col gap-2 min-w-0">
+                        {/* BEFORE — strikethrough, muted */}
                         <div className="flex items-start gap-2">
-                          <span className="flex-shrink-0 mt-[3px] text-[9px] font-bold uppercase tracking-widest text-rose-400/70 w-10">Before</span>
-                          <p className="text-sm leading-relaxed text-rose-300/80 italic line-through decoration-rose-400/30">{beforeRaw}</p>
+                          <span className="flex-shrink-0 mt-[3px] text-[9px] font-bold uppercase tracking-widest text-white/30 w-12">Before</span>
+                          <p className="text-sm leading-relaxed text-white/45 italic line-through decoration-white/15">{beforeRaw}</p>
                         </div>
-                        {/* AFTER */}
+                        {/* AFTER — full white, with amber accent label */}
                         <div className="flex items-start gap-2">
-                          <span className="flex-shrink-0 mt-[3px] text-[9px] font-bold uppercase tracking-widest text-emerald-400/70 w-10">After</span>
-                          <p className="text-sm leading-relaxed text-emerald-300 font-medium">{afterRaw}</p>
+                          <span className="flex-shrink-0 mt-[3px] text-[9px] font-bold uppercase tracking-widest text-primary/70 w-12">After</span>
+                          <p className="text-sm leading-relaxed text-white/90">{afterRaw}</p>
                         </div>
                       </div>
                     </div>
                   );
                 }
 
-                // Legacy fallback: render as plain italic
+                // Legacy fallback
                 return (
-                  <div className="flex items-start gap-3 px-4 py-3">
+                  <div className="flex items-start gap-3 px-4 py-3.5 border-t border-border/40">
                     <div className="flex items-center gap-1.5 flex-shrink-0 w-20 pt-0.5">
-                      <BookOpen className="h-3 w-3 text-white/50" />
-                      <span className="text-[10px] font-bold uppercase tracking-widest text-white/50">Example</span>
+                      <BookOpen className="h-3 w-3 text-white/30" />
+                      <span className="text-[10px] font-bold uppercase tracking-widest text-white/35">Example</span>
                     </div>
-                    <p className="text-sm leading-relaxed text-white/80 italic">{tip.example}</p>
+                    <p className="text-sm leading-relaxed text-white/75 italic">{tip.example}</p>
                   </div>
                 );
               })()}
@@ -156,6 +185,8 @@ function TipCard({ tip, index, total, defaultOpen }: {
   );
 }
 
+// ── Outer accordion ───────────────────────────────────────────────────────────
+
 export function ImprovementTipsAccordion({ tips, locked }: Props) {
   const [parentOpen, setParentOpen] = useState(true);
 
@@ -163,18 +194,18 @@ export function ImprovementTipsAccordion({ tips, locked }: Props) {
 
   return (
     <div className="rounded-2xl border border-border bg-surface overflow-hidden">
-      {/* Parent header — always visible: title + count badge */}
+      {/* Parent header */}
       <button
         onClick={() => setParentOpen((o) => !o)}
         className="flex w-full items-center justify-between px-5 py-4 text-left hover:bg-white/[0.02] transition-colors"
         aria-expanded={parentOpen}
       >
         <div className="flex items-center gap-2">
-          <Wrench className="h-3.5 w-3.5 text-amber-400" />
-          <span className="text-xs font-bold uppercase tracking-wider text-amber-400">
+          <Wrench className="h-3.5 w-3.5 text-primary/75" />
+          <span className="text-xs font-bold uppercase tracking-wider text-white/70">
             Coaching Drills
           </span>
-          <span className="rounded-full bg-amber-500/10 border border-amber-500/20 px-2 py-0.5 text-[10px] font-semibold text-amber-400">
+          <span className="rounded-full border border-white/10 bg-white/[0.03] px-2 py-0.5 text-[10px] font-semibold tabular-nums text-white/55">
             {tips.length}
           </span>
         </div>
@@ -191,7 +222,6 @@ export function ImprovementTipsAccordion({ tips, locked }: Props) {
         <div className="overflow-hidden">
           <div className="border-t border-border px-4 py-4 flex flex-col gap-2.5">
             {locked ? (
-              /* Locked: show number badges + structure blurred, tip text hidden */
               tips.map((tip, i) => (
                 <LockedBlurOverlay key={i} label={`Tip ${i + 1}`} blurPx={4} opacity={0.28}>
                   <TipCard tip={tip} index={i} total={tips.length} defaultOpen={false} />

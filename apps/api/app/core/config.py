@@ -24,6 +24,13 @@ class Settings(BaseSettings):
     API_V1_PREFIX: str  = "/api/v1"
     DEBUG:         bool = False
 
+    # Dev-only authentication bypass: accept "Bearer test_token_<clerk_id>" as
+    # a valid login. MUST be False outside local development — the validator
+    # below refuses to start if this is True in staging/production. Decoupled
+    # from APP_ENV so a misconfigured staging deploy (env=development by
+    # accident) still cannot expose the bypass.
+    ALLOW_DEV_AUTH_BYPASS: bool = False
+
     # Leave empty to have HOST_IP drive these automatically.
     # Set explicitly in .env to override the auto-compute entirely.
     CORS_ORIGINS:  list[str] = []
@@ -75,6 +82,28 @@ class Settings(BaseSettings):
                 "Check your .env file."
             )
 
+        # Dev auth bypass is hard-gated: it MUST NOT be active outside local
+        # development. Refusing to boot is safer than logging a warning that
+        # nobody sees on a publicly-reachable staging URL.
+        if self.ALLOW_DEV_AUTH_BYPASS and self.APP_ENV != "development":
+            raise ValueError(
+                "ALLOW_DEV_AUTH_BYPASS=True is only permitted when APP_ENV="
+                "'development'. The bypass accepts arbitrary 'test_token_*' "
+                "tokens as a valid login — leaving it on in staging/production "
+                "is a complete authentication bypass."
+            )
+
+        # Stripe webhook secret is required in every non-development env, not
+        # only production. A staging deploy with the endpoint publicly reachable
+        # but no secret accepts unsigned events — an attacker can grant credits
+        # at will. Hard-fail at boot instead.
+        if self.APP_ENV != "development" and not self.STRIPE_WEBHOOK_SECRET:
+            raise ValueError(
+                f"STRIPE_WEBHOOK_SECRET is required when APP_ENV={self.APP_ENV!r}. "
+                "Configure the value from Stripe Dashboard → Developers → "
+                "Webhooks → <endpoint> → Signing secret."
+            )
+
         if self.APP_ENV == "production":
             if self.DEBUG:
                 raise ValueError(
@@ -93,14 +122,22 @@ class Settings(BaseSettings):
                     f"CORS_ORIGINS contains http:// origins in production: {http_origins}. "
                     "Use https:// only."
                 )
-            if not self.STRIPE_WEBHOOK_SECRET:
-                raise ValueError("STRIPE_WEBHOOK_SECRET is required in production.")
+            # STRIPE_WEBHOOK_SECRET requirement is enforced earlier (for all
+            # non-development envs); no need to re-check here.
             if self.AWS_ACCESS_KEY_ID == "REPLACE_ME" or self.AWS_SECRET_ACCESS_KEY == "REPLACE_ME":
                 raise ValueError("AWS credentials are not configured for production.")
             if not self.METRICS_AUTH_TOKEN:
                 raise ValueError(
                     "METRICS_AUTH_TOKEN is required in production to protect the "
                     "/metrics endpoint from public access."
+                )
+            if not self.CLERK_JWT_AUDIENCE:
+                raise ValueError(
+                    "CLERK_JWT_AUDIENCE is required in production. Set it to this "
+                    "API's origin (e.g. 'https://api.celpippro.com') and configure "
+                    "the matching `aud` claim in your Clerk JWT template — "
+                    "otherwise a token minted by another Clerk app could be "
+                    "replayed against this API."
                 )
 
         return self
@@ -116,6 +153,12 @@ class Settings(BaseSettings):
     CLERK_SECRET_KEY:      str
     CLERK_PUBLISHABLE_KEY: str
     CLERK_JWKS_URL:        str = "https://api.clerk.dev/v1/jwks"
+    # Expected `aud` claim on incoming Clerk JWTs. Empty string disables `aud`
+    # verification (acceptable in development only). REQUIRED in production:
+    # the prod validator below enforces this. Set this to the API's origin
+    # (e.g. "https://api.celpippro.com") and configure the matching `aud`
+    # claim in your Clerk JWT template.
+    CLERK_JWT_AUDIENCE:    str = ""
 
     # ── AWS S3 / Cloudflare R2 ────────────────────────────────────────────────
     S3_BUCKET_NAME:          str       = "celpip"
@@ -143,6 +186,36 @@ class Settings(BaseSettings):
     # per custom_bundle purchase. Multiplied by cart quantity at webhook time.
     ADDON_CREDITS_PER_PACK: int = 5
 
+    # ── Retry credits ─────────────────────────────────────────────────────────
+    # Single pool of credits a user spends to REDO an already-completed
+    # practice attempt or to retake a mock test. Free plan users get 0 (cannot
+    # retry). Pro plan users get PRO_RETRY_CREDITS_GRANT once at activation
+    # (never refilled — per spec). Add-on purchases top up this same pool.
+    #
+    # All values below are independently tunable so the math can be adjusted
+    # without changing logic. Defaults follow the convention:
+    #   pack credits = (tasks the pack covers) * ADDON_CREDITS_PER_PACK
+    #   mock retry cost = number of tasks in that mock
+    #   mock bundle credits = sum of both mock retry costs (= 1 of each mock)
+
+    # Tasks per skill (matches the CELPIP test format itself).
+    SPEAKING_TASK_COUNT: int = 8
+    WRITING_TASK_COUNT:  int = 2
+
+    # One-time grant on Pro plan activation. Never refilled.
+    PRO_RETRY_CREDITS_GRANT: int = 70
+
+    # Cost in retry credits per redo action.
+    PRACTICE_RETRY_COST:      int = 1   # redo one practice prompt
+    SPEAKING_MOCK_RETRY_COST: int = 8   # retake a speaking mock (8 tasks)
+    WRITING_MOCK_RETRY_COST:  int = 2   # retake a writing mock (2 tasks)
+
+    # Retry credits granted per add-on purchase unit (multiplied by cart qty).
+    WRITING_PACK_RETRY_CREDITS:  int = 10   # = WRITING_TASK_COUNT  * ADDON_CREDITS_PER_PACK
+    SPEAKING_PACK_RETRY_CREDITS: int = 40   # = SPEAKING_TASK_COUNT * ADDON_CREDITS_PER_PACK
+    CUSTOM_BUNDLE_RETRY_CREDITS: int = 5    # = ADDON_CREDITS_PER_PACK (one task's worth)
+    MOCK_BUNDLE_RETRY_CREDITS:   int = 10   # = SPEAKING_MOCK_RETRY_COST + WRITING_MOCK_RETRY_COST
+
     # ── AI Scoring ────────────────────────────────────────────────────────────
     AI_SCORING_PROVIDER:     str = "openai"
     AI_SCORING_MODEL:        str = "gpt-4o-mini"
@@ -153,6 +226,12 @@ class Settings(BaseSettings):
     AI_FEEDBACK_MODEL:       str = "gpt-4o-mini"
     AI_MAX_RETRIES:          int = 3
     AI_TIMEOUT_SECS:         int = 90
+
+    # Writing scoring uses a single LLM call. The system prompt carries inline
+    # Band 6–12 CELPIP calibration anchors plus a weighted-score formula, so
+    # accuracy does not require a judge/coach split. Default model is gpt-4o
+    # (the model the scoring rubric was calibrated against in score_check.py).
+    AI_WRITING_MODEL:        str = "gpt-4o"
 
     OPENAI_API_KEY:    str = ""
     ANTHROPIC_API_KEY: str = ""

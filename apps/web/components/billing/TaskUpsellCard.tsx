@@ -13,10 +13,10 @@
 //   metadata: { task_key: "speaking-task-1" }  ← validated by KNOWN_TASK_KEYS
 // ─────────────────────────────────────────────────────────────────────────────
 
-import { useState }             from "react";
+import { useState } from "react";
 import { Sliders, Check, ShoppingCart } from "lucide-react";
-import { toast }                from "sonner";
-import { useBillingCartStore }  from "@/store/billingCartStore";
+import { toast } from "sonner";
+import { useBillingCartStore } from "@/store/billingCartStore";
 
 // ── Task title maps ───────────────────────────────────────────────────────────
 
@@ -39,13 +39,13 @@ const WRITING_TASK_TITLES: Record<number, string> = {
 // ── Component ─────────────────────────────────────────────────────────────────
 
 interface TaskUpsellCardProps {
-  skill:      "speaking" | "writing";
+  skill: "speaking" | "writing";
   taskNumber: number;
 }
 
 export function TaskUpsellCard({ skill, taskNumber }: TaskUpsellCardProps) {
   const taskTitles = skill === "speaking" ? SPEAKING_TASK_TITLES : WRITING_TASK_TITLES;
-  const taskKeys   = Object.keys(taskTitles).map(Number);
+  const taskKeys = Object.keys(taskTitles).map(Number);
 
   const [selectedTask, setSelectedTask] = useState<number>(taskNumber);
 
@@ -54,13 +54,13 @@ export function TaskUpsellCard({ skill, taskNumber }: TaskUpsellCardProps) {
   const handleAddToCart = () => {
     const taskKey = `${skill}-task-${selectedTask}`; // e.g. "speaking-task-1"
     addItem({
-      id:        `custom-bundle-${taskKey}`,          // unique per task
-      type:      "custom_bundle",
-      name:      "Custom Task Bundle",
-      subtitle:  `Task ${selectedTask} — ${taskTitles[selectedTask] ?? ""}`,
+      id: `custom-bundle-${taskKey}`,          // unique per task
+      type: "custom_bundle",
+      name: "Custom Task Bundle",
+      subtitle: `Task ${selectedTask} — ${taskTitles[selectedTask] ?? ""}`,
       unitPrice: 1.99,
-      currency:  "CAD",
-      metadata:  { task_key: taskKey },               // ← backend validates this key
+      currency: "CAD",
+      metadata: { task_key: taskKey },               // ← backend validates this key
     });
     toast.success("Custom Task Bundle added to cart", {
       description: `Task ${selectedTask} — ${taskTitles[selectedTask] ?? ""}`,
@@ -94,6 +94,12 @@ export function TaskUpsellCard({ skill, taskNumber }: TaskUpsellCardProps) {
         <div className="flex items-center gap-1.5">
           <Check className="w-3 h-3 shrink-0 text-primary" />
           <span className="text-xs text-white/60 leading-tight">Adds 5 questions for selected task</span>
+
+        </div>
+        <div className="flex items-center gap-1.5">
+          <Check className="w-3 h-3 shrink-0 text-primary" />
+          <span className="text-xs text-white/60 leading-tight">Adds 5 retry credits</span>
+
         </div>
 
         {/* Task dropdown — pre-selected to current task */}

@@ -13,7 +13,7 @@ For durable shared state across API replicas we use Redis when configured.
 from __future__ import annotations
 
 from fastapi import Request
-from jose import jwt
+import jwt
 from slowapi import Limiter
 from slowapi.util import get_remote_address
 
@@ -49,7 +49,11 @@ def _identify_client(request: Request) -> str:
                     return f"user:{clerk_id}"
             else:
                 try:
-                    sub = jwt.get_unverified_claims(token).get("sub")
+                    # PyJWT has no `get_unverified_claims`; we decode without
+                    # signature verification because this is only a bucketing
+                    # key — security verification happens in get_current_user.
+                    claims = jwt.decode(token, options={"verify_signature": False})
+                    sub = claims.get("sub")
                     if sub:
                         return f"user:{sub}"
                 except Exception:

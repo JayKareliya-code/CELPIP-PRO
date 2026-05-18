@@ -296,7 +296,7 @@ export function WritingTaskPromptsFolder({ taskNumber, prompts }: WritingTaskPro
   const comingSoonCount = Math.max(0, attemptsLimit - visiblePrompts.length);
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 animate-fade-in">
       {/* Breadcrumb */}
       <BreadcrumbNav />
 

@@ -24,14 +24,31 @@ def get_sync_engine() -> sa.engine.Engine:
 
     The DATABASE_URL is rewritten from the asyncpg driver to psycopg2 (the sync
     driver, installed via psycopg2-binary). Cached for the worker process
-    lifetime; ``pool_pre_ping`` recycles connections dropped by the DB.
+    lifetime.
+
+    Pool sizing
+    -----------
+    pool_size=5 / max_overflow=10 — with ``task_acks_late=True`` and pipeline
+    tasks holding a session open across an OpenAI call, the previous 2+2 ceiling
+    was tight enough to cause pool-checkout timeouts when reconciliation and
+    export ran alongside scoring. Five persistent + ten burst connections is
+    comfortable for the worker concurrencies we run (default `--concurrency=2`
+    per process) without overwhelming Postgres.
+
+    Connection recycling
+    --------------------
+    pool_recycle=1800 — managed Postgres (RDS / Supabase / Render) closes idle
+    connections after ~5–30 min. Recycling at 30 min ensures we never hand out
+    a server-side-closed socket to a task. pool_pre_ping is the runtime
+    safety net for the in-between case.
     """
     sync_url = settings.DATABASE_URL.replace(
         "postgresql+asyncpg://", "postgresql+psycopg2://"
     )
     return sa.create_engine(
         sync_url,
-        pool_size=2,
-        max_overflow=2,
+        pool_size=5,
+        max_overflow=10,
         pool_pre_ping=True,
+        pool_recycle=1800,
     )

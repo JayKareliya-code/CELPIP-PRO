@@ -99,18 +99,45 @@ def _get_engine():
     return create_async_engine(
         settings.DATABASE_URL,
         future=True,
-        pool_size=2,
-        max_overflow=2,
+        pool_size=3,
+        max_overflow=5,
         pool_pre_ping=True,
+        pool_recycle=1800,  # managed PG drops idle connections; recycle every 30 min
     )
 
 
 async def run_speaking_pipeline(attempt_id: str) -> None:
-    """Acquire a session from the process-wide engine and run the pipeline."""
+    """Run the speaking pipeline as two committed phases.
+
+    Phase 1 (transcribe): idempotency check + mark_processing + Whisper STT
+    + transcript persistence + STT cost log. Committed independently so a
+    later scoring failure does NOT roll back the transcript. Without this
+    split, a Celery retry would re-bill Whisper for the same audio.
+
+    Phase 2 (score): loads the (now-committed) transcript and runs the
+    LLM scoring + persistence + status update. If this phase fails, the
+    transcript stays in place; the retry skips Whisper and goes straight
+    to scoring.
+    """
+    aid = UUID(attempt_id)
     session_maker = async_sessionmaker(_get_engine(), expire_on_commit=False, autoflush=False)
+
+    # ── Phase 1: transcription (committed before scoring) ─────────────────────
     async with session_maker() as db:
         try:
-            await _pipeline(db, UUID(attempt_id))
+            done = await _phase_transcribe(db, aid)
+            await db.commit()
+        except Exception:
+            await db.rollback()
+            raise
+        if done:
+            # Idempotency short-circuit fired — nothing more to do.
+            return
+
+    # ── Phase 2: scoring (separate transaction) ───────────────────────────────
+    async with session_maker() as db:
+        try:
+            await _phase_score(db, aid)
             await db.commit()
         except Exception:
             await db.rollback()
@@ -119,13 +146,81 @@ async def run_speaking_pipeline(attempt_id: str) -> None:
 
 # ── Orchestrator ──────────────────────────────────────────────────────────────
 
-async def _pipeline(db: AsyncSession, attempt_id: UUID) -> None:
+async def _phase_transcribe(db: AsyncSession, attempt_id: UUID) -> bool:
+    """Run idempotency check, mark_processing, and transcription.
+
+    Returns True when the caller should stop (idempotency short-circuit
+    already finalised the attempt). False means Phase 2 must continue.
+    """
+    # Idempotency: see writing_pipeline._pipeline. If a ScoreReport already
+    # exists, skip the rescore + STT (which would double-charge tokens and
+    # IntegrityError on the UNIQUE constraint) and just finalise the status.
+    existing = await db.execute(
+        sa.select(ScoreReport.id)
+        .where(ScoreReport.attempt_id == attempt_id)
+    )
+    if existing.scalar_one_or_none() is not None:
+        logger.info(
+            "speaking_pipeline: ScoreReport already exists for attempt=%s — "
+            "skipping rescore and finalising status",
+            attempt_id,
+        )
+        await db.execute(
+            update(Attempt).where(Attempt.id == attempt_id).values(status="complete")
+        )
+        return True
+
     await _mark_processing(db, attempt_id)
-    attempt, s_attempt = await _load_attempt(db, attempt_id)
+
+    # Transcript-level idempotency: if Whisper has already produced a row for
+    # this attempt (committed by a previous Phase 1 that crashed in Phase 2),
+    # do NOT re-bill STT. The transcript text is loaded in Phase 2 from this
+    # same row.
+    transcript_row = await db.execute(
+        sa.select(Transcript.id).where(Transcript.attempt_id == attempt_id)
+    )
+    if transcript_row.scalar_one_or_none() is not None:
+        logger.info(
+            "speaking_pipeline: Transcript already exists for attempt=%s — "
+            "skipping Whisper STT",
+            attempt_id,
+        )
+        return False
+
+    _attempt, s_attempt = await _load_attempt(db, attempt_id)
+    audio = await download_from_s3(s_attempt.audio_s3_key)
+    await _transcribe(db, attempt_id, audio)
+    return False
+
+
+async def _phase_score(db: AsyncSession, attempt_id: UUID) -> None:
+    """Score the (already-transcribed) attempt and persist the report."""
+    # Re-check the ScoreReport short-circuit in case two retries raced.
+    existing = await db.execute(
+        sa.select(ScoreReport.id).where(ScoreReport.attempt_id == attempt_id)
+    )
+    if existing.scalar_one_or_none() is not None:
+        await db.execute(
+            update(Attempt).where(Attempt.id == attempt_id).values(status="complete")
+        )
+        return
+
+    attempt, _s_attempt = await _load_attempt(db, attempt_id)
     target_band = await _load_user_target_band(db, attempt.user_id)
     ctx = await _load_prompt(db, attempt.prompt_id)
-    audio = await download_from_s3(s_attempt.audio_s3_key)
-    transcript = await _transcribe(db, attempt_id, audio)
+
+    # Load the transcript text from the committed row (Phase 1 wrote it).
+    t_row = (await db.execute(
+        sa.select(Transcript.text).where(Transcript.attempt_id == attempt_id)
+    )).scalar_one_or_none()
+    if t_row is None:
+        # Should not happen — Phase 1 commits before Phase 2 runs.
+        raise LookupError(
+            f"speaking_pipeline: transcript missing for attempt={attempt_id} "
+            "at Phase 2 entry — Phase 1 must have failed silently."
+        )
+    transcript: str = t_row
+
     system_prompt = await _build_prompt(db, ctx, target_band)
     result = await _score(db, attempt_id, transcript, ctx, system_prompt)
     await _save_score(db, attempt_id, result, actual_model=ctx.scoring_model)

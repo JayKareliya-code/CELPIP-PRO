@@ -16,6 +16,7 @@ import { PenLine } from "lucide-react";
 import { BreadcrumbNav } from "@/components/layout/BreadcrumbNav";
 import { WritingTaskGrid } from "@/components/writing/WritingTaskGrid";
 import { StarterUpsellCards } from "@/components/upgrade/StarterUpsellCards";
+import { RetryCreditsBanner } from "@/components/retry-credits/RetryCreditsBanner";
 import { useTaskModuleAccess } from "@/lib/hooks/useTaskModuleAccess";
 import { useWritingQuota } from "@/lib/hooks/useWritingQuota";
 import type { WritingTask } from "@/lib/types";
@@ -36,23 +37,24 @@ function ModuleHomeSkeleton() {
       {/* Breadcrumb */}
       <BreadcrumbNav />
 
-      {/* Header row skeleton */}
-      <div className="flex items-center justify-between gap-4 flex-wrap">
-        {/* Title skeleton */}
-        <div className="flex items-center gap-3 shrink-0">
-          <div className="w-11 h-11 rounded-xl bg-white/[0.05] border border-white/[0.07] animate-pulse" />
-          <div className="space-y-2">
-            <div className="h-6 w-40 rounded-lg bg-white/[0.05] animate-pulse" />
-            <div className="h-3.5 w-24 rounded bg-white/[0.04] animate-pulse" />
+      {/* Header row skeleton — 2-column grid with equal heights */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 items-stretch">
+        {/* Left: title + retry banner stacked */}
+        <div className="flex flex-col justify-between gap-3 min-w-0">
+          <div className="flex items-center gap-3">
+            <div className="w-11 h-11 rounded-xl bg-white/[0.05] border border-white/[0.07] animate-pulse" />
+            <div className="space-y-2">
+              <div className="h-6 w-40 rounded-lg bg-white/[0.05] animate-pulse" />
+              <div className="h-3.5 w-24 rounded bg-white/[0.04] animate-pulse" />
+            </div>
           </div>
+          <div className="h-[56px] rounded-2xl border border-white/[0.07] bg-white/[0.03] animate-pulse" />
         </div>
 
-        {/* Upsell cards skeleton */}
-        <div className="flex-1 min-w-0 max-w-xl">
-          <div className="grid grid-cols-2 gap-3">
-            <div className="h-[118px] rounded-2xl border border-white/[0.07] bg-white/[0.03] animate-pulse" />
-            <div className="h-[118px] rounded-2xl border border-white/[0.07] bg-white/[0.03] animate-pulse" />
-          </div>
+        {/* Right: upsell cards — stack on phones to match the real component */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div className="h-[118px] rounded-2xl border border-white/[0.07] bg-white/[0.03] animate-pulse" />
+          <div className="h-[118px] rounded-2xl border border-white/[0.07] bg-white/[0.03] animate-pulse" />
         </div>
       </div>
 
@@ -94,21 +96,31 @@ export function WritingModuleHome({ tasks }: WritingModuleHomeProps) {
       {/* Breadcrumb */}
       <BreadcrumbNav />
 
-      {/* ── Header row: title on left, upsell cards / stats on right ───────── */}
-      <div className="flex items-center justify-between gap-4 flex-wrap">
-        {/* Title */}
-        <div className="flex items-center gap-3 shrink-0">
-          <div className="w-11 h-11 rounded-xl bg-amber-600/20 border border-amber-500/30 flex items-center justify-center shrink-0">
-            <PenLine className="w-5 h-5 text-amber-400" />
+      {/* ── Header row: 2-column grid, equal-height columns ────────────────
+          Left:  title block + retry-credits banner stacked vertically
+          Right: upsell / stat cards
+          items-stretch keeps the column heights aligned so the title + retry
+          banner reads as a single cohesive panel matching the upsell cards. */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 items-stretch">
+        {/* Left column */}
+        <div className="flex flex-col justify-between gap-3 min-w-0">
+          {/* Title */}
+          <div className="flex items-center gap-3">
+            <div className="w-11 h-11 rounded-xl bg-amber-600/20 border border-amber-500/30 flex items-center justify-center shrink-0">
+              <PenLine className="w-5 h-5 text-amber-400" />
+            </div>
+            <div>
+              <h1 className="text-2xl font-bold text-foreground">Writing Module</h1>
+              <p className="text-sm text-subtle mt-0.5">2 tasks | Tasks 1-2</p>
+            </div>
           </div>
-          <div>
-            <h1 className="text-2xl font-bold text-foreground">Writing Module</h1>
-            <p className="text-sm text-subtle mt-0.5">2 tasks | Tasks 1-2</p>
-          </div>
+
+          {/* Retry credits banner */}
+          <RetryCreditsBanner />
         </div>
 
-        {/* Upsell / stat cards — StarterUpsellCards handles both starter & pro */}
-        <div className="flex-1 min-w-0 max-w-xl">
+        {/* Right column — upsell / stat cards */}
+        <div className="min-w-0">
           <StarterUpsellCards module="writing" />
         </div>
       </div>

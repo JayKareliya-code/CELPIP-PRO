@@ -15,55 +15,73 @@
 import Link from "next/link";
 import { ArrowRight, Mic, PenLine, ClipboardList, Rocket, Target, Check, ShoppingCart } from "lucide-react";
 import { useTaskModuleAccess } from "@/lib/hooks/useTaskModuleAccess";
-import { useQuota }            from "@/lib/hooks/useQuota";
-import { useCurrentUser }      from "@/lib/hooks/useCurrentUser";
+import { useQuota } from "@/lib/hooks/useQuota";
+import { useCurrentUser } from "@/lib/hooks/useCurrentUser";
 import { useBillingCartStore } from "@/store/billingCartStore";
-import { toast }               from "sonner";
-import type { Skill }          from "@/lib/types";
+import { toast } from "sonner";
+import type { Skill } from "@/lib/types";
 
 // ── Module config ─────────────────────────────────────────────────────────────
 
 type Module = "speaking" | "writing" | "mock";
 
 interface BundleConfig {
-  id:          string;
-  cartType:    "speaking_pack" | "writing_pack" | "mock_bundle";
-  name:        string;
-  price:       number;
-  priceLabel:  string;
-  description: string;
-  icon:        React.ReactNode;
+  id: string;
+  cartType: "speaking_pack" | "writing_pack" | "mock_bundle";
+  name: string;
+  price: number;
+  priceLabel: string;
+  /**
+   * Bullet points shown under the bundle name — one row each, all rendered
+   * as check-icon list items. Add more entries to surface extra perks; the
+   * card adapts its height automatically.
+   */
+  description: readonly string[];
+  icon: React.ReactNode;
 }
 
 const BUNDLES: Record<Module, BundleConfig> = {
   speaking: {
-    id:          "speaking-pack",
-    cartType:    "speaking_pack",
-    name:        "Speaking Pack",
-    price:       6.99,
-    priceLabel:  "$6.99",
-    description: "Adds 5 questions per task",
-    icon:        <Mic className="w-4 h-4 text-emerald-400" />,
+    id: "speaking-pack",
+    cartType: "speaking_pack",
+    name: "Speaking Pack",
+    price: 6.99,
+    priceLabel: "$6.99",
+    description: ["Adds 5 questions per task", "Adds 40 retry credits"],
+    icon: <Mic className="w-4 h-4 text-emerald-400" />,
   },
   writing: {
-    id:          "writing-pack",
-    cartType:    "writing_pack",
-    name:        "Writing Pack",
-    price:       2.99,
-    priceLabel:  "$2.99",
-    description: "Adds 5 questions per task",
-    icon:        <PenLine className="w-4 h-4 text-blue-400" />,
+    id: "writing-pack",
+    cartType: "writing_pack",
+    name: "Writing Pack",
+    price: 2.99,
+    priceLabel: "$2.99",
+    description: ["Adds 5 questions per task", "Adds 10 retry credits"],
+    icon: <PenLine className="w-4 h-4 text-blue-400" />,
   },
   mock: {
-    id:          "mock-bundle",
-    cartType:    "mock_bundle",
-    name:        "Mock Bundle",
-    price:       2.99,
-    priceLabel:  "$2.99",
-    description: "1 Speaking + 1 Writing mock test",
-    icon:        <ClipboardList className="w-4 h-4 text-violet-400" />,
+    id: "mock-bundle",
+    cartType: "mock_bundle",
+    name: "Mock Bundle",
+    price: 2.99,
+    priceLabel: "$2.99",
+    description: ["1 Speaking + 1 Writing mock test", "Adds 10 retry credits"],
+    icon: <ClipboardList className="w-4 h-4 text-violet-400" />,
   },
 };
+
+// Join the bullet list into a single line for analytics / cart subtitle —
+// the cart drawer shows one subtitle row per item.
+function joinBullets(items: readonly string[]): string {
+  return items.join(" · ");
+}
+
+// Pro upgrade card bullet copy — extend this array to add more perks. The
+// card height adapts automatically so multiple lines render cleanly.
+const PRO_UPGRADE_BULLETS: readonly string[] = [
+  "Unlock advanced AI feedback",
+  "Get 70 retry credits",
+];
 
 // ── Props ─────────────────────────────────────────────────────────────────────
 
@@ -77,7 +95,7 @@ export function StarterUpsellCards({ module }: Props) {
   const skill: Skill = module === "mock" ? "speaking" : module;
 
   const taskAccess = useTaskModuleAccess(skill);
-  const quota      = useQuota(skill);
+  const quota = useQuota(skill);
   const { user, isLoading: userLoading } = useCurrentUser();
 
   const isLoading =
@@ -91,10 +109,14 @@ export function StarterUpsellCards({ module }: Props) {
   if (isLoading) return null;
 
   const isStarter = plan === "starter";
-  const bundle    = BUNDLES[module];
+  const bundle = BUNDLES[module];
 
   return (
-    <div className="grid grid-cols-2 gap-3">
+    // Stack on phones (< sm) so the full pack names stay visible instead of
+    // truncating to "Sp..." / "Up...". Side-by-side from sm upward where the
+    // column has enough room (≥ 640 px viewport on mobile, full module-home
+    // right column on lg).
+    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
       {/* Left: bundle ad — shown for all users */}
       <BundleCard config={bundle} />
 
@@ -105,6 +127,30 @@ export function StarterUpsellCards({ module }: Props) {
         <TargetBandCard band={user?.target_band ?? null} />
       )}
     </div>
+  );
+}
+
+// ── Bullet list ───────────────────────────────────────────────────────────────
+// Renders each description string as its own check-icon row. Use `tone="amber"`
+// inside the Pro upgrade card so the text picks up the amber palette.
+
+function BulletList({
+  items,
+  tone = "default",
+}: {
+  items: readonly string[];
+  tone?: "default" | "amber";
+}) {
+  const textClass = tone === "amber" ? "text-amber-400/60" : "text-white/50";
+  return (
+    <ul className="-mt-1 flex flex-col gap-1">
+      {items.map((line, i) => (
+        <li key={i} className="flex items-start gap-2">
+          <Check className="w-3.5 h-3.5 mt-[1px] shrink-0 text-primary" />
+          <span className={`text-xs leading-tight ${textClass}`}>{line}</span>
+        </li>
+      ))}
+    </ul>
   );
 }
 
@@ -145,19 +191,20 @@ function CardShell({
 
 function BundleCard({ config }: { config: BundleConfig }) {
   const addItem = useBillingCartStore((s) => s.addItem);
+  const subtitle = joinBullets(config.description);
 
   const handleBuy = () => {
     addItem({
-      id:        config.id,
-      type:      config.cartType,
-      name:      config.name,
-      subtitle:  config.description,
+      id: config.id,
+      type: config.cartType,
+      name: config.name,
+      subtitle,
       unitPrice: config.price,
-      currency:  "CAD",
-      metadata:  {},
+      currency: "CAD",
+      metadata: {},
     });
     toast.success(`${config.name} added to cart`, {
-      description: config.description,
+      description: subtitle,
       duration: 2500,
     });
   };
@@ -180,11 +227,8 @@ function BundleCard({ config }: { config: BundleConfig }) {
         </div>
       </div>
 
-      {/* Description */}
-      <div className="flex items-center gap-2 -mt-1">
-        <Check className="w-3.5 h-3.5 shrink-0 text-primary" />
-        <span className="text-xs text-white/50 leading-tight">{config.description}</span>
-      </div>
+      {/* Description bullets */}
+      <BulletList items={config.description} />
 
       {/* CTA */}
       <button
@@ -220,11 +264,8 @@ function ProUpgradeCard() {
         </div>
       </div>
 
-      {/* Description */}
-      <div className="flex items-center gap-2 -mt-1">
-        <Check className="w-3.5 h-3.5 shrink-0 text-primary" />
-        <span className="text-xs text-amber-400/60 leading-tight">Unlock advanced AI feedback</span>
-      </div>
+      {/* Description bullets */}
+      <BulletList items={PRO_UPGRADE_BULLETS} tone="amber" />
 
       {/* CTA */}
       <Link
@@ -243,18 +284,18 @@ function ProUpgradeCard() {
 // Links to /settings to update it.
 
 function TargetBandCard({ band }: { band: number | null }) {
-  const hasBand  = band != null;
+  const hasBand = band != null;
   // Percent along the 1–12 scale
-  const pct      = hasBand ? Math.round(((band - 1) / 11) * 100) : 0;
+  const pct = hasBand ? Math.round(((band - 1) / 11) * 100) : 0;
 
   // Colour shifts from amber (low) → emerald (high)
   const barColor = !hasBand
     ? "bg-white/20"
     : band >= 9
-    ? "bg-emerald-400"
-    : band >= 7
-    ? "bg-primary"
-    : "bg-amber-500";
+      ? "bg-emerald-400"
+      : band >= 7
+        ? "bg-primary"
+        : "bg-amber-500";
 
   return (
     <CardShell>
@@ -268,9 +309,8 @@ function TargetBandCard({ band }: { band: number | null }) {
             Target Band
           </span>
         </div>
-        <span className={`text-lg font-bold tabular-nums shrink-0 ${
-          hasBand ? "text-white" : "text-white/30"
-        }`}>
+        <span className={`text-lg font-bold tabular-nums shrink-0 ${hasBand ? "text-white" : "text-white/30"
+          }`}>
           {hasBand ? band : "—"}
         </span>
       </div>

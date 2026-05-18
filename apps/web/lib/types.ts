@@ -147,6 +147,14 @@ export interface QuotaStatusResponse {
   writing_mock_tests_limit:        number | null;
   speaking_mock_addon_credits:     number;
   writing_mock_addon_credits:      number;
+  // ── Retry credit pool ─────────────────────────────────────────────────────
+  // Single shared pool spent on practice redoes (1 credit each) and mock
+  // retakes (8 speaking / 2 writing). Free plan = 0, Pro granted at activation,
+  // add-ons top up. `lifetime_granted` is the sum of every positive grant
+  // (Pro activation + every add-on purchase) — used by the UI as the
+  // denominator of the "remaining / total" progress bar.
+  retry_credits_balance:          number;
+  retry_credits_lifetime_granted: number;
 }
 
 /** One task's credit balance — from GET /api/v1/billing/addon-credits */

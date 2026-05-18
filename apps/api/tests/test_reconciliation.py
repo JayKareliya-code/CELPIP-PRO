@@ -18,14 +18,19 @@ import sqlalchemy as sa
 # ── Helpers ───────────────────────────────────────────────────────────────────
 
 def _make_pi(*, status: str = "succeeded", refunded: bool = False) -> MagicMock:
-    """Return a mock Stripe PaymentIntent object."""
+    """Return a mock Stripe PaymentIntent object.
+
+    The task expands `latest_charge` (the modern Stripe API shape — the old
+    `charges.data` list was removed in 2022-11-15+), so we mock that field as
+    a Charge-like object with a `.refunded` flag.
+    """
     charge = MagicMock()
     charge.get.side_effect = lambda k, d=None: {"refunded": refunded}.get(k, d)
 
     pi = MagicMock()
     pi.get.side_effect = lambda k, d=None: {
         "status": status,
-        "charges": {"data": [charge]},
+        "latest_charge": charge,
     }.get(k, d)
     return pi
 

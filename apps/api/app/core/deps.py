@@ -5,12 +5,18 @@ from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_asyn
 from app.core.config import settings
 
 # ── Primary (read-write) engine ───────────────────────────────────────────────
+# pool_pre_ping + pool_recycle guard against managed-Postgres dropping idle
+# connections (RDS/Supabase/Render kill them after 5–30 minutes of inactivity);
+# without recycling we'd hand out a server-side-closed socket and the next
+# request would get an OperationalError.
 engine = create_async_engine(
     settings.DATABASE_URL,
     echo=settings.DEBUG,
     future=True,
     pool_size=10,
     max_overflow=20,
+    pool_pre_ping=True,
+    pool_recycle=1800,
 )
 
 async_session_maker = async_sessionmaker(
@@ -27,6 +33,8 @@ read_engine = create_async_engine(
     future=True,
     pool_size=10,
     max_overflow=20,
+    pool_pre_ping=True,
+    pool_recycle=1800,
 )
 
 read_session_maker = async_sessionmaker(

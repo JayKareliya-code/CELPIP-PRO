@@ -1,7 +1,9 @@
 from __future__ import annotations
 
 import uuid
-from sqlalchemy import CheckConstraint, ForeignKey, Index, Integer, String
+from sqlalchemy import (
+    CheckConstraint, ForeignKey, Index, Integer, String, UniqueConstraint,
+)
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.models.base import Base, TimestampMixin
@@ -49,6 +51,15 @@ class AddonCredit(Base, TimestampMixin):
         CheckConstraint("credits_total > 0",                          name="check_addon_credit_total_positive"),
         CheckConstraint("credits_used >= 0",                          name="check_addon_credit_used_non_negative"),
         CheckConstraint("credits_used <= credits_total",              name="check_addon_credit_used_le_total"),
+        # Idempotency: one grant per (PaymentIntent, addon_type, task_key). A
+        # webhook re-delivery (e.g. an admin replay with a new event_id) for
+        # the same PI cannot double-insert. The webhook aggregates duplicate
+        # cart segments into a single row before INSERT so legitimate carts
+        # are not blocked.
+        UniqueConstraint(
+            "stripe_pi_id", "addon_type", "task_key",
+            name="uq_addon_credit_grant",
+        ),
         Index("idx_addon_credits_user_id",        "user_id"),
         Index("idx_addon_credits_user_type_key",  "user_id", "addon_type", "task_key"),
         Index("idx_addon_credits_stripe_pi",      "stripe_pi_id"),

@@ -48,6 +48,7 @@ import {
   ArrowRight,
 } from "lucide-react";
 import { BreadcrumbNav }    from "@/components/layout/BreadcrumbNav";
+import { MicPermissionNotice } from "@/components/speaking/MicPermissionNotice";
 import { useCurrentUser }   from "@/lib/hooks/useCurrentUser";
 import { useSpeakingQuota } from "@/lib/hooks/useSpeakingQuota";
 import { cn }               from "@/lib/utils";
@@ -386,9 +387,12 @@ export function TaskPromptsFolder({ taskNumber, prompts }: TaskPromptsFolderProp
   const hasAnyPrompts   = visiblePrompts.length > 0;
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 animate-fade-in">
       {/* Breadcrumb */}
       <BreadcrumbNav />
+
+      {/* Mic permission prompt — only renders when permission is not granted */}
+      <MicPermissionNotice />
 
       {/* ── Back + Header + Progress — col 1 | Upsell card — col 2 ──────────── */}
       <div className="grid grid-cols-1 md:grid-cols-[65%_1fr] gap-4 items-end">

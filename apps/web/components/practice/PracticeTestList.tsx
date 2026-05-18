@@ -17,6 +17,7 @@ import { BreadcrumbNav }     from "@/components/layout/BreadcrumbNav";
 import { PracticeQuotaBar }   from "@/components/practice/PracticeQuotaBar";
 import { PracticeTestSlot }   from "@/components/practice/PracticeTestSlot";
 import { PracticeUpgradeCTA } from "@/components/practice/PracticeUpgradeCTA";
+import { MicPermissionNotice } from "@/components/speaking/MicPermissionNotice";
 import { usePracticeQuota }   from "@/lib/hooks/usePracticeQuota";
 import { useCurrentUser }     from "@/lib/hooks/useCurrentUser";
 import { SKILL_META, MAX_PRACTICE_SLOTS } from "@/lib/practice/config";
@@ -69,8 +70,12 @@ export function PracticeTestList({ skill, user: serverUser }: PracticeTestListPr
   const showUpgrade = quota ? quota.limit < MAX_PRACTICE_SLOTS : false;
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 animate-fade-in">
       <BreadcrumbNav />
+
+      {/* Mic permission prompt — speaking mocks need recorder access; on the
+          writing variant the notice silently no-ops (granted state hides it). */}
+      {skill === "speaking" && <MicPermissionNotice />}
 
       {/* ── Back + Header ─────────────────────────────────────────────────── */}
       <div className="space-y-4">

@@ -134,11 +134,15 @@ async def resolve_user_from_token(token: str, db: AsyncSession) -> User | None:
     token as a ``?token=`` query parameter and delegates here for validation.
     """
     from app.services.user_service import get_or_create_user
-    from jose import jwt as jose_jwt, jwk as jose_jwk, JWTError
+    import jwt as pyjwt
+    from jwt import PyJWK
+    from jwt.exceptions import PyJWTError as JWTError
 
     try:
         # ── Development bypass ─────────────────────────────────────────────────
-        if settings.APP_ENV == "development" and token.startswith(_DEV_TOKEN_PREFIX):
+        # See app.core.security for the rationale: gated on ALLOW_DEV_AUTH_BYPASS
+        # (config validator refuses to enable it outside APP_ENV='development').
+        if settings.ALLOW_DEV_AUTH_BYPASS and token.startswith(_DEV_TOKEN_PREFIX):
             clerk_user_id = token[len(_DEV_TOKEN_PREFIX):]
             if not clerk_user_id:
                 return None
@@ -151,18 +155,28 @@ async def resolve_user_from_token(token: str, db: AsyncSession) -> User | None:
 
         # ── Validate Clerk JWT ────────────────────────────────────────────────
         jwks   = await _get_jwks()
-        header = jose_jwt.get_unverified_header(token)
+        header = pyjwt.get_unverified_header(token)
         key    = next(
             (k for k in jwks["keys"] if k["kid"] == header.get("kid")), None
         )
         if not key:
             return None
 
-        payload: dict = jose_jwt.decode(
+        # Mirror app.core.security.get_current_user: enforce `aud` when
+        # CLERK_JWT_AUDIENCE is configured (required in production).
+        decode_options: dict = {}
+        decode_kwargs:  dict = {}
+        if settings.CLERK_JWT_AUDIENCE:
+            decode_kwargs["audience"] = settings.CLERK_JWT_AUDIENCE
+        else:
+            decode_options["verify_aud"] = False
+        public_key = PyJWK(key).key
+        payload: dict = pyjwt.decode(
             token,
-            jose_jwk.construct(key),
+            public_key,
             algorithms=["RS256"],
-            options={"verify_aud": False},
+            options=decode_options or None,
+            **decode_kwargs,
         )
         _check_authorized_party(payload)
         clerk_user_id: str = payload["sub"]

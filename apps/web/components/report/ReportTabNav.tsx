@@ -1,21 +1,25 @@
 "use client";
 
 // ─────────────────────────────────────────────────────────────────────────────
-// ReportTabNav.tsx — Animated pill tab bar for the report page
+// ReportTabNav.tsx — Underline tab bar for the report page
 //
-// Renders a horizontal row of tab buttons with:
-//   • Sliding background indicator (tracks active tab via measureRef)
-//   • Optional count badge per tab
-//   • Full keyboard accessibility (role=tablist, aria-selected)
-//   • Sticky positioning is handled by the parent (ProReport)
+// Design follows the convention used by Linear / GitHub / Stripe Dashboard:
+//   • Inactive tabs are muted text, no background.
+//   • Active tab is bolder white with a 2px amber-gold underline below it.
+//   • A sliding indicator animates the underline between tabs.
+//   • Optional leading icon and trailing count badge per tab.
 // ─────────────────────────────────────────────────────────────────────────────
 
 import { useEffect, useRef, useState } from "react";
+import type { LucideIcon } from "lucide-react";
 
 export interface ReportTab {
   id:     string;
   label:  string;
-  badge?: number;   // optional count badge shown after the label
+  /** Optional leading icon — uses lucide-react components. */
+  icon?:  LucideIcon;
+  /** Optional count badge shown after the label (e.g. number of items). */
+  badge?: number;
 }
 
 interface Props {
@@ -25,14 +29,14 @@ interface Props {
 }
 
 export function ReportTabNav({ tabs, activeTab, onChange }: Props) {
-  // Track the bounding rect of the active tab button so the sliding
-  // indicator background can be positioned absolutely behind it.
-  const containerRef                      = useRef<HTMLDivElement>(null);
-  const btnRefs                           = useRef<Record<string, HTMLButtonElement | null>>({});
-  const [indicator, setIndicator]         = useState({ left: 0, width: 0, ready: false });
+  // Track the active tab button's box so the sliding underline can animate
+  // between tabs without layout thrash.
+  const containerRef                = useRef<HTMLDivElement>(null);
+  const btnRefs                     = useRef<Record<string, HTMLButtonElement | null>>({});
+  const [indicator, setIndicator]   = useState({ left: 0, width: 0, ready: false });
 
-  // Recompute indicator position whenever the active tab changes
-  // (also fires once on mount to set the initial position without a flash).
+  // Recompute indicator position whenever the active tab changes. Also fires
+  // once on mount to set the initial position without a flash.
   useEffect(() => {
     const container = containerRef.current;
     const btn       = btnRefs.current[activeTab];
@@ -53,14 +57,17 @@ export function ReportTabNav({ tabs, activeTab, onChange }: Props) {
       ref={containerRef}
       role="tablist"
       aria-label="Report sections"
-      className="relative flex items-center gap-1 rounded-xl border border-border bg-surface p-1 overflow-x-auto scrollbar-none"
+      className="relative flex items-center gap-1 overflow-x-auto overflow-y-hidden no-scrollbar border-b border-border/60"
     >
-      {/* Sliding background indicator — hidden until first measurement */}
+      {/* Sliding underline indicator — amber-gold primary accent.
+          Sits flush with the bottom of the container so it visually replaces
+          the inside edge of the rail border for the active tab. Kept inside
+          the box so overflow-y-hidden never clips it (which would otherwise
+          drop the indicator entirely on narrow viewports). */}
       <div
         aria-hidden
         className={[
-          "absolute top-1 bottom-1 rounded-lg transition-all duration-200 ease-out",
-          "bg-white/[0.07] border border-white/[0.06]",
+          "absolute bottom-0 h-[2px] rounded-full bg-primary transition-all duration-200 ease-out",
           indicator.ready ? "opacity-100" : "opacity-0",
         ].join(" ")}
         style={{ left: indicator.left, width: indicator.width }}
@@ -68,6 +75,7 @@ export function ReportTabNav({ tabs, activeTab, onChange }: Props) {
 
       {tabs.map((tab) => {
         const isActive = tab.id === activeTab;
+        const Icon     = tab.icon;
         return (
           <button
             key={tab.id}
@@ -77,25 +85,32 @@ export function ReportTabNav({ tabs, activeTab, onChange }: Props) {
             aria-controls={`report-panel-${tab.id}`}
             onClick={() => onChange(tab.id)}
             className={[
-              // Base: relative so the button sits above the sliding indicator
-              "relative flex flex-1 items-center justify-center gap-2",
-              "rounded-lg px-5 py-2.5 text-sm font-medium",
-              "transition-colors duration-150 whitespace-nowrap select-none",
+              "relative flex items-center gap-2 px-4 py-3 text-sm whitespace-nowrap select-none",
+              "transition-colors duration-150 outline-none",
+              "focus-visible:text-white",
               isActive
-                ? "text-white"
-                : "text-white/40 hover:text-white/70",
+                ? "text-white font-semibold"
+                : "text-white/45 hover:text-white/80 font-medium",
             ].join(" ")}
           >
-          <span>{tab.label}</span>
+            {Icon && (
+              <Icon
+                className={[
+                  "h-4 w-4 shrink-0 transition-colors",
+                  isActive ? "text-primary" : "text-white/40",
+                ].join(" ")}
+              />
+            )}
+            <span>{tab.label}</span>
 
-            {/* Count badge */}
+            {/* Count badge — amber tint when active, muted otherwise. */}
             {typeof tab.badge === "number" && tab.badge > 0 && (
               <span
                 className={[
                   "rounded-full px-1.5 py-px text-[10px] font-bold tabular-nums",
                   isActive
-                    ? "bg-primary/25 text-primary-light"
-                    : "bg-white/[0.08] text-white/30",
+                    ? "bg-primary/15 text-primary"
+                    : "bg-white/[0.06] text-white/35",
                 ].join(" ")}
               >
                 {tab.badge}

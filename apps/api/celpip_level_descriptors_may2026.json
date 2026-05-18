@@ -1,0 +1,559 @@
+{
+  "document_title": "CELPIP Level Descriptors - May 2026",
+  "source_file": "CELPIP-Level-Descriptors-May2026.pdf",
+  "format_version": "1.0",
+  "normalization_notes": [
+    "Text was structured from the PDF into JSON by test module, level, and scoring dimension.",
+    "PDF ligatures were normalized, for example: ﬁ -> fi and ﬂ -> fl.",
+    "Line-break artifacts were removed and bullets were converted into JSON arrays."
+  ],
+  "sections": [
+    {
+      "module": "speaking",
+      "source_page": 1,
+      "title": "CELPIP Speaking Level",
+      "dimensions": [
+        "Content/Coherence",
+        "Vocabulary",
+        "Listenability",
+        "Task Fulfillment",
+        "When"
+      ],
+      "levels": [
+        {
+          "level_label": "12",
+          "levels": [12],
+          "proficiency_descriptor": "Expert proficiency in high-stakes social, educational, or workplace contexts",
+          "content_coherence": [
+            "communicate in demanding non-routine situations for a full range of purposes, intentions, and objectives",
+            "present information and develop ideas with complex, clear, and precise descriptions or details"
+          ],
+          "vocabulary": [
+            "use a very broad range of concrete and abstract language",
+            "use a broad range of figures of speech and idioms"
+          ],
+          "listenability": [
+            "speak with very good control of a very broad range of complex and diverse grammatical structures",
+            "speak intelligibly with consistently fluent rhythm, pronunciation, and intonation"
+          ],
+          "task_fulfillment": [
+            "adapt my language to the situation, my desired purposes and my relationships to listeners",
+            "precisely communicate my ideas to others when I speak"
+          ],
+          "when": [
+            "I speak with peers or authority figures",
+            "I speak face-to-face, online, or on the phone",
+            "the situation is formal or informal"
+          ]
+        },
+        {
+          "level_label": "11",
+          "levels": [11],
+          "proficiency_descriptor": "Advanced proficiency in high-stakes social, educational, or workplace contexts",
+          "content_coherence": [
+            "communicate in demanding non-routine situations for a range of purposes",
+            "present information and develop ideas with clear and precise descriptions or details"
+          ],
+          "vocabulary": [
+            "use a broad range of concrete and abstract language",
+            "use a range of figures of speech and idioms"
+          ],
+          "listenability": [
+            "speak with good control of a broad range of complex and diverse grammatical structures",
+            "speak intelligibly with consistently fluent rhythm, pronunciation, and intonation"
+          ],
+          "task_fulfillment": [
+            "adapt my language to most situations, my desired purposes, and my relationships to listeners",
+            "communicate my ideas to others when I speak"
+          ],
+          "when": [
+            "I speak with peers or authority figures",
+            "I speak face-to-face, online, or on the phone",
+            "the situation is formal or informal"
+          ]
+        },
+        {
+          "level_label": "10",
+          "levels": [10],
+          "proficiency_descriptor": "Highly effective proficiency in some high-stakes social, educational, or workplace contexts",
+          "content_coherence": [
+            "communicate in moderately demanding non-routine situations",
+            "present information and develop ideas with clear descriptions or reasons"
+          ],
+          "vocabulary": [
+            "use a range of concrete and abstract language",
+            "use some figures of speech and idioms"
+          ],
+          "listenability": [
+            "speak with good control of a broad range of complex grammatical structures",
+            "speak intelligibly with mostly fluent rhythm, pronunciation, and intonation"
+          ],
+          "task_fulfillment": [
+            "adjust my speaking style and tone to a broad range of audiences and situations",
+            "convey my ideas to others when I speak"
+          ],
+          "when": [
+            "I speak with peers or authority figures",
+            "I speak face-to-face, online, or on the phone",
+            "the situation is formal or informal"
+          ]
+        },
+        {
+          "level_label": "9",
+          "levels": [9],
+          "proficiency_descriptor": "Effective proficiency in some high-stakes social, educational, or workplace contexts",
+          "content_coherence": [
+            "present information and support ideas with moderately complex reasons"
+          ],
+          "vocabulary": [
+            "use common and context-specific vocabulary",
+            "use some figures of speech and idioms"
+          ],
+          "listenability": [
+            "speak with some control of complex grammatical structures",
+            "speak intelligibly with mostly fluent rhythm, pronunciation, and intonation"
+          ],
+          "task_fulfillment": [
+            "adjust my speaking style and tone to a range of audiences and situations",
+            "convey my ideas to others when I speak"
+          ],
+          "when": [
+            "I speak with peers or authority figures",
+            "I speak face-to-face, online, or on the phone",
+            "the situation is formal or informal"
+          ]
+        },
+        {
+          "level_label": "8",
+          "levels": [8],
+          "proficiency_descriptor": "Good proficiency in more demanding social, educational, or workplace contexts",
+          "content_coherence": [
+            "present concrete and some abstract information that is supported with moderately complex reasons"
+          ],
+          "vocabulary": [
+            "use common words and some context-specific vocabulary",
+            "use some figures of speech and idioms"
+          ],
+          "listenability": [
+            "speak with some control of complex grammatical structures",
+            "speak intelligibly with mostly fluent rhythm, pronunciation, and intonation",
+            "speak with very few self-corrections, repetitions, or inappropriate pauses"
+          ],
+          "task_fulfillment": [
+            "adjust my speaking style and tone to some of audiences and situations",
+            "convey my intended meaning to others when I speak"
+          ],
+          "when": [
+            "I speak face-to-face, online, or on the phone",
+            "the situation is formal or informal"
+          ]
+        },
+        {
+          "level_label": "7",
+          "levels": [7],
+          "proficiency_descriptor": "Adequate proficiency in somewhat demanding social, educational, or workplace contexts",
+          "content_coherence": [
+            "present concrete and some abstract information that is supported with moderately complex reasons"
+          ],
+          "vocabulary": [
+            "use common words and some more precise vocabulary to communicate meaning",
+            "use some figures of speech and idioms"
+          ],
+          "listenability": [
+            "speak with good control of simple grammatical structures",
+            "speak clearly with understandable rhythm, pronunciation, and intonation",
+            "speak with very few self-corrections, repetitions, or inappropriate pauses"
+          ],
+          "task_fulfillment": [
+            "adjust my speaking style and tone to some familiar listeners and situations",
+            "convey my intended meaning to others when I speak"
+          ],
+          "when": [
+            "I speak face-to-face, online, or on the phone",
+            "the situation is formal or informal"
+          ]
+        },
+        {
+          "level_label": "6",
+          "levels": [6],
+          "proficiency_descriptor": "Developing proficiency in everyday social, educational, or workplace contexts",
+          "content_coherence": [
+            "support my opinions and feelings with reasons",
+            "relate factual information"
+          ],
+          "vocabulary": [
+            "use common words and phrases"
+          ],
+          "listenability": [
+            "speak with control of simple grammatical structures",
+            "usually speak with understandable rhythm, pronunciation, and intonation",
+            "speak with some self-corrections, repetitions, or inappropriate pauses"
+          ],
+          "task_fulfillment": [
+            "adjust my speaking style to suit some familiar situations",
+            "convey accurate information to others when I speak"
+          ],
+          "when": [
+            "I speak face-to-face, online, or on the phone",
+            "the situation is casual or somewhat formal"
+          ]
+        },
+        {
+          "level_label": "5",
+          "levels": [5],
+          "proficiency_descriptor": "Acquiring proficiency in everyday social, educational, or workplace contexts",
+          "content_coherence": [
+            "communicate my feelings",
+            "describe common objects, situations, and people that I know",
+            "tell a simple story about something that happened to me"
+          ],
+          "vocabulary": [
+            "use common words and phrases"
+          ],
+          "listenability": [
+            "speak with some control of simple grammatical structures"
+          ],
+          "task_fulfillment": [
+            "convey information about a familiar topic"
+          ],
+          "when": [
+            "I speak face-to-face, online, or on the phone",
+            "the situation is casual or somewhat formal"
+          ]
+        },
+        {
+          "level_label": "4",
+          "levels": [4],
+          "proficiency_descriptor": "Adequate proficiency for daily life activities",
+          "content_coherence": [
+            "say what I like, dislike, and how I feel",
+            "give a simple description of objects, situations, and people that I know",
+            "tell a short, simple story about something that happened to me"
+          ],
+          "vocabulary": [
+            "use common words"
+          ],
+          "listenability": [
+            "speak with limited control of simple grammatical structures"
+          ],
+          "task_fulfillment": [
+            "convey some information about a very familiar topic"
+          ],
+          "when": [
+            "I speak face-to-face, online, or on the phone",
+            "the situation is casual"
+          ]
+        },
+        {
+          "level_label": "3",
+          "levels": [3],
+          "proficiency_descriptor": "Some proficiency in limited contexts of personal relevance",
+          "content_coherence": [
+            "say what I like, dislike, and what I need"
+          ],
+          "vocabulary": [
+            "use very common words"
+          ],
+          "listenability": [
+            "sometimes use correct grammar"
+          ],
+          "task_fulfillment": [
+            "talk about myself and what I need"
+          ],
+          "when": [
+            "I speak face-to-face, online, or on the phone",
+            "the situation is casual"
+          ]
+        },
+        {
+          "level_label": "0, 1, 2",
+          "levels": [0, 1, 2],
+          "proficiency_descriptor": "Limited ability in contexts related to immediate needs or insufficient information to assess",
+          "content_coherence": [
+            "sometimes say what I like, dislike, and what I need"
+          ],
+          "vocabulary": [
+            "use very common words"
+          ],
+          "listenability": [
+            "rarely use correct grammar"
+          ],
+          "task_fulfillment": [
+            "sometimes talk about myself and what I need"
+          ],
+          "when": [
+            "I speak face-to-face, online, or on the phone",
+            "the situation is casual"
+          ]
+        }
+      ]
+    },
+    {
+      "module": "writing",
+      "source_page": 2,
+      "title": "CELPIP Writing Level",
+      "dimensions": [
+        "Content/Coherence",
+        "Vocabulary",
+        "Readability",
+        "Task Fulfillment",
+        "When"
+      ],
+      "levels": [
+        {
+          "level_label": "12",
+          "levels": [12],
+          "proficiency_descriptor": "Expert proficiency in high-stakes social, educational, or workplace contexts",
+          "content_coherence": [
+            "write complex formal and informal texts for a full range of purposes, intentions, and objectives",
+            "develop ideas with relevant and sufficient facts, extended descriptions, details, or quotations"
+          ],
+          "vocabulary": [
+            "choose specialized, formal, and common words to express my precise meaning"
+          ],
+          "readability": [
+            "connect ideas and make transitions within and between paragraphs",
+            "write with very good control of a very broad range of complex and diverse grammatical structures"
+          ],
+          "task_fulfillment": [
+            "present information using a tone and style appropriate to the situation",
+            "precisely communicate my ideas"
+          ],
+          "when": [
+            "I write for a diverse and undefined audience and the situation is formal or informal"
+          ]
+        },
+        {
+          "level_label": "11",
+          "levels": [11],
+          "proficiency_descriptor": "Advanced proficiency in high-stakes social, educational, or workplace contexts",
+          "content_coherence": [
+            "write formal and informal texts for a range of purposes",
+            "develop ideas with relevant facts, descriptions, details, or quotations"
+          ],
+          "vocabulary": [
+            "choose specialized, formal, and common words to express my meaning"
+          ],
+          "readability": [
+            "connect ideas and make transitions within and between paragraphs",
+            "write with good control of a broad range of complex and diverse grammatical structures"
+          ],
+          "task_fulfillment": [
+            "present information using a tone and style that is usually appropriate to the situation",
+            "accurately communicate my ideas"
+          ],
+          "when": [
+            "I write for an undefined audience and the situation is formal or informal"
+          ]
+        },
+        {
+          "level_label": "10",
+          "levels": [10],
+          "proficiency_descriptor": "Highly effective proficiency in some high-stakes social, educational, or workplace contexts",
+          "content_coherence": [
+            "write short formal and informal texts of some complexity",
+            "support key ideas with a range of facts, descriptions, details, or quotations"
+          ],
+          "vocabulary": [
+            "choose words and phrases to provide precise details, descriptions, and comparisons"
+          ],
+          "readability": [
+            "connect ideas and make transitions within and between paragraphs",
+            "write with good control of a range of complex and diverse grammatical structures"
+          ],
+          "task_fulfillment": [
+            "present information using a tone and style that follows most formal and informal writing conventions",
+            "convey my intended meaning"
+          ],
+          "when": [
+            "I write for a defined audience and the situation is formal or informal"
+          ]
+        },
+        {
+          "level_label": "9",
+          "levels": [9],
+          "proficiency_descriptor": "Effective proficiency in some high-stakes social, educational, or workplace contexts",
+          "content_coherence": [
+            "write short formal and informal texts of some complexity",
+            "support key ideas with relevant facts, descriptions, details, or quotations"
+          ],
+          "vocabulary": [
+            "choose words and phrases to provide accurate details, descriptions, and comparisons"
+          ],
+          "readability": [
+            "write well-organized paragraphs",
+            "write with control of a range of complex and diverse grammatical structures",
+            "write with good control of spelling and punctuation"
+          ],
+          "task_fulfillment": [
+            "present information using a tone and style that follows some formal and most informal writing conventions",
+            "convey my intended meaning"
+          ],
+          "when": [
+            "I write for a defined audience and the situation is formal or informal"
+          ]
+        },
+        {
+          "level_label": "8",
+          "levels": [8],
+          "proficiency_descriptor": "Good proficiency in more demanding social, educational, or workplace contexts",
+          "content_coherence": [
+            "write short, moderately complex texts",
+            "develop a main idea with supporting details"
+          ],
+          "vocabulary": [
+            "use common or context-specific words to communicate meaning"
+          ],
+          "readability": [
+            "write well-organized paragraphs",
+            "write with good control of complex grammatical structures, spelling, and punctuation"
+          ],
+          "task_fulfillment": [
+            "present information using a tone and style that follows common writing conventions",
+            "convey and support my main ideas about a topic"
+          ],
+          "when": [
+            "I write for a familiar or clearly defined audience"
+          ]
+        },
+        {
+          "level_label": "7",
+          "levels": [7],
+          "proficiency_descriptor": "Adequate proficiency in somewhat demanding social, educational, or workplace contexts",
+          "content_coherence": [
+            "write short, moderately complex, factual texts",
+            "express a main idea with supporting detail"
+          ],
+          "vocabulary": [
+            "use common and some context-specific words to communicate meaning"
+          ],
+          "readability": [
+            "organize related ideas into paragraphs",
+            "write with adequate control of complex grammatical structures",
+            "write with good control of simple grammar, spelling, and punctuation"
+          ],
+          "task_fulfillment": [
+            "present information using a tone and style that follows most common writing conventions",
+            "convey factual information about a topic"
+          ],
+          "when": [
+            "I write for a familiar or clearly defined audience"
+          ]
+        },
+        {
+          "level_label": "6",
+          "levels": [6],
+          "proficiency_descriptor": "Developing proficiency in everyday social, educational, or workplace contexts",
+          "content_coherence": [
+            "write short, coherent texts",
+            "express a main idea with some supporting detail"
+          ],
+          "vocabulary": [
+            "use common words and phrases"
+          ],
+          "readability": [
+            "organize related ideas into paragraphs",
+            "write with good control of simple grammar",
+            "write with adequate control of spelling and punctuation"
+          ],
+          "task_fulfillment": [
+            "present information using a tone and style that are sometimes appropriate to the situation",
+            "convey some factual information about a topic"
+          ],
+          "when": [
+            "I write for a familiar or clearly defined audience"
+          ]
+        },
+        {
+          "level_label": "5",
+          "levels": [5],
+          "proficiency_descriptor": "Acquiring proficiency in everyday social, educational, or workplace contexts",
+          "content_coherence": [
+            "write short, simple to moderately complex texts",
+            "express a main idea and some related ideas"
+          ],
+          "vocabulary": [
+            "use common words and phrases"
+          ],
+          "readability": [
+            "connect two or more related ideas",
+            "write with good control of simple grammar",
+            "write with adequate control of spelling and punctuation"
+          ],
+          "task_fulfillment": [
+            "use common phrases that are appropriate to the situation",
+            "convey some information about familiar topics"
+          ],
+          "when": [
+            "I write for or to familiar people"
+          ]
+        },
+        {
+          "level_label": "4",
+          "levels": [4],
+          "proficiency_descriptor": "Adequate proficiency for daily life activities",
+          "content_coherence": [
+            "write simple sentences and short, simple paragraphs",
+            "communicate personal information"
+          ],
+          "vocabulary": [
+            "use common words"
+          ],
+          "readability": [
+            "write with some control of simple grammar",
+            "use capital letters and simple punctuation"
+          ],
+          "task_fulfillment": [
+            "use some common phrases that are appropriate to the situation",
+            "convey some information about very familiar topics"
+          ],
+          "when": [
+            "I write for or to a familiar person"
+          ]
+        },
+        {
+          "level_label": "3",
+          "levels": [3],
+          "proficiency_descriptor": "Some proficiency in limited contexts of personal relevance",
+          "content_coherence": [
+            "write short, simple sentences"
+          ],
+          "vocabulary": [
+            "use very common words"
+          ],
+          "readability": [
+            "sometimes use correct grammar",
+            "use capital letters and some punctuation"
+          ],
+          "task_fulfillment": [
+            "write some information about me"
+          ],
+          "when": [
+            "I write for or to a familiar person"
+          ]
+        },
+        {
+          "level_label": "0, 1, 2",
+          "levels": [0, 1, 2],
+          "proficiency_descriptor": "Limited ability in contexts related to immediate needs or insufficient information to assess",
+          "content_coherence": [
+            "write very short, simple sentences and simple phrases"
+          ],
+          "vocabulary": [
+            "write the alphabet and numbers",
+            "use very common words"
+          ],
+          "readability": [
+            "rarely use correct grammar"
+          ],
+          "task_fulfillment": [
+            "write some very simple information about me"
+          ],
+          "when": [
+            "I write for or to a familiar person"
+          ]
+        }
+      ]
+    }
+  ]
+}

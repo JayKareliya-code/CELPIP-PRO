@@ -1,0 +1,84 @@
+
+{
+    "taskA": {"question" :"You use the local public library several times every week. However, the library is closed on Sundays and Mondays. You think the library should be open every day. Write an email to the chief librarian in about 150–200 words. Your email should do the following things: Describe the importance of the library for you. Explain why the opening hours don’t work for you. Suggest how people could use the library if it were open every day."
+              "response" :{
+                "band_12" :"Dear Ms. Sonora,
+                            My name is Charles Stevens. As a longstanding resident of the neighbourhood, I have had an Annex Library Card for two decades. I truly appreciate the work that you do as the Chief Librarian, in making it such an inclusive environment and fostering the local community.
+                            Now, as a parent of two children (Gary, 6, and Sofia, 4) it is clear to me that the library’s service to the community could be enhanced if opening hours were extended to Sundays and Mondays. As you know, many families have sports activities and shopping scheduled on Saturday mornings. Sunday is the only day on which we could all enjoy the library’s play rooms, youth groups, and creative programs.  Monday is the only night on which all member of the Annex Theatrical Troupe can practice in the auditorium.
+                            These opinions are widely shared: parents at Annex Kindergarten are unanimous in their desire to share a Sunday cappuccino in the downstairs coffee shop, and to rehearse their lines in the auditorium on Mondays.
+                            Please consider opening the library seven days a week; I hope to raise the issue at your next steering committee meeting.
+                            Warm regards,
+                            Charles Stevens",
+                "band_11" : "Dear Sir/Madam,
+                            I am an avid user of my local public library. I visit the library several times a week, and would like to use it more, but I find the opening hours somewhat restrictive.
+                            I am a single mother currently studying for a Masters at the Open University. As I am undertaking my studies from home, I don’t have access to a university library. Unfortunately I have very poor internet connection where I live and so rely heavily on the public library to conduct online research.
+                            In addition, my daughter is book fanatic – she simply loves to read. Our favourite thing to do together is to spend time in the library at weekends. However, her swimming lessons have now been scheduled for Saturdays, on the opposite side of town. She does not have time to visit the library on the same day. As the library is closed on Sundays, we have to live without our weekly library visit together.
+                            I feel the library should be open to the public every day of the week. It is an important resource for people looking for work, studying, or for those who simply wish to expand their minds.
+                            B. Smith",
+                "band_10" : "Dear Chief Librarian,
+                            I use the local public library several times a week to research material, and access word processing for my studies.  Access to the library is integral to my schooling, and as such, flexible opening hours are vital.
+                            I recently started a part-time job which requires me to cover shifts on the weekend, and varying week days.  Unfortunately, this restricts my ability to access the library given the current opening hours.  I feel that if the hours were extended to be open 7 days a week, it would enhance the experience of many patrons.
+                            For many people, the library is a place of leisure and recreation; as such, if it were to open on both Saturday’s and Sunday’s, kids and adults alike could enjoy the enriching activities offered at your facility over the entire weekend. 7 day access would make this possible for all persons, regardless of their weekly work/study structure.
+                            Thank you for reviewing this request, and I hope you will consider extending opening hours to 7 days a week.
+                            Kind regards,
+                            Vanessa",
+                "band_9" : "To whom it may concern,
+                            My name is Seth and I am writing to you today regarding the opening hours for the library. I am an English student and my course requires me to read many books throughout the year. As a result, I visit the library several times a week to rent the required books. Books can be very expensive, so the library is a great benefit to me as instead of spending lots of money buying these expensive books I can rent them instead at a much lower cost.
+                            I have recently started a new part-time job. Now, my only days off are Sundays and Tuesdays. The library is closed on Sundays which leaves Tuesday evenings after school as the only time I can visit the library. As the library closes early on Tuesdays, I have to rush down after school. This is very stressful for me and it would be much easier if the Library was open on Sundays as then I would have all day to visit.
+                            I feel that many other people have the same problem and would benefit greatly if the library was open every day. I hope you will consider this.
+                            Thanks,
+                            Seth",
+                "band_8" : "Dear Chief Librarian,
+                            I am writing to you with regards to the operating hours of your library. I would appreciate that the library committee will consider operating on Sundays and Mondays as well.
+                            I am a regular patron of your library. I need to visit the library for my research and self study sessions required for my part time MBA course.  Occasionally, I would be required to work late for meetings and overtime, and would not be meet the library operating hours. I could only use the library on Saturday, which is a day I would need to complete other household chores.
+                            By opening your library daily, it can benefit not just me, but the entire community. Most families will spend their Sundays doing things together. The library can certainly organize story telling sessions or talks/workshops that are family friendly on Sundays. There are also many schools surrounding your library. Your library is an excellent place for highschoolers to hang out after school for self studies or project meetings. Therefore, there is every reason to open on Mondays too!
+                            I hope my suggestions can be considered by the committee. I will look forward to your favourable response soon.
+                            Regards
+                            Wendy",
+                "band_7" : "Respected Sir,
+                            Library is the best source of information and knowledge, easily accessible to public. I visit library 4 to 5 times a week spending a minimum of 2 hours on each visit. I would like to put forth my request request to keep the library open every day of a week, in public interest.
+                            People work in different environments with different schedule. For instance, my work shifts enables me to take Sunday/Monday offs whereas, my wife gets Saturday/Sunday offs. These are the days which are most comfortable and convenient us to visit and more time in library reading. But unfortunately, the public library is not open on Sundays and Mondays which keeps most of the public away from library especially on Sunday and for people like me on Monday too.
+                            As said, library being the source of information for most of the public should be accessible to public every day to ensure we cover interests of interested people
+                            Thanks,
+                            XYZ",
+                "band_6": " Date: 13 june 2016
+                            To: Chief Librarian
+                            Topic: Importance of Library
+                            I believe that library is very important in our society. Library is where we find all the information that want to see. It is important to everyone specially for the student to give an extra ideas and searching and learning from their assignments. Even for ordinary people is very useful and helpful. Sometime people will came to library to read books during their spare times and they feel good after they read their favourite books.
+                            The library is closed every Sunday and Monday and it will not work for me. I am a full time employee and work in weekdays. And Sundays is just my spare time to visit library.
+                            I hope that you will find a solution for the schedule of the opening Hours of the library special during"
+              }
+            },
+    "taskB":{
+            "question" :"Mail Delivery Survey
+                        The government wants to either make people pick up their own mail at the post office or have it delivered only twice a week. This will save the government money. The government is asking your opinion of the change.
+                        Choose the option that you prefer. Why do you prefer your choice? Explain the reasons for your choice. Write about 150–200 words.
+                        Option A: I prefer to get my mail at the local post office.
+                        Option B: I prefer to have mail delivered to my home twice a week.",
+            "response" :{
+                "band_12": "There are two primary reasons that I prefer to pick up my mail at the local post office: security and availability.
+                            As a person who regularly sends and receives confidential documents, security is a crucial aspect of my use of Canada Post. The standard mailboxes attached to duplexes in downtown Toronto are insecure. In contrast, the postal storage in Canada Post locations (and pharmacies throughout the city) are protected from casual theft.
+                            The second primary reason that I prefer to pick up my mail is that, even though receiving the mail would require a short walk, it would remain available daily. In my line of work as a commissioner of oaths, two-day delay in receiving a document can be a serious professional problem. Furthermore, a good walk never did anyone any harm, even, perhaps especially, in the teeth of the February winter.
+                            Finally, I would hope that — should the government institute the new pick-up-your-mail policy — they will also lengthen the hours at Canada Post locations, and broaden the range of pharmacies that can serve as mail handling locations.",
+                "band_11": "It is very important to me to have my mail delivered to my home. I have a very stressful job and often work long hours, well after the post office closing time. As I work such long hours, I tend to purchase most of my groceries and clothing online. Thus, I receive a lot of mail through the post.
+                            There has been times where I have not been home to sign for a registered mail and have had to pick up a package from the post office. The post office is located down town on a street with very limited parking facilities. I often find myself circling the block several times waiting for a space to open up. On numerous occasions I have been forced to park in a loading zone, which has resulted in a parking fine more than once. Visiting my local post office, is both time consuming and expensive!
+                            I must admit, I am not happy that the government plans to cut back on the postal service. If I must choose, I absolutely prefer to have mail delivered to my home twice a week, as opposed to not at all!",
+                "band_10": "I would prefer option B be implemented, rather than option A.  The convenience of having mail and packages delivered to my home outweighs the option of ready access to the items at my own discretion.
+                            Typically I only check the mail box at my apartment 2-3 times a week, so the delivery restrictions would not affect me greatly.  So long as there were assigned delivery days, I would be able to obtain my mail at regular intervals and not waste time checking an empty post box.
+                            If option A were implemented, the onus to collect the post would be on me. Realistically, there wouldn’t be time to make the trip to the post office more than once or twice a week, which makes option B all the more appealing.
+                            The time saving method of mail delivery (option B) is a much preferred option. Please consider it!",
+                "band_9": "I would prefer to have my mail delivered to my home twice a week as opposed to me collecting it myself at the local post office. The reason I would prefer this is because I have a very busy schedule and having to collect my own mail from the post office would just take up more of my spare time. Also, the closest post office to my house is a twenty minute walk. I do not own a car so I would have to walk this distance in order to collect my mail.
+                           I feel that having my mail delivered to my home twice a week is a more efficient way of delivering mail to homes as it limits the amounts of trips the post office has to take in order to deliver mail. This in turn will save money for the government as instead of spending money on gas and wages for the employees that deliver the mail every day, they will be only spending this money two days per week.
+                           These are the reason I would prefer to have my mail sent out to my home twice a week.",
+                "band_8": "My option is to have my mails delivered to my home twice a week. Though it’s only twice a week, but it does not change my daily routine. We do not need to allocate time for post office pick up. Sometimes, both my husband and myself may be too occupied at work, and may miss picking up the mails. I sincerely do not want to miss out important mails for that reason.
+                           Base on our mailing records, we do not receive mails daily. At least for relevant mails. We do have junk mails delivered daily, which is not favoured. We had opted for electronic mails for most of our banking and financial institutions. So we will not be expecting regular mails from them. Government bodies are also starting to mail electronically, which is the our preferred mode of correspondence. Twice a week of mail delivery is about right for our family. In fact, we do not require to clear our mailbox stuffed with junk mails everyday anymore!",
+                "band_7": "I appreciate this move to reduce and save the money spent by government on mailing infrastructure. We live in a world ruled by electronic mails. Most of the communications from/to people happen via emails including the critical ones, so I believe there is a huge scope for cost savings, if we optimize the mail delivery system properly.
+                           I would prefer the mails to be delivered to my home versus collecting them by myself since I work 7 days a week with shifts placed between 8 AM to 6 PM. This schedule does not permit me to collect the mails at the local post office with the commuting time accounted. Any material delivery can be easily handed over to my wife or mother at home and mails can be dropped into my personal mailbox installed at the door.
+                           To conclude, I believe delivering mail twice a week would keep both government and public in a win-win situation saving significant money without causing inconvenience to the public. Mails still act as an important communication way",
+                "band_6": "I prefer to get my mail at the post office. It is also useful to me to come in the post office to pick my mail. Through this I am giving a small amount of contribution to the government. And by doing so, I believe that that government will do something in return in the society for the save money.
+                           It also give benefit to me to get may mail in the post office to keep me updated on my daily routine.
+                           And it also an extra time for me to walk and it will be good exercise to me. In this opinion it will help a lot to keep me updated to my mail and also to may bill payment."
+                            },
+                    
+    }
+}

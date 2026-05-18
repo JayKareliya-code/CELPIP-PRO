@@ -6,6 +6,7 @@ Row-level security: user_id is checked so users can only access their own report
 """
 from __future__ import annotations
 
+import asyncio
 import logging
 from uuid import UUID
 
@@ -62,33 +63,69 @@ async def fetch_report(
     Returns:
         ReportResponse if found and owned by user_id, else None.
     """
-    # 1 — Load attempt + verify ownership
+    # 1 — Load attempt + verify ownership (must precede everything else so we
+    # know skill + prompt_id and can refuse cross-tenant access).
     attempt = await db.get(Attempt, attempt_id)
     if attempt is None or attempt.user_id != user_id:
         return None
     if attempt.status != "complete":
         return None
 
-    # 2 — Load ScoreReport
-    score_report_result = await db.execute(
+    # 2 — Fire every remaining read in parallel. Each is independent of the
+    # others; previously they were issued sequentially for ~6 RTTs of wall
+    # latency on every report view. ScoreDimension joins through ScoreReport
+    # so it doesn't have to wait for the ScoreReport id to come back first.
+    is_speaking = attempt.skill == "speaking"
+    is_writing  = not is_speaking
+
+    score_report_co = db.execute(
         select(ScoreReport).where(ScoreReport.attempt_id == attempt_id)
     )
+    dims_co = db.execute(
+        select(ScoreDimension)
+        .join(ScoreReport, ScoreDimension.report_id == ScoreReport.id)
+        .where(ScoreReport.attempt_id == attempt_id)
+        .order_by(ScoreDimension.dimension)
+    )
+    feedback_co = db.execute(
+        select(FeedbackReport).where(FeedbackReport.attempt_id == attempt_id)
+    )
+    transcript_co = (
+        db.execute(select(Transcript).where(Transcript.attempt_id == attempt_id))
+        if is_speaking else None
+    )
+    speaking_prompt_co = (
+        db.execute(select(SpeakingPrompt).where(SpeakingPrompt.id == attempt.prompt_id))
+        if is_speaking else None
+    )
+    writing_prompt_co = (
+        db.execute(select(WritingPrompt).where(WritingPrompt.id == attempt.prompt_id))
+        if is_writing else None
+    )
+    writing_attempt_co = (
+        db.execute(select(WritingAttempt).where(WritingAttempt.attempt_id == attempt_id))
+        if is_writing else None
+    )
+
+    coros = [
+        score_report_co, dims_co, feedback_co,
+        transcript_co, speaking_prompt_co, writing_prompt_co, writing_attempt_co,
+    ]
+    results = await asyncio.gather(*[c for c in coros if c is not None])
+    # Pop results in the same order we appended.
+    score_report_result = results.pop(0)
+    dims_result         = results.pop(0)
+    feedback_result     = results.pop(0)
+    tx_result           = results.pop(0) if is_speaking else None
+    sp_result           = results.pop(0) if is_speaking else None
+    wp_result           = results.pop(0) if is_writing  else None
+    wa_result           = results.pop(0) if is_writing  else None
+
     score_report = score_report_result.scalar_one_or_none()
     if score_report is None:
         logger.warning("No score_report found for complete attempt %s", attempt_id)
         return None
 
-    # 3 — Load ScoreDimensions
-    dims_result = await db.execute(
-        select(ScoreDimension)
-        .where(ScoreDimension.report_id == score_report.id)
-        .order_by(ScoreDimension.dimension)
-    )
-
-    # 4 — Load FeedbackReport (single query — reused for both dimensions and feedback)
-    feedback_result = await db.execute(
-        select(FeedbackReport).where(FeedbackReport.attempt_id == attempt_id)
-    )
     feedback = feedback_result.scalar_one_or_none()
 
     # dimension_commentary is populated for new reports; None/empty for legacy ones
@@ -144,17 +181,27 @@ async def fetch_report(
     sample_response  = feedback.sample_response if feedback else ""
     next_milestone   = (feedback.next_milestone or "") if feedback else ""
 
-    # 5 — Load Transcript (speaking only)
+    # Pull the judge's step-by-step reasoning trace out of raw_rubric_json if
+    # present. Schema v1 stored it nested under {"judge": {...}}; schema v2
+    # (current) writes it flat at the top level. Check both shapes so reports
+    # generated under either schema render correctly.
+    scoring_rationale: str = ""
+    rubric_blob = score_report.raw_rubric_json or {}
+    if isinstance(rubric_blob, dict):
+        scoring_rationale = rubric_blob.get("scoring_rationale") or ""
+        if not scoring_rationale:
+            judge_blob = rubric_blob.get("judge")
+            if isinstance(judge_blob, dict):
+                scoring_rationale = judge_blob.get("scoring_rationale") or ""
+
+    # 3 — Transcript text (speaking only, pre-fetched above)
     transcript_text: str | None = None
-    if attempt.skill == "speaking":
-        tx_result = await db.execute(
-            select(Transcript).where(Transcript.attempt_id == attempt_id)
-        )
+    if tx_result is not None:
         tx = tx_result.scalar_one_or_none()
         if tx:
             transcript_text = tx.text
 
-    # 6 — Load full prompt via ORM to get all fields (including Task 5 / image fields)
+    # 4 — Prompt fields (pre-fetched above based on skill)
     task_title                 = f"Task {attempt.task_number}"
     prompt_text                = ""
     instructions_text          = None
@@ -163,10 +210,7 @@ async def fetch_report(
     curveball_option           = None
     curveball_instruction_text = None
 
-    if attempt.skill == "speaking":
-        sp_result = await db.execute(
-            select(SpeakingPrompt).where(SpeakingPrompt.id == attempt.prompt_id)
-        )
+    if sp_result is not None:
         sp = sp_result.scalar_one_or_none()
         if sp:
             task_title                 = sp.title
@@ -176,10 +220,7 @@ async def fetch_report(
             choice_options             = sp.choice_options          # Task 5 only
             curveball_option           = sp.curveball_option        # Task 5 only
             curveball_instruction_text = sp.curveball_instruction_text  # Task 5 only
-    else:
-        wp_result = await db.execute(
-            select(WritingPrompt).where(WritingPrompt.id == attempt.prompt_id)
-        )
+    elif wp_result is not None:
         wp = wp_result.scalar_one_or_none()
         if wp:
             task_title        = wp.title
@@ -198,15 +239,14 @@ async def fetch_report(
     choice_options    = prompt_image_data.get("choice_options")
     curveball_option  = prompt_image_data.get("curveball_option")
 
-    # 8 — Fetch user_response_text (always returned — it's the user's own content)
+    # 5 — User response text (transcript for speaking, essay for writing).
+    # Speaking: reuse the transcript we already fetched. Writing: pre-fetched
+    # WritingAttempt above.
     user_response_text: str | None = None
-    if attempt.skill == "speaking":
+    if is_speaking:
         if transcript_text:
             user_response_text = transcript_text
-    else:
-        wa_result = await db.execute(
-            select(WritingAttempt).where(WritingAttempt.attempt_id == attempt_id)
-        )
+    elif wa_result is not None:
         wa = wa_result.scalar_one_or_none()
         if wa:
             user_response_text = wa.essay_text
@@ -257,6 +297,7 @@ async def fetch_report(
         sample_response=sample_response   if is_pro else "",
         transcript=transcript_text        if is_pro else None,
         next_milestone=next_milestone      if is_pro else "",
+        scoring_rationale=scoring_rationale if is_pro else "",
         completed_at=attempt.updated_at,
         access=access,
     )

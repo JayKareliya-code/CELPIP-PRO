@@ -85,5 +85,11 @@ class ReportResponse(BaseModel):
     sample_response: str
     transcript: str | None                 # speaking only (pro plan)
     next_milestone: str = ""              # One-sentence next-step coaching note
+    # Step-by-step reasoning trace from the judge model. Walks through each
+    # dimension (precise words quoted, errors quoted, structures named) and
+    # the holistic band decision before the numbers are assigned. Available
+    # for writing attempts only; empty string for speaking or legacy reports.
+    # Pro-only diagnostic content — never returned to starter users.
+    scoring_rationale: str = ""
     completed_at: datetime
     access: ReportAccess                   # explicit gate — see ReportAccess docstring

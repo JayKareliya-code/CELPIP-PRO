@@ -36,7 +36,7 @@ export const ADDONS: AddonCardConfig[] = [
     iconBg: "border-white/[0.10] bg-transparent",
     name: "Writing Pack",
     price: 2.99,
-    quantityLabel: ["Adds 5 questions per task", "Total 10 writing questions"],
+    quantityLabel: ["Adds 5 questions per task", "Total 10 writing questions", "Adds 10 retry credits"],
   },
   {
     id: "speaking-pack",
@@ -45,7 +45,7 @@ export const ADDONS: AddonCardConfig[] = [
     iconBg: "border-white/[0.10] bg-transparent",
     name: "Speaking Pack",
     price: 6.99,
-    quantityLabel: ["Adds 5 questions per task", "Total 40 speaking questions"],
+    quantityLabel: ["Adds 5 questions per task", "Total 40 speaking questions", "Adds 40 retry credits"],
   },
   {
     id: "mock-bundle",
@@ -54,7 +54,7 @@ export const ADDONS: AddonCardConfig[] = [
     iconBg: "border-white/[0.10] bg-transparent",
     name: "Mock Test Bundle",
     price: 2.99,
-    quantityLabel: ["Adds 1 Full Speaking Test", "Adds 1 Full Writing Test"],
+    quantityLabel: ["Adds 1 Full Speaking Test", "Adds 1 Full Writing Test", "Adds 10 retry credits"],
   },
   {
     id: "custom-bundle",
@@ -63,7 +63,7 @@ export const ADDONS: AddonCardConfig[] = [
     iconBg: "border-white/[0.10] bg-transparent",
     name: "Custom Task Bundle",
     price: 1.99,
-    quantityLabel: ["Adds 5 questions for any"],
+    quantityLabel: ["Adds 5 questions for any task", "Adds 5 retry credits"],
     moduleTaskOptions: CUSTOM_BUNDLE_MODULES,
   },
 ];

@@ -60,6 +60,15 @@ export interface QuotaStatus {
   writing_mock_tests_limit?:    number | null;
   speaking_mock_addon_credits?: number;
   writing_mock_addon_credits?:  number;
+  /**
+   * Single shared retry-credit pool. Spent on practice redoes (1 each) and
+   * mock retakes (8 speaking / 2 writing). 0 for free plan users; granted
+   * on Pro activation and topped up by add-on purchases.
+   * `lifetime_granted` is the sum of every positive grant — denominator of
+   * the "remaining / total" progress bar.
+   */
+  retry_credits_balance?:          number;
+  retry_credits_lifetime_granted?: number;
 }
 
 // ── USE_MOCK quota resolver (dev mode, no backend) ────────────────────────────
@@ -124,6 +133,8 @@ function selectSkillQuota(resp: QuotaStatusResponse, skill: Skill): QuotaStatus 
     writing_mock_tests_limit:    resp.writing_mock_tests_limit,
     speaking_mock_addon_credits: resp.speaking_mock_addon_credits,
     writing_mock_addon_credits:  resp.writing_mock_addon_credits,
+    retry_credits_balance:          resp.retry_credits_balance,
+    retry_credits_lifetime_granted: resp.retry_credits_lifetime_granted,
   };
 }
 

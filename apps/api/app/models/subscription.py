@@ -27,7 +27,13 @@ class Subscription(Base, TimestampMixin):
     payment_type:              Mapped[str]        = mapped_column(String, nullable=False, default="one_time")
 
     __table_args__ = (
-        CheckConstraint("plan IN ('pro')",                              name="check_sub_plan"),
+        # Loose DB-level shape check; the canonical allowlist lives in
+        # app.api.v1.billing.constants.PLAN_PRICE_IDS and is enforced by
+        # `_normalize_plan_slug` at the webhook boundary. Keeping the DB
+        # constraint loose means adding a new plan tier doesn't require a
+        # coordinated migration deploy before the code that writes it.
+        CheckConstraint("plan IS NOT NULL AND length(plan) BETWEEN 1 AND 32",
+                        name="check_sub_plan"),
         CheckConstraint("status IN ('active', 'refunded', 'disputed')", name="check_sub_status"),
         CheckConstraint("payment_type IN ('one_time', 'cart')",         name="check_sub_payment_type"),
         Index("idx_subscriptions_user_id",        "user_id"),

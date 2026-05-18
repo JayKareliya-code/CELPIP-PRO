@@ -94,10 +94,13 @@ def reconcile_stripe_plans() -> dict:
                     continue
 
                 # ── 2. Ask Stripe for the PI's real status ────────────────────
+                # PaymentIntent.charges was removed from the default Stripe API
+                # version in 2022-11-15+. We expand `latest_charge` instead and
+                # read `refunded` from that object.
                 try:
                     pi = stripe.PaymentIntent.retrieve(
                         pi_id,
-                        expand=["charges.data"],
+                        expand=["latest_charge"],
                     )
                 except stripe.StripeError as exc:
                     log.warning(
@@ -109,13 +112,16 @@ def reconcile_stripe_plans() -> dict:
                     continue
 
                 # ── 3. Determine if the payment has been refunded ─────────────
-                # Two signals: PI status == "canceled", or the charge itself
-                # is flagged refunded (matches how _handle_charge_refunded works).
+                # Two signals: PI status == "canceled", or the latest charge is
+                # flagged refunded (matches how _handle_charge_refunded works).
                 pi_canceled = pi.get("status") == "canceled"
                 charge_refunded = False
-                charges = pi.get("charges", {}).get("data", [])
-                if charges:
-                    charge_refunded = bool(charges[0].get("refunded", False))
+                latest_charge = pi.get("latest_charge")
+                # When expanded, latest_charge is a Charge object; when not, a
+                # string id. We only inspect the object form — the expand above
+                # is what gives us .refunded without another round-trip.
+                if isinstance(latest_charge, dict) or hasattr(latest_charge, "get"):
+                    charge_refunded = bool(latest_charge.get("refunded", False))
 
                 if not (pi_canceled or charge_refunded):
                     continue  # payment still good — nothing to do

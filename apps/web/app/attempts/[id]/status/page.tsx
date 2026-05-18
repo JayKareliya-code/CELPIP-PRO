@@ -1,8 +1,9 @@
 // ─────────────────────────────────────────────────────────────────────────────
 // app/attempts/[id]/status/page.tsx — Attempt processing / status page
 //
-// Polls the attempt status every 3 s via useAttemptStatus.
-// Once complete, shows a "View Full Report" link inside AttemptStatusCard.
+// Polls the attempt status every 3 s via useAttemptStatus and renders the
+// shared ProcessingScreen until scoring completes, then auto-redirects to
+// /attempts/[id]/report.
 // ─────────────────────────────────────────────────────────────────────────────
 
 import type { Metadata }         from "next";

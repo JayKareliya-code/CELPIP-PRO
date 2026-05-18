@@ -12,7 +12,11 @@ from app.core.config import settings
 from app.core.deps import engine, get_redis_pool
 from app.core.rate_limit import limiter
 from app.core.logging_config import configure_logging
-from app.core.middleware import RequestIDMiddleware
+from app.core.middleware import (
+    BodySizeLimitMiddleware,
+    RequestIDMiddleware,
+    SecurityHeadersMiddleware,
+)
 from app.core.pubsub import PlanEventBus
 from app.api.router import api_router
 from app.workers.celery_app import celery_app as _celery_app  # noqa: F401 — ensures shared_task binds to the configured broker
@@ -95,6 +99,21 @@ def create_app() -> FastAPI:
 
     # ── Request-ID: first middleware so the ID is available for all subsequent layers ──
     app.add_middleware(RequestIDMiddleware)
+
+    # ── Body-size limit: reject oversized requests before Starlette buffers them.
+    # Cap = AUDIO_MAX_BYTES + 5 MiB headroom for multipart envelope / metadata.
+    # Per-route validators (essay length, audio bytes) still apply as a second
+    # line of defense for chunked-transfer requests with no Content-Length.
+    app.add_middleware(
+        BodySizeLimitMiddleware,
+        max_bytes=settings.AUDIO_MAX_BYTES + 5 * 1024 * 1024,
+    )
+
+    # ── Security headers: HSTS only on non-dev so local http:// works ─────────
+    app.add_middleware(
+        SecurityHeadersMiddleware,
+        hsts=(settings.APP_ENV != "development"),
+    )
 
     # ── Rate limiting ─────────────────────────────────────────────────────────
     app.state.limiter = limiter

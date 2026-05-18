@@ -71,10 +71,10 @@ function TaskRow({ task, skill }: { task: MockExamTaskResult; skill: MockExamSes
         <StatusIcon status={task.status} />
       </span>
 
-      {/* Band badge — fixed width so all rows align */}
+      {/* Band score — plain coloured text matching the recent attempts table */}
       <span className="flex justify-center">
         {task.estimated_band !== null ? (
-          <ScoreBadge band={task.estimated_band} size="sm" />
+          <ScoreBadge band={task.estimated_band} plain />
         ) : (
           <span className="text-xs text-subtle">—</span>
         )}
@@ -129,7 +129,7 @@ function SessionCard({ session }: { session: MockExamSession }) {
           <div className="text-center min-w-[3rem]">
             {session.avg_band !== null ? (
               <>
-                <ScoreBadge band={session.avg_band} size="md" />
+                <ScoreBadge band={session.avg_band} plain />
                 <p className="text-[10px] text-subtle mt-0.5 leading-none">avg band</p>
               </>
             ) : (

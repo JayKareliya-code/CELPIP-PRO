@@ -49,6 +49,9 @@ def _get_audio_s3_key(attempt_id: str) -> str | None:
     queue="speaking",
     max_retries=3,
     default_retry_delay=30,
+    retry_backoff=True,          # exponential: 30 s → 60 s → 120 s
+    retry_backoff_max=600,
+    retry_jitter=True,           # spread retries across worker processes
     acks_late=True,
 )
 def score_speaking_attempt(self, attempt_id: str) -> dict:

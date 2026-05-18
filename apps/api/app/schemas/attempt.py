@@ -68,5 +68,14 @@ class QuotaStatusResponse(BaseModel):
     speaking_mock_tests_limit:       int | None = None
     writing_mock_tests_limit:        int | None = None
     # ── Mock-exam addon pool credits (purchased bundles, summed across rows) ──
+    # Driven by the mock_bundle add-on. Consumed by the quota gate when plan
+    # mock slots are exhausted on a NEW mock attempt.
     speaking_mock_addon_credits:     int = 0
     writing_mock_addon_credits:      int = 0
+    # ── Retry credit pool — single shared balance spent on redoes/retakes ─────
+    # See app.services.retry_credit_service. Free plan starts at 0; Pro grants
+    # PRO_RETRY_CREDITS_GRANT once at activation; add-on purchases top up.
+    # `lifetime_granted` is the sum of every positive ledger entry — used by
+    # the UI to render a "remaining / total" progress bar.
+    retry_credits_balance:           int = 0
+    retry_credits_lifetime_granted:  int = 0

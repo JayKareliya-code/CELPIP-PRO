@@ -27,8 +27,24 @@ class User(Base, TimestampMixin):
     tos_accepted_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     tos_version:     Mapped[str | None]      = mapped_column(String(32))
 
+    # Retry-credit pool. Free plan = 0 (cannot retry). Pro plan = granted
+    # PRO_RETRY_CREDITS_GRANT once at activation. Add-on purchases top up.
+    # Spent on practice redoes (PRACTICE_RETRY_COST each) and mock retakes
+    # (SPEAKING_MOCK_RETRY_COST / WRITING_MOCK_RETRY_COST). Authoritative
+    # source for quota gate decisions; the retry_credit_ledger table holds
+    # the audit trail of every change.
+    retry_credits_balance: Mapped[int] = mapped_column(
+        Integer, default=0, nullable=False, server_default="0"
+    )
+
     __table_args__ = (
-        CheckConstraint("plan IN ('starter', 'pro')", name="check_user_plan"),
+        # Loose DB-level shape check; canonical allowlist is enforced at the
+        # application layer (Pydantic + `_normalize_plan_slug`). See the
+        # matching note on Subscription.plan for why this is intentionally
+        # not an IN-list.
+        CheckConstraint("plan IS NOT NULL AND length(plan) BETWEEN 1 AND 32",
+                        name="check_user_plan"),
+        CheckConstraint("retry_credits_balance >= 0", name="check_retry_credits_non_negative"),
     )
 
     # Audit log of every ToS acceptance event (append-only)

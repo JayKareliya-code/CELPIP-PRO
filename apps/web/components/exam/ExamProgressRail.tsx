@@ -43,7 +43,7 @@ export function ExamProgressRail({ tasks, currentTaskIndex }: ExamProgressRailPr
         </span>
 
         {/* Task pills */}
-        <div className="flex items-center gap-1.5 flex-1 overflow-x-auto scrollbar-none">
+        <div className="flex items-center gap-1.5 flex-1 overflow-x-auto overflow-y-hidden no-scrollbar">
           {tasks.map((task, i) => {
             const isActive = i === currentTaskIndex;
             const isDone   = task.status === "done";

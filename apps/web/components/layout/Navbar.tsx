@@ -134,7 +134,7 @@ function ProfileDropdown() {
           <img
             src={avatarUrl}
             alt={displayName}
-            className="w-8 h-8 rounded-full object-cover ring-2 ring-amber-500/20 shrink-0"
+            className="w-8 h-8 rounded-full object-cover ring-2 ring-amber-400/70 ring-offset-1 ring-offset-black shrink-0"
           />
         ) : (
           <div className="w-8 h-8 rounded-full bg-amber-900/30 border border-amber-700/30 flex items-center justify-center shrink-0">

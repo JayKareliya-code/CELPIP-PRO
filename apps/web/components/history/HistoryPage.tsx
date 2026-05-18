@@ -5,7 +5,7 @@
 // ─────────────────────────────────────────────────────────────────────────────
 
 import { useState }                    from "react";
-import { History }                     from "lucide-react";
+import { History, BookOpen, ClipboardList, type LucideIcon } from "lucide-react";
 import { PageWrapper }                 from "@/components/layout/PageWrapper";
 import { useHistory }                  from "@/lib/hooks/useHistory";
 import { HistoryFilterBar }            from "./HistoryFilterBar";
@@ -17,9 +17,9 @@ import type { Skill, PaginatedHistory } from "@/lib/types";
 
 type ViewMode = "practice" | "mock";
 
-const VIEW_TABS: { label: string; value: ViewMode; icon: string }[] = [
-  { label: "Practice",    value: "practice", icon: "🎤" },
-  { label: "Mock Exams",  value: "mock",     icon: "📋" },
+const VIEW_TABS: { label: string; value: ViewMode; icon: LucideIcon }[] = [
+  { label: "Practice",    value: "practice", icon: BookOpen      },
+  { label: "Mock Exams",  value: "mock",     icon: ClipboardList },
 ];
 
 // ── Page ──────────────────────────────────────────────────────────────────────
@@ -60,7 +60,7 @@ export function HistoryPage() {
           role="tablist"
           className="grid grid-cols-2 gap-1 sm:inline-grid rounded-xl border border-border bg-surface p-1"
         >
-          {VIEW_TABS.map(({ label, value, icon }) => {
+          {VIEW_TABS.map(({ label, value, icon: Icon }) => {
             const isActive = view === value;
             return (
               <button
@@ -69,14 +69,20 @@ export function HistoryPage() {
                 aria-selected={isActive}
                 onClick={() => handleViewChange(value)}
                 className={[
-                  "flex items-center justify-center gap-1.5 rounded-lg px-4 py-1.5 text-sm font-medium",
-                  "transition-all duration-150 whitespace-nowrap",
+                  "flex items-center justify-center gap-2 rounded-lg px-4 py-1.5 text-sm font-medium",
+                  "transition-colors duration-150 whitespace-nowrap",
                   isActive
-                    ? "bg-primary text-white shadow-sm"
-                    : "text-subtle hover:text-white hover:bg-white/5",
+                    ? "bg-white/[0.06] border border-white/10 text-white shadow-sm"
+                    : "border border-transparent text-white/45 hover:text-white/80 hover:bg-white/[0.03]",
                 ].join(" ")}
               >
-                <span>{icon}</span> {label}
+                <Icon
+                  className={[
+                    "h-3.5 w-3.5 shrink-0 transition-colors",
+                    isActive ? "text-primary" : "text-white/35",
+                  ].join(" ")}
+                />
+                {label}
               </button>
             );
           })}

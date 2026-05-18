@@ -3,7 +3,9 @@ import asyncio
 import time
 import httpx
 from datetime import date
-from jose import jwt, jwk, JWTError
+import jwt
+from jwt import PyJWK
+from jwt.exceptions import PyJWTError as JWTError
 from fastapi import Depends, HTTPException, Request
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -135,8 +137,10 @@ async def get_current_user(
         token = credentials.credentials
 
         # Development-only bypass: accept test_token_<clerk_id> in local dev.
-        # Gated behind APP_ENV so this can never run in production.
-        if settings.APP_ENV == "development" and token.startswith(_DEV_TOKEN_PREFIX):
+        # Gated behind ALLOW_DEV_AUTH_BYPASS (which the config validator
+        # refuses to enable outside APP_ENV='development'), so a staging or
+        # production deploy cannot expose this even if APP_ENV gets misset.
+        if settings.ALLOW_DEV_AUTH_BYPASS and token.startswith(_DEV_TOKEN_PREFIX):
             clerk_user_id = token[len(_DEV_TOKEN_PREFIX):]
             if not clerk_user_id:
                 raise exc
@@ -150,11 +154,24 @@ async def get_current_user(
         key    = next((k for k in jwks["keys"] if k["kid"] == header.get("kid")), None)
         if not key:
             raise exc
+        # `aud` verification: when CLERK_JWT_AUDIENCE is configured we require
+        # the claim to match. The prod validator forces this to be set, so
+        # production deploys are always strict; in development the empty
+        # default keeps the bypass for the Clerk-CLI / local test flow.
+        decode_options: dict = {}
+        decode_kwargs:  dict = {}
+        if settings.CLERK_JWT_AUDIENCE:
+            decode_kwargs["audience"] = settings.CLERK_JWT_AUDIENCE
+        else:
+            decode_options["verify_aud"] = False
+        # PyJWK exposes `.key` as the cryptography object PyJWT.decode expects.
+        public_key = PyJWK(key).key
         payload: dict = jwt.decode(
             token,
-            jwk.construct(key),
+            public_key,
             algorithms=["RS256"],
-            options={"verify_aud": False},
+            options=decode_options or None,
+            **decode_kwargs,
         )
         _check_authorized_party(payload)
         clerk_user_id: str = payload["sub"]
@@ -225,5 +242,67 @@ async def require_admin(
     # last-synced DB flag so existing admins keep working.
     if not (is_clerk_admin or user.is_admin):
         raise HTTPException(status_code=403, detail="Admin only")
+
+    return user
+
+
+# Freshness window: how recent the JWT `iat` claim must be to count as a
+# fresh authentication. Clerk session tokens refresh every ~60s, so a 5-minute
+# window means the user (or a stolen token) cannot trigger destructive actions
+# more than 5 minutes after the last refresh.
+_RECENT_AUTH_MAX_AGE_SECONDS = 5 * 60
+
+
+async def require_recent_auth(
+    request:     Request,
+    credentials: Annotated[HTTPAuthorizationCredentials, Depends(security)],
+    user:        Annotated[User, Depends(get_current_user)],
+) -> User:
+    """Validate the caller and additionally require a *recently minted* JWT.
+
+    Use this dependency on endpoints whose effect is destructive or
+    high-trust (account deletion, payment-method removal, etc.). It rejects
+    callers whose token's `iat` claim is older than 5 minutes, which forces
+    the frontend to call ``getToken({ skipCache: true })`` immediately before
+    the request — proof that the user is actively in the session, not just
+    that a stale token leaked from logs or browser storage.
+
+    The development bypass token (``test_token_*``) is exempt so local
+    integration tests don't have to forge JWT claims.
+    """
+    token = credentials.credentials
+
+    if settings.ALLOW_DEV_AUTH_BYPASS and token.startswith(_DEV_TOKEN_PREFIX):
+        return user
+
+    try:
+        # PyJWT has no `get_unverified_claims` helper. We re-decode the token
+        # without signature verification: this is safe here because the
+        # signature WAS already verified by get_current_user above (caller is
+        # authenticated), and we only need the `iat` claim for freshness.
+        claims = jwt.decode(token, options={"verify_signature": False})
+        iat    = int(claims.get("iat", 0))
+    except (JWTError, ValueError, TypeError):
+        raise HTTPException(
+            status_code=401,
+            detail="Could not parse token claims.",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+
+    if iat <= 0 or (time.time() - iat) > _RECENT_AUTH_MAX_AGE_SECONDS:
+        logger.warning(
+            "require_recent_auth: stale token rejected user=%s iat=%s age=%.0fs",
+            user.clerk_user_id, iat, time.time() - iat if iat else -1,
+        )
+        raise HTTPException(
+            status_code=401,
+            detail={
+                "code": "STALE_AUTH",
+                "message": (
+                    "This action requires a freshly authenticated session. "
+                    "Please re-authenticate and try again."
+                ),
+            },
+        )
 
     return user

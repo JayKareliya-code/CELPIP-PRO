@@ -50,12 +50,19 @@ _24H = timedelta(hours=24)
 
 
 async def _recent_export_count(db: AsyncSession, user_id: uuid.UUID) -> int:
-    """Return the number of export jobs created by this user in the last 24 h."""
+    """Return the number of NON-FAILED export jobs by this user in the last 24h.
+
+    Failed jobs are excluded so a system-side error (S3 unreachable, missing
+    creds, DB transient) doesn't lock the user out for a full day. A user
+    whose last attempt failed can retry immediately. Successful, pending,
+    processing, expired, and complete jobs all count toward the limit.
+    """
     cutoff = datetime.now(timezone.utc) - _24H
     result = await db.execute(
         select(func.count()).select_from(ExportJob).where(
             ExportJob.user_id == user_id,
             ExportJob.created_at >= cutoff,
+            ExportJob.status != "failed",
         )
     )
     return result.scalar_one()
@@ -99,7 +106,13 @@ async def request_data_export(
         created_at=datetime.now(timezone.utc),
     )
     db.add(job)
-    await db.flush()   # get the id without committing — get_db commits on exit
+
+    # Commit BEFORE enqueueing so the row is visible to the Celery worker.
+    # On a fast local Redis broker the worker can pick up the task in <50ms,
+    # which races against get_db's deferred commit and causes the worker's
+    # status-update UPDATEs to silently affect 0 rows — the job appears
+    # "stuck" at pending forever. Committing here closes that race.
+    await db.commit()
 
     # ── Enqueue Celery task ───────────────────────────────────────────────────
     from app.workers.export_tasks import build_user_export  # local import avoids circular

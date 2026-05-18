@@ -26,7 +26,7 @@
 
 import { useState }                        from "react";
 import Link                                from "next/link";
-import { ArrowRight }                      from "lucide-react";
+import { ArrowRight, GraduationCap, FileText, BarChart3, Lock } from "lucide-react";
 import { formatBand }                      from "@/lib/utils";
 
 import { ReportTabNav }                    from "./ReportTabNav";
@@ -88,15 +88,15 @@ export function ProReport({ report, targetBand, isPro }: Props) {
 
   // Build tab list — Analytics tab always shows; locked for Starter.
   const tabs: ReportTab[] = [
-    { id: "coaching",  label: "Coaching Report" },
-    { id: "response",  label: "My Response"     },
-    { id: "analytics", label: "Analytics" },
+    { id: "coaching",  label: "Coaching Report", icon: GraduationCap },
+    { id: "response",  label: "My Response",     icon: FileText      },
+    { id: "analytics", label: "Analytics",       icon: BarChart3     },
   ];
 
-  // Starter: Analytics tab label gets a lock hint
+  // Starter: swap the Analytics icon to a Lock so the tab reads as gated.
   const displayTabs: ReportTab[] = isPro
     ? tabs
-    : tabs.map((t) => t.id === "analytics" ? { ...t, label: "Analytics 🔒" } : t);
+    : tabs.map((t) => t.id === "analytics" ? { ...t, icon: Lock } : t);
 
   return (
     <div className="flex flex-col gap-0">
@@ -104,8 +104,10 @@ export function ProReport({ report, targetBand, isPro }: Props) {
       {/* ── Sticky tab bar ──────────────────────────────────────────────────────
           Sticks just below the main navbar (navbar height = 3.5rem / 56px).
           backdrop-blur gives a frosted-glass feel as content scrolls under it.
+          The tab nav supplies its own rail border, so this container only
+          handles the sticky positioning + blurred backdrop.
       */}
-      <div className="sticky top-[3.5rem] z-20 -mx-4 sm:-mx-6 lg:-mx-8 px-4 sm:px-6 lg:px-8 pt-3 pb-3 backdrop-blur-md bg-background/80 border-b border-border/40">
+      <div className="sticky top-[3.5rem] z-20 -mx-4 sm:-mx-6 lg:-mx-8 px-4 sm:px-6 lg:px-8 pt-2 backdrop-blur-md bg-background/80">
         <ReportTabNav
           tabs={displayTabs}
           activeTab={activeTab}

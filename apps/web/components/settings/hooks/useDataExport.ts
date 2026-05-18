@@ -8,7 +8,8 @@
 // ─────────────────────────────────────────────────────────────────────────────
 
 import { useEffect, useRef, useState } from "react";
-import { apiFetch } from "@/lib/api";
+import { useAuth } from "@clerk/nextjs";
+import { apiFetch, authHeaders, API_V1, ApiError } from "@/lib/api";
 import type { ExportJob } from "@/components/settings/types";
 
 export interface UseDataExportReturn {
@@ -20,12 +21,15 @@ export interface UseDataExportReturn {
 
 /**
  * Manages the full data-export lifecycle:
- *   1. POST  /users/me/export         → starts the job, gets job_id
- *   2. Polls GET /users/me/export/status/:job_id every 5 s until terminal state
+ *   1. POST  /api/v1/users/me/export                  → starts the job, gets job_id
+ *   2. Polls GET /api/v1/users/me/export/status/:job_id every 5 s until terminal state
  *
+ * Both requests carry the user's Clerk bearer token via authHeaders().
  * Rate-limit (429) is surfaced as a human-readable error string.
  */
 export function useDataExport(): UseDataExportReturn {
+  const { getToken } = useAuth();
+
   const [jobId,   setJobId]   = useState<string | null>(null);
   const [job,     setJob]     = useState<ExportJob | null>(null);
   const [loading, setLoading] = useState(false);
@@ -40,7 +44,11 @@ export function useDataExport(): UseDataExportReturn {
 
     pollRef.current = setInterval(async () => {
       try {
-        const data = await apiFetch<ExportJob>(`/users/me/export/status/${jobId}`);
+        const token = await getToken();
+        const data = await apiFetch<ExportJob>(
+          `${API_V1}/users/me/export/status/${jobId}`,
+          { headers: authHeaders(token) },
+        );
         setJob(data);
         if (data.status === "complete" || data.status === "failed") {
           clearInterval(pollRef.current!);
@@ -51,7 +59,7 @@ export function useDataExport(): UseDataExportReturn {
     }, 5_000);
 
     return () => clearInterval(pollRef.current!);
-  }, [jobId, job?.status]);
+  }, [jobId, job?.status, getToken]);
 
   // ── Request ───────────────────────────────────────────────────────────────
 
@@ -59,7 +67,11 @@ export function useDataExport(): UseDataExportReturn {
     setLoading(true);
     setError(null);
     try {
-      const res = await apiFetch<{ job_id: string }>("/users/me/export", { method: "POST" });
+      const token = await getToken();
+      const res = await apiFetch<{ job_id: string }>(
+        `${API_V1}/users/me/export`,
+        { method: "POST", headers: authHeaders(token) },
+      );
       setJobId(res.job_id);
       setJob({
         job_id:        res.job_id,
@@ -69,9 +81,11 @@ export function useDataExport(): UseDataExportReturn {
         error_message: null,
       });
     } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : String(err);
+      // Status comes from ApiError; the message string is "API error: <text>"
+      // and never contains the numeric code, so we have to check err.status.
+      const isRateLimit = err instanceof ApiError && err.status === 429;
       setError(
-        msg.includes("429")
+        isRateLimit
           ? "You can only request one export every 24 hours."
           : "Failed to start export. Please try again later.",
       );

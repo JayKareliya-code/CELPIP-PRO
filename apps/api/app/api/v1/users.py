@@ -1,21 +1,25 @@
 import logging
+import uuid
 from datetime import datetime, timezone
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, HTTPException, Request, Response
+from fastapi import APIRouter, Depends, HTTPException, Query, Request, Response
 from pydantic import BaseModel, Field
-from sqlalchemy import text, func, distinct
+from sqlalchemy import select, text, func, distinct
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.config import settings
 from app.core.deps import get_db
-from app.core.security import get_current_user
+from app.core.rate_limit import limiter
+from app.core.security import get_current_user, require_recent_auth
 from app.core.quota import get_plan_limits
 from app.models.user import User
+from app.models.retry_credit_ledger import RetryCreditLedger
 from app.repositories.attempt_repo import AttemptRepository
 from app.repositories.user_repo import UserRepository
 from app.schemas.user import UserMeResponse, SetTargetScoreRequest, WeakAreaItem
 from app.schemas.attempt import QuotaStatusResponse
+from app.services import retry_credit_service
 from app.services.addon_credit_service import get_credits_per_task, get_available_credits
 from app.models.tos_acceptance import TosAcceptance
 
@@ -121,29 +125,30 @@ async def get_my_quota(
     user: Annotated[User, Depends(get_current_user)],
     db:   Annotated[AsyncSession, Depends(get_db)],
 ) -> QuotaStatusResponse:
-    """Return per-task quota usage for the authenticated user.
+    """Return per-task quota + retry-credit balance + add-on credits for the user.
 
-    Counts DISTINCT prompts attempted per task — not total attempts.
-    This matches enforce_quota: retrying the same prompt is always free and
-    must not inflate the displayed count or trigger a false can_attempt=False.
+    Three buckets surfaced for the frontend, mirroring the quota gate:
+      - `*_used_per_task` / `*_limit_per_task`            → plan tier slots
+      - `*_addon_credits_per_task` / `*_mock_addon_credits` → add-on packs
+      - `retry_credits_balance` / `..._lifetime_granted`    → redo/retake pool
     """
     repo = AttemptRepository(db)
 
-    # Per-task DISTINCT prompt counts — one query per skill (mirrors enforce_quota logic)
+    # Per-task DISTINCT prompt counts — mirror enforce_quota logic.
     s_used_raw = await repo.count_distinct_prompts_per_skill(user.id, "speaking")
     w_used_raw = await repo.count_distinct_prompts_per_skill(user.id, "writing")
 
-    # Normalise to full task number ranges expected by the frontend
     s_used_per_task: dict[int, int] = {i: s_used_raw.get(i, 0) for i in range(9)}
     w_used_per_task: dict[int, int] = {i: w_used_raw.get(i, 0) for i in range(1, 3)}
 
-    # Addon credits per task — queried separately; 0 when no addons purchased.
-    # A speaking_pack purchase creates one row per task at webhook time, so this
-    # correctly reflects both module-level packs AND task-specific custom bundles.
+    # Per-task add-on credit balances — populated by the webhook on purchase.
+    # When plan quota is exhausted on a NEW prompt the quota gate consumes
+    # from these. The frontend adds them to plan limit for the effective
+    # ring on each task card.
     s_addon_credits = await get_credits_per_task(user.id, "speaking", db)
     w_addon_credits = await get_credits_per_task(user.id, "writing",  db)
 
-    # Distinct speaking mock exam sessions (uses the mock_exam_task_attempts table)
+    # Distinct speaking mock exam sessions (mock_exam_task_attempts table).
     mock_result = await db.execute(
         text(
             "SELECT COUNT(DISTINCT session_id) "
@@ -154,7 +159,7 @@ async def get_my_quota(
     )
     speaking_mock_used: int = mock_result.scalar() or 0
 
-    # Writing mock attempts (uses the attempts table with is_mock_test=true)
+    # Writing mock attempts (attempts table with is_mock_test=true).
     writing_mock_used: int = await repo.count_mock_tests_by_user_skill(user.id, "writing")
 
     s_limits = get_plan_limits(user.plan, "speaking")
@@ -163,8 +168,11 @@ async def get_my_quota(
     s_limit = s_limits.per_task
     w_limit = w_limits.per_task
 
-    # can_attempt = True when usage < planLimit OR addon credits available for that task.
-    # This allows starter users with a purchased addon to still start attempts.
+    # Retry-credit balance + lifetime grant — drives the "X/Y" progress bar.
+    retry_credits          = await retry_credit_service.get_balance(db, user.id)
+    retry_credits_lifetime = await retry_credit_service.get_lifetime_granted(db, user.id)
+
+    # can_attempt for a NEW prompt: usage < plan limit, OR add-on credits left.
     def _can_attempt_speaking(task_num: int, usage: int) -> bool:
         if s_limit is not None and usage < s_limit:
             return True
@@ -178,7 +186,7 @@ async def get_my_quota(
     s_can = {i: _can_attempt_speaking(i, usage) for i, usage in s_used_per_task.items()}
     w_can = {i: _can_attempt_writing(i, usage)  for i, usage in w_used_per_task.items()}
 
-    # Mock addon pool credits — sum available credits for each skill pool key.
+    # Mock add-on pool credits — sum available across rows per skill key.
     s_mock_addon = await get_available_credits(user.id, "mock-test-speaking-addon", db)
     w_mock_addon = await get_available_credits(user.id, "mock-test-writing-addon",  db)
 
@@ -198,6 +206,63 @@ async def get_my_quota(
         writing_mock_tests_limit=w_limits.mock_tests,
         speaking_mock_addon_credits=s_mock_addon,
         writing_mock_addon_credits=w_mock_addon,
+        # Retry credit pool — currency for redoes and retakes.
+        retry_credits_balance=retry_credits,
+        retry_credits_lifetime_granted=retry_credits_lifetime,
+    )
+
+
+# ── Retry-credit ledger ───────────────────────────────────────────────────────
+
+
+class RetryCreditLedgerEntry(BaseModel):
+    """One historical movement of the user's retry-credit balance."""
+    id:         str
+    delta:      int
+    reason:     str
+    attempt_id: str | None
+    source_ref: str | None
+    created_at: datetime
+
+
+class RetryCreditLedgerResponse(BaseModel):
+    balance: int
+    entries: list[RetryCreditLedgerEntry]
+
+
+@router.get("/me/retry-credits/ledger", response_model=RetryCreditLedgerResponse)
+async def get_my_retry_credit_ledger(
+    user:  Annotated[User, Depends(get_current_user)],
+    db:    Annotated[AsyncSession, Depends(get_db)],
+    limit: int = Query(default=50, ge=1, le=200),
+) -> RetryCreditLedgerResponse:
+    """Return the user's retry-credit balance and recent ledger entries.
+
+    Powers the Settings → Usage tab. Pro users see grants and spends;
+    starter users see an empty list and a 0 balance.
+    """
+    balance = await retry_credit_service.get_balance(db, user.id)
+
+    rows = (await db.execute(
+        select(RetryCreditLedger)
+        .where(RetryCreditLedger.user_id == user.id)
+        .order_by(RetryCreditLedger.created_at.desc())
+        .limit(limit)
+    )).scalars().all()
+
+    return RetryCreditLedgerResponse(
+        balance=balance,
+        entries=[
+            RetryCreditLedgerEntry(
+                id=str(r.id),
+                delta=r.delta,
+                reason=r.reason,
+                attempt_id=str(r.attempt_id) if r.attempt_id else None,
+                source_ref=r.source_ref,
+                created_at=r.created_at,
+            )
+            for r in rows
+        ],
     )
 
 
@@ -276,17 +341,33 @@ class DeleteAccountRequest(BaseModel):
 
 
 @router.delete("/me", status_code=204)
+@limiter.limit("2/hour")
 async def delete_my_account(
+    request: Request,
     body: DeleteAccountRequest,
-    user: Annotated[User, Depends(get_current_user)],
+    user: Annotated[User, Depends(require_recent_auth)],
     db:   Annotated[AsyncSession, Depends(get_db)],
 ) -> Response:
     """Irreversibly delete the authenticated user's account and all data.
 
-    Steps:
-      1. Cancel any active Stripe subscription / detach the customer.
-      2. Delete S3 audio objects owned by this user (best-effort).
-      3. Delete the User row → ON DELETE CASCADE wipes dependent rows.
+    Defense-in-depth on a destructive endpoint:
+      * ``require_recent_auth`` — caller's JWT must have been minted within
+        the last 5 minutes, so a stolen/leaked token outside that window
+        cannot wipe an account.
+      * ``2/hour`` rate limit — bounds blast radius if a token IS leaked.
+      * Confirmation string — prevents accidental "fat-finger" calls from
+        third-party tooling.
+
+    Order of operations:
+      1. Snapshot Stripe customer ids + S3 prefixes BEFORE deleting the DB row
+         (so they survive the row's cascade-delete and we still know what to
+         clean up).
+      2. Delete the User row inside the request transaction — relies on
+         ``ON DELETE CASCADE`` to wipe attempts/subscriptions/credits/etc.
+      3. Commit. Once committed, the user is gone from this product's
+         perspective even if best-effort cleanup later fails.
+      4. Best-effort Stripe customer detach + S3 object purge AFTER commit.
+         Failures here are logged but never resurrect the DB row.
 
     The Clerk account is NOT deleted here (Clerk is the source of truth for
     identity). The Clerk user should be deleted via a background webhook from
@@ -298,33 +379,42 @@ async def delete_my_account(
             detail="Confirmation token mismatch. Send {\"confirm\":\"DELETE\"}.",
         )
 
-    # ── 1. Detach Stripe customer (best-effort) ───────────────────────────────
-    try:
-        import stripe  # noqa: PLC0415
-        from app.models.subscription import Subscription  # noqa: PLC0415
-        from sqlalchemy import select  # noqa: PLC0415
+    # ── 1. Snapshot side-effect targets BEFORE deleting the row ───────────────
+    from app.models.subscription import Subscription  # noqa: PLC0415
 
-        sub_rows = (await db.execute(
-            select(Subscription).where(Subscription.user_id == user.id)
-        )).scalars().all()
-        customer_ids = {s.stripe_customer_id for s in sub_rows if s.stripe_customer_id}
-        for cid in customer_ids:
-            try:
-                stripe.Customer.delete(cid)
-            except Exception as exc:
-                logger.warning("Stripe customer delete failed for %s: %s", cid, exc)
-    except Exception as exc:
-        logger.warning("Stripe cleanup failed during account deletion: %s", exc)
+    sub_rows = (await db.execute(
+        select(Subscription).where(Subscription.user_id == user.id)
+    )).scalars().all()
+    customer_ids: set[str] = {
+        s.stripe_customer_id for s in sub_rows if s.stripe_customer_id
+    }
+    s3_prefixes: list[str] = [
+        f"{settings.S3_AUDIO_PREFIX}{user.id}/",
+        f"mock-tests/{user.id}/",
+    ]
+    user_id_for_log = user.id
 
-    # ── 2. Delete S3 audio objects (best-effort) ──────────────────────────────
+    # ── 2. Delete the User row (cascades to attempts, subscriptions, …) ───────
+    await db.delete(user)
+    await db.commit()
+    logger.info("Account deleted: user_id=%s", user_id_for_log)
+
+    # ── 3. Best-effort external cleanup (post-commit) ─────────────────────────
+    # The row is gone; from this product's POV the user no longer exists. Any
+    # failure here leaves "garbage" Stripe customers / S3 objects, NOT a
+    # privacy violation. A future periodic janitor can sweep stragglers.
+    for cid in customer_ids:
+        try:
+            import stripe  # noqa: PLC0415
+            stripe.Customer.delete(cid)
+        except Exception as exc:
+            logger.warning("Stripe customer delete failed for %s: %s", cid, exc)
+
     try:
         from app.services.storage.presigner import get_s3_client  # noqa: PLC0415
 
         client = get_s3_client()
-        for prefix in (
-            f"{settings.S3_AUDIO_PREFIX}{user.id}/",
-            f"mock-tests/{user.id}/",
-        ):
+        for prefix in s3_prefixes:
             paginator = client.get_paginator("list_objects_v2")
             for page in paginator.paginate(
                 Bucket=settings.S3_BUCKET_NAME, Prefix=prefix
@@ -339,9 +429,4 @@ async def delete_my_account(
     except Exception as exc:
         logger.warning("S3 cleanup failed during account deletion: %s", exc)
 
-    # ── 3. Delete the User row (cascades to attempts, subscriptions, …) ───────
-    await db.delete(user)
-    await db.flush()
-
-    logger.info("Account deleted: user_id=%s", user.id)
     return Response(status_code=204)

@@ -1,9 +1,26 @@
 "use client";
 
+// ─────────────────────────────────────────────────────────────────────────────
+// FeedbackPanels.tsx — Strengths + Areas to Improve
+//
+// Subtle theme-matched styling. Active toggle uses the site's amber-gold
+// primary. Cards use a thin left rule for at-a-glance semantic scanning
+// (subtle green for strengths, subtle rose for weaknesses) but no loud
+// pill fills or bright backgrounds.
+// ─────────────────────────────────────────────────────────────────────────────
+
 import { useState }                        from "react";
 import { Check, AlertTriangle, Wrench }    from "lucide-react";
 import type { ReportFeedbackItem }          from "@/lib/types";
 import { LockedBlurOverlay }               from "./LockedBlurOverlay";
+
+// ── Label helper — Title Case for dimension keys ─────────────────────────────
+
+function formatLabel(label: string): string {
+  return label
+    .replace(/_/g, " ")
+    .replace(/\b\w/g, (c) => c.toUpperCase());
+}
 
 // ── Strength Card ─────────────────────────────────────────────────────────────
 
@@ -13,18 +30,19 @@ function StrengthCard({ item, index }: { item: ReportFeedbackItem; index: number
 
   return (
     <div
-      className="rounded-xl border border-border bg-white/[0.02] p-4 flex flex-col gap-2.5 border-l-2 border-l-emerald-500 animate-fade-in"
+      className="relative rounded-xl border border-border bg-white/[0.015] p-4 flex flex-col gap-2.5 animate-fade-in
+                 before:content-[''] before:absolute before:left-0 before:top-0 before:bottom-0 before:w-[2px] before:bg-emerald-500/40 before:rounded-l-xl"
       style={{ animationDelay: `${index * 70}ms`, animationFillMode: "both" }}
     >
       {hasLabel && (
-        <span className="inline-flex w-fit items-center gap-1.5 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-widest text-emerald-400">
-          <Check className="h-2.5 w-2.5 flex-shrink-0" />
-          {item.label}
-        </span>
+        <div className="flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-widest text-white/45">
+          <Check className="h-3 w-3 flex-shrink-0 text-emerald-500/80" />
+          {formatLabel(item.label)}
+        </div>
       )}
       <p className="text-sm leading-relaxed text-white/80">{item.observation}</p>
       {hasQuote && (
-        <p className="text-base font-medium leading-relaxed text-white/60 italic pl-3 border-l border-white/10">
+        <p className="text-[15px] font-medium leading-relaxed text-white/55 italic pl-3 border-l border-white/10">
           &ldquo;{item.quote}&rdquo;
         </p>
       )}
@@ -41,32 +59,33 @@ function WeaknessCard({ item, index }: { item: ReportFeedbackItem; index: number
 
   return (
     <div
-      className="rounded-xl border border-border bg-white/[0.02] p-4 flex flex-col gap-2.5 border-l-2 border-l-rose-500 animate-fade-in"
+      className="relative rounded-xl border border-border bg-white/[0.015] p-4 flex flex-col gap-2.5 animate-fade-in
+                 before:content-[''] before:absolute before:left-0 before:top-0 before:bottom-0 before:w-[2px] before:bg-rose-500/40 before:rounded-l-xl"
       style={{ animationDelay: `${index * 70}ms`, animationFillMode: "both" }}
     >
       {hasLabel && (
-        <span className="inline-flex w-fit items-center gap-1.5 rounded-full border border-rose-500/30 bg-rose-500/10 px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-widest text-rose-400">
-          <AlertTriangle className="h-2.5 w-2.5 flex-shrink-0" />
-          {item.label}
-        </span>
+        <div className="flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-widest text-white/45">
+          <AlertTriangle className="h-3 w-3 flex-shrink-0 text-rose-400/80" />
+          {formatLabel(item.label)}
+        </div>
       )}
       <p className="text-sm leading-relaxed text-white/80">{item.observation}</p>
       {hasQuote && (
-        <p className="text-base font-medium leading-relaxed text-white/60 italic pl-3 border-l border-rose-500/30">
+        <p className="text-[15px] font-medium leading-relaxed text-white/55 italic pl-3 border-l border-white/10">
           &ldquo;{item.quote}&rdquo;
         </p>
       )}
       {hasFix && (
-        <div className="flex items-start gap-2 rounded-lg border border-white/[0.07] bg-white/[0.03] px-3 py-2">
-          <Wrench className="flex-shrink-0 h-3.5 w-3.5 text-white/30 mt-0.5" />
-          <p className="text-xs leading-relaxed text-white/55">{item.fix}</p>
+        <div className="flex items-start gap-2 rounded-lg border border-white/[0.06] bg-white/[0.02] px-3 py-2.5">
+          <Wrench className="flex-shrink-0 h-3.5 w-3.5 text-primary/70 mt-0.5" />
+          <p className="text-xs leading-relaxed text-white/70">{item.fix}</p>
         </div>
       )}
     </div>
   );
 }
 
-// ── Legacy panel wrappers (kept for backwards compat) ────────────────────────
+// ── Legacy single-panel wrappers (kept for backwards compat) ─────────────────
 
 interface PanelProps { items: ReportFeedbackItem[]; }
 
@@ -75,8 +94,8 @@ export function StrengthsPanel({ items }: PanelProps) {
   return (
     <div className="rounded-2xl border border-border bg-surface p-5 h-full flex flex-col gap-3">
       <div className="flex items-center gap-2">
-        <Check className="h-3.5 w-3.5 text-emerald-500" />
-        <h3 className="text-xs font-bold uppercase tracking-wider text-emerald-400">Strengths</h3>
+        <Check className="h-3.5 w-3.5 text-emerald-500/80" />
+        <h3 className="text-xs font-bold uppercase tracking-wider text-white/70">Strengths</h3>
       </div>
       <div className="flex flex-col gap-2.5">
         {items.map((item, i) => <StrengthCard key={i} item={item} index={i} />)}
@@ -90,8 +109,8 @@ export function WeaknessesPanel({ items }: PanelProps) {
   return (
     <div className="rounded-2xl border border-border bg-surface p-5 h-full flex flex-col gap-3">
       <div className="flex items-center gap-2">
-        <AlertTriangle className="h-3.5 w-3.5 text-rose-500" />
-        <h3 className="text-xs font-bold uppercase tracking-wider text-rose-400">Areas to Improve</h3>
+        <AlertTriangle className="h-3.5 w-3.5 text-rose-400/80" />
+        <h3 className="text-xs font-bold uppercase tracking-wider text-white/70">Areas to Improve</h3>
       </div>
       <div className="flex flex-col gap-2.5">
         {items.map((item, i) => <WeaknessCard key={i} item={item} index={i} />)}
@@ -100,11 +119,11 @@ export function WeaknessesPanel({ items }: PanelProps) {
   );
 }
 
-// ── Phase 2B: FeedbackToggle — full-width, toggle between S/W ────────────────
+// ── Toggle panel ─────────────────────────────────────────────────────────────
 //
 // Default: "weaknesses" — users want to know what to fix first.
-// Toggle pill shows count badges for both sides.
-// Cards render at full width (no cramped 2-column grid).
+// Toggle pill uses the amber-gold primary for the active state, replacing the
+// previous rose/emerald bright fills.
 
 type FeedbackTab = "weaknesses" | "strengths";
 
@@ -120,12 +139,10 @@ export function FeedbackToggle({ strengths, weaknesses, locked }: ToggleProps) {
   const hasStrengths  = strengths.length  > 0;
   const hasWeaknesses = weaknesses.length > 0;
 
-  // If only one side has items, show it without toggle
   if (!hasStrengths && !hasWeaknesses) return null;
   if (!hasStrengths) return <WeaknessesPanel items={weaknesses} />;
   if (!hasWeaknesses) return <StrengthsPanel  items={strengths}  />;
 
-  // The card list — shared between unlocked and locked renders
   const cardList = (
     <div className="flex flex-col gap-2.5">
       {active === "weaknesses"
@@ -138,22 +155,24 @@ export function FeedbackToggle({ strengths, weaknesses, locked }: ToggleProps) {
   return (
     <div className="rounded-2xl border border-border bg-surface p-5 flex flex-col gap-4">
 
-      {/* ── Toggle pill — always visible (counts are useful even when locked) */}
-      <div className="flex items-center gap-1.5 self-start rounded-xl border border-border/60 bg-white/[0.03] p-1">
+      {/* ── Toggle pill — primary amber accent for the active side ──────── */}
+      <div className="flex items-center gap-1 self-start rounded-xl border border-border/60 bg-white/[0.02] p-1">
+
         <button
           onClick={() => !locked && setActive("weaknesses")}
           className={[
-            "flex items-center gap-1.5 rounded-lg px-3.5 py-2 text-xs font-semibold transition-all duration-150",
+            "flex items-center gap-2 rounded-lg px-3.5 py-2 text-xs font-semibold transition-all duration-150",
             active === "weaknesses"
-              ? "bg-rose-500/15 border border-rose-500/30 text-rose-400"
-              : "text-white/40 hover:text-white/65",
+              ? "bg-white/[0.06] border border-white/10 text-white/90 shadow-sm"
+              : "border border-transparent text-white/45 hover:text-white/70",
           ].join(" ")}
         >
-          <AlertTriangle className="h-3 w-3" />
+          {/* Tiny status dot — rose for the weakness side */}
+          <span className={`h-1.5 w-1.5 rounded-full ${active === "weaknesses" ? "bg-rose-400/80" : "bg-rose-400/30"}`} />
           Areas to Improve
           <span className={[
             "rounded-full px-1.5 py-px text-[10px] font-bold tabular-nums",
-            active === "weaknesses" ? "bg-rose-500/20 text-rose-300" : "bg-white/[0.08] text-white/30",
+            active === "weaknesses" ? "bg-white/10 text-white/75" : "bg-white/[0.05] text-white/35",
           ].join(" ")}>
             {weaknesses.length}
           </span>
@@ -162,24 +181,24 @@ export function FeedbackToggle({ strengths, weaknesses, locked }: ToggleProps) {
         <button
           onClick={() => !locked && setActive("strengths")}
           className={[
-            "flex items-center gap-1.5 rounded-lg px-3.5 py-2 text-xs font-semibold transition-all duration-150",
+            "flex items-center gap-2 rounded-lg px-3.5 py-2 text-xs font-semibold transition-all duration-150",
             active === "strengths"
-              ? "bg-emerald-500/15 border border-emerald-500/30 text-emerald-400"
-              : "text-white/40 hover:text-white/65",
+              ? "bg-white/[0.06] border border-white/10 text-white/90 shadow-sm"
+              : "border border-transparent text-white/45 hover:text-white/70",
           ].join(" ")}
         >
-          <Check className="h-3 w-3" />
+          <span className={`h-1.5 w-1.5 rounded-full ${active === "strengths" ? "bg-emerald-500/80" : "bg-emerald-500/30"}`} />
           Strengths
           <span className={[
             "rounded-full px-1.5 py-px text-[10px] font-bold tabular-nums",
-            active === "strengths" ? "bg-emerald-500/20 text-emerald-300" : "bg-white/[0.08] text-white/30",
+            active === "strengths" ? "bg-white/10 text-white/75" : "bg-white/[0.05] text-white/35",
           ].join(" ")}>
             {strengths.length}
           </span>
         </button>
       </div>
 
-      {/* Card list — locked = blurred overlay, unlocked = full content */}
+      {/* Card list */}
       {locked ? (
         <LockedBlurOverlay label="Feedback Details" blurPx={4} opacity={0.3}>
           {cardList}
