@@ -161,7 +161,7 @@ export function ScoreProgressCard({ currentBand, skill, taskNumber, currentAttem
 
       {/* ── Header ────────────────────────────────────────────────────────── */}
       <div className="flex items-center justify-between px-5 pt-5 pb-3">
-        <h3 className="text-[11px] font-bold uppercase tracking-widest text-white/30">Score Trend</h3>
+        <h2 className="text-[11px] font-bold uppercase tracking-widest text-white/30">Score Trend</h2>
         <span className="text-[10px] text-white/20 tabular-nums">
           {data.scores.length} attempt{data.scores.length !== 1 ? "s" : ""} · Task {taskNumber}
         </span>

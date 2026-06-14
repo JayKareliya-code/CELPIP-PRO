@@ -23,6 +23,7 @@ import { WritingEditor, clearDraft } from "@/components/writing/WritingEditor";
 import { WordCounter }              from "@/components/writing/WordCounter";
 import { SubmitWritingButton }      from "@/components/writing/SubmitWritingButton";
 import { ProcessingScreen }         from "@/components/common/ProcessingScreen";
+import { ConfirmModal }             from "@/components/common/ConfirmModal";
 import type { WritingTask }         from "@/lib/types";
 
 // ── Props ─────────────────────────────────────────────────────────────────────
@@ -43,6 +44,9 @@ export function WritingPracticeSession({ task }: WritingPracticeSessionProps) {
     setContent,
     submit,
     terminate,
+    exitRequested,
+    cancelExit,
+    confirmExit,
   } = useWritingAttempt();
 
   // Draft session key — unique per task so each task has its own draft
@@ -154,6 +158,19 @@ export function WritingPracticeSession({ task }: WritingPracticeSessionProps) {
     // from the fixed-canvas layout (layout.tsx provides the true viewport size).
     <div className="flex flex-col flex-1">
       {renderScreen()}
+
+      {/* Exit confirmation modal — replaces the previous window.confirm() so
+          the dialog matches the dark theme, is keyboard-accessible, and works
+          inside iOS in-app WebViews where native confirm is unreliable. */}
+      <ConfirmModal
+        open={exitRequested}
+        onCancel={cancelExit}
+        onConfirm={confirmExit}
+        title="Leave writing session?"
+        description="Your draft will be cleared and unsaved progress lost."
+        confirmLabel="Leave session"
+        isDestructive
+      />
     </div>
   );
 }

@@ -121,6 +121,9 @@ def create_app() -> FastAPI:
     app.add_middleware(SlowAPIMiddleware)
 
     # ── CORS ──────────────────────────────────────────────────────────────────
+    # Custom headers MUST be listed here or the browser's preflight will fail
+    # before the route ever sees the request. If you add a new header in
+    # apps/web/lib/api.ts or any hook, mirror it here.
     allowed_methods = ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"]
     allowed_headers = [
         "Authorization",
@@ -130,6 +133,7 @@ def create_app() -> FastAPI:
         "Origin",
         "X-Request-ID",
         "X-User-Date",        # sent by apiFetch for streak/timezone logic
+        "Idempotency-Key",    # sent by useCreateCheckoutSession to dedupe submits
         "Stripe-Signature",
     ]
     app.add_middleware(

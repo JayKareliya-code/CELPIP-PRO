@@ -17,9 +17,6 @@ import { StarterUpsellCards }     from "@/components/upgrade/StarterUpsellCards"
 import { RetryCreditsBanner }     from "@/components/retry-credits/RetryCreditsBanner";
 import { usePracticeQuota }       from "@/lib/hooks/usePracticeQuota";
 import { useCurrentUser }         from "@/lib/hooks/useCurrentUser";
-import {
-  PRO_PLAN_LIMITS,
-} from "@/lib/constants";
 import type { AppUser } from "@/lib/types";
 
 const SKILLS = ["speaking", "writing"] as const;
@@ -32,17 +29,11 @@ export function PracticeHub({ user: serverUser }: PracticeHubProps) {
   const { user: clientUser } = useCurrentUser();
   const user      = clientUser ?? serverUser;
   const plan      = user?.plan ?? "starter";
-  const isStarter = plan === "starter";
 
   const { quota: speakingQuota, isLoading: loadingS } = usePracticeQuota("speaking");
   const { quota: writingQuota,  isLoading: loadingW } = usePracticeQuota("writing");
 
-  const isLoading = loadingS || loadingW;
   const planLabel = plan === "pro" ? "Pro Plan" : "Starter Plan";
-
-  // Total tests available across both skills
-  const totalSpeaking = plan === "pro" ? PRO_PLAN_LIMITS.speaking_mock_tests : 1;
-  const totalWriting  = plan === "pro" ? PRO_PLAN_LIMITS.writing_mock_tests  : 1;
 
   return (
     <div className="space-y-6">
@@ -58,8 +49,8 @@ export function PracticeHub({ user: serverUser }: PracticeHubProps) {
         <div className="flex flex-col justify-between gap-3 min-w-0">
           {/* Title */}
           <div className="flex items-center gap-3">
-            <div className="w-11 h-11 rounded-xl bg-amber-600/20 border border-amber-500/30 flex items-center justify-center shrink-0">
-              <PlayCircle className="w-5 h-5 text-amber-400" />
+            <div className="w-11 h-11 rounded-xl bg-primary/20 border border-primary/30 flex items-center justify-center shrink-0">
+              <PlayCircle className="w-5 h-5 text-primary" />
             </div>
             <div>
               <h1 className="text-2xl font-bold text-foreground">Mock Tests</h1>

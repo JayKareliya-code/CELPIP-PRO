@@ -157,10 +157,11 @@ function buildMockHistory(skill: Skill): PaginatedHistory {
 // ── Hook ──────────────────────────────────────────────────────────────────────
 
 export function useProgressData(skill: Skill): UseProgressDataReturn {
-  const { getToken } = useAuth();
+  const { getToken, userId, isSignedIn } = useAuth();
 
   const { data, isLoading, isError } = useQuery<PaginatedHistory>({
-    queryKey: ["progress-history", skill],
+    // Scope by userId — see useCurrentUser for rationale.
+    queryKey: ["progress-history", userId ?? "anonymous", skill],
 
     queryFn: async () => {
       if (USE_MOCK) {
@@ -177,6 +178,7 @@ export function useProgressData(skill: Skill): UseProgressDataReturn {
 
     staleTime: 60_000,  // 1 min
     retry: 1,
+    enabled: USE_MOCK || (!!isSignedIn && !!userId),
   });
 
   const items = data?.items ?? [];

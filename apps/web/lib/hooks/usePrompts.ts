@@ -33,10 +33,13 @@ export function usePrompts(skill: "writing"):  UsePromptsReturn<WritingTask>;
 export function usePrompts(
   skill: Skill,
 ): UsePromptsReturn<SpeakingTask | WritingTask> {
-  const { getToken } = useAuth();
+  const { getToken, userId } = useAuth();
 
   const { data, isLoading, isError } = useQuery<(SpeakingTask | WritingTask)[]>({
-    queryKey: ["prompts", skill],
+    // Scope by userId — same rationale as useMockExamPrompts. Prompts are not
+    // user-specific today, but a uniform key shape keeps invalidation patterns
+    // symmetric and prevents a future per-user filter from leaking.
+    queryKey: ["prompts", userId ?? "anonymous", skill],
 
     queryFn: async () => {
       if (USE_MOCK) {

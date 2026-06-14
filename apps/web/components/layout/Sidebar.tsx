@@ -59,6 +59,7 @@ export function Sidebar({ open, onClose }: MobileSidebarProps) {
 
       {/* ── Drawer panel ─────────────────────────────────────────────────── */}
       <aside
+        id="mobile-sidebar"
         className={cn(
           "fixed top-0 left-0 z-50 h-full w-72 flex flex-col",
           "bg-[#000000] border-r border-white/[0.07]",
@@ -77,7 +78,7 @@ export function Sidebar({ open, onClose }: MobileSidebarProps) {
             onClick={onClose}
           >
             <span className="text-xl font-black tracking-tight text-white">CELPIP</span>
-            <span className="text-xl font-black tracking-tight text-amber-400">BRO</span>
+            <span className="text-xl font-black tracking-tight text-primary">BRO</span>
           </Link>
           <button
             onClick={onClose}
@@ -99,7 +100,7 @@ export function Sidebar({ open, onClose }: MobileSidebarProps) {
                 className={cn(
                   "flex items-center gap-3 px-3 py-3 rounded-xl text-sm font-medium transition-colors",
                   active
-                    ? "bg-amber-500/10 text-amber-400 border border-amber-500/20"
+                    ? "bg-primary/10 text-primary border border-primary/20"
                     : "text-white/55 hover:text-white/90 hover:bg-white/[0.04]",
                 )}
               >
@@ -121,7 +122,7 @@ export function Sidebar({ open, onClose }: MobileSidebarProps) {
                 className={cn(
                   "flex items-center gap-3 px-3 py-3 rounded-xl text-sm font-medium transition-colors",
                   active
-                    ? "bg-amber-500/10 text-amber-400 border border-amber-500/20"
+                    ? "bg-primary/10 text-primary border border-primary/20"
                     : "text-white/55 hover:text-white/90 hover:bg-white/[0.04]",
                 )}
               >

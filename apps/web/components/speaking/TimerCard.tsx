@@ -10,9 +10,18 @@
 //   └────────────────────────────────────────────────┘
 // ─────────────────────────────────────────────────────────────────────────────
 
+import { useMemo }    from "react";
 import { TimerBar }   from "@/components/common/TimerBar";
 import { formatTime } from "@/lib/utils";
 import { cn }         from "@/lib/utils";
+
+/** Throttle SR announcements to checkpoints + final 5s. See ExamInfoBar. */
+function prepAnnouncement(secondsLeft: number): string {
+  if (secondsLeft <= 0)                          return "Preparation time is up.";
+  if ([30, 15, 10].includes(secondsLeft))        return `${secondsLeft} seconds of preparation remaining.`;
+  if (secondsLeft <= 5)                          return `${secondsLeft}.`;
+  return "";
+}
 
 interface TimerCardProps {
   secondsLeft:  number;
@@ -28,6 +37,7 @@ export function TimerCard({
   className,
 }: TimerCardProps) {
   const isCritical = secondsLeft <= 10;
+  const srPhrase   = useMemo(() => prepAnnouncement(secondsLeft), [secondsLeft]);
 
   return (
     <div
@@ -36,15 +46,19 @@ export function TimerCard({
         className,
       )}
     >
-      {/* Label row + countdown */}
+      {/* Label row + countdown — the visible numeric counter is decorative
+          for SRs; the live region below carries the throttled announcement. */}
       <div className="flex items-center justify-between gap-3">
         <span className="text-xs font-semibold tracking-[0.12em] uppercase text-canvas-subtle/70 select-none">
           {label}
         </span>
-        <span className={cn(
-          "tabular-nums font-bold text-2xl leading-none",
-          isCritical ? "text-danger animate-pulse" : "text-primary",
-        )}>
+        <span
+          aria-hidden="true"
+          className={cn(
+            "tabular-nums font-bold text-2xl leading-none",
+            isCritical ? "text-danger animate-pulse" : "text-primary",
+          )}
+        >
           {formatTime(secondsLeft)}
         </span>
       </div>
@@ -55,6 +69,11 @@ export function TimerCard({
         totalSeconds={totalSeconds}
         trackHeight="h-1"
       />
+
+      {/* SR-only countdown — quiet during mid-band, assertive at the end. */}
+      <span className="sr-only" aria-live={isCritical ? "assertive" : "polite"} aria-atomic="true">
+        {srPhrase}
+      </span>
     </div>
   );
 }

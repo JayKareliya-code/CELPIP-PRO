@@ -21,7 +21,7 @@ export function PlanBadge({ plan }: PlanBadgeProps) {
 
   const cls =
     plan === "pro"
-      ? "bg-amber-900/30 border-amber-700/40 text-amber-400"
+      ? "bg-primary/10 border-primary/20 text-primary"
       : "bg-white/[0.05] border-white/[0.10] text-white/40";
 
   return (

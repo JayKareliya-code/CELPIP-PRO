@@ -1,10 +1,13 @@
 "use client";
 
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { Toaster }        from "sonner";
-import { useRef }         from "react";
-import { AuthCacheGuard } from "@/components/layout/AuthCacheGuard";
-import { usePlanEvents }  from "@/lib/hooks/usePlanEvents";
+import { Toaster }              from "sonner";
+import { useClerk }             from "@clerk/nextjs";
+import { useEffect, useRef }    from "react";
+import { useRouter }            from "next/navigation";
+import { AuthCacheGuard }       from "@/components/layout/AuthCacheGuard";
+import { usePlanEvents }        from "@/lib/hooks/usePlanEvents";
+import { ApiError, API_AUTH_EXPIRED_EVENT } from "@/lib/api";
 
 /**
  * Mounts the SSE plan-events listener globally so that plan upgrades
@@ -12,6 +15,38 @@ import { usePlanEvents }  from "@/lib/hooks/usePlanEvents";
  */
 function PlanEventsWatcher() {
   usePlanEvents();
+  return null;
+}
+
+/**
+ * Listens for the `celpip:auth-expired` event that apiFetch dispatches on
+ * any 401 response. Reacts exactly once per session by signing the user out
+ * and redirecting to the Clerk hosted sign-in. A debounce ref prevents a
+ * burst of in-flight requests (all 401-ing at once after a token expires)
+ * from firing N parallel signOut() calls.
+ */
+function AuthExpiredHandler() {
+  const { signOut } = useClerk();
+  const router      = useRouter();
+  const handlingRef = useRef(false);
+
+  useEffect(() => {
+    const onExpired = () => {
+      if (handlingRef.current) return;
+      handlingRef.current = true;
+      // Best-effort sign-out then redirect. If signOut itself rejects we
+      // still navigate so the user is never stuck on a screen full of 401
+      // toasts.
+      signOut()
+        .catch(() => { /* ignored — fall through to redirect */ })
+        .finally(() => {
+          router.replace("/sign-in");
+        });
+    };
+    window.addEventListener(API_AUTH_EXPIRED_EVENT, onExpired);
+    return () => window.removeEventListener(API_AUTH_EXPIRED_EVENT, onExpired);
+  }, [signOut, router]);
+
   return null;
 }
 
@@ -37,13 +72,26 @@ export function Providers({ children }: { children: React.ReactNode }) {
     queryClientRef.current = new QueryClient({
       defaultOptions: {
         queries: {
-          // Retry once on failure — surfaces errors quickly without hammering the API.
-          retry: 1,
+          // Retry once on transient failure, never on deterministic errors.
+          // 401 is handled by AuthExpiredHandler; retrying it would just
+          // burn a second request before the sign-out fires.
+          retry: (failureCount, error) => {
+            if (error instanceof ApiError && [400, 401, 403, 404, 422].includes(error.status)) {
+              return false;
+            }
+            return failureCount < 1;
+          },
           // Conservative default: 30 s. Most queries override this individually.
           // Auth-scoped queries (current-user, billing-status) use per-query staleTime.
           staleTime: 30_000,
           // Never re-use data from a previous user session once the window refocuses.
           refetchOnWindowFocus: true,
+        },
+        mutations: {
+          // Mutations should never auto-retry — a duplicate POST could create
+          // a second Stripe Checkout Session or another DB row. Call sites
+          // that genuinely want a retry must opt in explicitly.
+          retry: 0,
         },
       },
     });
@@ -57,6 +105,9 @@ export function Providers({ children }: { children: React.ReactNode }) {
         single most important guard against cross-user data leakage.
       */}
       <AuthCacheGuard />
+
+      {/* Listens for 401s from apiFetch and signs the user out exactly once */}
+      <AuthExpiredHandler />
 
       {/* Global SSE listener — keeps plan badge in sync after purchase from any page */}
       <PlanEventsWatcher />

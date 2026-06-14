@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { useAuth, useUser, useClerk } from "@clerk/nextjs";
 import { useCurrentUser } from "@/lib/hooks/useCurrentUser";
@@ -21,7 +22,7 @@ function PlanBadge({ plan, size = "sm" }: { plan: Plan; size?: "xs" | "sm" }) {
   const label = plan === "pro" ? "Pro" : "Starter";
   const cls =
     plan === "pro"
-      ? "bg-amber-900/30 border-amber-700/40 text-amber-400"
+      ? "bg-primary/10 border-primary/25 text-primary"
       : "bg-white/[0.05] border-white/[0.10] text-white/35";
   return (
     <span
@@ -49,7 +50,7 @@ function Brand() {
       <span className="text-2xl sm:text-3xl font-black tracking-tight text-white group-hover:text-white/90 transition-colors">
         CELPIP
       </span>
-      <span className="text-2xl sm:text-3xl font-black tracking-tight text-amber-400 group-hover:text-amber-300 transition-colors">
+      <span className="text-2xl sm:text-3xl font-black tracking-tight text-primary group-hover:text-primary-hover transition-colors">
         BRO
       </span>
     </Link>
@@ -70,7 +71,7 @@ function NavLinks({ pathname, onClick }: { pathname: string; onClick?: () => voi
             className={cn(
               "relative text-sm font-medium transition-colors duration-150 whitespace-nowrap px-1 py-0.5 group",
               active
-                ? "text-amber-400"
+                ? "text-primary"
                 : "text-white/55 hover:text-white/90",
             )}
           >
@@ -80,8 +81,8 @@ function NavLinks({ pathname, onClick }: { pathname: string; onClick?: () => voi
               className={cn(
                 "absolute -bottom-0.5 left-0 h-[2px] w-full rounded-full transition-all duration-200",
                 active
-                  ? "bg-amber-400 opacity-100"
-                  : "bg-amber-400 opacity-0 group-hover:opacity-40",
+                  ? "bg-primary opacity-100"
+                  : "bg-primary opacity-0 group-hover:opacity-40",
               )}
             />
           </Link>
@@ -111,9 +112,21 @@ function ProfileDropdown() {
         setOpen(false);
       }
     }
+    function handleKey(e: KeyboardEvent) {
+      // Escape closes the dropdown — keyboard users can dismiss without
+      // tabbing through every menu item. Only act when the dropdown is open
+      // so we don't fight other Escape handlers on the page.
+      if (e.key === "Escape" && open) {
+        setOpen(false);
+      }
+    }
     document.addEventListener("mousedown", handleClick);
-    return () => document.removeEventListener("mousedown", handleClick);
-  }, []);
+    document.addEventListener("keydown", handleKey);
+    return () => {
+      document.removeEventListener("mousedown", handleClick);
+      document.removeEventListener("keydown", handleKey);
+    };
+  }, [open]);
 
   return (
     <div ref={ref} className="relative shrink-0">
@@ -125,20 +138,29 @@ function ProfileDropdown() {
           "flex items-center gap-2 pl-1 pr-2.5 py-1 rounded-full",
           "border transition-all duration-150",
           open
-            ? "border-amber-500/30 bg-amber-500/10"
-            : "border-white/[0.08] hover:border-amber-500/20 hover:bg-white/[0.04]",
+            ? "border-primary/30 bg-primary/10"
+            : "border-white/[0.08] hover:border-primary/20 hover:bg-white/[0.04]",
         )}
       >
-        {/* Avatar */}
+        {/* Avatar — fixed 32×32 so next/image can serve a tiny optimized
+            variant from Clerk's image host (allowlisted in next.config.mjs).
+            alt="" + role="img" hides the redundant displayName from SR since
+            the name renders right next to the avatar in the same dropdown. */}
         {avatarUrl ? (
-          <img
+          <Image
             src={avatarUrl}
-            alt={displayName}
-            className="w-8 h-8 rounded-full object-cover ring-2 ring-amber-400/70 ring-offset-1 ring-offset-black shrink-0"
+            alt=""
+            width={32}
+            height={32}
+            className="w-8 h-8 rounded-full object-cover ring-2 ring-primary/70 ring-offset-1 ring-offset-black shrink-0"
+            // Critical avatar visible above the fold on every page → priority.
+            priority
+            // Generic profile image — no need for SR to announce it.
+            aria-hidden="true"
           />
         ) : (
-          <div className="w-8 h-8 rounded-full bg-amber-900/30 border border-amber-700/30 flex items-center justify-center shrink-0">
-            <User2 className="w-4 h-4 text-amber-400" />
+          <div className="w-8 h-8 rounded-full bg-primary/10 border border-primary/20 flex items-center justify-center shrink-0">
+            <User2 className="w-4 h-4 text-primary" />
           </div>
         )}
 
@@ -255,25 +277,29 @@ export function Navbar() {
               {/* Public nav links */}
               {showPublicNav && (
                 <>
-                  <Link href="/terms"   className="hidden sm:inline text-xs text-white/35 hover:text-amber-400 transition-colors">Terms</Link>
-                  <Link href="/privacy" className="hidden sm:inline text-xs text-white/35 hover:text-amber-400 transition-colors">Privacy</Link>
-                  <Link href="/contact" className="hidden sm:inline text-xs text-white/35 hover:text-amber-400 transition-colors">Contact</Link>
-                  <Link href="/sign-in" className="hidden xs:inline text-sm font-medium text-white/55 hover:text-white/90 transition-colors">Sign In</Link>
-                  <Link href="/sign-up" className="text-sm font-semibold bg-amber-500 hover:bg-amber-400 text-black px-3 py-1 sm:px-4 sm:py-1.5 rounded-lg transition-colors whitespace-nowrap">Get Started</Link>
+                  <Link href="/terms"   className="hidden sm:inline text-xs text-white/55 hover:text-primary transition-colors">Terms</Link>
+                  <Link href="/privacy" className="hidden sm:inline text-xs text-white/55 hover:text-primary transition-colors">Privacy</Link>
+                  <Link href="/contact" className="hidden sm:inline text-xs text-white/55 hover:text-primary transition-colors">Contact</Link>
+                  <Link href="/sign-in" className="hidden sm:inline text-sm font-medium text-white/55 hover:text-white/90 transition-colors">Sign In</Link>
+                  <Link href="/sign-up" className="text-sm font-semibold bg-primary hover:bg-primary-hover text-primary-foreground px-3 py-1 sm:px-4 sm:py-1.5 rounded-lg transition-colors whitespace-nowrap">Get Started</Link>
                 </>
               )}
 
               {showAuthNav && <ProfileDropdown />}
 
-              {/* Hamburger — mobile only, opens the slide-in Sidebar */}
+              {/* Hamburger — mobile only, opens the slide-in Sidebar.
+                  aria-expanded mirrors the disclosure state; aria-controls
+                  points at the sidebar so SRs know what this button operates. */}
               {showAuthNav && (
                 <button
                   id="mobile-menu-trigger"
                   onClick={() => setSidebarOpen(true)}
                   className="lg:hidden flex items-center justify-center w-9 h-9 rounded-lg border border-white/[0.08] hover:border-white/[0.14] hover:bg-white/[0.04] transition-colors"
                   aria-label="Open navigation menu"
+                  aria-expanded={sidebarOpen}
+                  aria-controls="mobile-sidebar"
                 >
-                  <Menu className="w-4 h-4 text-white/70" />
+                  <Menu className="w-4 h-4 text-white/70" aria-hidden="true" />
                 </button>
               )}
 

@@ -10,18 +10,31 @@
  */
 
 import { useState, useCallback } from "react";
+import dynamic from "next/dynamic";
 import { Navbar }        from "@/components/layout/Navbar";
 import { Footer }        from "@/components/layout/Footer";
 import { AdminSidebar }  from "@/components/admin/AdminSidebar";
-import {
-  BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell,
-} from "recharts";
 import {
   DollarSign, Users, TrendingUp, AlertCircle, RefreshCw, ChevronUp, ChevronDown,
 } from "lucide-react";
 import { useAuth } from "@clerk/nextjs";
 import { apiFetch, authHeaders, API_V1 } from "@/lib/api";
 import { cn } from "@/lib/utils";
+
+// Lazy-load the recharts subtree so the ~95 KB-gz chart code only ships when
+// this page renders. ssr=false because recharts needs window for ResizeObserver
+// and chart layout — server-rendering it produces no benefit anyway.
+const CostByModelChart = dynamic(
+  () => import("@/components/admin/CostByModelChart"),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="h-[220px] flex items-center justify-center text-xs text-subtle">
+        Loading chart…
+      </div>
+    ),
+  },
+);
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -312,38 +325,7 @@ export default function CostReportPage() {
                     Spend by Model
                   </h2>
                   <div className="bg-surface rounded-xl border border-border p-5 shadow-card">
-                    <ResponsiveContainer width="100%" height={220}>
-                      <BarChart data={chartData} margin={{ top: 4, right: 16, left: 8, bottom: 4 }}>
-                        <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border)" />
-                        <XAxis
-                          dataKey="model"
-                          tick={{ fontSize: 11, fill: "var(--color-subtle)" }}
-                          axisLine={false}
-                          tickLine={false}
-                        />
-                        <YAxis
-                          tickFormatter={v => `$${v.toFixed(3)}`}
-                          tick={{ fontSize: 11, fill: "var(--color-subtle)" }}
-                          axisLine={false}
-                          tickLine={false}
-                          width={64}
-                        />
-                        <Tooltip
-                          formatter={(v: number) => [fmt(v), "Est. USD"]}
-                          contentStyle={{
-                            background: "var(--color-surface)",
-                            border: "1px solid var(--color-border)",
-                            borderRadius: "8px",
-                            fontSize: "12px",
-                          }}
-                        />
-                        <Bar dataKey="usd" radius={[4, 4, 0, 0]}>
-                          {chartData.map((_, i) => (
-                            <Cell key={i} fill={CHART_COLORS[i % CHART_COLORS.length]} />
-                          ))}
-                        </Bar>
-                      </BarChart>
-                    </ResponsiveContainer>
+                    <CostByModelChart data={chartData} colors={CHART_COLORS} format={fmt} />
                   </div>
                 </section>
               )}

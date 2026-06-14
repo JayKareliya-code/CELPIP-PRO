@@ -11,7 +11,7 @@ const FAQS = [
   },
   {
     q: "What does Pro unlock?",
-    a: "Pro unlocks individual Speaking and Writing task practice, detailed AI feedback, estimated practice band scores, improved sample responses, vocabulary and templates, attempt history, and 2 full mock tests for Speaking plus 2 full mock tests for Writing.",
+    a: "Pro unlocks individual Speaking and Writing task practice, detailed AI feedback, estimated practice band scores, improved sample responses, vocabulary and templates, attempt history, and 2 full mock tests, each covering Speaking and Writing.",
   },
   {
     q: "Are the scores official CELPIP results?",

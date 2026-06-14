@@ -4,6 +4,7 @@
 
 "use client";
 
+import Image                  from "next/image";
 import { Mic }                from "lucide-react";
 import { MicWaveform }        from "@/components/speaking/MicWaveform";
 import { TaskIdentityStrip }  from "@/components/speaking/TaskIdentityStrip";
@@ -47,9 +48,14 @@ function OptionDetailCard({
         "bg-white/[0.03]",
       )}>
         {option.image_url && (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img src={option.image_url} alt={option.name}
-            className="w-full max-h-[18vh] object-contain" />
+          <Image
+            src={option.image_url}
+            alt={option.name}
+            width={400}
+            height={240}
+            sizes="(max-width: 768px) 50vw, 25vw"
+            className="w-full max-h-[18vh] object-contain"
+          />
         )}
         <div className="px-4 py-3">
           <h4 className={cn(

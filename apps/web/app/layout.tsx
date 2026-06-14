@@ -118,7 +118,7 @@ export default function RootLayout({
   return (
     <ClerkProvider>
       <html
-        lang="en"
+        lang="en-CA"
         className={`${inter.variable} ${sourceSerif.variable} dark`}
         suppressHydrationWarning
       >

@@ -64,9 +64,10 @@ export interface MockExamState {
   // ── Actions ──────────────────────────────────────────────────────────────
 
   /** Enter LOADING — called before the prompt fetch begins. Accepts the
-   *  exam slot number so the session UUID can be stabilised across page
-   *  navigations (retakes reuse the same session_id → no quota inflation). */
-  beginLoading: (slotNumber: number) => void;
+   *  exam slot number AND the current user's id so the session UUID can
+   *  be stabilised across page navigations for retakes (no quota inflation)
+   *  without sharing the UUID between users on a shared browser. */
+  beginLoading: (slotNumber: number, userId: string | null) => void;
   /** Populate tasks and enter READY (intro screen). */
   loadExam: (prompts: MockExamPrompt[]) => void;
   /** User pressed "Begin Exam" — enter TASK_COUNTDOWN for task 0. */
@@ -171,10 +172,13 @@ const INITIAL: Pick<
 export const useMockExamStore = create<MockExamState>((set, get) => ({
   ...INITIAL,
 
-  beginLoading: (slotNumber: number) => {
-    // Derive a localStorage key that is user-agnostic but slot-specific.
-    // We scope it to "speaking" here because this store is speaking-only.
-    const storageKey = `celpip-mock-session-speaking-${slotNumber}`;
+  beginLoading: (slotNumber: number, userId: string | null) => {
+    // Derive a localStorage key that is user-AND-slot-specific. Without the
+    // userId, two different users on the same browser tab would share the
+    // same examSessionId for a slot — the second user's audio uploads would
+    // be keyed to the first user's session_id in the DB. The AuthCacheGuard
+    // also drops `celpip-*` storage keys on user switch as a backstop.
+    const storageKey = `celpip-mock-session-speaking-${userId ?? "anonymous"}-${slotNumber}`;
 
     // Try to restore the session ID that was previously used for this slot.
     // This is the core of the retake-dedup fix: if the user navigates away

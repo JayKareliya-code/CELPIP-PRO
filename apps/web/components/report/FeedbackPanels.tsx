@@ -95,7 +95,7 @@ export function StrengthsPanel({ items }: PanelProps) {
     <div className="rounded-2xl border border-border bg-surface p-5 h-full flex flex-col gap-3">
       <div className="flex items-center gap-2">
         <Check className="h-3.5 w-3.5 text-emerald-500/80" />
-        <h3 className="text-xs font-bold uppercase tracking-wider text-white/70">Strengths</h3>
+        <h2 className="text-xs font-bold uppercase tracking-wider text-white/70">Strengths</h2>
       </div>
       <div className="flex flex-col gap-2.5">
         {items.map((item, i) => <StrengthCard key={i} item={item} index={i} />)}
@@ -110,7 +110,7 @@ export function WeaknessesPanel({ items }: PanelProps) {
     <div className="rounded-2xl border border-border bg-surface p-5 h-full flex flex-col gap-3">
       <div className="flex items-center gap-2">
         <AlertTriangle className="h-3.5 w-3.5 text-rose-400/80" />
-        <h3 className="text-xs font-bold uppercase tracking-wider text-white/70">Areas to Improve</h3>
+        <h2 className="text-xs font-bold uppercase tracking-wider text-white/70">Areas to Improve</h2>
       </div>
       <div className="flex flex-col gap-2.5">
         {items.map((item, i) => <WeaknessCard key={i} item={item} index={i} />)}

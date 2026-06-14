@@ -4,6 +4,7 @@
 
 "use client";
 
+import Image                  from "next/image";
 import { CheckCircle2 }       from "lucide-react";
 import { TaskIdentityStrip }  from "@/components/speaking/TaskIdentityStrip";
 import { TimerCard }          from "@/components/speaking/TimerCard";
@@ -50,9 +51,14 @@ function OptionCard({
       )}
     >
       {option.image_url && (
-        // eslint-disable-next-line @next/next/no-img-element
-        <img src={option.image_url} alt={option.name}
-          className="w-full max-h-[22vh] object-contain" />
+        <Image
+          src={option.image_url}
+          alt={option.name}
+          width={400}
+          height={240}
+          sizes="(max-width: 768px) 50vw, 25vw"
+          className="w-full max-h-[22vh] object-contain"
+        />
       )}
 
       <div className="relative p-4">

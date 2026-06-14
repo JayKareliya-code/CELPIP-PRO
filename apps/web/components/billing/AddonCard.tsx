@@ -25,15 +25,19 @@ interface AddonCardProps {
   onAddToCart: (item: Omit<CartItem, "quantity">) => void;
 }
 
-/** Builds the cart item payload from the current selector state. */
+/** Builds the cart item payload from the current selector state.
+ *
+ *  Note: mock_bundle items fall through to the catch-all branch below, so the
+ *  caller no longer needs to pass a `selectedMockTest` arg — the slot is
+ *  resolved server-side by the webhook (see backend `_handle_checkout_completed`).
+ *  Likewise `mockTestOptions` from the config isn't needed inside this function. */
 export function buildCartItem(
   config: AddonCardConfig,
   selectedModule: string,
   selectedModuleTask: string,
   selectedTask: string,
-  selectedMockTest: string = "",
 ): Omit<CartItem, "quantity"> {
-  const { id, cartType, name, price, quantityLabel, taskOptions, mockTestOptions, moduleTaskOptions } = config;
+  const { id, cartType, name, price, quantityLabel, taskOptions, moduleTaskOptions } = config;
 
 
   if (moduleTaskOptions && selectedModuleTask) {
@@ -91,7 +95,7 @@ export function AddonCard({ config, onAddToCart }: AddonCardProps) {
 
   const handleAdd = () => {
     if (disabled) return;
-    onAddToCart(buildCartItem(config, selectedModule, selectedModuleTask, selectedTask, selectedMockTest));
+    onAddToCart(buildCartItem(config, selectedModule, selectedModuleTask, selectedTask));
   };
 
   return (

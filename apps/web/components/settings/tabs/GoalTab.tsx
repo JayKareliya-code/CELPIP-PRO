@@ -66,8 +66,8 @@ export function GoalTab() {
                 className={cn(
                   "flex items-center justify-center rounded-xl border py-3 text-sm font-bold transition-all duration-150",
                   isSelected
-                    ? "border-amber-500/60 bg-amber-500/10 text-amber-400 ring-1 ring-amber-500/30"
-                    : "border-white/[0.08] bg-white/[0.02] text-white/40 hover:border-amber-500/30 hover:text-white/80",
+                    ? "border-primary/60 bg-primary/10 text-primary ring-1 ring-primary/30"
+                    : "border-white/[0.08] bg-white/[0.02] text-white/40 hover:border-primary/30 hover:text-white/80",
                 )}
               >
                 {band}
@@ -86,7 +86,7 @@ export function GoalTab() {
           <span className="text-sm text-white/50">
             Band <span className="font-semibold text-white/80">{selected}</span>
             {bandLabel && (
-              <> — <span className="text-amber-400/80">{bandLabel}</span></>
+              <> — <span className="text-primary/80">{bandLabel}</span></>
             )}
           </span>
         </div>
@@ -103,7 +103,7 @@ export function GoalTab() {
             type="button"
             onClick={handleSave}
             disabled={!changed || selected === null || setTargetBand.isPending}
-            className="inline-flex items-center gap-2 rounded-xl bg-amber-500 hover:bg-amber-400 disabled:opacity-40 disabled:cursor-not-allowed px-5 py-2.5 text-sm font-semibold text-black transition-colors"
+            className="inline-flex items-center gap-2 rounded-xl bg-primary hover:bg-primary-hover disabled:opacity-40 disabled:cursor-not-allowed px-5 py-2.5 text-sm font-semibold text-primary-foreground transition-colors"
           >
             {setTargetBand.isPending ? (
               <><Loader2 className="h-4 w-4 animate-spin" /> Saving…</>
@@ -120,9 +120,9 @@ export function GoalTab() {
       </Section>
 
       {/* ── Info callout ─────────────────────────────────────────────────── */}
-      <div className="rounded-xl border border-amber-500/10 bg-amber-500/[0.04] px-4 py-3">
-        <p className="text-xs text-amber-400/70 leading-relaxed">
-          <span className="font-semibold text-amber-400">How it works: </span>
+      <div className="rounded-xl border border-primary/10 bg-primary/[0.04] px-4 py-3">
+        <p className="text-xs text-primary/70 leading-relaxed">
+          <span className="font-semibold text-primary">How it works: </span>
           The AI scorer uses your target band to tailor feedback, highlight gaps, and
           generate sample responses at your goal level. You can update it any time.
         </p>

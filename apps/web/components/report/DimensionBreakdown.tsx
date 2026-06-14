@@ -58,9 +58,9 @@ export function DimensionBreakdown({ dimensions }: Props) {
 
   return (
     <div className="rounded-2xl border border-border bg-surface p-6 shadow-card">
-      <h3 className="mb-4 text-xs font-semibold uppercase tracking-wider text-white/30">
+      <h2 className="mb-4 text-xs font-semibold uppercase tracking-wider text-white/30">
         Dimension Breakdown
-      </h3>
+      </h2>
 
       <div className="flex flex-col gap-3">
         {dimensions.map((dim, i) => (

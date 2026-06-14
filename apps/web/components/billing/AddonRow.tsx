@@ -39,7 +39,7 @@ export function AddonRow({ config, onAddToCart }: AddonRowProps) {
 
   const handleAdd = () => {
     if (disabled) return;
-    onAddToCart(buildCartItem(config, selectedModule, selectedModuleTask, selectedTask, selectedMockTest));
+    onAddToCart(buildCartItem(config, selectedModule, selectedModuleTask, selectedTask));
   };
 
   const hasSelector = !!(mockTestOptions || taskOptions || moduleTaskOptions);

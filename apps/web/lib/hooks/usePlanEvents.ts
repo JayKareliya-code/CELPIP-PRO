@@ -30,11 +30,17 @@ const API_BASE_URL =
 const SSE_ENDPOINT = `${API_BASE_URL}/api/v1/billing/plan-events`;
 const SSE_TOKEN_ENDPOINT = `${API_V1}/billing/sse-token`;
 
-/** Reconnect delay after an unexpected connection drop (ms). */
-const RECONNECT_DELAY_MS = 3_000;
+/** Base delay between reconnect attempts (ms). Backoff is exponential and
+ *  capped at MAX_RECONNECT_DELAY_MS — gentler than the previous linear
+ *  schedule for callers behind corporate proxies that close long connections. */
+const BASE_RECONNECT_DELAY_MS = 1_500;
+const MAX_RECONNECT_DELAY_MS  = 60_000;
 
-/** Maximum number of consecutive reconnect attempts before giving up. */
-const MAX_RETRIES = 5;
+/** Maximum number of consecutive reconnect attempts before standing down.
+ *  We reset the counter to zero on `visibilitychange → visible`, so a user
+ *  returning to a tab that exhausted its retries gets a fresh budget instead
+ *  of being permanently disconnected. */
+const MAX_RETRIES = 10;
 
 // ── Hook ──────────────────────────────────────────────────────────────────────
 
@@ -106,11 +112,26 @@ export function usePlanEvents(): void {
 
       // ── Event: plan upgraded ───────────────────────────────────────────────
       es.addEventListener("plan-updated", (ev: MessageEvent) => {
+        let data: { plan?: string; user_id?: string } | null = null;
         try {
-          const data = JSON.parse(ev.data) as { plan: string; user_id: string };
-          console.info("[usePlanEvents] plan-updated received:", data);
+          data = JSON.parse(ev.data);
         } catch {
           // Non-critical — we still invalidate the cache below.
+        }
+
+        // Defense-in-depth user_id check. The backend SSE handler is already
+        // user-scoped via the opaque token, but in a hypothetical reconnect-
+        // token-rotation race the stream could be momentarily wrong. Drop
+        // events whose payload disagrees with this client's user instead of
+        // invalidating the wrong user's caches.
+        if (data?.user_id && userId && data.user_id !== userId) {
+          if (process.env.NODE_ENV !== "production") {
+            console.warn(
+              "[usePlanEvents] discarding plan-updated for user %s while signed in as %s",
+              data.user_id, userId,
+            );
+          }
+          return;
         }
 
         // Immediately re-fetch the queries so the UI reflects the new plan
@@ -148,17 +169,28 @@ export function usePlanEvents(): void {
       });
     }
 
-    /** Schedule a reconnect attempt with simple linear backoff. */
+    /** Schedule a reconnect with exponential backoff, capped. The counter is
+     *  reset on `visibilitychange → visible` (see below) so a tab that
+     *  exhausted its retries while backgrounded gets a fresh budget when the
+     *  user returns. Adds 0–500 ms of jitter so a fleet doesn't reconnect in
+     *  lockstep after an outage. */
     function scheduleReconnect(): void {
       if (cancelled) return;
       if (retriesRef.current >= MAX_RETRIES) {
-        console.warn(
-          `[usePlanEvents] Max retries (${MAX_RETRIES}) reached — giving up.`
-        );
+        if (process.env.NODE_ENV !== "production") {
+          console.warn(
+            `[usePlanEvents] Max retries (${MAX_RETRIES}) reached — pausing until tab regains focus.`,
+          );
+        }
         return;
       }
       retriesRef.current += 1;
-      const delay = RECONNECT_DELAY_MS * retriesRef.current;
+      const exp    = Math.min(
+        MAX_RECONNECT_DELAY_MS,
+        BASE_RECONNECT_DELAY_MS * 2 ** (retriesRef.current - 1),
+      );
+      const jitter = Math.floor(Math.random() * 500);
+      const delay  = exp + jitter;
 
       reconnectTimer.current = setTimeout(() => {
         if (!cancelled) connect();
@@ -179,9 +211,25 @@ export function usePlanEvents(): void {
 
     connect();
 
+    // When the tab becomes visible after being backgrounded, reset the retry
+    // counter and attempt a fresh connect. Corporate proxies often close
+    // long-lived SSE connections on idle; without this, a user returning to
+    // an exhausted tab would silently miss every subsequent plan-update.
+    const onVisibilityChange = () => {
+      if (document.visibilityState !== "visible") return;
+      retriesRef.current = 0;
+      // Only re-open if we're not already connected. EventSource exposes
+      // readyState (0=connecting, 1=open, 2=closed).
+      if (!esRef.current || esRef.current.readyState === EventSource.CLOSED) {
+        connect();
+      }
+    };
+    document.addEventListener("visibilitychange", onVisibilityChange);
+
     // Cleanup when the component unmounts, the user signs out, or userId changes.
     return () => {
       cancelled = true;
+      document.removeEventListener("visibilitychange", onVisibilityChange);
       cleanup();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps

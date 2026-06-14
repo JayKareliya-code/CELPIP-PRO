@@ -43,12 +43,34 @@ export function AuthCacheGuard(): null {
     // The userId changed (sign-in, sign-out, or account switch).
     // Wipe the entire cache so no stale data from the previous user leaks.
     if (prevUserIdRef.current !== undefined || currentUserId !== undefined) {
-      console.info(
-        "[AuthCacheGuard] userId changed (%s → %s) — clearing React Query cache.",
-        prevUserIdRef.current ?? "none",
-        currentUserId        ?? "none",
-      );
+      if (process.env.NODE_ENV !== "production") {
+        console.info(
+          "[AuthCacheGuard] userId changed (%s → %s) — clearing client state.",
+          prevUserIdRef.current ?? "none",
+          currentUserId        ?? "none",
+        );
+      }
       queryClient.clear();
+
+      // Also sweep client storage so namespaced caches (mock-exam session
+      // UUIDs in localStorage, writing-draft timers in sessionStorage) cannot
+      // bleed across users. We match the `celpip-*` prefix that this app uses
+      // for all its own keys; everything else (Clerk, Stripe, third-party) is
+      // left alone.
+      try {
+        const drop = (storage: Storage) => {
+          const keys: string[] = [];
+          for (let i = 0; i < storage.length; i++) {
+            const k = storage.key(i);
+            if (k && k.startsWith("celpip-")) keys.push(k);
+          }
+          keys.forEach((k) => storage.removeItem(k));
+        };
+        drop(window.localStorage);
+        drop(window.sessionStorage);
+      } catch {
+        // SSR, quota errors, private mode — non-fatal.
+      }
     }
 
     prevUserIdRef.current = currentUserId;

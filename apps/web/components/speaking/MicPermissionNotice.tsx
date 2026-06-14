@@ -39,9 +39,13 @@ export function MicPermissionNotice() {
           <p className="text-sm font-semibold text-white/85">
             Microphone access is blocked
           </p>
-          <p className="text-xs text-white/55 mt-0.5 leading-relaxed">
-            Enable it in your browser&apos;s site settings (click the lock icon
-            in the address bar) to start a speaking attempt.
+          <p className="text-xs text-white/75 mt-0.5 leading-relaxed">
+            Open this page&apos;s permissions in your browser&apos;s site
+            settings and allow microphone access. On Chrome and Edge:{" "}
+            <kbd className="rounded bg-white/10 px-1 py-0.5 font-mono text-[10px]">⋮</kbd>
+            {" "}→ Settings → Privacy and security → Site settings → Microphone.
+            On Safari: Safari menu → Settings → Websites → Microphone. On
+            mobile, open your device&apos;s app permissions for your browser.
           </p>
         </div>
       </div>

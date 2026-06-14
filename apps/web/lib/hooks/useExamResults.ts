@@ -44,12 +44,14 @@ const POLL_INTERVAL_MS = 5_000;
 // ── Hook ──────────────────────────────────────────────────────────────────────
 
 export function useExamResults(sessionId: string): void {
-  const { getToken }    = useAuth();
-  const { setTaskBand } = useMockExamStore();
+  const { getToken, userId } = useAuth();
+  const { setTaskBand }      = useMockExamStore();
 
   const { data } = useQuery<SessionResultsResponse>({
-    queryKey: ["exam-results", sessionId],
-    enabled:  Boolean(sessionId),
+    // Scope by userId so a freshly-signed-in user can't briefly receive the
+    // previous user's mock-exam bands before AuthCacheGuard clears caches.
+    queryKey: ["exam-results", userId ?? "anonymous", sessionId],
+    enabled:  Boolean(sessionId) && Boolean(userId),
 
     queryFn: async () => {
       const token = await getToken();

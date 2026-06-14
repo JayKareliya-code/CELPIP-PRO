@@ -19,10 +19,11 @@ export function useWeakAreas(): {
   items:     WeakAreaItem[];
   isLoading: boolean;
 } {
-  const { getToken } = useAuth();
+  const { getToken, userId, isSignedIn } = useAuth();
 
   const { data, isLoading } = useQuery<WeakAreaItem[]>({
-    queryKey: ["weak-areas"],
+    // Scope by userId — see useCurrentUser for rationale.
+    queryKey: ["weak-areas", userId ?? "anonymous"],
 
     queryFn: async (): Promise<WeakAreaItem[]> => {
       if (USE_MOCK) return MOCK_WEAK_AREAS;
@@ -34,6 +35,7 @@ export function useWeakAreas(): {
     },
 
     staleTime: 5 * 60_000, // 5 min — aggregated data changes slowly
+    enabled: USE_MOCK || (!!isSignedIn && !!userId),
   });
 
   return { items: data ?? [], isLoading };

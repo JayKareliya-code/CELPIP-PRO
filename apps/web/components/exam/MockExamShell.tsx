@@ -30,6 +30,8 @@ import { useQueryClient }     from "@tanstack/react-query";
 
 import { useMockExamSession } from "@/lib/hooks/useMockExamSession";
 import { useMockExamPrompts } from "@/lib/hooks/useMockExamPrompts";
+import { useFocusOnChange }   from "@/lib/hooks/useFocusOnChange";
+import { ConfirmModal }       from "@/components/common/ConfirmModal";
 import { getSpeakingTaskTitle } from "@/lib/speaking-constants";
 
 // Reused individual-task screens (no changes to these files)
@@ -92,6 +94,10 @@ export function MockExamShell({ slotNumber }: MockExamShellProps) {
     selectChoice,
     exit,
     terminate,
+    finishRecording,
+    exitRequested,
+    cancelExit,
+    confirmExit,
   } = useMockExamSession();
 
   const queryClient = useQueryClient();
@@ -251,6 +257,9 @@ export function MockExamShell({ slotNumber }: MockExamShellProps) {
           promptText={prompt.prompt_text}
           taskNumber={prompt.task_number}
           taskTitle={taskTitle}
+          // Task 5 TASK_RECORDING is silent prep — no live mic — so the
+          // Stop button only makes sense for non-Task-5 here.
+          onStop={prompt.task_number === 5 ? undefined : finishRecording}
         />
       );
     }
@@ -282,6 +291,7 @@ export function MockExamShell({ slotNumber }: MockExamShellProps) {
           promptText={prompt.prompt_text}
           taskNumber={prompt.task_number}
           taskTitle={taskTitle}
+          onStop={finishRecording}
         />
       );
     }
@@ -367,10 +377,13 @@ export function MockExamShell({ slotNumber }: MockExamShellProps) {
            key={phase} intentionally causes a full subtree remount on every
            phase transition — resets child local state and triggers the
            animate-fade-in entry animation. Do NOT remove without verifying
-           mic/audio state is safe to reuse across phase boundaries. */}
-      <div key={phase} className="animate-fade-in flex flex-col flex-1">
+           mic/audio state is safe to reuse across phase boundaries.
+           The focusRef + tabIndex={-1} pair moves keyboard/SR focus to the
+           new screen so users aren't stranded on the document body after the
+           remount. */}
+      <PhasedScreen phase={phase}>
         {renderScreen()}
-      </div>
+      </PhasedScreen>
 
       {/* Exit button — z-[60] to sit above the canvas shell */}
       {showExit && (
@@ -387,6 +400,35 @@ export function MockExamShell({ slotNumber }: MockExamShellProps) {
           Exit
         </button>
       )}
+
+      {/* Exit confirmation modal — replaces the previous window.confirm. */}
+      <ConfirmModal
+        open={exitRequested}
+        onCancel={cancelExit}
+        onConfirm={confirmExit}
+        title="Exit the exam?"
+        description="Your progress so far will not be scored. This action cannot be undone."
+        confirmLabel="Exit exam"
+        isDestructive
+      />
+    </div>
+  );
+}
+
+/**
+ * Wraps the phase-keyed screen so we can attach a ref hook. The ref + key
+ * combination is what gives useFocusOnChange a re-runnable identity.
+ */
+function PhasedScreen({ phase, children }: { phase: string; children: React.ReactNode }) {
+  const ref = useFocusOnChange<HTMLDivElement>(phase);
+  return (
+    <div
+      key={phase}
+      ref={ref}
+      tabIndex={-1}
+      className="animate-fade-in flex flex-col flex-1 focus:outline-none"
+    >
+      {children}
     </div>
   );
 }

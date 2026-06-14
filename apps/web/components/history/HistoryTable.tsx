@@ -17,7 +17,7 @@ import { StatusBadge }       from "@/components/common/StatusBadge";
 import { SkillBadge }        from "@/components/common/SkillBadge";
 import { EmptyState }        from "@/components/common/EmptyState";
 import { PaginationFooter }  from "@/components/common/PaginationFooter";
-import { timeAgo, formatBand } from "@/lib/utils";
+import { timeAgo } from "@/lib/utils";
 import type { PaginatedHistory, Skill } from "@/lib/types";
 
 // ── Unified state badge (mobile cards only) ───────────────────────────────────

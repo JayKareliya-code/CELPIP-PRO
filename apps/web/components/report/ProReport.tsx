@@ -28,6 +28,7 @@ import { useState }                        from "react";
 import Link                                from "next/link";
 import { ArrowRight, GraduationCap, FileText, BarChart3, Lock } from "lucide-react";
 import { formatBand }                      from "@/lib/utils";
+import { useFocusOnChange }                from "@/lib/hooks/useFocusOnChange";
 
 import { ReportTabNav }                    from "./ReportTabNav";
 import type { ReportTab }                  from "./ReportTabNav";
@@ -98,8 +99,30 @@ export function ProReport({ report, targetBand, isPro }: Props) {
     ? tabs
     : tabs.map((t) => t.id === "analytics" ? { ...t, icon: Lock } : t);
 
+  // Accessible page heading. Rendered visually hidden because the band score
+  // gauge is the visual h1 equivalent — but screen readers need a real <h1>
+  // for "this is what this page is about", and the heading-level hierarchy
+  // below (h2 sections) needs a parent.
+  const skillLabel = report.skill === "speaking" ? "Speaking" : "Writing";
+  const a11yTitle  = `${skillLabel} coaching report — Band ${report.estimated_band}`;
+
+  // After the status page redirects here, the previously-focused "View report"
+  // button is gone. Move focus to the h1 so SRs announce the band immediately
+  // and keyboard tabbing starts from the top of the new page. Keyed on
+  // attempt_id so navigating between two reports re-fires the focus move.
+  const focusRef = useFocusOnChange<HTMLDivElement>(report.attempt_id);
+
   return (
-    <div className="flex flex-col gap-0">
+    <div ref={focusRef} className="flex flex-col gap-0">
+
+      {/* Screen-reader-only document heading. The score gauge in
+          ScoreSummaryCard is the *visual* hero; this gives SR/keyboard users
+          a clean landmark and anchors the heading hierarchy.
+          tabIndex={-1} + data-focus-on-mount lets the status→report
+          redirect land focus here so SRs announce the band immediately. */}
+      <h1 className="sr-only" tabIndex={-1} data-focus-on-mount>
+        {a11yTitle}
+      </h1>
 
       {/* ── Sticky tab bar ──────────────────────────────────────────────────────
           Sticks just below the main navbar (navbar height = 3.5rem / 56px).
@@ -281,7 +304,7 @@ export function ProReport({ report, targetBand, isPro }: Props) {
                   Switch to{" "}
                   <button
                     onClick={() => setActiveTab("coaching")}
-                    className="underline text-white/40 hover:text-amber-400 transition-colors"
+                    className="underline text-white/40 hover:text-primary transition-colors"
                   >
                     Coaching Report
                   </button>{" "}
@@ -392,18 +415,18 @@ const PRO_FEATURES = [
 
 function StarterUpgradeSideCard() {
   return (
-    <div className="relative overflow-hidden rounded-2xl border border-amber-700/30 bg-gradient-to-br from-amber-950/50 via-amber-950/25 to-transparent p-5 flex flex-col gap-4">
+    <div className="relative overflow-hidden rounded-2xl border border-primary/20 bg-gradient-to-br from-primary/15 via-primary/10 to-transparent p-5 flex flex-col gap-4">
       {/* Ambient glow */}
-      <div className="absolute -top-10 -right-10 h-40 w-40 rounded-full bg-amber-500/10 blur-3xl pointer-events-none" />
+      <div className="absolute -top-10 -right-10 h-40 w-40 rounded-full bg-primary/10 blur-3xl pointer-events-none" />
 
       {/* Header */}
       <div>
-        <p className="text-[10px] font-bold uppercase tracking-wider text-amber-400/70 mb-1">
+        <p className="text-[10px] font-bold uppercase tracking-wider text-primary/70 mb-1">
           Unlock Full Report
         </p>
-        <h3 className="text-base font-bold text-foreground leading-snug">
+        <h2 className="text-base font-bold text-foreground leading-snug">
           You&rsquo;re on the Starter plan
-        </h3>
+        </h2>
         <p className="mt-1 text-xs text-subtle leading-relaxed">
           Upgrade to Pro to unlock the complete coaching report.
         </p>
@@ -413,8 +436,8 @@ function StarterUpgradeSideCard() {
       <ul className="space-y-1.5 flex-1">
         {PRO_FEATURES.map((feat) => (
           <li key={feat} className="flex items-start gap-2 text-xs text-foreground/70">
-            <span className="mt-0.5 h-3.5 w-3.5 flex-shrink-0 rounded-full bg-amber-500/20 flex items-center justify-center">
-              <span className="block h-1 w-1 rounded-full bg-amber-400" />
+            <span className="mt-0.5 h-3.5 w-3.5 flex-shrink-0 rounded-full bg-primary/20 flex items-center justify-center">
+              <span className="block h-1 w-1 rounded-full bg-primary" />
             </span>
             {feat}
           </li>
@@ -422,14 +445,14 @@ function StarterUpgradeSideCard() {
       </ul>
 
       {/* CTA */}
-      <div className="pt-3 border-t border-amber-700/20">
+      <div className="pt-3 border-t border-primary/20">
         <div className="mb-2">
           <p className="text-xs font-bold text-foreground">Pro Plan — $9.99 CAD</p>
           <p className="text-[10px] text-subtle">One-time payment · Never expires</p>
         </div>
         <Link
           href="/billing"
-          className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-amber-400 hover:bg-amber-300 px-5 py-2.5 text-sm font-bold text-black transition-colors duration-200"
+          className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-primary hover:bg-primary-hover px-5 py-2.5 text-sm font-bold text-primary-foreground transition-colors duration-200"
         >
           Upgrade to Pro <ArrowRight className="h-4 w-4" />
         </Link>
@@ -442,14 +465,14 @@ function StarterUpgradeSideCard() {
 
 function StarterUpgradeCta() {
   return (
-    <div className="rounded-2xl border border-amber-700/30 bg-gradient-to-br from-amber-950/40 via-amber-950/20 to-transparent p-6 flex flex-col gap-5">
+    <div className="rounded-2xl border border-primary/20 bg-gradient-to-br from-primary/15 via-primary/10 to-transparent p-6 flex flex-col gap-5">
       <div>
-        <p className="text-[10px] font-bold uppercase tracking-wider text-amber-400/70 mb-1">
+        <p className="text-[10px] font-bold uppercase tracking-wider text-primary/70 mb-1">
           Unlock Full Report
         </p>
-        <h3 className="text-lg font-bold text-foreground">
+        <h2 className="text-lg font-bold text-foreground">
           You&rsquo;re seeing the Starter summary
-        </h3>
+        </h2>
         <p className="mt-1 text-sm text-subtle leading-relaxed">
           Upgrade to Pro for the complete coaching report — rubric breakdown,
           feedback panels, improvement plan, and a sample response tuned to your target band.
@@ -459,22 +482,22 @@ function StarterUpgradeCta() {
       <ul className="space-y-2">
         {PRO_FEATURES.map((feat) => (
           <li key={feat} className="flex items-start gap-2.5 text-sm text-foreground/75">
-            <span className="mt-0.5 h-4 w-4 flex-shrink-0 rounded-full bg-amber-500/20 flex items-center justify-center">
-              <span className="block h-1.5 w-1.5 rounded-full bg-amber-400" />
+            <span className="mt-0.5 h-4 w-4 flex-shrink-0 rounded-full bg-primary/20 flex items-center justify-center">
+              <span className="block h-1.5 w-1.5 rounded-full bg-primary" />
             </span>
             {feat}
           </li>
         ))}
       </ul>
 
-      <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 pt-4 border-t border-amber-700/20">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 pt-4 border-t border-primary/20">
         <div>
           <p className="text-sm font-bold text-foreground">Pro Plan — $9.99 CAD</p>
           <p className="text-xs text-subtle">One-time payment · Never expires</p>
         </div>
         <Link
           href="/billing"
-          className="ml-auto inline-flex items-center gap-2 rounded-xl bg-amber-400 hover:bg-amber-300 px-5 py-2.5 text-sm font-semibold text-black transition-colors"
+          className="ml-auto inline-flex items-center gap-2 rounded-xl bg-primary hover:bg-primary-hover px-5 py-2.5 text-sm font-semibold text-primary-foreground transition-colors"
         >
           Upgrade to Pro <ArrowRight className="h-4 w-4" />
         </Link>

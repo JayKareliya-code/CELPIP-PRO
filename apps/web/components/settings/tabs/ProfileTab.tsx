@@ -4,6 +4,7 @@
 // components/settings/tabs/ProfileTab.tsx
 // ─────────────────────────────────────────────────────────────────────────────
 
+import Image from "next/image";
 import { CalendarDays, ExternalLink, Flame, Target } from "lucide-react";
 import { useUser, useClerk } from "@clerk/nextjs";
 
@@ -32,14 +33,19 @@ export function ProfileTab() {
         {/* ── Identity row ─────────────────────────────────────────────── */}
         <div className="flex items-center gap-4">
           {avatarUrl ? (
-            <img
+            <Image
               src={avatarUrl}
-              alt={displayName}
-              className="w-16 h-16 rounded-full object-cover ring-2 ring-amber-500/20 shrink-0"
+              // displayName appears as a heading right next to the avatar;
+              // the image is decorative for sighted users and redundant for SR.
+              alt=""
+              aria-hidden="true"
+              width={64}
+              height={64}
+              className="w-16 h-16 rounded-full object-cover ring-2 ring-primary/20 shrink-0"
             />
           ) : (
-            <div className="w-16 h-16 rounded-full bg-amber-900/30 border border-amber-700/30 flex items-center justify-center shrink-0">
-              <span className="text-xl font-bold text-amber-400">
+            <div className="w-16 h-16 rounded-full bg-primary/10 border border-primary/20 flex items-center justify-center shrink-0">
+              <span className="text-xl font-bold text-primary">
                 {displayName.charAt(0).toUpperCase()}
               </span>
             </div>
@@ -67,7 +73,7 @@ export function ProfileTab() {
               Current Streak
             </p>
             <div className="flex items-center gap-1.5 mt-1">
-              <Flame className="w-4 h-4 text-amber-400" />
+              <Flame className="w-4 h-4 text-primary" />
               <p className="text-2xl font-bold text-white/90">{user?.streak_days ?? 0}</p>
               <span className="text-sm text-white/40 mt-0.5">days</span>
             </div>
@@ -78,7 +84,7 @@ export function ProfileTab() {
               Target Band
             </p>
             <div className="flex items-center gap-1.5 mt-1">
-              <Target className="w-4 h-4 text-amber-400" />
+              <Target className="w-4 h-4 text-primary" />
               <p className="text-2xl font-bold text-white/90">{user?.target_band ?? "—"}</p>
               {user?.target_band && (
                 <span className="text-sm text-white/40 mt-0.5">/ 12</span>
@@ -92,7 +98,7 @@ export function ProfileTab() {
           id="btn-manage-clerk-account"
           type="button"
           onClick={() => openUserProfile()}
-          className="w-full flex items-center justify-between rounded-xl border border-white/[0.08] bg-white/[0.03] px-4 py-3 text-sm text-white/60 hover:text-white/90 hover:border-amber-500/20 hover:bg-amber-500/[0.04] transition-all duration-150"
+          className="w-full flex items-center justify-between rounded-xl border border-white/[0.08] bg-white/[0.03] px-4 py-3 text-sm text-white/60 hover:text-white/90 hover:border-primary/20 hover:bg-primary/[0.04] transition-all duration-150"
         >
           <span className="font-medium">Manage account (name, email, password…)</span>
           <ExternalLink className="w-4 h-4 shrink-0" />

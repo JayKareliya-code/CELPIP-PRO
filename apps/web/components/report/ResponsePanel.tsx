@@ -10,6 +10,7 @@
 //   • Writing:             instructions (if any) + prompt text
 // ─────────────────────────────────────────────────────────────────────────────
 
+import Image from "next/image";
 import { Mic, PenLine, Shuffle } from "lucide-react";
 import type { ChoiceOption, Skill } from "@/lib/types";
 
@@ -130,7 +131,7 @@ export function ResponsePanel({
           </span>
 
           {hasTaskNumber && (
-            <span className="inline-flex items-center rounded-full border border-amber-500/30 bg-amber-500/10 px-2.5 py-0.5 text-[11px] font-semibold text-amber-300">
+            <span className="inline-flex items-center rounded-full border border-primary/30 bg-primary/10 px-2.5 py-0.5 text-[11px] font-semibold text-primary">
               {taskLabel(skill, taskNumber!)}
             </span>
           )}
@@ -138,16 +139,20 @@ export function ResponsePanel({
 
         {/* Instructions (writing header / speaking instructions) */}
         {instructionsText && (
-          <p className="relative text-xs leading-relaxed text-white/50 italic border-b border-amber-500/15 pb-2">
+          <p className="relative text-xs leading-relaxed text-white/50 italic border-b border-primary/15 pb-2">
             {instructionsText}
           </p>
         )}
 
-        {/* Context image (Tasks 3, 4, 8) */}
+        {/* Context image (Tasks 3, 4, 8). Sized down vs the live exam screens
+            since this is a post-attempt review view, not fold-critical. */}
         {contextImageUrl && (
-          <img
+          <Image
             src={contextImageUrl}
             alt="Scene for this task"
+            width={640}
+            height={320}
+            sizes="(max-width: 768px) 100vw, 640px"
             className="block max-w-full max-h-80 w-auto h-auto object-contain rounded-xl"
           />
         )}
@@ -161,8 +166,8 @@ export function ResponsePanel({
 
         {/* ── Task 5: choice options + curveball ───────────────────────── */}
         {isTask5 && choiceOptions && choiceOptions.length > 0 && (
-          <div className="relative flex flex-col gap-3 border-t border-amber-500/20 pt-3">
-            <p className="text-[11px] font-bold uppercase tracking-widest text-amber-400/70">
+          <div className="relative flex flex-col gap-3 border-t border-primary/20 pt-3">
+            <p className="text-[11px] font-bold uppercase tracking-widest text-primary/70">
               Choice Options
             </p>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">

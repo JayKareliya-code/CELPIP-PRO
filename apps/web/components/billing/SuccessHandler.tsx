@@ -35,14 +35,19 @@ export function SuccessHandler({ success, canceled, plan, addonOnly = false }: S
     };
   }, []);
 
-  // ── Plan-upgrade polling ────────────────────────────────────────────────────
-  // Only runs for plan upgrades (not addon-only carts).
-  // Polls until the SSE-delivered plan change arrives or MAX_POLLS is reached.
+  // ── Post-checkout polling ──────────────────────────────────────────────────
+  // Stripe webhooks are typically delivered in 1–3 s but can take 10 s+ at
+  // P99. The same 3-poll backstop runs for BOTH plan upgrades and addon-only
+  // purchases — without it, addon-only buyers used to see the success toast
+  // but no credits until they manually refreshed. Plan upgrades stop early
+  // when the SSE-delivered plan change is observed; addon purchases just
+  // exhaust the poll budget (refreshAfterPayment invalidates the addon-credits
+  // query, which is the signal that matters).
   useEffect(() => {
-    if (!success || addonOnly) return;
+    if (!success) return;
     if (!user) return;
-    // SSE already delivered the plan update — stop here.
-    if (user.plan !== "starter") {
+    // Plan-upgrade fast path: SSE already delivered → done.
+    if (!addonOnly && user.plan !== "starter") {
       if (pollTimer.current) clearInterval(pollTimer.current);
       return;
     }
@@ -56,14 +61,18 @@ export function SuccessHandler({ success, canceled, plan, addonOnly = false }: S
       if (pollCount.current >= MAX_POLLS) {
         clearInterval(pollTimer.current!);
         pollTimer.current = null;
-        // Plan still hasn't flipped after the full poll window — the Stripe
-        // webhook is likely delayed. Tell the user instead of silently giving
-        // up; usePlanEvents (SSE) and refetchOnWindowFocus will still catch it.
-        toast.info("Still finalizing your upgrade…", {
-          description:
-            "Payment succeeded — this can take a moment. Refresh the page if your plan doesn't update shortly.",
-          duration: 8000,
-        });
+        // Webhook still hasn't landed. The SSE listener and window-focus
+        // refetch will catch it eventually; surface a friendly note for the
+        // plan path. We don't toast for addon-only here because the toast
+        // from the mount effect ("Practice packs added!") already implied
+        // success — telling them it's still finalising would confuse.
+        if (!addonOnly) {
+          toast.info("Still finalizing your upgrade…", {
+            description:
+              "Payment succeeded — this can take a moment. Refresh the page if your plan doesn't update shortly.",
+            duration: 8000,
+          });
+        }
       }
     }, POLL_INTERVAL_MS);
 

@@ -19,13 +19,19 @@ export function getCookie(name: string): string | null {
  *
  * - `path=/` so the cookie is visible across the whole app.
  * - `SameSite=Lax` is the modern default and matches Clerk's session cookies.
- * - Not flagged `Secure` because dev runs over http://localhost; if you ever
- *   move to https-only, add it here.
+ * - `Secure` is set automatically whenever the page itself is served over
+ *   https (production, staging). Browsers reject `Secure` on http://localhost
+ *   so we drop it during dev; the runtime check means there's nothing to
+ *   remember to flip on deploy day.
  */
 export function setCookie(name: string, value: string, days = 30): void {
   if (typeof document === "undefined") return;
   const expires = new Date(Date.now() + days * 86_400_000).toUTCString();
+  const secure  =
+    typeof window !== "undefined" && window.location.protocol === "https:"
+      ? " Secure;"
+      : "";
   document.cookie =
     `${encodeURIComponent(name)}=${encodeURIComponent(value)};` +
-    ` expires=${expires}; path=/; SameSite=Lax`;
+    ` expires=${expires}; path=/; SameSite=Lax;${secure}`;
 }

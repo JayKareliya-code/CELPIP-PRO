@@ -43,17 +43,19 @@ async function fetchFeatureFlags(token: string): Promise<FeatureFlags> {
  * Returns an empty object while loading or on error (all flags → false).
  */
 export function useFeatureFlags(): FeatureFlags {
-  const { getToken, isSignedIn } = useAuth();
+  const { getToken, isSignedIn, userId } = useAuth();
 
   const { data } = useQuery<FeatureFlags>({
-    queryKey: ["feature-flags"],
+    // Scope by userId so flags from User A are never served to User B in the
+    // narrow window before AuthCacheGuard runs its queryClient.clear().
+    queryKey: ["feature-flags", userId ?? "anonymous"],
     queryFn: async () => {
       const token = await getToken();
       if (!token) return {};
       return fetchFeatureFlags(token);
     },
     // Only fetch when the user is signed in — avoids 401 noise on public pages
-    enabled: !!isSignedIn,
+    enabled: !!isSignedIn && !!userId,
     staleTime:   60_000,   // 60 s — flags change rarely
     gcTime:      300_000,  // 5 min — keep cached value even after component unmounts
     retry:       1,        // one retry on network hiccup; fail silently after that

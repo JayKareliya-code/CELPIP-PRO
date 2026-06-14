@@ -65,12 +65,13 @@ export function useTaskScoreHistory(
   taskNumber: number | null,
   limit = 10,
 ): UseTaskScoreHistoryReturn {
-  const { getToken } = useAuth();
+  const { getToken, userId, isSignedIn } = useAuth();
 
-  const enabled = !!skill && taskNumber !== null;
+  const enabled = !!skill && taskNumber !== null && (USE_MOCK || (!!isSignedIn && !!userId));
 
   const { data, isLoading, isError } = useQuery<TaskScoreHistory>({
-    queryKey: ["task-score-history", skill, taskNumber, limit],
+    // Scope by userId — see useCurrentUser for rationale.
+    queryKey: ["task-score-history", userId ?? "anonymous", skill, taskNumber, limit],
 
     queryFn: async () => {
       if (USE_MOCK) {

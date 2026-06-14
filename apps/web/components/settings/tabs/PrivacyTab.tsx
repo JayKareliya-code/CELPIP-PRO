@@ -57,7 +57,7 @@ export function PrivacyTab() {
             type="button"
             onClick={requestExport}
             disabled={loading}
-            className="inline-flex items-center gap-2 rounded-xl border border-white/[0.08] bg-white/[0.03] hover:border-amber-500/20 hover:bg-amber-500/[0.04] px-4 py-2.5 text-sm font-medium text-white/60 hover:text-white/90 transition-all disabled:opacity-50"
+            className="inline-flex items-center gap-2 rounded-xl border border-white/[0.08] bg-white/[0.03] hover:border-primary/20 hover:bg-primary/[0.04] px-4 py-2.5 text-sm font-medium text-white/60 hover:text-white/90 transition-all disabled:opacity-50"
           >
             <Download className="w-4 h-4" />
             {loading ? "Requesting…" : "Request data export"}
@@ -67,7 +67,7 @@ export function PrivacyTab() {
         {/* In-progress */}
         {job && exportInProgress && (
           <div className="flex items-center gap-3 text-sm text-white/50">
-            <Loader2 className="h-4 w-4 animate-spin text-amber-400" />
+            <Loader2 className="h-4 w-4 animate-spin text-primary" />
             Building your export… this may take a minute.
           </div>
         )}
@@ -96,7 +96,7 @@ export function PrivacyTab() {
             <button
               type="button"
               onClick={requestExport}
-              className="inline-flex items-center gap-2 rounded-xl bg-amber-500 hover:bg-amber-400 px-4 py-2 text-sm font-semibold text-black transition-colors"
+              className="inline-flex items-center gap-2 rounded-xl bg-primary hover:bg-primary-hover px-4 py-2 text-sm font-semibold text-primary-foreground transition-colors"
             >
               <Download className="w-4 h-4" /> Retry
             </button>

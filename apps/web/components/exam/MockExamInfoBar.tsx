@@ -13,10 +13,22 @@
 
 "use client";
 
+import { useMemo } from "react";
 import { CheckCircle2, AlertCircle } from "lucide-react";
 import { formatTime } from "@/lib/utils";
 import { cn }         from "@/lib/utils";
 import type { MockExamTask } from "@/lib/types";
+
+/** Same checkpoint policy as ExamInfoBar — only announce at 60/30/15/10 and
+ *  the final 5 seconds. Empty string when no announcement is due so SRs don't
+ *  re-read mid-band ticks. */
+function timerAnnouncement(isRecording: boolean, secondsLeft: number | undefined): string {
+  if (!isRecording || secondsLeft === undefined) return "";
+  if (secondsLeft <= 0) return "Time is up.";
+  if ([60, 30, 15, 10].includes(secondsLeft)) return `${secondsLeft} seconds remaining.`;
+  if (secondsLeft <= 5) return `${secondsLeft}.`;
+  return "";
+}
 
 interface MockExamInfoBarProps {
   tasks:            MockExamTask[];
@@ -39,10 +51,14 @@ export function MockExamInfoBar({
   secondsLeft,
   partLabel,
 }: MockExamInfoBarProps) {
-  const activeTask = tasks[currentTaskIndex];
-  const isCritical = isRecording && (secondsLeft ?? 0) <= 10;
-  const taskNumber = activeTask?.taskNumber ?? 0;
-  const taskLabel  = (taskNumber as number) === 0 ? "Practice" : `Task ${taskNumber}`;
+  const activeTask  = tasks[currentTaskIndex];
+  const isCritical  = isRecording && (secondsLeft ?? 0) <= 10;
+  const taskNumber  = activeTask?.taskNumber ?? 0;
+  const taskLabel   = (taskNumber as number) === 0 ? "Practice" : `Task ${taskNumber}`;
+  const srTimerText = useMemo(
+    () => timerAnnouncement(isRecording, secondsLeft),
+    [isRecording, secondsLeft],
+  );
 
   return (
     <div className="sticky top-0 z-10 shrink-0 w-full bg-canvas/95 backdrop-blur-md border-b border-border/40">
@@ -93,20 +109,35 @@ export function MockExamInfoBar({
             Task {currentTaskIndex + 1} of {tasks.length}
           </span>
 
-          {/* Live REC indicator */}
+          {/* Live REC indicator — see ExamInfoBar for the a11y rationale.
+              SR announces "Recording started" on mount; the throttled
+              checkpoint announcer below handles the countdown. */}
           {isRecording && (
-            <div className="flex items-center gap-2 px-3 py-1 rounded-full
-                            bg-danger/10 border border-danger/30">
-              <span className="relative flex h-2.5 w-2.5 shrink-0">
+            <div
+              role="status"
+              aria-live="assertive"
+              aria-atomic="true"
+              aria-label={
+                secondsLeft !== undefined
+                  ? `Recording. ${secondsLeft} seconds left.`
+                  : "Recording started."
+              }
+              className="flex items-center gap-2 px-3 py-1 rounded-full
+                            bg-danger/10 border border-danger/30"
+            >
+              <span aria-hidden="true" className="relative flex h-2.5 w-2.5 shrink-0">
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-danger opacity-60" />
                 <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-danger" />
               </span>
-              <span className="text-danger font-bold uppercase tracking-widest text-[11px]">Rec</span>
+              <span aria-hidden="true" className="text-danger font-bold uppercase tracking-widest text-[11px]">Rec</span>
               {secondsLeft !== undefined && (
-                <span className={cn(
-                  "tabular-nums font-bold text-sm",
-                  isCritical ? "text-danger animate-pulse" : "text-canvas-text",
-                )}>
+                <span
+                  aria-hidden="true"
+                  className={cn(
+                    "tabular-nums font-bold text-sm",
+                    isCritical ? "text-danger animate-pulse" : "text-canvas-text",
+                  )}
+                >
                   {formatTime(secondsLeft)}
                 </span>
               )}
@@ -151,9 +182,10 @@ export function MockExamInfoBar({
         </div>
       </div>
 
-      {/* Recording progress bar — full-width depleting line */}
+      {/* Recording progress bar — full-width depleting line. Decorative,
+          aria-hidden so SRs don't track the per-frame width change. */}
       {isRecording && secondsLeft !== undefined && (
-        <div className="h-[2px] w-full bg-border/30">
+        <div className="h-[2px] w-full bg-border/30" aria-hidden="true">
           <div
             className={cn(
               "h-full transition-all duration-1000 ease-linear",
@@ -163,6 +195,11 @@ export function MockExamInfoBar({
           />
         </div>
       )}
+
+      {/* Throttled SR-only timer announcer — see ExamInfoBar for the policy. */}
+      <span className="sr-only" aria-live={isCritical ? "assertive" : "polite"} aria-atomic="true">
+        {srTimerText}
+      </span>
     </div>
   );
 }

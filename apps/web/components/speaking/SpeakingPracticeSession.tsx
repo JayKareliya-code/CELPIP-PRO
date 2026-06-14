@@ -22,6 +22,7 @@
 "use client";
 
 import { useEffect }              from "react";
+import { useFocusOnChange }       from "@/lib/hooks/useFocusOnChange";
 import { useSpeakingAttempt }     from "@/lib/hooks/useSpeakingAttempt";
 import { usePracticeSessionStore } from "@/store/practiceSessionStore";
 import { CountdownOverlay }       from "@/components/speaking/CountdownOverlay";
@@ -46,7 +47,8 @@ interface SpeakingPracticeSessionProps {
 export function SpeakingPracticeSession({ task }: SpeakingPracticeSessionProps) {
   const {
     phase, secondsLeft, uploadProgress, start, selectedChoice, terminate,
-    exitRequested, cancelExit, confirmExit,
+    exitRequested, cancelExit, confirmExit, finishRecording,
+    uploadError, retryUpload,
   } = useSpeakingAttempt();
   const { setSelectedChoice } = usePracticeSessionStore();
 
@@ -126,6 +128,9 @@ export function SpeakingPracticeSession({ task }: SpeakingPracticeSessionProps) 
             promptText={task.prompt_text}
             taskNumber={task.task_number}
             taskTitle={taskTitle}
+            // Task 5's "RECORDING" phase is silent prep — no live mic — so
+            // the stop button only makes sense for non-Task-5 here.
+            onStop={task.task_number === 5 ? undefined : finishRecording}
           />
         );
 
@@ -154,11 +159,18 @@ export function SpeakingPracticeSession({ task }: SpeakingPracticeSessionProps) 
             promptText={task.prompt_text}
             taskNumber={task.task_number}
             taskTitle={taskTitle}
+            onStop={finishRecording}
           />
         );
 
       case "UPLOADING":
-        return <UploadProgressBar progress={uploadProgress} />;
+        return (
+          <UploadProgressBar
+            progress={uploadProgress}
+            error={uploadError}
+            onRetry={retryUpload}
+          />
+        );
 
       case "PROCESSING":
         return <ProcessingScreen skill="speaking" />;
@@ -173,8 +185,19 @@ export function SpeakingPracticeSession({ task }: SpeakingPracticeSessionProps) 
     }
   };
 
+  // Re-focus the screen wrapper every time `phase` changes. The `key={phase}`
+  // remount destroys the previously-focused element; without this, keyboard
+  // and SR users would land on the document body with no announcement of the
+  // new screen.
+  const focusRef = useFocusOnChange<HTMLDivElement>(phase);
+
   return (
-    <div className="flex flex-col flex-1" key={phase}>
+    <div
+      key={phase}
+      ref={focusRef}
+      tabIndex={-1}
+      className="flex flex-col flex-1 focus:outline-none"
+    >
       <div className="animate-fade-in flex flex-col flex-1">
         {renderScreen()}
       </div>

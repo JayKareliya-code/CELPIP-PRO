@@ -95,6 +95,7 @@ export function TosGateModal({ tosVersion, tosAcceptedAt }: TosGateModalProps) {
           <Link
             href="/terms"
             target="_blank"
+            rel="noopener noreferrer"
             className="text-amber-400 underline underline-offset-2 hover:text-amber-300 transition-colors"
           >
             Full Terms of Service ↗
@@ -102,6 +103,7 @@ export function TosGateModal({ tosVersion, tosAcceptedAt }: TosGateModalProps) {
           <Link
             href="/privacy"
             target="_blank"
+            rel="noopener noreferrer"
             className="text-amber-400 underline underline-offset-2 hover:text-amber-300 transition-colors"
           >
             Privacy Policy ↗
@@ -119,11 +121,11 @@ export function TosGateModal({ tosVersion, tosAcceptedAt }: TosGateModalProps) {
           />
           <span className="text-sm text-gray-300 leading-relaxed">
             I have read and agree to the{" "}
-            <Link href="/terms" target="_blank" className="text-amber-400 underline hover:text-amber-300">
+            <Link href="/terms" target="_blank" rel="noopener noreferrer" className="text-amber-400 underline hover:text-amber-300">
               Terms of Service
             </Link>{" "}
             and{" "}
-            <Link href="/privacy" target="_blank" className="text-amber-400 underline hover:text-amber-300">
+            <Link href="/privacy" target="_blank" rel="noopener noreferrer" className="text-amber-400 underline hover:text-amber-300">
               Privacy Policy
             </Link>
             .

@@ -33,14 +33,17 @@ export function LockedSection({ title, description }: Props) {
         </div>
       </div>
 
-      {/* Frosted overlay */}
+      {/* Frosted overlay. Body copy uses text-white/70 (not text-subtle which
+          is ~text-white/55) over the ~80% black backdrop so the measured
+          contrast clears WCAG AA's 4.5:1 minimum for body text. The lock
+          icon stroke is bumped to white/60 for the same reason. */}
       <div className="absolute inset-0 flex flex-col items-center justify-center bg-[#0e0e0e]/80 backdrop-blur-[2px]">
         <div className="flex flex-col items-center gap-2 px-6 text-center">
           <div className="flex h-9 w-9 items-center justify-center rounded-full border border-border bg-surface">
-            <Lock className="h-4 w-4 text-subtle" />
+            <Lock className="h-4 w-4 text-white/60" aria-hidden="true" />
           </div>
-          <p className="text-sm font-semibold text-foreground">{title}</p>
-          <p className="text-xs text-subtle leading-relaxed max-w-xs">{description}</p>
+          <p className="text-sm font-semibold text-white">{title}</p>
+          <p className="text-xs text-white/70 leading-relaxed max-w-xs">{description}</p>
         </div>
       </div>
     </div>

@@ -51,12 +51,22 @@
 
   html {
     overflow-x: hidden;
+    scroll-behavior: smooth;
+    /* Anchor jumps (e.g. "See Plans" → #pricing) clear the sticky navbar (h-14). */
+    scroll-padding-top: 4.5rem;
   }
 
   h1 { @apply text-3xl font-bold tracking-tight; }
   h2 { @apply text-2xl font-bold tracking-tight; }
   h3 { @apply text-xl font-semibold tracking-tight; }
   h4 { @apply text-lg font-semibold; }
+
+  /* Visible keyboard focus for interactive elements that don't define their own
+     (WCAG 2.4.7). Components using focus-visible:outline-none keep their own ring. */
+  :focus-visible {
+    outline: 2px solid hsl(var(--ring) / 0.85);
+    outline-offset: 2px;
+  }
 }
 
 /* ── Band score colour utilities ─────────────────────────────────────────── */
@@ -115,4 +125,28 @@
 @keyframes mic-idle {
   from { height: 4px;  }
   to   { height: 16px; }
+}
+
+/* ── prefers-reduced-motion ───────────────────────────────────────────────── */
+/*
+ * Respect the user's OS-level "Reduce motion" setting (WCAG 2.3.3).
+ *
+ * This neutralises every animation and transition globally rather than asking
+ * each component to opt in. The pulsing REC indicator, mic pulse ring,
+ * countdown bounce, score-gauge rAF sweep, processing-screen dots, and the
+ * tw-animate-css/Tailwind animation utilities all collapse to a single,
+ * immediately-resolved frame — preserving the final visual state without the
+ * motion that triggers vestibular disorders.
+ *
+ * scroll-behavior: auto disables smooth-scroll for the same reason.
+ */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration:        0.01ms !important;
+    animation-iteration-count: 1      !important;
+    transition-duration:       0.01ms !important;
+    scroll-behavior:           auto   !important;
+  }
 }

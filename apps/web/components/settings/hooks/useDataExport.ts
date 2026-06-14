@@ -53,8 +53,15 @@ export function useDataExport(): UseDataExportReturn {
         if (data.status === "complete" || data.status === "failed") {
           clearInterval(pollRef.current!);
         }
-      } catch {
+      } catch (err) {
+        // Polling stopped — surface the error rather than silently leaving
+        // the UI on "pending" forever. The user needs SOMETHING to act on.
         clearInterval(pollRef.current!);
+        setError(
+          err instanceof Error
+            ? err.message
+            : "Lost connection to the export job. Refresh to check status.",
+        );
       }
     }, 5_000);
 

@@ -68,26 +68,12 @@ export function useBilling() {
       refetchOnWindowFocus: true,
     });
 
-  // ── Start checkout ─────────────────────────────────────────────────────────
-
-  const checkoutMutation = useMutation({
-    mutationFn: async (plan: BillingPlan) => {
-      const token = await getToken();
-      return api.post<{ checkout_url: string }>(
-        `${API_V1}/billing/checkout`,
-        {
-          items:      [{ id: plan, type: "plan", quantity: 1, metadata: { plan_slug: plan } }],
-          promo_code: null,
-        },
-        { headers: authHeaders(token) },
-      );
-    },
-    onSuccess: ({ checkout_url }) => {
-      window.location.href = checkout_url;
-    },
-  });
-
   // ── Open customer portal ───────────────────────────────────────────────────
+  // Note: the previous `startCheckout(plan)` shortcut was removed to eliminate
+  // a duplicate /billing/checkout entry point. All checkout flows now go
+  // through `useCreateCheckoutSession`, which carries the re-entry guard and
+  // idempotency key. Plan-upgrade callers should call createCheckoutSession
+  // with a single `buildPlanCartItem("pro")` item.
 
   const portalMutation = useMutation({
     mutationFn: async () => {
@@ -122,9 +108,6 @@ export function useBilling() {
   return {
     billingStatus,
     statusLoading,
-    startCheckout:  checkoutMutation.mutate,
-    isCheckingOut:  checkoutMutation.isPending,
-    checkoutError:  checkoutMutation.error,
     openPortal:     portalMutation.mutate,
     isOpeningPortal: portalMutation.isPending,
     refreshAfterPayment,

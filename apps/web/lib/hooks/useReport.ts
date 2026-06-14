@@ -28,10 +28,14 @@ export interface UseReportReturn {
  * Cached indefinitely (staleTime: Infinity) because reports are immutable.
  */
 export function useReport(attemptId: string): UseReportReturn {
-  const { getToken } = useAuth();
+  const { getToken, userId } = useAuth();
 
   const { data, isLoading, isError } = useQuery<ReportResponse>({
-    queryKey: ["report", attemptId],
+    // Scope by userId for symmetry with the other auth-protected queries.
+    // Attempt IDs are server-side unique so collision is practically zero,
+    // but AuthCacheGuard's user-switch clear has a one-render race; this
+    // closes it. See useCurrentUser for the canonical pattern.
+    queryKey: ["report", userId ?? "anonymous", attemptId],
 
     queryFn: async () => {
       const token = await getToken();
@@ -41,7 +45,7 @@ export function useReport(attemptId: string): UseReportReturn {
       );
     },
 
-    enabled: !!attemptId,
+    enabled: !!attemptId && !!userId,
     staleTime: Infinity,  // reports are immutable — never re-fetch
     retry: 2,
   });

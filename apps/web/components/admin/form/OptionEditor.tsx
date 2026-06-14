@@ -15,6 +15,7 @@
 "use client";
 
 import { useCallback, useId, useMemo, useRef, useState } from "react";
+import Image from "next/image";
 import { ImageIcon, Plus, Trash2, UploadCloud, X } from "lucide-react";
 import { useAuth }       from "@clerk/nextjs";
 import { Field }         from "@/components/admin/shared/Field";
@@ -231,8 +232,14 @@ export function OptionEditor({ fieldName, label, initial, slot }: OptionEditorPr
             {/* Preview */}
             {previewUrl ? (
               <div className="relative rounded-lg overflow-hidden border border-border bg-muted h-28">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={previewUrl} alt="Option preview" className="w-full h-full object-cover" />
+                <Image
+                  src={previewUrl}
+                  alt="Option preview"
+                  fill
+                  sizes="(max-width: 768px) 50vw, 200px"
+                  className="object-cover"
+                />
+                {/* spacer to keep flex layout below working */}
                 <div className="absolute top-1.5 right-1.5 flex gap-1">
                   <span className="bg-black/60 text-white text-[10px] px-2 py-0.5 rounded-full">
                     {uploadState === "done" ? "Uploaded ✓" : "Saved"}

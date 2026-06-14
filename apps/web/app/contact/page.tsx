@@ -13,7 +13,7 @@ import {
   Wrench,
   BookOpen,
 } from "lucide-react";
-import { useState } from "react";
+import { useId, useState } from "react";
 
 // ── Static FAQ data ────────────────────────────────────────────────────────────
 
@@ -205,6 +205,7 @@ export default function ContactPage() {
 
 function FaqItem({ question, answer }: { question: string; answer: string }) {
   const [open, setOpen] = useState(false);
+  const panelId = useId(); // unique per-instance for the aria-controls link
 
   return (
     <div className="rounded-xl border border-white/[0.07] bg-white/[0.02] overflow-hidden transition-colors hover:border-white/[0.12]">
@@ -212,16 +213,23 @@ function FaqItem({ question, answer }: { question: string; answer: string }) {
         onClick={() => setOpen((p) => !p)}
         className="w-full flex items-center justify-between gap-4 px-5 py-4 text-left"
         aria-expanded={open}
+        aria-controls={panelId}
       >
         <span className="text-sm font-medium text-white/80">{question}</span>
         <ChevronDown
+          aria-hidden="true"
           className={`h-4 w-4 shrink-0 text-white/30 transition-transform duration-200 ${
             open ? "rotate-180 text-amber-400" : ""
           }`}
         />
       </button>
       {open && (
-        <div className="px-5 pb-4 text-sm text-white/55 leading-relaxed border-t border-white/[0.05] pt-3">
+        <div
+          id={panelId}
+          role="region"
+          aria-label={question}
+          className="px-5 pb-4 text-sm text-white/55 leading-relaxed border-t border-white/[0.05] pt-3"
+        >
           {answer}
         </div>
       )}

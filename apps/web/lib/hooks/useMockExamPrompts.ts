@@ -69,10 +69,13 @@ export interface UseMockExamPromptsReturn {
 }
 
 export function useMockExamPrompts(slotNumber: number): UseMockExamPromptsReturn {
-  const { getToken } = useAuth();
+  const { getToken, userId } = useAuth();
 
   const { data, isLoading, error } = useQuery<MockExamPrompt[], Error>({
-    queryKey: ["mockExamPrompts", slotNumber],
+    // Scope by userId for consistency with the rest of the auth-protected
+    // hooks. The prompts themselves are the same across users, but having
+    // a uniform key shape keeps invalidation/clearing patterns symmetric.
+    queryKey: ["mockExamPrompts", userId ?? "anonymous", slotNumber],
 
     queryFn: async (): Promise<MockExamPrompt[]> => {
       // ── Mock / dev mode ────────────────────────────────────────────────────

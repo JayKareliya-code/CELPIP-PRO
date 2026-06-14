@@ -41,7 +41,7 @@ export function SubscriptionTab() {
           {plan !== "pro" && (
             <Link
               href="/billing"
-              className="shrink-0 inline-flex items-center gap-1.5 rounded-xl bg-amber-500 hover:bg-amber-400 px-4 py-2 text-sm font-semibold text-black transition-colors"
+              className="shrink-0 inline-flex items-center gap-1.5 rounded-xl bg-primary hover:bg-primary-hover px-4 py-2 text-sm font-semibold text-primary-foreground transition-colors"
             >
               Upgrade <ChevronRight className="w-3.5 h-3.5" />
             </Link>
@@ -56,7 +56,7 @@ export function SubscriptionTab() {
       >
         <Link
           href="/billing"
-          className="flex items-center justify-between rounded-xl border border-white/[0.08] bg-white/[0.03] px-4 py-3 text-sm text-white/60 hover:text-white/90 hover:border-amber-500/20 hover:bg-amber-500/[0.04] transition-all duration-150"
+          className="flex items-center justify-between rounded-xl border border-white/[0.08] bg-white/[0.03] px-4 py-3 text-sm text-white/60 hover:text-white/90 hover:border-primary/20 hover:bg-primary/[0.04] transition-all duration-150"
         >
           <span className="font-medium">View billing &amp; payment history</span>
           <ChevronRight className="w-4 h-4 shrink-0" />

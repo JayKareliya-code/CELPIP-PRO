@@ -28,10 +28,13 @@ export function useDashboardStats(): {
   data:      DashboardStats | undefined;
   isLoading: boolean;
 } {
-  const { getToken } = useAuth();
+  const { getToken, userId, isSignedIn } = useAuth();
 
   return useQuery<DashboardStats>({
-    queryKey: ["dashboard-stats"],
+    // Scope by userId — otherwise the brief window between sign-in and the
+    // AuthCacheGuard queryClient.clear() could surface the previous user's
+    // band scores. Same pattern as useCurrentUser.
+    queryKey: ["dashboard-stats", userId ?? "anonymous"],
 
     queryFn: async (): Promise<DashboardStats> => {
       if (USE_MOCK) return MOCK_STATS;
@@ -57,5 +60,6 @@ export function useDashboardStats(): {
     },
 
     staleTime: 60_000, // 1 min — a new attempt invalidates via useHistory
+    enabled: USE_MOCK || (!!isSignedIn && !!userId),
   });
 }

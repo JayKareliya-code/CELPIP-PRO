@@ -8,11 +8,13 @@ import { PlanCard } from "@/components/billing/PlanCard";
 import { AddonRow } from "@/components/billing/AddonRow";
 import { BillingFAQ } from "@/components/billing/BillingFAQ";
 import { SuccessHandler } from "@/components/billing/SuccessHandler";
-import { BillingCartPanel } from "@/components/billing/BillingCartPanel";
 import { PLANS } from "@/components/billing/PlanGrid";
 import { ADDONS } from "@/components/billing/AddonGrid";
 import { useCurrentUser } from "@/lib/hooks/useCurrentUser";
-import { useBilling } from "@/lib/hooks/useBilling";
+import {
+  useCreateCheckoutSession,
+  buildPlanCartItem,
+} from "@/lib/hooks/useCreateCheckoutSession";
 import { useBillingCartStore } from "@/store/billingCartStore";
 import type { BillingPlan } from "@/lib/hooks/useBilling";
 import type { UserPlan } from "@/lib/types";
@@ -27,7 +29,8 @@ interface BillingPageClientProps {
 
 export function BillingPageClient({ success, canceled, planParam, addonOnly = false }: BillingPageClientProps) {
   const { user, isLoading: userLoading } = useCurrentUser();
-  const { startCheckout } = useBilling();
+  // Single checkout entry point — see useCreateCheckoutSession header note.
+  const { createCheckoutSession, isPending: isCheckingOut } = useCreateCheckoutSession();
 
   const [checkingOutPlan, setCheckingOutPlan] = useState<BillingPlan | null>(null);
   const currentPlan: UserPlan = (user?.plan ?? "starter") as UserPlan;
@@ -35,14 +38,21 @@ export function BillingPageClient({ success, canceled, planParam, addonOnly = fa
   const addItem = useBillingCartStore((s) => s.addItem);
 
   const handleUpgrade = (plan: BillingPlan) => {
+    if (isCheckingOut) return;          // belt: ignore rapid duplicate clicks
     setCheckingOutPlan(plan);
-    startCheckout(plan, {
-      onError: (err: unknown) => {
-        setCheckingOutPlan(null);
-        const msg = err instanceof Error ? err.message : "Something went wrong. Please try again.";
-        toast.error("Checkout failed", { description: msg });
+    createCheckoutSession(
+      {
+        items:      [buildPlanCartItem(plan)],
+        promo_code: null,
       },
-    });
+      {
+        onError: (err: unknown) => {
+          setCheckingOutPlan(null);
+          const msg = err instanceof Error ? err.message : "Something went wrong. Please try again.";
+          toast.error("Checkout failed", { description: msg });
+        },
+      },
+    );
   };
 
   const handleAddToCart = (item: Omit<CartItem, "quantity">) => {

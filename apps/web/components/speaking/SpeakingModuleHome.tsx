@@ -89,7 +89,6 @@ export function SpeakingModuleHome({ tasks }: SpeakingModuleHomeProps) {
   // Plan-level quota (null taskNumber = overview mode).
   const {
     effectiveLimit: planAttemptsLimit,
-    plan,
     isLoading,
   } = useSpeakingQuota(null);
 

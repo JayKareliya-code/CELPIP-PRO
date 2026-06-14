@@ -48,20 +48,20 @@ export function LockedBlurOverlay({
       <div className="absolute inset-0 flex flex-col items-center justify-center bg-[#0a0a0a]/60 backdrop-blur-[1px]">
         <div className="flex flex-col items-center gap-3 px-6 text-center">
           {/* Lock badge */}
-          <div className="flex h-10 w-10 items-center justify-center rounded-full border border-amber-500/30 bg-amber-500/10 shadow-[0_0_20px_rgba(245,158,11,0.15)]">
-            <Lock className="h-4.5 w-4.5 text-amber-400" />
+          <div className="flex h-10 w-10 items-center justify-center rounded-full border border-primary/30 bg-primary/10 shadow-[0_0_20px_rgba(200,150,62,0.15)]">
+            <Lock className="h-4.5 w-4.5 text-primary" />
           </div>
 
           {/* Label */}
           <div>
             <p className="text-sm font-semibold text-white/90">{label}</p>
-            <p className="text-xs text-white/40 mt-0.5">Upgrade to Pro to unlock</p>
+            <p className="text-xs text-white/70 mt-0.5">Upgrade to Pro to unlock</p>
           </div>
 
           {/* CTA */}
           <Link
             href="/billing"
-            className="inline-flex items-center gap-1.5 rounded-lg bg-amber-500/90 hover:bg-amber-400 px-4 py-1.5 text-xs font-semibold text-black transition-colors"
+            className="inline-flex items-center gap-1.5 rounded-lg bg-primary/90 hover:bg-primary-hover px-4 py-1.5 text-xs font-semibold text-primary-foreground transition-colors"
           >
             Upgrade → Pro
           </Link>

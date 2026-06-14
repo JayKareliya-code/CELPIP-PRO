@@ -38,7 +38,7 @@ export function SettingsNav({ active, onChange }: SettingsNavProps) {
               isActive
                 ? isDanger
                   ? "bg-red-500/10 border border-red-500/20 text-red-400"
-                  : "bg-amber-500/10 border border-amber-500/20 text-amber-400"
+                  : "bg-primary/10 border border-primary/20 text-primary"
                 : isDanger
                   ? "border border-transparent text-white/40 hover:text-red-400/80 hover:bg-red-500/[0.06]"
                   : "border border-transparent text-white/40 hover:text-white/80 hover:bg-white/[0.04]",

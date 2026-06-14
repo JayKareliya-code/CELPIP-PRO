@@ -48,10 +48,11 @@ export interface UseHistoryReturn {
  * @param page   1-indexed page number (default: 1).
  */
 export function useHistory(skill: Skill | null, page: number): UseHistoryReturn {
-  const { getToken } = useAuth();
+  const { getToken, userId, isSignedIn } = useAuth();
 
   const { data, isLoading, isError } = useQuery<PaginatedHistory>({
-    queryKey: ["history", skill, page],
+    // Scope by userId — see useCurrentUser for rationale.
+    queryKey: ["history", userId ?? "anonymous", skill, page],
 
     queryFn: async () => {
       if (USE_MOCK) {
@@ -69,6 +70,7 @@ export function useHistory(skill: Skill | null, page: number): UseHistoryReturn 
 
     placeholderData: keepPreviousData,  // keep previous page visible while fetching next
     staleTime: 30_000,                  // 30 s — history changes infrequently
+    enabled: USE_MOCK || (!!isSignedIn && !!userId),
   });
 
   return { history: data, isLoading, isError };

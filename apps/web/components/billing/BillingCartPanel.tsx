@@ -10,6 +10,7 @@ import {
   selectSubtotal,
   selectTotal,
   formatCAD,
+  isPromoFresh,
 } from "@/store/billingCartStore";
 import { useCreateCheckoutSession } from "@/lib/hooks/useCreateCheckoutSession";
 import { toast } from "sonner";
@@ -20,12 +21,14 @@ interface BillingCartPanelProps {
 }
 
 export function BillingCartPanel({ embedded = false }: BillingCartPanelProps) {
-  const items         = useBillingCartStore((s) => s.items);
-  const promoCode     = useBillingCartStore((s) => s.promoCode);
-  const promoDiscount = useBillingCartStore((s) => s.promoDiscount);
-  const increaseQty   = useBillingCartStore((s) => s.increaseQty);
-  const decreaseQty   = useBillingCartStore((s) => s.decreaseQty);
-  const removeItem    = useBillingCartStore((s) => s.removeItem);
+  const items          = useBillingCartStore((s) => s.items);
+  const promoCode      = useBillingCartStore((s) => s.promoCode);
+  const promoDiscount  = useBillingCartStore((s) => s.promoDiscount);
+  const promoAppliedAt = useBillingCartStore((s) => s.promoAppliedAt);
+  const clearPromo     = useBillingCartStore((s) => s.clearPromo);
+  const increaseQty    = useBillingCartStore((s) => s.increaseQty);
+  const decreaseQty    = useBillingCartStore((s) => s.decreaseQty);
+  const removeItem     = useBillingCartStore((s) => s.removeItem);
 
   const subtotal        = selectSubtotal(items);
   const discountPercent = promoCode ? promoDiscount : 0;
@@ -37,6 +40,22 @@ export function BillingCartPanel({ embedded = false }: BillingCartPanelProps) {
 
   const handleCheckout = () => {
     if (!items.length) return;
+    if (isPending) return; // belt: ignore rapid duplicate clicks before disabled propagates
+
+    // Promo TTL: if the verdict is older than PROMO_TTL_MS, drop it and ask
+    // the user to re-apply. Stripe re-validates the code at session creation,
+    // so a stale verdict here would silently produce a price mismatch — the
+    // cart shows -20% but Stripe charges full price. Better to surface the
+    // expiry up-front than create a billing dispute.
+    if (!isPromoFresh({ promoCode, promoAppliedAt })) {
+      clearPromo();
+      toast.info("Promo code expired", {
+        description: "Please re-apply your code before checkout.",
+        duration: 5000,
+      });
+      return;
+    }
+
     createCheckoutSession(
       { items, promo_code: promoCode },
       {

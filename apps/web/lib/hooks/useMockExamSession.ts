@@ -13,8 +13,9 @@
 //   • Exposes a clean public interface consumed by MockExamShell.
 // ─────────────────────────────────────────────────────────────────────────────
 
-import { useEffect, useRef, useCallback } from "react";
+import { useEffect, useRef, useCallback, useState } from "react";
 import { useRouter }                      from "next/navigation";
+import { useAuth }                        from "@clerk/nextjs";
 import {
   useMockExamStore,
   type MockExamPhase,
@@ -57,12 +58,24 @@ export interface UseMockExamSessionReturn {
   /** Silent termination — stops mic + resets store without confirm dialog.
    *  Use in unmount effects (page navigation away). */
   terminate:        () => void;
+  /** Finish the current task's recording early (Stop button). No-op outside
+   *  the active recording phase (won't fire during Task 5 prep). */
+  finishRecording:  () => void;
+  /** True when exit was requested — shell renders the confirm modal. */
+  exitRequested:    boolean;
+  /** Cancel the exit (close modal). */
+  cancelExit:       () => void;
+  /** Confirm the exit (forceStop + reset + navigate). */
+  confirmExit:      () => void;
 }
 
 // ── Hook ──────────────────────────────────────────────────────────────────────
 
 export function useMockExamSession(): UseMockExamSessionReturn {
-  const router = useRouter();
+  const router       = useRouter();
+  const { userId }   = useAuth();
+  // Replaces window.confirm() — the shell renders a ConfirmModal.
+  const [exitRequested, setExitRequested] = useState(false);
 
   const {
     phase, tasks, currentIndex, secondsLeft, breakSecondsLeft,
@@ -255,9 +268,11 @@ export function useMockExamSession(): UseMockExamSessionReturn {
     // Fire beginLoading immediately so the shell shows ExamLoadingScreen.
     // loadExam is called on the next microtask so the LOADING phase is
     // actually rendered before the store transitions to READY.
-    beginLoading(slotNumber);
+    // Pass userId so the per-slot session UUID is keyed per user — without
+    // this, two users on the same browser tab would share an examSessionId.
+    beginLoading(slotNumber, userId ?? null);
     Promise.resolve().then(() => loadExam(prompts));
-  }, [beginLoading, loadExam]);
+  }, [beginLoading, loadExam, userId]);
 
   const startExam = useCallback(() => {
     storeStartExam();
@@ -267,15 +282,22 @@ export function useMockExamSession(): UseMockExamSessionReturn {
     setSelectedChoice(choice);
   }, [setSelectedChoice]);
 
+  /** Request exit — sets exitRequested flag. The shell renders a styled
+   *  ConfirmModal in response (no native window.confirm — see writing /
+   *  speaking flows for the same pattern). */
   const exit = useCallback(() => {
-    const confirmed = window.confirm(
-      "Are you sure you want to exit the exam? Your progress so far will not be scored."
-    );
-    if (confirmed) {
-      forceStop();
-      reset();
-      router.push("/mock-test/speaking");
-    }
+    setExitRequested(true);
+  }, []);
+
+  const cancelExit = useCallback(() => {
+    setExitRequested(false);
+  }, []);
+
+  const confirmExit = useCallback(() => {
+    setExitRequested(false);
+    forceStop();
+    reset();
+    router.push("/mock-test/speaking");
   }, [forceStop, reset, router]);
 
   // Silent teardown — no confirm dialog, no navigation. Used by the shell's
@@ -284,6 +306,20 @@ export function useMockExamSession(): UseMockExamSessionReturn {
     forceStop();
     reset();
   }, [forceStop, reset]);
+
+  /** Finish the current task's recording early. Only valid while the mic is
+   *  actually live (TASK_RECORDING for non-Task-5, TASK_RECORDING_PART2 for
+   *  Task 5). No-op in any other phase so a stray click can't skip prep or
+   *  break a partial Task 5 setup. */
+  const finishRecording = useCallback(() => {
+    const state    = useMockExamStore.getState();
+    const isTask5  = currentTask?.taskNumber === 5;
+    const recording =
+      (state.phase === "TASK_RECORDING"       && !isTask5) ||
+      (state.phase === "TASK_RECORDING_PART2" &&  isTask5);
+    if (!recording) return;
+    advanceTaskPhase();
+  }, [advanceTaskPhase, currentTask?.taskNumber]);
 
   return {
     phase,
@@ -302,5 +338,9 @@ export function useMockExamSession(): UseMockExamSessionReturn {
     selectChoice,
     exit,
     terminate,
+    finishRecording,
+    exitRequested,
+    cancelExit,
+    confirmExit,
   };
 }

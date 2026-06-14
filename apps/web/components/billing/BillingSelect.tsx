@@ -63,7 +63,8 @@ export function BillingSelect({
   }, [disabled, options, value]);
 
   const toggleDropdown = useCallback(() => {
-    open ? close() : openDropdown();
+    if (open) close();
+    else      openDropdown();
   }, [open, close, openDropdown]);
 
   // ── Outside-click ─────────────────────────────────────────────────────────

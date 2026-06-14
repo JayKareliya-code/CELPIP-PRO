@@ -120,12 +120,12 @@ export function PracticeSkillCard({
         {/* ── Row 3: meta row ────────────────────────────────────────────── */}
         <div className="flex items-center gap-3 text-[11px] font-medium text-subtle mb-3">
           <span className="flex items-center gap-1">
-            <Clock className="w-3 h-3 text-amber-400/60" />
+            <Clock className="w-3 h-3 text-primary/60" />
             <span>Duration <span className="text-foreground/60">{meta.duration}</span></span>
           </span>
           <span className="w-px h-3 bg-white/10 self-center" />
           <span className="flex items-center gap-1">
-            <AlignLeft className="w-3 h-3 text-amber-400/60" />
+            <AlignLeft className="w-3 h-3 text-primary/60" />
             <span className="text-foreground/60">{meta.taskSummary}</span>
           </span>
         </div>
@@ -141,7 +141,7 @@ export function PracticeSkillCard({
                 ? `${quota.remaining} test${quota.remaining === 1 ? "" : "s"} remaining`
                 : "All tests used · retries available"}
             </span>
-            <ChevronRight className="w-4 h-4 text-white/30 group-hover:text-amber-400/70 transition-colors" />
+            <ChevronRight className="w-4 h-4 text-white/30 group-hover:text-primary/70 transition-colors" />
           </div>
         )}
       </div>

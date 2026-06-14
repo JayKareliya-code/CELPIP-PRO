@@ -30,7 +30,6 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@clerk/nextjs";
 import { useQuery } from "@tanstack/react-query";
-import { useState } from "react";
 import {
   Clock,
   Mic,
@@ -41,11 +40,6 @@ import {
   Timer,
   ImageIcon,
   Lock,
-  Check,
-  PenLine,
-  Sliders,
-  ShoppingCart,
-  ArrowRight,
 } from "lucide-react";
 import { BreadcrumbNav }    from "@/components/layout/BreadcrumbNav";
 import { MicPermissionNotice } from "@/components/speaking/MicPermissionNotice";
@@ -54,8 +48,6 @@ import { useSpeakingQuota } from "@/lib/hooks/useSpeakingQuota";
 import { cn }               from "@/lib/utils";
 import { formatShortDuration } from "@/lib/utils";
 import { API_V1, api, authHeaders } from "@/lib/api";
-import { useBillingCartStore } from "@/store/billingCartStore";
-import { toast }               from "sonner";
 import {
   SPEAKING_TASK_TITLES,
   SPEAKING_TASK_DESCRIPTIONS,

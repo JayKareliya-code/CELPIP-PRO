@@ -81,10 +81,11 @@ function buildMockData(page: number): PaginatedMockExamHistory {
 // ── Hook ──────────────────────────────────────────────────────────────────────
 
 export function useMockExamHistory(page: number) {
-  const { getToken } = useAuth();
+  const { getToken, userId, isSignedIn } = useAuth();
 
   const { data, isLoading, isError } = useQuery<PaginatedMockExamHistory>({
-    queryKey: ["mock-exam-history", page],
+    // Scope by userId — see useCurrentUser for rationale.
+    queryKey: ["mock-exam-history", userId ?? "anonymous", page],
 
     queryFn: async () => {
       if (USE_MOCK) {
@@ -101,6 +102,7 @@ export function useMockExamHistory(page: number) {
 
     placeholderData: keepPreviousData,
     staleTime: 30_000,
+    enabled: USE_MOCK || (!!isSignedIn && !!userId),
   });
 
   return { sessions: data, isLoading, isError };

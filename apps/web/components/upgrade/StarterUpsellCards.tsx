@@ -141,7 +141,7 @@ function BulletList({
   items: readonly string[];
   tone?: "default" | "amber";
 }) {
-  const textClass = tone === "amber" ? "text-amber-400/60" : "text-white/50";
+  const textClass = tone === "amber" ? "text-primary/60" : "text-white/50";
   return (
     <ul className="-mt-1 flex flex-col gap-1">
       {items.map((line, i) => (
@@ -170,16 +170,16 @@ function CardShell({
       className={[
         "group relative flex flex-col gap-3 rounded-2xl border p-4 overflow-hidden transition-all duration-200",
         amber
-          ? "border-amber-500/25 bg-[#111111] hover:border-amber-500/50 hover:shadow-[0_0_24px_rgba(200,150,62,0.10)]"
+          ? "border-primary/25 bg-[#111111] hover:border-primary/50 hover:shadow-[0_0_24px_rgba(200,150,62,0.10)]"
           : "border-white/[0.09] bg-[#111111] hover:border-white/[0.20]",
         className,
       ].join(" ")}
     >
       {amber && (
-        <div className="absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r from-transparent via-amber-400/50 to-transparent" />
+        <div className="absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r from-transparent via-primary/50 to-transparent" />
       )}
       {amber && (
-        <div className="absolute inset-x-0 top-0 h-20 bg-gradient-to-b from-amber-500/[0.06] to-transparent pointer-events-none" />
+        <div className="absolute inset-x-0 top-0 h-20 bg-gradient-to-b from-primary/[0.06] to-transparent pointer-events-none" />
       )}
       {children}
     </div>
@@ -251,8 +251,8 @@ function ProUpgradeCard() {
       {/* Top row */}
       <div className="flex items-center justify-between gap-2">
         <div className="flex items-center gap-2 min-w-0">
-          <div className="w-7 h-7 rounded-lg border border-amber-500/25 bg-amber-500/10 flex items-center justify-center shrink-0">
-            <Rocket className="w-3.5 h-3.5 text-amber-400" />
+          <div className="w-7 h-7 rounded-lg border border-primary/25 bg-primary/10 flex items-center justify-center shrink-0">
+            <Rocket className="w-3.5 h-3.5 text-primary" />
           </div>
           <span className="text-base font-semibold text-amber-100 leading-tight truncate">
             Upgrade to Pro
@@ -260,7 +260,7 @@ function ProUpgradeCard() {
         </div>
         <div className="flex items-baseline gap-0.5 shrink-0">
           <span className="text-lg font-bold text-amber-100 tabular-nums">$9.99</span>
-          <span className="text-[10px] text-amber-400/50 ml-0.5">CAD</span>
+          <span className="text-[10px] text-primary/50 ml-0.5">CAD</span>
         </div>
       </div>
 

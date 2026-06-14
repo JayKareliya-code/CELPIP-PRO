@@ -52,6 +52,13 @@ export interface UseSpeakingAttemptReturn {
   /** Silent termination — stops mic + resets store without confirm dialog.
    *  Use in unmount effects (page navigation away). */
   terminate:        () => void;
+  /** Finish the recording early (Stop button). No-op outside the active
+   *  recording phase, so a stale button click can't corrupt prep / Task 5
+   *  curveball flow. */
+  finishRecording:  () => void;
+  /** Retry the upload pipeline after a transient network failure. Reuses
+   *  the in-memory blob — no re-record required. */
+  retryUpload:      () => void;
 }
 
 // ── Hook ──────────────────────────────────────────────────────────────────────
@@ -66,6 +73,10 @@ export function useSpeakingAttempt(): UseSpeakingAttemptReturn {
     selectedChoice,
     reset,
   } = usePracticeSessionStore();
+  // Note: the current recordingBlob is read inside retryUpload via
+  // `usePracticeSessionStore.getState().recordingBlob`. We deliberately do
+  // NOT subscribe to it here — subscribing would re-render the consumer on
+  // every blob update during recording, which is wasteful.
 
   // Stable refs so interval callbacks always read fresh state without stale closure
   const phaseRef = useRef(phase);
@@ -245,9 +256,42 @@ export function useSpeakingAttempt(): UseSpeakingAttemptReturn {
     reset();
   }, [forceStop, reset]);
 
+  /** Retry the upload pipeline after a failure. The previously-recorded blob
+   *  is still in the store (we never null it on error), so a retry can use
+   *  it directly instead of asking the user to re-record. No-op if there's
+   *  no blob to retry or no current task. */
+  const retryUpload = useCallback(() => {
+    const blob = usePracticeSessionStore.getState().recordingBlob;
+    const t    = taskRef.current;
+    if (!blob || !t) return;
+    runUploadPipeline(blob, mimeTypeRef.current || "audio/webm");
+  }, [runUploadPipeline, mimeTypeRef]);
+
+  /** Finish the recording early. Only valid while the mic is actually live
+   *  (RECORDING for non-Task-5, RECORDING_PART2 for Task 5). A no-op in any
+   *  other phase so a stale button click can't skip prep or break a partial
+   *  Task 5 setup. The phase advance triggers the same UPLOADING transition
+   *  the timer would have produced at zero. */
+  const finishRecording = useCallback(() => {
+    const currentPhase = usePracticeSessionStore.getState().phase;
+    const isTask5      = taskRef.current?.task_number === 5;
+    const recording =
+      (currentPhase === "RECORDING"        && !isTask5) ||
+      (currentPhase === "RECORDING_PART2"  &&  isTask5);
+    if (!recording) return;
+    // Inline the tick-interval clear instead of calling clearTick(): the
+    // function is re-created every render (it's not a useCallback), so
+    // including it in deps would invalidate this useCallback on every render.
+    if (tickIntervalRef.current) {
+      clearInterval(tickIntervalRef.current);
+      tickIntervalRef.current = null;
+    }
+    advancePhase();
+  }, [advancePhase]);
+
   return {
     phase, secondsLeft, uploadProgress, attemptId, uploadError, selectedChoice,
     exitRequested, cancelExit, confirmExit,
-    start, exit, terminate,
+    start, exit, terminate, finishRecording, retryUpload,
   };
 }

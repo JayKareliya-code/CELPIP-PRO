@@ -115,7 +115,7 @@ export function TranscriptAnalysisCard({ transcript, taskDurationS }: Props) {
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <BarChart2 className="h-4 w-4 text-white/40" />
-          <h3 className="text-xs font-bold uppercase tracking-wider text-white/40">Speech Analytics</h3>
+          <h2 className="text-xs font-bold uppercase tracking-wider text-white/40">Speech Analytics</h2>
         </div>
       </div>
 

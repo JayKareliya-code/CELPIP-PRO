@@ -22,9 +22,9 @@ export function ReportUpgradeCTA() {
         <p className="text-xs font-semibold uppercase tracking-wider text-subtle mb-1">
           Unlock Full Report
         </p>
-        <h3 className="text-lg font-bold text-foreground">
+        <h2 className="text-lg font-bold text-foreground">
           You&rsquo;re seeing the Starter summary
-        </h3>
+        </h2>
         <p className="mt-1 text-sm text-subtle leading-relaxed">
           Pro gives you the complete coaching report — rubric breakdown, feedback
           panels, improvement plan, and a sample response tuned to your target band.

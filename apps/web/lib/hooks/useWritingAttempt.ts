@@ -53,11 +53,18 @@ export interface UseWritingAttemptReturn {
   setContent: (html: string, plainText: string) => void;
   /** Manual submit — transitions WRITING → SUBMITTING. */
   submit: () => void;
-  /** Exit: resets state and navigates back. Caller must confirm first. */
+  /** Request exit — sets exitRequested. The session component renders a
+   *  ConfirmModal in response (no native window.confirm). */
   exit: () => void;
   /** Silent termination — clears timers + session storage without navigating.
    *  Use in unmount effects (page navigation away). */
   terminate: () => void;
+  /** True when exit was requested — session renders the confirm modal. */
+  exitRequested: boolean;
+  /** Cancel the exit (close modal). */
+  cancelExit: () => void;
+  /** Confirm the exit (clear draft + navigate back). */
+  confirmExit: () => void;
 }
 
 // ── Session persistence helpers ───────────────────────────────────────────────
@@ -100,10 +107,14 @@ export function useWritingAttempt(): UseWritingAttemptReturn {
   const router       = useRouter();
   const { getToken } = useAuth();
 
-  const [phase,       setPhase]       = useState<WritingPhase>("IDLE");
-  const [secondsLeft, setSecondsLeft] = useState(0);
-  const [wordCount,   setWordCount]   = useState(0);
-  const [submitError, setSubmitError] = useState<string | null>(null);
+  const [phase,         setPhase]         = useState<WritingPhase>("IDLE");
+  const [secondsLeft,   setSecondsLeft]   = useState(0);
+  const [wordCount,     setWordCount]     = useState(0);
+  const [submitError,   setSubmitError]   = useState<string | null>(null);
+  // Replaces window.confirm() for the exit flow. The session component
+  // watches `exitRequested` and renders a styled ConfirmModal; the user's
+  // choice fires cancelExit / confirmExit. Same pattern as useSpeakingAttempt.
+  const [exitRequested, setExitRequested] = useState(false);
 
   // Refs — stable across re-renders, safe inside interval callbacks
   const taskRef        = useRef<WritingTask | null>(null);
@@ -321,11 +332,18 @@ export function useWritingAttempt(): UseWritingAttemptReturn {
     goToPhase("SUBMITTING");
   }, [clearAll, goToPhase]);
 
+  /** Request exit — sets exitRequested flag. The session component renders
+   *  a styled ConfirmModal in response (no native window.confirm). */
   const exit = useCallback(() => {
-    const confirmed = window.confirm(
-      "Are you sure you want to leave? Your writing session will end and unsaved progress may be lost."
-    );
-    if (!confirmed) return;
+    setExitRequested(true);
+  }, []);
+
+  const cancelExit = useCallback(() => {
+    setExitRequested(false);
+  }, []);
+
+  const confirmExit = useCallback(() => {
+    setExitRequested(false);
     const task = taskRef.current;
     if (task) clearSession(task.id);
     clearAll();
@@ -340,5 +358,9 @@ export function useWritingAttempt(): UseWritingAttemptReturn {
     clearAll();
   }, [clearAll]);
 
-  return { phase, secondsLeft, wordCount, submitError, start, setContent, submit, exit, terminate };
+  return {
+    phase, secondsLeft, wordCount, submitError,
+    start, setContent, submit, exit, terminate,
+    exitRequested, cancelExit, confirmExit,
+  };
 }

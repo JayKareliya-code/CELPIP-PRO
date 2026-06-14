@@ -10,6 +10,7 @@
 // ─────────────────────────────────────────────────────────────────────────────
 
 import { useEffect, useRef, useState } from "react";
+import Image                           from "next/image";
 import { ImageIcon, UploadCloud, X }   from "lucide-react";
 import { useAuth }                     from "@clerk/nextjs";
 import { Field }                       from "@/components/admin/shared/Field";
@@ -437,11 +438,12 @@ export function SpeakingFormFields({ initial, taskNumber }: Props) {
             {/* Preview — always uses presigned URL, never the raw public_url */}
             {previewUrl ? (
               <div className="relative rounded-lg overflow-hidden border border-border bg-muted h-36">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
+                <Image
                   src={previewUrl}
                   alt="Scene preview"
-                  className="w-full h-full object-cover"
+                  fill
+                  sizes="(max-width: 768px) 100vw, 600px"
+                  className="object-cover"
                 />
                 <div className="absolute top-2 right-2 flex gap-1.5">
                   <span className="bg-black/60 text-white text-[10px] px-2 py-0.5 rounded-full">

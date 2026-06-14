@@ -11,12 +11,19 @@
 "use client";
 
 import { useRef }   from "react";
-import { useAuth }  from "@clerk/nextjs";
+import { useAuth, useUser }  from "@clerk/nextjs";
 import { useQuery } from "@tanstack/react-query";
 import { ATTEMPT_POLL_INTERVAL_MS }          from "@/lib/constants";
 import { USE_MOCK, API_V1, api, authHeaders } from "@/lib/api";
 import type { AttemptStatusResponse }         from "@/lib/types";
 import { MOCK_RECENT_ATTEMPTS }               from "@/lib/mockData";
+
+/** Maximum total polling duration before we stop hammering the API.
+ *  At a 3 s interval this is ~120 requests per tab, plenty to absorb a
+ *  normal AI scoring pipeline (typically 30–90 s) while protecting the
+ *  backend if a worker truly wedges. After this expires the hook stops
+ *  polling and surfaces `isFailed: true` so the UI can show a recovery CTA. */
+const MAX_POLL_DURATION_MS = 6 * 60 * 1000; // 6 minutes
 
 // ── Mock resolver ──────────────────────────────────────────────────────────────
 
@@ -65,9 +72,14 @@ export interface UseAttemptStatusReturn {
 export function useAttemptStatus(attemptId: string): UseAttemptStatusReturn {
   const startedAtRef = useRef<number>(Date.now());
   const { getToken } = useAuth();
+  // userId scopes the cache so two users on the same machine can't see each
+  // other's in-flight attempt status, even in the brief window before
+  // AuthCacheGuard clears caches on user switch.
+  const { user: clerkUser } = useUser();
+  const userId = clerkUser?.id ?? null;
 
   const { data, isLoading, isError } = useQuery<AttemptStatusResponse>({
-    queryKey: ["attempt-status", attemptId],
+    queryKey: ["attempt-status", userId ?? "anonymous", attemptId],
 
     queryFn: async () => {
       if (USE_MOCK || attemptId.startsWith("mock-")) {
@@ -83,17 +95,30 @@ export function useAttemptStatus(attemptId: string): UseAttemptStatusReturn {
     refetchInterval: (query) => {
       const status = query.state.data?.status;
       if (status === "complete" || status === "failed") return false;
+      // Stop polling after MAX_POLL_DURATION_MS — protects the backend from
+      // an infinite loop if a worker is wedged, and gives the UI a chance to
+      // render the "still processing — refresh later" recovery state.
+      if (Date.now() - startedAtRef.current > MAX_POLL_DURATION_MS) return false;
       return ATTEMPT_POLL_INTERVAL_MS;
     },
 
     staleTime: 0,
   });
 
+  // Treat an exhausted poll window as a soft-failure so the UI can render
+  // a recovery affordance. We do NOT mutate the server-reported status
+  // (still "processing") — just synthesize the boolean for consumers.
+  const exhausted = !data?.status || (
+    data.status !== "complete" &&
+    data.status !== "failed"   &&
+    Date.now() - startedAtRef.current > MAX_POLL_DURATION_MS
+  );
+
   return {
     attempt:    data,
     isLoading,
     isError,
     isComplete: data?.status === "complete",
-    isFailed:   data?.status === "failed",
+    isFailed:   data?.status === "failed" || exhausted,
   };
 }

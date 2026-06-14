@@ -316,7 +316,7 @@ export function EssayAnalysisCard({ essayText, taskNumber }: Props) {
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <BarChart2 className="h-4 w-4 text-white/40" />
-          <h3 className="text-xs font-bold uppercase tracking-wider text-white/40">Writing Analytics</h3>
+          <h2 className="text-xs font-bold uppercase tracking-wider text-white/40">Writing Analytics</h2>
         </div>
         <span className="rounded-full border border-white/10 bg-white/[0.04] px-2 py-0.5 text-[10px] text-white/30">
           Task {taskNumber} · {taskLabel}

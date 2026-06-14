@@ -37,9 +37,9 @@ export function LockedDimensionPreview({ skill }: Props) {
   return (
     <div className="rounded-2xl border border-border bg-surface p-6">
       <div className="mb-5 flex items-center justify-between">
-        <h3 className="text-sm font-semibold uppercase tracking-wider text-subtle">
+        <h2 className="text-sm font-semibold uppercase tracking-wider text-subtle">
           Dimension Breakdown
-        </h3>
+        </h2>
         <span className="inline-flex items-center gap-1 rounded-full border border-border bg-surface px-2.5 py-0.5 text-[11px] font-semibold text-subtle">
           <Lock className="h-3 w-3" />
           Pro

@@ -8,7 +8,7 @@
 // thin left rule and a single muted dot rather than loud severity pills.
 // ─────────────────────────────────────────────────────────────────────────────
 
-import { useState } from "react";
+import { useId, useState } from "react";
 import { ChevronDown, Wrench, HelpCircle, Zap, BookOpen } from "lucide-react";
 import type { ReportImprovementTip } from "@/lib/types";
 import { LockedBlurOverlay } from "./LockedBlurOverlay";
@@ -57,6 +57,7 @@ function TipCard({ tip, index, total, defaultOpen }: {
   defaultOpen: boolean;
 }) {
   const [open, setOpen] = useState(defaultOpen);
+  const panelId         = useId(); // wires button.aria-controls → panel.id
   const hasDetail = Boolean(tip.why || tip.how || tip.example);
   const p = priorityFor(index, total);
 
@@ -78,6 +79,7 @@ function TipCard({ tip, index, total, defaultOpen }: {
           hasDetail ? "hover:bg-white/[0.025] cursor-pointer" : "cursor-default",
         ].join(" ")}
         aria-expanded={open}
+        aria-controls={hasDetail ? panelId : undefined}
         disabled={!hasDetail}
       >
         {/* Number — outline only, no colour fill */}
@@ -106,6 +108,9 @@ function TipCard({ tip, index, total, defaultOpen }: {
       {/* Expandable detail */}
       {hasDetail && (
         <div
+          id={panelId}
+          role="region"
+          aria-label={tip.title || "Improvement details"}
           className="grid transition-[grid-template-rows] duration-300 ease-in-out"
           style={{ gridTemplateRows: open ? "1fr" : "0fr" }}
         >

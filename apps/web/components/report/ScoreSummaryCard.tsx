@@ -171,11 +171,11 @@ export function ScoreSummaryCard({ estimatedBand, skill, completedAt, nextMilest
 
           {/* Next milestone coaching pill */}
           {hasMilestone && (
-            <div className="flex items-start gap-2 rounded-xl border border-amber-500/20 bg-amber-500/[0.06] px-3 py-2.5 mt-1">
-              <Target className="flex-shrink-0 h-4 w-4 text-amber-400 mt-0.5" />
+            <div className="flex items-start gap-2 rounded-xl border border-primary/20 bg-primary/[0.06] px-3 py-2.5 mt-1">
+              <Target className="flex-shrink-0 h-4 w-4 text-primary mt-0.5" />
               <div>
-                <p className="text-[10px] font-bold uppercase tracking-wider text-amber-400/60 mb-0.5">Next goal</p>
-                <p className="text-xs leading-relaxed text-amber-200/85">{nextMilestone}</p>
+                <p className="text-[10px] font-bold uppercase tracking-wider text-primary/60 mb-0.5">Next goal</p>
+                <p className="text-xs leading-relaxed text-primary/85">{nextMilestone}</p>
               </div>
             </div>
           )}

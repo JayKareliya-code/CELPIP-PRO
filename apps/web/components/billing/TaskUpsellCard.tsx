@@ -73,8 +73,8 @@ export function TaskUpsellCard({ skill, taskNumber }: TaskUpsellCardProps) {
 
       {/* Top: Sliders icon + title + price */}
       <div className="px-3 pt-3 pb-2 flex items-center gap-2.5">
-        <div className="w-8 h-8 rounded-lg border border-amber-500/30 bg-amber-500/10 flex items-center justify-center shrink-0">
-          <Sliders className="w-4 h-4 text-amber-400" />
+        <div className="w-8 h-8 rounded-lg border border-primary/30 bg-primary/10 flex items-center justify-center shrink-0">
+          <Sliders className="w-4 h-4 text-primary" />
         </div>
         <div className="flex-1 min-w-0">
           <span className="text-xl font-extrabold text-white leading-tight">Custom Task Bundle</span>

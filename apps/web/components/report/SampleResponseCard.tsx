@@ -54,7 +54,7 @@ export function SampleResponseCard({ sampleResponse, targetBand, taskNumber }: P
         aria-expanded={open}
       >
         <div className="flex items-center gap-2.5">
-          <Star className="h-4 w-4 text-amber-400/60 flex-shrink-0" />
+          <Star className="h-4 w-4 text-primary/60 flex-shrink-0" />
           <div>
             <span className="text-sm font-semibold text-white/55">
               {targetBand ? `Band ${targetBand}+ Sample Response` : "Sample Response"}
@@ -83,10 +83,10 @@ export function SampleResponseCard({ sampleResponse, targetBand, taskNumber }: P
           <div className="border-t border-border px-5 py-4 flex flex-col gap-4">
 
             {/* Targeted rewrite notice */}
-            <div className="flex items-start gap-2 rounded-xl border border-amber-500/15 bg-amber-500/[0.04] px-3.5 py-2.5">
-              <Star className="h-3.5 w-3.5 text-amber-400/60 flex-shrink-0 mt-0.5" />
-              <p className="text-[11px] leading-relaxed text-amber-300/60">
-                <span className="font-semibold text-amber-300/80">Targeted rewrite</span>
+            <div className="flex items-start gap-2 rounded-xl border border-primary/15 bg-primary/[0.04] px-3.5 py-2.5">
+              <Star className="h-3.5 w-3.5 text-primary/60 flex-shrink-0 mt-0.5" />
+              <p className="text-[11px] leading-relaxed text-primary/70">
+                <span className="font-semibold text-primary/90">Targeted rewrite</span>
                 {" "}— this response directly corrects the weaknesses in your submission. Study the
                 differences to understand what a higher band looks like for this exact prompt.
               </p>
