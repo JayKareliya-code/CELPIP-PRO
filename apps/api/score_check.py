@@ -67,7 +67,7 @@ MODEL = "gpt-4o"   # change to match the production model
 
 # Paste your OpenAI API key here to run without touching .env or the shell.
 # Leave as "" to fall back to OPENAI_API_KEY from the environment / .env file.
-API_KEY = ""
+API_KEY = ""  # NEVER hardcode a real key here — falls back to OPENAI_API_KEY from env/.env
 
 
 # ── Inputs (single-essay mode) ────────────────────────────────────────────────
