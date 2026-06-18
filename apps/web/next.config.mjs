@@ -39,7 +39,12 @@ if (isProd) {
 //   - S3 / R2        → presigned audio + scene-image fetches
 //   - Sentry         → if NEXT_PUBLIC_SENTRY_DSN is set (browser SDK)
 const clerkHosts = [
-    "https://*.clerk.accounts.dev",
+    // Production instance: Clerk's Frontend API is served from a custom subdomain
+    // (clerk.<your-domain>). clerk-js, FAPI calls, and hosted widgets all load
+    // from here, so it must be allowed or the browser blocks Clerk entirely.
+    "https://clerk.celpipbro.ca",
+    "https://accounts.celpipbro.ca",     // Clerk Account Portal (hosted sign-in pages)
+    "https://*.clerk.accounts.dev",      // Development instance (local + preview)
     "https://*.clerk.com",
     "https://clerk.com",
     "https://challenges.cloudflare.com", // Clerk Turnstile bot check
