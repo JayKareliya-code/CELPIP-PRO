@@ -1,0 +1,3002 @@
+[
+  {
+    "task_number": 2,
+    "title": "A Memorable Trip You Took",
+    "slug": "a-memorable-trip-you-took",
+    "topic": "travel",
+    "difficulty": "easy",
+    "prep_time_seconds": 30,
+    "response_time_seconds": 60,
+    "prompt_text": "Talk about a memorable trip that you still remember clearly today. Where did you go and who went with you? What happened on the trip, and what made it so special for you?",
+    "vocabulary_tips": [
+      "unforgettable",
+      "scenery",
+      "adventure",
+      "highlight",
+      "relaxing",
+      "souvenir"
+    ],
+    "connector_phrases": [
+      "A couple of years ago",
+      "First of all",
+      "The best part was",
+      "After that",
+      "By the end of the trip",
+      "Looking back"
+    ],
+    "template_hint": "Set the scene with when, where, and who, then describe the highlight of the trip in vivid detail, and finish by explaining why it stayed with you.",
+    "sample_response_band12": "A couple of years ago, my family and I took a trip to the coast of British Columbia, and honestly, it's still the best vacation I've ever had. We stayed in a tiny cabin right by the water, and every morning I'd wake up to the sound of the waves. The highlight was definitely the day we went whale watching. I'll never forget the moment a huge humpback whale surfaced just a few metres from our boat. Everyone gasped, and I actually had goosebumps. After that, we spent the evenings cooking fresh seafood and just talking for hours. Looking back, what made it so special wasn't really the scenery, although it was stunning. It was the fact that we were all together, completely relaxed, with no phones and no stress. That trip reminded me how important it is to slow down and enjoy life.",
+    "prompt_tag": "practice",
+    "sort_order": 0
+  },
+  {
+    "task_number": 2,
+    "title": "A Time You Got Lost",
+    "slug": "a-time-you-got-lost",
+    "topic": "navigation",
+    "difficulty": "medium",
+    "prep_time_seconds": 30,
+    "response_time_seconds": 60,
+    "prompt_text": "Talk about a time when you got lost in an unfamiliar place. Where were you and how did you end up lost? What did you do to find your way again, and how did you feel during the experience?",
+    "vocabulary_tips": [
+      "disoriented",
+      "unfamiliar",
+      "panicked",
+      "landmark",
+      "directions",
+      "relieved"
+    ],
+    "connector_phrases": [
+      "One time",
+      "At first",
+      "Before I knew it",
+      "Suddenly",
+      "Eventually",
+      "In the end"
+    ],
+    "template_hint": "Set the scene with where you were and how you got lost, build tension by describing what went wrong and how you reacted, then resolve it and share the relief you felt.",
+    "sample_response_band12": "One time, when I was travelling alone in Tokyo, I got completely lost in the subway system. At first I felt confident because I had a map, but all the signs were in Japanese, and before I knew it, I'd taken the wrong train going in the opposite direction. Suddenly I realised I had no idea where I was, and my phone battery was almost dead. I'll admit I started to panic a little. I tried to stay calm and looked for a familiar landmark, but nothing seemed right. Eventually, I gathered my courage and asked a kind stranger for directions using hand gestures. She actually walked me all the way to the correct platform. In the end, I made it back to my hotel feeling incredibly relieved. Looking back, it taught me that people are usually happy to help if you just ask.",
+    "prompt_tag": "practice",
+    "sort_order": 1
+  },
+  {
+    "task_number": 2,
+    "title": "A Trip That Went Wrong",
+    "slug": "a-trip-that-went-wrong",
+    "topic": "mishap",
+    "difficulty": "medium",
+    "prep_time_seconds": 30,
+    "response_time_seconds": 60,
+    "prompt_text": "Talk about a time when a trip did not go as planned. What were you expecting, and what actually went wrong? How did you handle the situation, and what did you learn from it?",
+    "vocabulary_tips": [
+      "unexpected",
+      "cancelled",
+      "stranded",
+      "frustrating",
+      "improvise",
+      "chaotic"
+    ],
+    "connector_phrases": [
+      "A few years back",
+      "Everything was going fine until",
+      "All of a sudden",
+      "To make matters worse",
+      "Somehow",
+      "In the end"
+    ],
+    "template_hint": "Set up your expectations for the trip, describe what went wrong and how it escalated, then explain how you coped and what the experience taught you.",
+    "sample_response_band12": "A few years back, my friends and I planned a weekend camping trip in the mountains, and we were so excited. Everything was going fine until we arrived and realised we'd forgotten the tent poles back home. All of a sudden, our cozy camping plan fell apart. To make matters worse, it started pouring rain about an hour later, and we were completely soaked. We didn't know what to do, so we decided to improvise. Somehow, we rigged up a shelter using a tarp and some rope tied between two trees. It wasn't pretty, but it kept us dry. We ended up huddled together, laughing at how ridiculous the situation was. In the end, that disastrous trip became one of our favourite stories. It taught me that sometimes the best memories come from the moments when everything goes wrong.",
+    "prompt_tag": "practice",
+    "sort_order": 2
+  },
+  {
+    "task_number": 2,
+    "title": "Revisiting A Childhood Place",
+    "slug": "revisiting-a-childhood-place",
+    "topic": "nostalgia",
+    "difficulty": "hard",
+    "prep_time_seconds": 30,
+    "response_time_seconds": 60,
+    "prompt_text": "Talk about a time when you revisited a place from your childhood. Where was it, and why did you go back? How had the place changed, and what feelings did returning bring up for you?",
+    "vocabulary_tips": [
+      "nostalgic",
+      "familiar",
+      "memories",
+      "changed",
+      "bittersweet",
+      "emotional"
+    ],
+    "connector_phrases": [
+      "Not too long ago",
+      "As soon as I arrived",
+      "Back then",
+      "What struck me most",
+      "At the same time",
+      "Looking back"
+    ],
+    "template_hint": "Describe the place and your reason for returning, contrast how it was in childhood with how it looked now, then reflect on the bittersweet emotions the visit stirred up.",
+    "sample_response_band12": "Not too long ago, I went back to the small town where I grew up, mainly to visit the old playground near my grandparents' house. As soon as I arrived, a wave of memories came flooding back. Back then, that playground felt enormous, with this huge slide I was always too scared to go down. But standing there as an adult, I was amazed at how tiny everything actually was. What struck me most was that the old oak tree I used to climb had been cut down, and a new apartment building stood where the corner store used to be. At the same time, the smell of the air and the sound of the river were exactly the same. Honestly, it was a bittersweet feeling. Part of me felt joyful and nostalgic, but another part felt a little sad. Looking back, it really made me appreciate how quickly time passes.",
+    "prompt_tag": "practice",
+    "sort_order": 3
+  },
+  {
+    "task_number": 2,
+    "title": "A Spontaneous Day Trip",
+    "slug": "a-spontaneous-day-trip",
+    "topic": "spontaneity",
+    "difficulty": "easy",
+    "prep_time_seconds": 30,
+    "response_time_seconds": 60,
+    "prompt_text": "Talk about a time when you took a spontaneous day trip. Where did you go, and what made you decide to leave so suddenly? What did you do once you got there, and was the trip worth it?",
+    "vocabulary_tips": [
+      "spontaneous",
+      "impulsive",
+      "carefree",
+      "spur-of-the-moment",
+      "refreshing",
+      "worthwhile"
+    ],
+    "connector_phrases": [
+      "One sunny morning",
+      "Out of nowhere",
+      "Without thinking twice",
+      "On the way",
+      "By the afternoon",
+      "All in all"
+    ],
+    "template_hint": "Set the scene with the sudden decision, describe what you did during the day with lively detail, and end by saying whether the spur-of-the-moment trip was worth it.",
+    "sample_response_band12": "One sunny Saturday morning, I woke up and just felt restless, like I needed a change of scenery. Out of nowhere, I decided to drive to a lake about two hours away that a friend had once mentioned. Without thinking twice, I grabbed a few snacks, hopped in the car, and hit the road. On the way, I rolled the windows down and played my favourite music, and I already felt freer. When I got there, the lake was absolutely gorgeous and almost empty. I spent the whole afternoon swimming, reading by the water, and just doing nothing. By the afternoon, I felt completely refreshed, like all my stress had melted away. All in all, it was totally worth it. That spontaneous trip reminded me that sometimes the best days are the ones you don't plan at all.",
+    "prompt_tag": "practice",
+    "sort_order": 4
+  },
+  {
+    "task_number": 2,
+    "title": "A Long Journey by Train",
+    "slug": "a-long-journey-by-train",
+    "topic": "journey",
+    "difficulty": "medium",
+    "prep_time_seconds": 30,
+    "response_time_seconds": 60,
+    "prompt_text": "Talk about a long journey you took by train, bus, or plane. Where were you going and how long did the journey take? What did you do to pass the time, and how did you feel by the end?",
+    "vocabulary_tips": [
+      "lengthy",
+      "cramped",
+      "exhausting",
+      "passing scenery",
+      "passenger",
+      "anticipation"
+    ],
+    "connector_phrases": [
+      "Last summer",
+      "At the beginning",
+      "As the hours went by",
+      "Meanwhile",
+      "Eventually",
+      "By the time"
+    ],
+    "template_hint": "Set up the destination and length of the journey, describe how you spent the long hours and what you noticed, then express how you felt as the journey ended.",
+    "sample_response_band12": "Last summer, I took a long train journey across the country to visit my cousin, and it lasted nearly fourteen hours. At the beginning, I was full of energy and excitement, watching the city slowly disappear behind us. As the hours went by, the scenery changed dramatically, from busy towns to endless golden fields and rolling hills. To pass the time, I read a couple of books, listened to podcasts, and chatted with an elderly passenger across from me who had the most fascinating life stories. Meanwhile, I kept sneaking glances out the window because the passing scenery was so beautiful. I won't lie, by hour twelve I was getting a bit stiff and tired. Eventually, the train pulled into the station, and the moment I saw my cousin waving on the platform, all that exhaustion just disappeared. By the time I arrived, I honestly felt the journey was part of the adventure.",
+    "prompt_tag": "practice",
+    "sort_order": 5
+  },
+  {
+    "task_number": 2,
+    "title": "A Place That Surprised You",
+    "slug": "a-place-that-surprised-you",
+    "topic": "beauty",
+    "difficulty": "hard",
+    "prep_time_seconds": 30,
+    "response_time_seconds": 60,
+    "prompt_text": "Talk about a place whose beauty surprised you when you saw it. Where was it, and why hadn't you expected much? What did you see that amazed you, and how did it make you feel?",
+    "vocabulary_tips": [
+      "breathtaking",
+      "stunning",
+      "underrated",
+      "spectacular",
+      "awestruck",
+      "vibrant"
+    ],
+    "connector_phrases": [
+      "A while ago",
+      "To be honest",
+      "But the moment",
+      "I couldn't believe",
+      "Standing there",
+      "To this day"
+    ],
+    "template_hint": "Explain why you had low expectations of the place, then describe the surprising beauty you discovered in vivid sensory detail, and end with the emotion it left you with.",
+    "sample_response_band12": "A while ago, a friend convinced me to visit a small village in the countryside, and to be honest, I expected it to be pretty dull. I imagined just a few old houses and not much else. But the moment we walked over the hill, I was completely awestruck. Spread out below us was a valley filled with vibrant wildflowers, with a crystal-clear river winding through it, all framed by snow-capped mountains. I couldn't believe a place so spectacular wasn't famous. Standing there, I felt this incredible sense of peace, like the world had slowed down just for me. The colours were so vivid it almost looked like a painting, and we ended up sitting on the grass for hours, just soaking it all in. To this day, it remains the most breathtaking view I've ever seen, and it taught me never to underestimate a place before I've been there.",
+    "prompt_tag": "practice",
+    "sort_order": 6
+  },
+  {
+    "task_number": 2,
+    "title": "Trying Something New Abroad",
+    "slug": "trying-something-new-abroad",
+    "topic": "adventure",
+    "difficulty": "medium",
+    "prep_time_seconds": 30,
+    "response_time_seconds": 60,
+    "prompt_text": "Talk about a time when you tried something new while you were travelling. What was the new activity or experience, and what made you decide to try it? How did it turn out, and would you do it again?",
+    "vocabulary_tips": [
+      "nervous",
+      "thrilling",
+      "out of my comfort zone",
+      "exhilarating",
+      "hesitant",
+      "rewarding"
+    ],
+    "connector_phrases": [
+      "While I was travelling",
+      "At first I was hesitant",
+      "But then",
+      "Halfway through",
+      "Once it was over",
+      "In hindsight"
+    ],
+    "template_hint": "Describe the new activity and why you decided to try it despite hesitation, narrate how it actually felt as you did it, and finish by reflecting on whether you'd do it again.",
+    "sample_response_band12": "While I was travelling in Thailand a few years ago, I decided to try scuba diving for the very first time. At first I was extremely hesitant because I'm honestly a bit afraid of deep water, and breathing underwater sounded terrifying. But then my travel companions kept encouraging me, so I figured I should push myself out of my comfort zone. The instructor was patient and walked me through everything step by step. When I first put my head under the surface, my heart was pounding. But halfway through the dive, something changed. I was floating among colourful fish and bright coral, and it felt absolutely magical, like another world. Once it was over, I came up with the biggest grin on my face. In hindsight, it was one of the most exhilarating and rewarding things I've ever done. I would absolutely do it again in a heartbeat.",
+    "prompt_tag": "practice",
+    "sort_order": 7
+  },
+  {
+    "task_number": 2,
+    "title": "A Goal You Worked For",
+    "slug": "a-goal-you-worked-for",
+    "topic": "Goals",
+    "difficulty": "easy",
+    "prep_time_seconds": 30,
+    "response_time_seconds": 60,
+    "prompt_text": "Talk about a goal that you worked very hard to achieve. Describe a specific time when you set a goal for yourself and did everything you could to reach it. When did this happen, and what was the goal? What steps did you take, and how did you feel when you finally achieved it?",
+    "vocabulary_tips": [
+      "determined",
+      "ambitious",
+      "step by step",
+      "rewarding",
+      "achievement",
+      "dedication"
+    ],
+    "connector_phrases": [
+      "A couple of years ago",
+      "At first",
+      "Little by little",
+      "After a while",
+      "Finally",
+      "Looking back"
+    ],
+    "template_hint": "Set the scene with when and what the goal was, walk through the main steps you took to reach it, then end with how it felt to finally achieve it.",
+    "sample_response_band12": "About two years ago, I set myself a goal to run my very first ten-kilometre race. At first, honestly, I could barely run for five minutes without stopping, so it felt almost impossible. But I made a plan and stuck to it. Every morning before work, I went out and ran a little bit further than the day before. Little by little, my legs got stronger and my breathing got easier. There were days when it was freezing cold and I really didn't want to go, but I forced myself out the door anyway. On race day, my whole family came to cheer me on. When I finally crossed that finish line, I burst into tears. I was so proud of myself. Looking back, that goal taught me that with enough patience and hard work, I really can achieve almost anything I put my mind to.",
+    "prompt_tag": "practice",
+    "sort_order": 8
+  },
+  {
+    "task_number": 2,
+    "title": "Proud Of Someone Else",
+    "slug": "proud-of-someone-else",
+    "topic": "Pride",
+    "difficulty": "medium",
+    "prep_time_seconds": 30,
+    "response_time_seconds": 60,
+    "prompt_text": "Talk about a time when you felt proud of another person for something they accomplished. This could be a friend, a family member, a student, or a teammate who reached a goal or did something impressive. Who was the person, and what did they achieve? When and where did this happen, and why did their success make you feel so proud?",
+    "vocabulary_tips": [
+      "accomplishment",
+      "overcame the odds",
+      "beaming with pride",
+      "hard work paid off",
+      "cheered them on",
+      "well-deserved"
+    ],
+    "connector_phrases": [
+      "A while back",
+      "The thing is",
+      "What really got to me was",
+      "Before I knew it",
+      "Looking back on it",
+      "To this day"
+    ],
+    "template_hint": "Set the scene by introducing the person and their goal, build up to the moment they succeeded, then explain why watching them win meant so much to you.",
+    "sample_response_band12": "A couple of years ago, my younger sister decided to run her very first half-marathon. The thing is, she had never been athletic at all, so honestly nobody in our family expected her to finish. She trained every single morning for about five months, even in the freezing winter. On race day, the whole family stood near the finish line in the cold, holding a homemade sign with her name on it. When she finally came around the last corner, exhausted but smiling, I just lost it and started cheering my head off. Watching her cross that line, with her hard work finally paying off, I felt this huge wave of pride wash over me. What really got to me was that she never once gave up. To this day, it reminds me how proud I am of her determination.",
+    "prompt_tag": "practice",
+    "sort_order": 9
+  },
+  {
+    "task_number": 2,
+    "title": "Finishing What You Almost Quit",
+    "slug": "finishing-what-you-almost-quit",
+    "topic": "Perseverance",
+    "difficulty": "medium",
+    "prep_time_seconds": 30,
+    "response_time_seconds": 60,
+    "prompt_text": "Talk about a time when you finished something difficult that you had almost given up on. Describe a specific situation when you nearly quit but decided to keep going. What were you trying to do, and why did you want to quit? What made you push through, and how did things turn out in the end?",
+    "vocabulary_tips": [
+      "exhausted",
+      "frustrated",
+      "persevere",
+      "determined",
+      "give up",
+      "breakthrough"
+    ],
+    "connector_phrases": [
+      "A while back",
+      "Halfway through",
+      "At one point",
+      "Even so",
+      "In the end",
+      "Looking back now"
+    ],
+    "template_hint": "Set up the difficult task and the moment you wanted to quit, explain what kept you going, then describe how relieved or proud you felt when you finally finished.",
+    "sample_response_band12": "A while back, I decided to write a short novel during my free time, something I'd dreamed about for years. Halfway through, though, I hit a wall. I was completely exhausted, the story felt messy, and at one point I honestly thought about deleting the whole thing and just giving up. I remember staring at the screen, totally frustrated. But then I thought about how disappointed I'd be if I quit so close to the end. So I gave myself a deadline and wrote just a little every single night, even when I didn't feel inspired. In the end, after about three months, I typed the very last sentence. I sat back, completely stunned that I'd actually done it. Looking back now, finishing that book meant the world to me, because it proved I don't have to be perfect to follow through on something I truly care about.",
+    "prompt_tag": "practice",
+    "sort_order": 10
+  },
+  {
+    "task_number": 2,
+    "title": "A Competition You Won",
+    "slug": "a-competition-you-won",
+    "topic": "Competition",
+    "difficulty": "medium",
+    "prep_time_seconds": 30,
+    "response_time_seconds": 60,
+    "prompt_text": "Talk about a competition or award that you won. Describe a specific time when you took part in a contest or received some kind of recognition. When and where did it take place, and who else was involved? How did you win, and how did you feel about it?",
+    "vocabulary_tips": [
+      "nervous",
+      "competitor",
+      "victory",
+      "thrilled",
+      "recognition",
+      "well-deserved"
+    ],
+    "connector_phrases": [
+      "A few years ago",
+      "Right before",
+      "As soon as",
+      "To my surprise",
+      "In the end",
+      "I'll never forget"
+    ],
+    "template_hint": "Describe when and where the competition happened and who you were up against, explain how the contest unfolded, then end with the thrill of winning and what it meant to you.",
+    "sample_response_band12": "A few years ago, I entered a regional cooking competition at a local food festival, and it's a day I'll never forget. There were about twenty competitors, and many of them were experienced chefs, so I felt incredibly nervous. Right before my turn, my hands were actually shaking. The challenge was to create an original dish using only three secret ingredients within forty-five minutes. I decided to cook my grandmother's spicy curry recipe with a modern twist. The kitchen was chaotic, with timers beeping everywhere, but I stayed focused and plated my dish just in time. When the judges announced the winners, I genuinely expected nothing. To my surprise, they called my name for first place! I was absolutely thrilled. Winning that award meant so much to me, because it showed that passion and a personal story can matter just as much as years of formal training.",
+    "prompt_tag": "practice",
+    "sort_order": 11
+  },
+  {
+    "task_number": 2,
+    "title": "A Memorable Museum Visit",
+    "slug": "a-memorable-museum-visit",
+    "topic": "Museum",
+    "difficulty": "easy",
+    "prep_time_seconds": 30,
+    "response_time_seconds": 60,
+    "prompt_text": "Talk about a memorable visit you made to a museum, art gallery, science centre, zoo, or exhibition. Describe what you saw there and what made the visit stand out for you. When did you go, and who did you go with? What was the most interesting part, and how did you feel during the visit?",
+    "vocabulary_tips": [
+      "exhibit",
+      "fascinating",
+      "hands-on display",
+      "wandered around",
+      "caught my eye",
+      "brought it to life"
+    ],
+    "connector_phrases": [
+      "One weekend",
+      "As soon as we walked in",
+      "What stood out the most",
+      "After that",
+      "The funny thing was",
+      "By the end of it"
+    ],
+    "template_hint": "Open with when and who you went with, describe the exhibit that fascinated you most, then share the feeling or thought you walked away with.",
+    "sample_response_band12": "One rainy weekend last spring, my best friend and I visited the science centre downtown, mostly just to get out of the house. As soon as we walked in, there was this huge interactive space exhibit with a model rocket you could actually climb inside. What stood out the most was a hands-on display about electricity, where you touched a metal ball and your hair literally stood straight up. We were laughing so hard taking photos of each other. After that, we watched a short film in the planetarium about black holes, and honestly it kind of blew my mind. The funny thing was, we had only planned to stay an hour, but we ended up wandering around for the whole afternoon. By the end of it, I felt like a curious little kid again, and I still talk about that visit today.",
+    "prompt_tag": "practice",
+    "sort_order": 12
+  },
+  {
+    "task_number": 2,
+    "title": "A Difficult Skill You Mastered",
+    "slug": "a-difficult-skill-you-mastered",
+    "topic": "Skills",
+    "difficulty": "hard",
+    "prep_time_seconds": 30,
+    "response_time_seconds": 60,
+    "prompt_text": "Talk about a difficult skill that you finally mastered. Describe a specific skill that took you a long time and a lot of effort to learn well. What was the skill, and why was it so hard for you? How did you practise it, and how did you feel once you finally mastered it?",
+    "vocabulary_tips": [
+      "challenging",
+      "frustrating",
+      "practice",
+      "gradually",
+      "mastery",
+      "rewarding"
+    ],
+    "connector_phrases": [
+      "When I first started",
+      "For the longest time",
+      "Bit by bit",
+      "After months of practice",
+      "Eventually",
+      "Now that I think about it"
+    ],
+    "template_hint": "Name the skill and why it was so difficult, describe how you practised over time, then end with the satisfying moment you realized you had finally mastered it.",
+    "sample_response_band12": "One difficult skill I finally mastered was playing the guitar, and it took me far longer than I ever expected. When I first started, my fingers were stiff and clumsy, and even pressing a simple chord left them sore and aching. For the longest time, every song sounded terrible, and I was honestly so frustrated that I wanted to throw the guitar across the room. But I refused to give up. I practised for twenty minutes every evening, slowly building up calluses on my fingertips and training my hands to move smoothly. Bit by bit, the chords started to flow together. After months of practice, there was one magical evening when I played an entire song from start to finish without a single mistake. I just sat there grinning like a child. Mastering that skill was incredibly rewarding, and now playing music is one of the greatest joys in my life.",
+    "prompt_tag": "practice",
+    "sort_order": 13
+  },
+  {
+    "task_number": 2,
+    "title": "A Big Project You Completed",
+    "slug": "a-big-project-you-completed",
+    "topic": "Projects",
+    "difficulty": "hard",
+    "prep_time_seconds": 30,
+    "response_time_seconds": 60,
+    "prompt_text": "Talk about a big project that you completed in the past, either at work, at school, or in your personal life. What was the project, and how long did it take? What challenges did you face, and how did you feel when it was finally finished?",
+    "vocabulary_tips": [
+      "ambitious",
+      "demanding",
+      "deadline",
+      "collaboration",
+      "accomplished",
+      "rewarding"
+    ],
+    "connector_phrases": [
+      "A couple of years back",
+      "In the beginning",
+      "As time went on",
+      "Despite the obstacles",
+      "By the end",
+      "When it was all over"
+    ],
+    "template_hint": "Introduce the project and its scale, walk through the main challenges you faced along the way, then describe the relief and pride you felt upon completing it.",
+    "sample_response_band12": "A couple of years back, I led a big project at work to redesign our company's entire website, and it was easily the most demanding thing I'd ever taken on. In the beginning, the task felt overwhelming because there were so many moving parts and a tight deadline of just four months. I had to coordinate designers, writers, and developers, and as time went on, we ran into endless technical problems and disagreements. There were several nights when I stayed up late, worried we'd never finish in time. Despite all the obstacles, our team pulled together and kept pushing forward, solving one issue after another. When we finally launched the new site and saw it live, I felt an enormous wave of relief and pride. By the end, our customers loved it, and that project taught me how powerful teamwork and persistence can truly be.",
+    "prompt_tag": "practice",
+    "sort_order": 14
+  },
+  {
+    "task_number": 2,
+    "title": "Someone Who Became Important",
+    "slug": "someone-who-became-important",
+    "topic": "relationships",
+    "difficulty": "medium",
+    "prep_time_seconds": 30,
+    "response_time_seconds": 60,
+    "prompt_text": "Talk about a time when you met someone who later became important to you. Describe how and where you first met this person, and who they were. Why did this person come to matter so much to you?",
+    "vocabulary_tips": [
+      "acquaintance",
+      "bond",
+      "trustworthy",
+      "supportive",
+      "genuine",
+      "inseparable"
+    ],
+    "connector_phrases": [
+      "A few years ago",
+      "At first",
+      "Over time",
+      "Before long",
+      "As it turned out",
+      "Looking back"
+    ],
+    "template_hint": "Set the scene with when and where you met, describe how the relationship grew from a first encounter, then explain why this person became so meaningful to you.",
+    "sample_response_band12": "About five years ago, I started a new job at a small marketing firm, and on my very first day I was paired with a colleague named Priya. At first, she was just the person showing me where the printer was, but over the next few weeks we ended up eating lunch together almost every day. We discovered we had the same sense of humor and the same anxieties about the job. Before long, she became someone I could call about absolutely anything. When my father got sick, she drove me to the hospital at midnight without a second thought. Looking back, I realize that what started as an ordinary workplace introduction turned into one of the most important friendships of my life. She taught me that some people just quietly become family, and I'm so grateful that random desk assignment brought us together.",
+    "prompt_tag": "practice",
+    "sort_order": 15
+  },
+  {
+    "task_number": 2,
+    "title": "Reconnecting After A Long Time",
+    "slug": "reconnecting-after-a-long-time",
+    "topic": "reunion",
+    "difficulty": "medium",
+    "prep_time_seconds": 30,
+    "response_time_seconds": 60,
+    "prompt_text": "Talk about a time when you reconnected with someone after a long time apart. Who was this person, and how long had it been since you last saw them? How did the reunion happen, and how did you feel? Why was reconnecting meaningful to you?",
+    "vocabulary_tips": [
+      "reunion",
+      "nostalgic",
+      "drifted apart",
+      "overwhelmed",
+      "familiar",
+      "rekindle"
+    ],
+    "connector_phrases": [
+      "Years went by",
+      "Out of the blue",
+      "When we finally met",
+      "At that moment",
+      "It felt as if",
+      "In the end"
+    ],
+    "template_hint": "Explain who the person was and how you lost touch, describe how the reunion came about and what it was like, then say why reconnecting mattered so much.",
+    "sample_response_band12": "A couple of years ago, I reconnected with my childhood friend Maria, whom I hadn't seen in nearly fifteen years. We'd been inseparable as kids, but after my family moved abroad, we slowly drifted apart and eventually lost touch completely. Then, out of the blue, she found me on social media and sent a message saying she happened to be visiting my city. When we finally met at a little café downtown, I was honestly a bit nervous that it would feel awkward. But at that moment she walked in, hugged me, and it felt as if no time had passed at all. We talked for hours about old memories and everything we'd missed in each other's lives. In the end, I realized how rare it is to pick up a friendship exactly where you left it. That reunion reminded me that real connections never truly disappear.",
+    "prompt_tag": "practice",
+    "sort_order": 16
+  },
+  {
+    "task_number": 2,
+    "title": "A Mentor Who Influenced Me",
+    "slug": "a-mentor-who-influenced-me",
+    "topic": "mentorship",
+    "difficulty": "medium",
+    "prep_time_seconds": 30,
+    "response_time_seconds": 60,
+    "prompt_text": "Talk about a mentor or teacher who had a strong influence on you. Who was this person, and when did you know them? What did they do or say on one occasion that really affected you? Why was their influence so important in your life?",
+    "vocabulary_tips": [
+      "inspiring",
+      "patient",
+      "encourage",
+      "guidance",
+      "potential",
+      "shaped"
+    ],
+    "connector_phrases": [
+      "Back when",
+      "One day",
+      "Thanks to",
+      "Little by little",
+      "Because of that",
+      "To this day"
+    ],
+    "template_hint": "Introduce the mentor and your relationship, describe a specific thing they did or said, then explain the lasting influence they had on who you became.",
+    "sample_response_band12": "Back when I was in high school, I had a history teacher named Mr. Okafor who completely changed how I saw myself. I was a shy, average student who never spoke up, and honestly I didn't believe I was capable of much. But one day, after I handed in an essay, he kept me behind and told me it was the most original piece he'd read all year. He encouraged me to enter a writing competition, even though I was certain I'd fail. Little by little, with his patient guidance, my confidence started to grow, and I actually ended up winning second place. Because of that, I chose to study journalism in university. To this day, whenever I doubt myself, I think about Mr. Okafor seeing potential in me before I could see it in myself.",
+    "prompt_tag": "practice",
+    "sort_order": 17
+  },
+  {
+    "task_number": 2,
+    "title": "Making A Friend As An Adult",
+    "slug": "making-a-friend-as-an-adult",
+    "topic": "friendship",
+    "difficulty": "hard",
+    "prep_time_seconds": 30,
+    "response_time_seconds": 60,
+    "prompt_text": "Talk about a time when you made a new friend as an adult. Where and how did you meet this person? What brought you together, and how did the friendship develop? Why was making this friend significant for you?",
+    "vocabulary_tips": [
+      "common ground",
+      "approachable",
+      "gradually",
+      "rapport",
+      "fulfilling",
+      "comfort zone"
+    ],
+    "connector_phrases": [
+      "Not long after",
+      "As it happened",
+      "Bit by bit",
+      "What surprised me was",
+      "Eventually",
+      "In hindsight"
+    ],
+    "template_hint": "Set up the context where you met the person as an adult, describe what drew you together and how the friendship grew, then explain why this friendship was meaningful.",
+    "sample_response_band12": "Making friends as an adult is surprisingly hard, so I really treasure the friendship I formed with my neighbor Tom two years ago. Not long after I moved into a new apartment in a city where I knew nobody, I noticed Tom walking his dog every morning at the same time as me. As it happened, I'd just adopted a puppy, so one day we struck up a conversation about training tips. Bit by bit, those short chats turned into weekend walks, and then into dinners with our families. What surprised me was how easily we found common ground despite being from totally different backgrounds. Eventually he became one of the few people I genuinely rely on in this city. In hindsight, stepping out of my comfort zone to say hello was the best decision I made that year. It proved that meaningful friendships are still possible at any age.",
+    "prompt_tag": "practice",
+    "sort_order": 18
+  },
+  {
+    "task_number": 2,
+    "title": "A Conversation I Will Never Forget",
+    "slug": "a-conversation-i-will-never-forget",
+    "topic": "conversation",
+    "difficulty": "hard",
+    "prep_time_seconds": 30,
+    "response_time_seconds": 60,
+    "prompt_text": "Talk about a conversation you have had that you will never forget. Who were you speaking with, and when did this conversation take place? What was said that made it so memorable? Why has it stayed with you ever since?",
+    "vocabulary_tips": [
+      "heartfelt",
+      "profound",
+      "vulnerable",
+      "perspective",
+      "honest",
+      "turning point"
+    ],
+    "connector_phrases": [
+      "I remember it vividly",
+      "At one point",
+      "That's when",
+      "It struck me that",
+      "From then on",
+      "Even now"
+    ],
+    "template_hint": "Establish who you were talking to and the setting, recount the key moment of the conversation, then explain why it left such a lasting impression.",
+    "sample_response_band12": "I remember it vividly. It was a late night about three years ago, sitting on the porch with my grandmother just a few months before she passed away. We were drinking tea, and at one point she started telling me about decisions she regretted and the dreams she'd given up when she was young. That's when she looked at me and said, don't wait for the perfect moment, because it never comes. It struck me that this woman, who always seemed so strong and certain, had carried these regrets quietly for decades. From then on, I started taking more risks in my own life, including changing careers to do something I actually loved. Even now, whenever I hesitate over a big decision, I hear her voice in my head. That single honest conversation completely reshaped how I think about time and courage.",
+    "prompt_tag": "practice",
+    "sort_order": 19
+  },
+  {
+    "task_number": 2,
+    "title": "Saying Goodbye To Someone",
+    "slug": "saying-goodbye-to-someone",
+    "topic": "farewell",
+    "difficulty": "medium",
+    "prep_time_seconds": 30,
+    "response_time_seconds": 60,
+    "prompt_text": "Talk about a time when you had to say goodbye to someone who mattered to you. Who was this person, and why were you parting ways? Where did the goodbye take place, and what happened? How did the experience make you feel?",
+    "vocabulary_tips": [
+      "bittersweet",
+      "emotional",
+      "farewell",
+      "cherish",
+      "tearful",
+      "parting"
+    ],
+    "connector_phrases": [
+      "The day came when",
+      "As we stood there",
+      "I tried to",
+      "In that moment",
+      "Afterwards",
+      "To this day"
+    ],
+    "template_hint": "Explain who the person was and why you had to part, describe the goodbye scene and what happened, then share how the experience felt and what it meant.",
+    "sample_response_band12": "One of the hardest goodbyes I ever experienced was when my closest friend, Sophie, emigrated to Australia about four years ago. We had grown up together and done practically everything side by side, so the news that she was leaving permanently felt almost unreal. The day came when I had to drive her to the airport early in the morning. As we stood there in the departure hall, I tried to stay cheerful and crack jokes, but both of us ended up in tears. In that moment, I realized how rare it is to have someone who truly understands you. Afterwards, I sat in my car for nearly an hour, just letting it sink in. It was such a bittersweet experience, full of sadness but also gratitude. To this day, we still video call every week, and that goodbye taught me to cherish the people who matter.",
+    "prompt_tag": "practice",
+    "sort_order": 20
+  },
+  {
+    "task_number": 2,
+    "title": "A Time You Helped Someone In Need",
+    "slug": "a-time-you-helped-someone-in-need",
+    "topic": "helping",
+    "difficulty": "easy",
+    "prep_time_seconds": 30,
+    "response_time_seconds": 60,
+    "prompt_text": "Think about a time when you helped someone who was going through a difficult situation. Talk about that experience. When and where did it happen? Who did you help, and what did you do for them? How did you feel afterward?",
+    "vocabulary_tips": [
+      "struggling",
+      "reach out",
+      "comfort",
+      "support",
+      "relieved",
+      "grateful"
+    ],
+    "connector_phrases": [
+      "A while back",
+      "At that moment",
+      "So I decided to",
+      "Then",
+      "After a while",
+      "Looking back"
+    ],
+    "template_hint": "Set the scene (when, where, who was in trouble), describe what you noticed and what you did to help, then explain how it turned out and how it made you feel.",
+    "sample_response_band12": "A while back, my close friend Maria was going through a really rough patch. Her mother had just been hospitalized, and she was completely overwhelmed with work and worry. One evening, she called me in tears, so I rushed straight over to her apartment. At that moment, I realized she hadn't eaten all day, so I cooked her a simple meal and just sat with her, letting her talk for hours. Then, over the next two weeks, I drove her to the hospital and helped manage her errands. After a while, her mother recovered, and Maria slowly got back on her feet. Looking back, that experience really stuck with me, because I saw how much a small act of showing up can mean. Honestly, it felt incredibly rewarding to be there when she needed me most.",
+    "prompt_tag": "practice",
+    "sort_order": 21
+  },
+  {
+    "task_number": 2,
+    "title": "An Act Of Kindness Toward You",
+    "slug": "an-act-of-kindness-toward-you",
+    "topic": "kindness",
+    "difficulty": "easy",
+    "prep_time_seconds": 30,
+    "response_time_seconds": 60,
+    "prompt_text": "Talk about a time when someone did something kind for you that you really appreciated. Describe what happened and explain why it meant so much to you. Who was the person, and when did this take place? What exactly did they do for you?",
+    "vocabulary_tips": [
+      "thoughtful",
+      "generous",
+      "unexpected",
+      "touched",
+      "appreciate",
+      "selfless"
+    ],
+    "connector_phrases": [
+      "A few years ago",
+      "Out of nowhere",
+      "To my surprise",
+      "What's more",
+      "Because of that",
+      "Ever since then"
+    ],
+    "template_hint": "Set the scene (when, where, who), describe the unexpected kind thing the person did, then share why it touched you and how it affected you afterward.",
+    "sample_response_band12": "A few years ago, I had just moved to a new city for work, and I honestly felt lonely and a little lost. One rainy morning, my car broke down on the way to the office, and I was panicking on the side of the road. Out of nowhere, an older neighbour I barely knew pulled over, helped me push the car, and then insisted on driving me all the way to work. To my surprise, he even waited to make sure I got in safely. What's more, he checked on me that evening and recommended a trustworthy mechanic. Because of that small act of kindness, I no longer felt like a stranger in town. Ever since then, we've become good friends. It really taught me that one thoughtful gesture from a stranger can completely change how you see a place.",
+    "prompt_tag": "practice",
+    "sort_order": 22
+  },
+  {
+    "task_number": 2,
+    "title": "A Memorable Volunteering Experience",
+    "slug": "a-memorable-volunteering-experience",
+    "topic": "volunteering",
+    "difficulty": "medium",
+    "prep_time_seconds": 30,
+    "response_time_seconds": 60,
+    "prompt_text": "Talk about a time when you volunteered your time to help others or a good cause. Describe the experience. Where did you volunteer, and when was it? What kind of work did you do there? What did you take away from the experience?",
+    "vocabulary_tips": [
+      "sign up",
+      "donate",
+      "rewarding",
+      "community",
+      "make a difference",
+      "fulfilling"
+    ],
+    "connector_phrases": [
+      "One summer",
+      "At first",
+      "As the day went on",
+      "Before I knew it",
+      "By the end",
+      "In the end"
+    ],
+    "template_hint": "Set the scene (where and when you volunteered, who you were with), describe the tasks and a standout moment, then reflect on what you learned or how it changed you.",
+    "sample_response_band12": "One summer, I signed up to volunteer at a local food bank, mostly because a coworker convinced me to join her. At first, I was a bit nervous, since I didn't really know what to expect or anyone there. As the day went on, I was put in charge of sorting donations and packing grocery boxes for families. Before I knew it, hours had flown by, and I was chatting and laughing with the other volunteers like old friends. The most touching moment was handing a box to a young mother who thanked us with tears in her eyes. By the end, my back ached, but my heart felt full. In the end, I kept going back every weekend for almost a year. That single afternoon completely changed how I saw my own free time and what really matters.",
+    "prompt_tag": "practice",
+    "sort_order": 23
+  },
+  {
+    "task_number": 2,
+    "title": "A Time You Helped A Stranger",
+    "slug": "a-time-you-helped-a-stranger",
+    "topic": "stranger",
+    "difficulty": "medium",
+    "prep_time_seconds": 30,
+    "response_time_seconds": 60,
+    "prompt_text": "Describe a time when you helped a complete stranger. Talk about what happened. Where were you, and when did this occur? What was the stranger struggling with, and how did you step in? How did the situation end?",
+    "vocabulary_tips": [
+      "lost",
+      "stranded",
+      "step in",
+      "assist",
+      "directions",
+      "reassure"
+    ],
+    "connector_phrases": [
+      "One afternoon",
+      "Just then",
+      "Without thinking",
+      "So I offered to",
+      "Eventually",
+      "In the end"
+    ],
+    "template_hint": "Set the scene (where you were and what you saw), describe the stranger's problem and how you stepped in to help, then explain how it resolved and how you both felt.",
+    "sample_response_band12": "One afternoon, I was waiting for the train at a busy downtown station when I noticed an elderly tourist looking completely confused and anxious. Just then, I realized she was holding a map upside down and almost in tears, because she had missed her connection and didn't speak much English. Without thinking, I walked over and asked if she needed help. So I offered to look up her route on my phone and explained which platform she needed in simple words. Eventually, I even walked her there and waited until the right train arrived. She kept thanking me and squeezed my hand before getting on. In the end, it only cost me about fifteen minutes, but her relief was unforgettable. Helping a stranger that day reminded me that a little patience and kindness can go a really long way.",
+    "prompt_tag": "practice",
+    "sort_order": 24
+  },
+  {
+    "task_number": 2,
+    "title": "Giving Something Up For Someone",
+    "slug": "giving-something-up-for-someone",
+    "topic": "sacrifice",
+    "difficulty": "hard",
+    "prep_time_seconds": 30,
+    "response_time_seconds": 60,
+    "prompt_text": "Talk about a time when you gave up something important so that someone else could benefit. Describe the experience. What did you give up, and who was it for? When and why did you make that decision? Looking back, how do you feel about your choice?",
+    "vocabulary_tips": [
+      "sacrifice",
+      "give up",
+      "put aside",
+      "selfless",
+      "worthwhile",
+      "no regrets"
+    ],
+    "connector_phrases": [
+      "A couple of years ago",
+      "At the time",
+      "It wasn't easy, but",
+      "After thinking it over",
+      "As a result",
+      "Looking back"
+    ],
+    "template_hint": "Set the scene and explain what was at stake, describe the sacrifice you chose to make and why, then reflect on the outcome and whether you'd do it again.",
+    "sample_response_band12": "A couple of years ago, I had saved up for months to take a dream trip to Japan with my friends. At the time, I was incredibly excited, and the tickets were finally booked. Then my younger brother suddenly got accepted into a university program, but our family couldn't quite cover his first tuition payment. It wasn't easy, but after thinking it over, I cancelled my trip and gave him the money I had saved. At first, I felt a sharp pang of disappointment watching my friends post photos from Japan. As a result, though, my brother started university on time and is now thriving in his career. Looking back, I have absolutely no regrets. That sacrifice taught me that some things, like family, matter far more than a vacation, and seeing him succeed was worth every penny.",
+    "prompt_tag": "practice",
+    "sort_order": 25
+  },
+  {
+    "task_number": 2,
+    "title": "A Time Someone Forgave You",
+    "slug": "a-time-someone-forgave-you",
+    "topic": "forgiveness",
+    "difficulty": "hard",
+    "prep_time_seconds": 30,
+    "response_time_seconds": 60,
+    "prompt_text": "Talk about a time when someone forgave you after you had made a mistake. Describe what you did wrong and who it affected. When did this happen, and how did the person respond? How did their forgiveness make you feel?",
+    "vocabulary_tips": [
+      "apologize",
+      "forgive",
+      "regret",
+      "mend",
+      "let it go",
+      "second chance"
+    ],
+    "connector_phrases": [
+      "Back when",
+      "At first",
+      "To be honest",
+      "Much to my relief",
+      "From then on",
+      "In hindsight"
+    ],
+    "template_hint": "Set the scene and describe the mistake you made, explain how you owned up to it and how the person reacted, then reflect on what their forgiveness meant to you.",
+    "sample_response_band12": "Back when I was in university, I let my best friend down in a way I still remember clearly. We had agreed to work together on a major group presentation, but I procrastinated badly and submitted my part late, which hurt our whole grade. At first, she was understandably furious and barely spoke to me for days. To be honest, I felt awful and guilty, so I finally sat her down, apologized sincerely, and admitted I had been careless. Much to my relief, instead of holding a grudge, she told me she valued our friendship too much to let one mistake ruin it. From then on, I never took her trust for granted again. In hindsight, her forgiveness taught me that owning up to your mistakes honestly can make a relationship even stronger than before.",
+    "prompt_tag": "practice",
+    "sort_order": 26
+  },
+  {
+    "task_number": 2,
+    "title": "Taking Part In A Community Effort",
+    "slug": "taking-part-in-a-community-effort",
+    "topic": "community",
+    "difficulty": "medium",
+    "prep_time_seconds": 30,
+    "response_time_seconds": 60,
+    "prompt_text": "Talk about a time when you joined a group effort to improve your community. What was the project, and where did it take place? What was your role, and who else was involved? How did you feel about the result of everyone's hard work?",
+    "vocabulary_tips": [
+      "pitch in",
+      "team up",
+      "clean-up",
+      "neighbourhood",
+      "accomplish",
+      "togetherness"
+    ],
+    "connector_phrases": [
+      "Last spring",
+      "To begin with",
+      "Together",
+      "As time went on",
+      "By the time we finished",
+      "All in all"
+    ],
+    "template_hint": "Set the scene (the community project, when and where), describe your role and how the group worked together, then share the outcome and the sense of pride it gave you.",
+    "sample_response_band12": "Last spring, my neighbourhood organized a big clean-up to restore a small park that had become overgrown and littered. To begin with, I signed up along with about thirty other residents, including several families with young kids. Together, we spent an entire Saturday picking up trash, pulling weeds, repainting the old benches, and planting fresh flowers. As time went on, more neighbours who were just passing by decided to pitch in too, which was wonderful to see. By the time we finished, the park looked completely transformed, almost unrecognizable from that morning. All in all, it was an exhausting but incredibly satisfying day. What struck me most was the sense of togetherness, since people who had never spoken before were suddenly laughing and working side by side. That community effort honestly made me feel proud to live where I do.",
+    "prompt_tag": "practice",
+    "sort_order": 27
+  },
+  {
+    "task_number": 2,
+    "title": "Helping A Neighbour With Something",
+    "slug": "helping-a-neighbour-with-something",
+    "topic": "neighbour",
+    "difficulty": "easy",
+    "prep_time_seconds": 30,
+    "response_time_seconds": 60,
+    "prompt_text": "Describe a time when you helped one of your neighbours with something. Talk about what happened. Who was the neighbour, and when did this take place? What did they need help with, and what did you do? How did this affect your relationship with them?",
+    "vocabulary_tips": [
+      "lend a hand",
+      "errand",
+      "elderly",
+      "grateful",
+      "favour",
+      "get along"
+    ],
+    "connector_phrases": [
+      "Not long ago",
+      "One day",
+      "Right away",
+      "While I was at it",
+      "After that",
+      "Ever since"
+    ],
+    "template_hint": "Set the scene (the neighbour and what they needed), describe how you stepped in to help, then explain how it strengthened your relationship.",
+    "sample_response_band12": "Not long ago, my elderly neighbour, Mr. Patel, who lives alone next door, knocked on my door looking quite worried. One day during a heavy snowstorm, his driveway was completely buried, and he had an important doctor's appointment that morning. Right away, I grabbed my shovel and spent about forty minutes clearing his driveway and the path to his car. While I was at it, I also scraped the ice off his windshield so he could leave safely. He was so grateful that he insisted on giving me a box of homemade sweets. After that, we started checking in on each other regularly, especially during bad weather. Ever since, our relationship has grown really warm, and now he feels more like family than just a neighbour. That small favour reminded me how much good neighbours can mean in everyday life.",
+    "prompt_tag": "practice",
+    "sort_order": 28
+  },
+  {
+    "task_number": 2,
+    "title": "A Difficult Decision You Made",
+    "slug": "a-difficult-decision-you-made",
+    "topic": "decision",
+    "difficulty": "medium",
+    "prep_time_seconds": 30,
+    "response_time_seconds": 60,
+    "prompt_text": "Talk about a difficult decision you once had to make. Describe a specific time when you had to choose between two important options and it was not easy. When did this happen, and what were you deciding between? How did you finally make up your mind, and how did you feel afterward?",
+    "vocabulary_tips": [
+      "torn",
+      "weigh the options",
+      "consequences",
+      "uncertain",
+      "commit",
+      "relieved"
+    ],
+    "connector_phrases": [
+      "A couple of years ago",
+      "At first",
+      "On one hand",
+      "After thinking it over",
+      "In the end",
+      "Looking back"
+    ],
+    "template_hint": "Set the scene with when and where the choice came up, explain the two options you were torn between and how you finally chose, then say how the decision turned out and why it mattered.",
+    "sample_response_band12": "A couple of years ago, I had to make one of the hardest decisions of my life. I was offered a great job in another city, but my family and friends were all back home. At first, I was really excited, but then the reality hit me. On one hand, the salary was amazing and it was a huge step for my career. On the other hand, I would be leaving everyone I loved behind. For about two weeks, I kept weighing the options, and honestly, I barely slept. After thinking it over, I decided to take the job, because I knew I would regret it if I didn't try. In the end, it turned out to be the right call. Looking back, I'm proud that I trusted myself, even though it was terrifying at the time.",
+    "prompt_tag": "practice",
+    "sort_order": 29
+  },
+  {
+    "task_number": 2,
+    "title": "A Time You Failed And Learned",
+    "slug": "a-time-you-failed-and-learned",
+    "topic": "failure",
+    "difficulty": "medium",
+    "prep_time_seconds": 30,
+    "response_time_seconds": 60,
+    "prompt_text": "Talk about a time when you failed at something and learned an important lesson from it. Describe a specific situation where things did not go the way you hoped. What were you trying to do, what went wrong, and what did you take away from the experience?",
+    "vocabulary_tips": [
+      "disappointed",
+      "underestimate",
+      "setback",
+      "lesson",
+      "embarrassing",
+      "resilient"
+    ],
+    "connector_phrases": [
+      "Back when",
+      "Unfortunately",
+      "To be honest",
+      "As it turned out",
+      "From that point on",
+      "Looking back"
+    ],
+    "template_hint": "Describe when and what you were attempting, explain how and why it went wrong, then end with the lesson you learned and how it changed you.",
+    "sample_response_band12": "Back when I was in university, I failed my very first big exam, and it really shook me. I was studying engineering, and I honestly thought I was naturally good at math, so I barely opened my textbook. Unfortunately, the exam was much harder than I expected, and to be honest, I completely froze. When the results came out, I had failed by a wide margin. I remember sitting in my room feeling so disappointed and embarrassed. As it turned out, that failure was exactly what I needed. From that point on, I started studying every single day and asking for help when I was stuck. I ended up passing the next exam with a high score. Looking back, I'm actually grateful, because that moment taught me that talent means nothing without real, consistent effort.",
+    "prompt_tag": "practice",
+    "sort_order": 30
+  },
+  {
+    "task_number": 2,
+    "title": "A Time You Overcame a Fear",
+    "slug": "a-time-you-overcame-a-fear",
+    "topic": "fear",
+    "difficulty": "easy",
+    "prep_time_seconds": 30,
+    "response_time_seconds": 60,
+    "prompt_text": "Talk about a time when you overcame a fear. Describe a specific moment when you faced something that scared you and pushed through it anyway. What were you afraid of, what made you finally do it, and how did you feel once it was over?",
+    "vocabulary_tips": [
+      "terrified",
+      "nervous",
+      "courage",
+      "heart pounding",
+      "face it",
+      "proud"
+    ],
+    "connector_phrases": [
+      "When I was younger",
+      "For years",
+      "On the day",
+      "Suddenly",
+      "Before I knew it",
+      "In the end"
+    ],
+    "template_hint": "Introduce the fear and where it came from, describe the moment you finally faced it with vivid feelings, then explain the sense of relief or pride you felt afterward.",
+    "sample_response_band12": "When I was younger, I was absolutely terrified of public speaking. For years, I would do anything to avoid standing in front of a crowd. Then, at work, my manager asked me to present our project to the whole department, and I couldn't say no. On the day of the presentation, my heart was pounding and my hands were shaking. I honestly thought I might faint. But once I started talking, something shifted. Before I knew it, the words were just flowing, and people were actually nodding along. When I finished, everyone clapped, and my manager gave me a thumbs up. In the end, I felt this incredible wave of relief and pride. That experience completely changed me, and now I actually volunteer to give presentations. Overcoming that fear made me believe I could handle almost anything.",
+    "prompt_tag": "practice",
+    "sort_order": 31
+  },
+  {
+    "task_number": 2,
+    "title": "A Mistake You Managed To Fix",
+    "slug": "a-mistake-you-managed-to-fix",
+    "topic": "mistake",
+    "difficulty": "medium",
+    "prep_time_seconds": 30,
+    "response_time_seconds": 60,
+    "prompt_text": "Talk about a mistake you made that you later managed to fix. Describe a specific time when you did something wrong and then found a way to put it right. When did this happen, how did you notice the mistake, and what did you do to correct it?",
+    "vocabulary_tips": [
+      "careless",
+      "realize",
+      "mess up",
+      "own up",
+      "correct",
+      "make amends"
+    ],
+    "connector_phrases": [
+      "Not too long ago",
+      "At first",
+      "As soon as",
+      "Right away",
+      "Thankfully",
+      "In the end"
+    ],
+    "template_hint": "Set the scene and describe the mistake, explain how you discovered it and the steps you took to fix it and own up to it, then reflect on the result and the lesson you learned.",
+    "sample_response_band12": "Not too long ago, I made a pretty serious mistake at work. I accidentally sent an important email with the wrong figures to one of our biggest clients. At first, I didn't even notice, but about an hour later, my stomach dropped when I realized what I had done. Right away, I went straight to my manager and owned up to it instead of trying to hide it. Then I quickly drafted a corrected version and called the client personally to apologize and explain. Thankfully, the client was really understanding and appreciated my honesty. We fixed the numbers, and the deal went ahead without any problems. In the end, my manager actually praised me for handling it so professionally. Looking back, that mistake taught me to always double-check my work before hitting send, and to face problems head-on rather than panicking.",
+    "prompt_tag": "practice",
+    "sort_order": 32
+  },
+  {
+    "task_number": 2,
+    "title": "A Time You Had To Be Patient",
+    "slug": "a-time-you-had-to-be-patient",
+    "topic": "patience",
+    "difficulty": "easy",
+    "prep_time_seconds": 30,
+    "response_time_seconds": 60,
+    "prompt_text": "Talk about a time when you had to be very patient. Describe a specific situation when you had to wait calmly or keep trying without rushing. What were you waiting for, why was it hard to stay patient, and how did things turn out in the end?",
+    "vocabulary_tips": [
+      "frustrating",
+      "stay calm",
+      "endure",
+      "worth the wait",
+      "rewarding",
+      "pay off"
+    ],
+    "connector_phrases": [
+      "A few years ago",
+      "Day after day",
+      "At times",
+      "Slowly but surely",
+      "Finally",
+      "In the end"
+    ],
+    "template_hint": "Set up what you were waiting or working toward, describe how you stayed patient even when it was frustrating, then reveal the rewarding result.",
+    "sample_response_band12": "A few years ago, I decided to learn how to play the guitar, and that really tested my patience. I imagined I'd be playing songs within a couple of weeks, but the reality was completely different. Day after day, my fingers hurt, the chords sounded terrible, and at times I wanted to throw the guitar across the room. It was honestly so frustrating. But instead of giving up, I told myself to just practice fifteen minutes a day, no matter what. Slowly but surely, the sounds started getting cleaner, and the chord changes became smoother. Finally, after about six months, I was able to play a full song from start to finish in front of my family. In the end, that moment was incredibly rewarding. Looking back, that whole experience taught me that real progress takes time, and patience truly pays off.",
+    "prompt_tag": "practice",
+    "sort_order": 33
+  },
+  {
+    "task_number": 2,
+    "title": "A Stressful Situation You Handled Well",
+    "slug": "a-stressful-situation-you-handled-well",
+    "topic": "stress",
+    "difficulty": "hard",
+    "prep_time_seconds": 30,
+    "response_time_seconds": 60,
+    "prompt_text": "Talk about a stressful situation that you handled well. Describe a specific time when something stressful happened and you kept your cool and dealt with it successfully. What was the situation, what made it stressful, and what did you do to manage it?",
+    "vocabulary_tips": [
+      "chaotic",
+      "keep calm",
+      "take charge",
+      "think on my feet",
+      "handle",
+      "composed"
+    ],
+    "connector_phrases": [
+      "One time",
+      "Out of nowhere",
+      "Immediately",
+      "Step by step",
+      "Thankfully",
+      "In the end"
+    ],
+    "template_hint": "Describe the stressful event and why it was so tense, explain the calm, clear actions you took to handle it, then end with the successful outcome and how you felt.",
+    "sample_response_band12": "One time, while I was hosting a big family dinner, things suddenly got really stressful. Out of nowhere, my elderly uncle started choking on a piece of food, and the whole room froze in panic. My heart was racing, but I knew I had to stay calm. Immediately, I remembered the first-aid training I had taken years before. Step by step, I got behind him and performed the Heimlich maneuver, and on the second try, the food came out and he could breathe again. Thankfully, he was completely fine within a few minutes, just a little shaken. Everyone was so relieved, and my aunt actually started crying and hugging me. In the end, that moment amazed me, because I had managed to think on my feet and stay composed under genuine pressure.",
+    "prompt_tag": "practice",
+    "sort_order": 34
+  },
+  {
+    "task_number": 2,
+    "title": "A Birthday You Will Never Forget",
+    "slug": "a-birthday-you-will-never-forget",
+    "topic": "birthday",
+    "difficulty": "easy",
+    "prep_time_seconds": 30,
+    "response_time_seconds": 60,
+    "prompt_text": "Talk about a birthday that you will always remember. Describe a specific birthday from your past and explain what made it so special to you. When did it happen and how old were you turning, who did you spend it with, and what happened that day that made it stand out?",
+    "vocabulary_tips": [
+      "memorable",
+      "thoughtful",
+      "surprised",
+      "candles",
+      "celebration",
+      "overwhelmed"
+    ],
+    "connector_phrases": [
+      "A few years ago",
+      "On that particular morning",
+      "At first",
+      "Then suddenly",
+      "Before I knew it",
+      "Looking back now"
+    ],
+    "template_hint": "Set the scene with when it happened and who was there, walk through what made the day unfold the way it did, then close with how the celebration made you feel.",
+    "sample_response_band12": "I'll never forget my twenty-fifth birthday, which happened about three years ago in my hometown. At the time, I was feeling pretty low because I'd just moved back and lost touch with most of my old friends. My sister told me we were just going out for a quiet dinner, so I dressed casually and didn't expect anything. But when we walked into the restaurant, the lights came on and around twenty people shouted, \"Happy birthday!\" I literally froze in the doorway. My sister had secretly tracked down all my childhood friends. There was a homemade cake with way too many candles, and people had brought old photos of us. Honestly, I got a little teary. What made it so memorable wasn't the party itself, but realizing how many people actually cared about me when I felt completely alone. I still smile whenever I think about it.",
+    "prompt_tag": "practice",
+    "sort_order": 35
+  },
+  {
+    "task_number": 2,
+    "title": "A Wedding Or Celebration You Attended",
+    "slug": "a-wedding-or-celebration-you-attended",
+    "topic": "wedding",
+    "difficulty": "medium",
+    "prep_time_seconds": 30,
+    "response_time_seconds": 60,
+    "prompt_text": "Talk about a wedding or other big celebration that you once attended. Describe a specific event and what your experience there was like. When and where did it take place, and whose celebration was it? What did you do during the event, and what is the one moment you remember most clearly?",
+    "vocabulary_tips": [
+      "ceremony",
+      "elegant",
+      "reception",
+      "emotional",
+      "lively",
+      "heartfelt"
+    ],
+    "connector_phrases": [
+      "A couple of years back",
+      "As soon as we arrived",
+      "During the ceremony",
+      "After that",
+      "By the end of the night",
+      "What stayed with me"
+    ],
+    "template_hint": "Open with whose celebration it was and where, describe the key moments of the event in order, and finish with the single image or feeling that stuck with you.",
+    "sample_response_band12": "A couple of years back, I attended my best friend's wedding in a small vineyard just outside the city, and it was absolutely beautiful. It was a warm September afternoon, and the whole place was decorated with fairy lights and wildflowers. I'd known the bride since we were kids, so being there felt incredibly personal. During the ceremony, she walked down the aisle and her father was already crying, which set everyone off. The reception afterward was lively and went on until midnight. We danced, ate way too much food, and gave embarrassing speeches. The moment I remember most clearly, though, was right at sunset, when the couple had their first dance and the whole crowd went silent. It honestly gave me goosebumps. Seeing two people I loved start their life together like that made it a day I will treasure for a long time.",
+    "prompt_tag": "practice",
+    "sort_order": 36
+  },
+  {
+    "task_number": 2,
+    "title": "A Holiday Or Festival You Loved",
+    "slug": "a-holiday-or-festival-you-loved",
+    "topic": "festival",
+    "difficulty": "easy",
+    "prep_time_seconds": 30,
+    "response_time_seconds": 60,
+    "prompt_text": "Talk about a holiday or festival celebration that you really loved. Describe one specific time you took part in it and why you enjoyed it so much. When did it happen and where were you? What did you see, eat, or do, and what made that occasion so enjoyable for you?",
+    "vocabulary_tips": [
+      "festive",
+      "colourful",
+      "tradition",
+      "lively",
+      "decorations",
+      "atmosphere"
+    ],
+    "connector_phrases": [
+      "Every year around that time",
+      "One year in particular",
+      "First",
+      "After a while",
+      "Towards the evening",
+      "By the end"
+    ],
+    "template_hint": "Name the festival and the specific year, describe what you saw, ate and did in vivid sensory detail, then explain what made that particular time so enjoyable.",
+    "sample_response_band12": "One festival I absolutely loved was the Diwali I celebrated a few years ago when I visited my grandparents' village. It was late autumn, and the whole place was glowing. The moment the sun went down, every house lit rows of little clay lamps along their walls, and the streets turned completely golden. First, we cleaned and decorated the house, then my grandmother made these incredible sweets that I ate far too many of. After a while, the neighbours gathered outside and we set off fireworks together, and the sky just exploded with colour. Towards the evening, everyone exchanged gifts and good wishes. What made it so special, though, wasn't the lights or the food. It was the warmth of having three generations of my family laughing in one room. By the end of the night, I felt completely happy, and I still think of it as my best Diwali ever.",
+    "prompt_tag": "practice",
+    "sort_order": 37
+  },
+  {
+    "task_number": 2,
+    "title": "Your Graduation Day",
+    "slug": "your-graduation-day",
+    "topic": "graduation",
+    "difficulty": "medium",
+    "prep_time_seconds": 30,
+    "response_time_seconds": 60,
+    "prompt_text": "Talk about your graduation day and what that day was like for you. When and where did the ceremony take place, and who came to support you? What happened during the day, and why was finishing that chapter of your life meaningful to you?",
+    "vocabulary_tips": [
+      "accomplishment",
+      "proud",
+      "ceremony",
+      "milestone",
+      "diploma",
+      "bittersweet"
+    ],
+    "connector_phrases": [
+      "After years of hard work",
+      "On the morning of",
+      "When my name was called",
+      "Right after that",
+      "Later on",
+      "In the end"
+    ],
+    "template_hint": "Begin with when and where the ceremony was and who attended, walk through the key moments such as receiving your diploma, then reflect on why completing it mattered.",
+    "sample_response_band12": "My university graduation took place about four years ago in our campus's main hall, and it's still one of the proudest days of my life. After years of hard work and a lot of stress, I honestly couldn't believe the day had finally come. On the morning of the ceremony, my parents and my younger brother drove three hours just to be there, and seeing them in the crowd meant everything to me. When my name was called, I walked across the stage, shook the dean's hand, and accepted my diploma while my family cheered way too loudly. Right after that, we threw our caps in the air, which felt amazing. Later on, we took photos all over campus. The reason it mattered so much was that I was the first person in my family to finish university. In the end, it felt like a milestone I'd earned for all of us.",
+    "prompt_tag": "practice",
+    "sort_order": 38
+  },
+  {
+    "task_number": 2,
+    "title": "A Special Family Gathering",
+    "slug": "a-special-family-gathering",
+    "topic": "family",
+    "difficulty": "easy",
+    "prep_time_seconds": 30,
+    "response_time_seconds": 60,
+    "prompt_text": "Talk about a special family gathering that you took part in. Describe one specific occasion when your family came together and what made it memorable. When and where did it happen, and who was there? What did you do together that made the day feel so special?",
+    "vocabulary_tips": [
+      "reunion",
+      "gather",
+      "generations",
+      "warm",
+      "homemade",
+      "laughter"
+    ],
+    "connector_phrases": [
+      "Not too long ago",
+      "The moment everyone arrived",
+      "Throughout the day",
+      "At one point",
+      "As the day went on",
+      "Looking back"
+    ],
+    "template_hint": "Set up the occasion, where it was, and who came, describe what the family did together over the day, and end with why that togetherness felt meaningful.",
+    "sample_response_band12": "Not too long ago, my whole family got together for a reunion at my aunt's house in the countryside, and it turned out to be one of my favourite days of the year. It was the middle of summer, and relatives I hadn't seen in ages travelled from all over to be there. The moment everyone arrived, the house was loud and full of life. Throughout the day, we cooked a huge meal together, with my uncles arguing over the barbecue and my cousins running around the garden. At one point, my grandmother brought out old photo albums, and we spent an hour laughing at how everyone used to look. As the day went on, we played games and told stories until late. What made it so special was having four generations under one roof. Looking back, those simple, ordinary moments are the ones I treasure the most.",
+    "prompt_tag": "practice",
+    "sort_order": 39
+  },
+  {
+    "task_number": 2,
+    "title": "A Surprise That Was Planned For You",
+    "slug": "a-surprise-that-was-planned-for-you",
+    "topic": "surprise",
+    "difficulty": "hard",
+    "prep_time_seconds": 30,
+    "response_time_seconds": 60,
+    "prompt_text": "Talk about a time when someone planned a surprise especially for you. Describe what the surprise was and how the whole thing unfolded. When did it happen, and who was behind it? How did you react in the moment, and why did this gesture mean so much to you?",
+    "vocabulary_tips": [
+      "unexpected",
+      "speechless",
+      "gesture",
+      "secretly",
+      "touched",
+      "overwhelmed"
+    ],
+    "connector_phrases": [
+      "Out of nowhere",
+      "I had absolutely no idea",
+      "At that exact moment",
+      "Before I could react",
+      "It turned out that",
+      "Even now"
+    ],
+    "template_hint": "Establish the ordinary situation you thought you were in, reveal how the surprise was sprung on you, then explain your reaction and why the effort behind it moved you.",
+    "sample_response_band12": "About two years ago, my partner planned a surprise that completely caught me off guard. I'd been having a brutal few months at work, exhausted and a bit burnt out, and I had no idea anything was being arranged. One evening, my partner told me we were just running a quick errand. Out of nowhere, we pulled up at a tiny cabin by a lake, and waiting inside were two of my closest friends who'd flown in for the weekend. I stood frozen in the doorway, completely speechless. It turned out my partner had been secretly planning everything for over a month, coordinating flights behind my back. Before I could even react, everyone was hugging me. What touched me most wasn't the trip itself, but realizing the people I love had noticed I was struggling and quietly did something about it. Even now, it reminds me how lucky I am.",
+    "prompt_tag": "practice",
+    "sort_order": 40
+  },
+  {
+    "task_number": 2,
+    "title": "A Tradition That Means a Lot",
+    "slug": "a-tradition-that-means-a-lot",
+    "topic": "tradition",
+    "difficulty": "hard",
+    "prep_time_seconds": 30,
+    "response_time_seconds": 60,
+    "prompt_text": "Talk about a tradition that means a great deal to you. Describe one specific time you took part in it and what made that occasion stand out. Who were you with, what happened, and why does this tradition hold such a special place in your heart?",
+    "vocabulary_tips": [
+      "meaningful",
+      "ritual",
+      "heritage",
+      "passed down",
+      "cherish",
+      "connection"
+    ],
+    "connector_phrases": [
+      "Ever since I was little",
+      "Every single year",
+      "What usually happens is",
+      "On this particular occasion",
+      "Over time",
+      "To this day"
+    ],
+    "template_hint": "Briefly say what the tradition is and who you share it with, describe one specific time you took part in it, then reflect on the deeper meaning it holds for you.",
+    "sample_response_band12": "A tradition that means a great deal to me is the Sunday morning breakfast my family has shared ever since I was little. It started with my grandfather, who insisted that no matter how busy we got, the whole family had to sit down together at least once a week. On this particular occasion last winter, it was our first breakfast since he had passed away the year before. We'd worried the tradition might fade without him, but that morning my little nephew quietly asked to learn grandfather's pancake recipe. To this day, I still get emotional thinking about it. Everyone crowded into my mother's kitchen, music played, and we cooked together just like always. The tradition matters so much because it keeps us connected and keeps his memory alive. It's a small ritual, but it holds our whole family together, and I'll carry it on for years to come.",
+    "prompt_tag": "practice",
+    "sort_order": 41
+  },
+  {
+    "task_number": 2,
+    "title": "A Fresh Start In A New City",
+    "slug": "a-fresh-start-in-a-new-city",
+    "topic": "relocation",
+    "difficulty": "medium",
+    "prep_time_seconds": 30,
+    "response_time_seconds": 60,
+    "prompt_text": "Talk about a time when you made a fresh start, such as moving to a new home or a new city. Describe that experience and how the change felt for you. When did it happen and where did you move to? What was difficult or exciting at first, and how did this new beginning change your life?",
+    "vocabulary_tips": [
+      "relocate",
+      "unfamiliar",
+      "overwhelming",
+      "adapt",
+      "opportunity",
+      "independence"
+    ],
+    "connector_phrases": [
+      "A few years ago",
+      "In the beginning",
+      "At first",
+      "Little by little",
+      "As time passed",
+      "In the end"
+    ],
+    "template_hint": "Describe when and where you moved and why, walk through the early challenges and small wins of settling in, then reflect on how the fresh start changed you.",
+    "sample_response_band12": "A few years ago, I made a big fresh start when I moved to a completely new city for a job opportunity, leaving behind everything familiar. It was a huge step because I'd lived in the same town my whole life. In the beginning, honestly, it was overwhelming. I didn't know a single person, I kept getting lost on public transit, and my tiny apartment felt empty at night. At first, I genuinely wondered if I'd made a mistake. But little by little, things started to click. I found a coffee shop I loved, made a few friends at work, and slowly learned my way around. As time passed, the unfamiliar streets began to feel like home. Looking back, that move taught me more about independence than anything else ever has. In the end, taking that risk completely changed my life for the better.",
+    "prompt_tag": "practice",
+    "sort_order": 42
+  },
+  {
+    "task_number": 2,
+    "title": "Learning Something New As An Adult",
+    "slug": "learning-something-new-as-an-adult",
+    "topic": "learning",
+    "difficulty": "easy",
+    "prep_time_seconds": 30,
+    "response_time_seconds": 60,
+    "prompt_text": "Talk about a time when you learned something completely new as an adult. Describe what you decided to learn and why you chose it. When did this happen and where were you? How did you feel when you finally started to get the hang of it?",
+    "vocabulary_tips": [
+      "unfamiliar",
+      "determined",
+      "gradually",
+      "rewarding",
+      "intimidating",
+      "accomplished"
+    ],
+    "connector_phrases": [
+      "A couple of years ago",
+      "At first",
+      "After a while",
+      "Before I knew it",
+      "Eventually",
+      "Looking back"
+    ],
+    "template_hint": "Set the scene by naming what you decided to learn and when, then describe how you struggled and improved over time, and finish with how mastering it made you feel.",
+    "sample_response_band12": "A couple of years ago, when I was around thirty, I decided to learn how to swim, which was something I'd always avoided. I signed up for an adult beginner class at my local community pool every Tuesday evening. At first, I felt incredibly self-conscious because everyone else in the group was much younger, and honestly, I was a little scared of the deep end. But my instructor was patient, and after a while I could float on my own without panicking. Before I knew it, I managed to swim an entire length of the pool. I still remember standing at the far wall, completely out of breath but grinning like a child. Looking back, that moment taught me that it's never too late to face a fear, and it gave me the confidence to try other new things since then.",
+    "prompt_tag": "practice",
+    "sort_order": 43
+  },
+  {
+    "task_number": 2,
+    "title": "A Class That Changed My Thinking",
+    "slug": "a-class-that-changed-my-thinking",
+    "topic": "education",
+    "difficulty": "medium",
+    "prep_time_seconds": 30,
+    "response_time_seconds": 60,
+    "prompt_text": "Talk about a course or class that changed the way you think about something. Describe what the class was about and where you took it. What idea or lesson stuck with you the most? Why did it have such a strong effect on you?",
+    "vocabulary_tips": [
+      "perspective",
+      "eye-opening",
+      "assumption",
+      "challenge",
+      "insightful",
+      "transformative"
+    ],
+    "connector_phrases": [
+      "Back when",
+      "At the beginning",
+      "One day",
+      "From that point on",
+      "As a result",
+      "To this day"
+    ],
+    "template_hint": "Introduce the class and when you took it, explain the specific idea that shifted your thinking, then describe how it still affects the way you see things now.",
+    "sample_response_band12": "Back when I was in my final year of university, I took an introductory philosophy course almost by accident, just to fill a gap in my timetable. The class was held in a huge lecture hall, and at the beginning I honestly thought it would be boring and abstract. But one day the professor asked us to question something we'd always assumed was true, and that completely caught me off guard. We spent weeks examining how our backgrounds shape our opinions without us even noticing. From that point on, I started questioning my own snap judgments about people and situations. As a result, I became a much better listener, because I realized I might be wrong. To this day, whenever I feel certain about something, I pause and ask myself why, and I owe that habit entirely to that one unexpected class.",
+    "prompt_tag": "practice",
+    "sort_order": 44
+  },
+  {
+    "task_number": 2,
+    "title": "A Book Or Film That Influenced Me",
+    "slug": "a-book-or-film-that-influenced-me",
+    "topic": "media",
+    "difficulty": "easy",
+    "prep_time_seconds": 30,
+    "response_time_seconds": 60,
+    "prompt_text": "Talk about a book or a film that had a strong influence on you. Describe what it was about and when you first read or watched it. Who recommended it to you, or how did you come across it? In what way did it change or affect you?",
+    "vocabulary_tips": [
+      "moving",
+      "unforgettable",
+      "resonate",
+      "thought-provoking",
+      "inspired",
+      "relatable"
+    ],
+    "connector_phrases": [
+      "A few years back",
+      "The moment",
+      "As the story went on",
+      "By the end",
+      "Ever since then",
+      "In hindsight"
+    ],
+    "template_hint": "Name the book or film and how you discovered it, describe a specific scene or message that hit you, then explain how it changed something about you.",
+    "sample_response_band12": "A few years back, a close friend lent me a film called The Pursuit of Happyness, telling me I simply had to watch it. I remember it was a rainy Sunday afternoon, and I had nothing planned, so I curled up on my couch with a cup of tea. The moment the main character started sleeping in a subway station with his son, I felt completely gripped. As the story went on, I was amazed by how he refused to give up despite losing almost everything. By the end, I was actually in tears, which rarely happens to me. Ever since then, whenever I face a setback at work, I think of that father and remind myself to keep pushing forward. In hindsight, that one film genuinely reshaped how I handle hard times, and I've recommended it to dozens of people since.",
+    "prompt_tag": "practice",
+    "sort_order": 45
+  },
+  {
+    "task_number": 2,
+    "title": "Teaching Someone Else A Skill",
+    "slug": "teaching-someone-else-a-skill",
+    "topic": "teaching",
+    "difficulty": "medium",
+    "prep_time_seconds": 30,
+    "response_time_seconds": 60,
+    "prompt_text": "Talk about a time when you taught someone else a skill. Describe who you taught and what skill it was. Where did this take place and how long did it take? How did you feel when the person finally learned it?",
+    "vocabulary_tips": [
+      "patient",
+      "step-by-step",
+      "frustrating",
+      "breakthrough",
+      "encourage",
+      "proud"
+    ],
+    "connector_phrases": [
+      "Not long ago",
+      "To start with",
+      "Little by little",
+      "After several tries",
+      "Finally",
+      "In the end"
+    ],
+    "template_hint": "Introduce who you taught and the skill, walk through how the teaching went including any struggles, then end with the satisfying moment they succeeded.",
+    "sample_response_band12": "Not long ago, I taught my younger sister how to ride a bicycle in the park near our house. She was about ten at the time, and she'd been too nervous to even sit on the seat. To start with, I held the back of the bike and just let her get used to balancing while I jogged beside her. Little by little, she stopped gripping the handlebars so tightly. After several tries, though, she kept tipping over and got really frustrated, and at one point she wanted to quit completely. I kept encouraging her, telling her she was so close. Finally, on a warm Saturday morning, I let go without telling her, and she rode about twenty metres on her own. In the end, the look of pure joy on her face made me feel incredibly proud, and I'll never forget that moment.",
+    "prompt_tag": "practice",
+    "sort_order": 46
+  },
+  {
+    "task_number": 2,
+    "title": "A Hobby I Unexpectedly Loved",
+    "slug": "a-hobby-i-unexpectedly-loved",
+    "topic": "hobbies",
+    "difficulty": "medium",
+    "prep_time_seconds": 30,
+    "response_time_seconds": 60,
+    "prompt_text": "Talk about a hobby that you unexpectedly fell in love with. Describe what the hobby is and how you first got into it. When and where did you start doing it? Why did it surprise you that you enjoyed it so much?",
+    "vocabulary_tips": [
+      "reluctant",
+      "absorbed",
+      "soothing",
+      "addictive",
+      "passionate",
+      "fulfilling"
+    ],
+    "connector_phrases": [
+      "It all started",
+      "Honestly, at first",
+      "Somehow",
+      "Over time",
+      "Before long",
+      "Now"
+    ],
+    "template_hint": "Explain how you reluctantly started the hobby, describe the moment it clicked for you, then share why it became unexpectedly meaningful.",
+    "sample_response_band12": "It all started about three years ago when my wife dragged me to a pottery class for her birthday. Honestly, at first I had zero interest, and I only went to keep her company at the little studio downtown. I remember getting clay all over my clothes and feeling completely clumsy at the wheel. But somehow, the moment I shaped my first lopsided little bowl, I was hooked. Over time, I found that sitting at the wheel for an hour completely cleared my mind after stressful workdays. Before long, I'd bought my own tools and was going to the studio every single weekend. Now I have shelves full of mugs and bowls that I've given away to friends and family. What surprises me most is that I, someone who never considered himself creative, ended up finding so much peace and joy in something I almost didn't try.",
+    "prompt_tag": "practice",
+    "sort_order": 47
+  },
+  {
+    "task_number": 2,
+    "title": "A Time I Changed My Opinion",
+    "slug": "a-time-i-changed-my-opinion",
+    "topic": "perspective",
+    "difficulty": "hard",
+    "prep_time_seconds": 30,
+    "response_time_seconds": 60,
+    "prompt_text": "Talk about a time when you completely changed your opinion about something. Describe what you used to believe and what made you change your mind. When did this happen, and who or what was involved? How do you feel about it now?",
+    "vocabulary_tips": [
+      "convinced",
+      "stubborn",
+      "reconsider",
+      "open-minded",
+      "realization",
+      "humbling"
+    ],
+    "connector_phrases": [
+      "For the longest time",
+      "Then one day",
+      "It turned out",
+      "Gradually",
+      "After that experience",
+      "These days"
+    ],
+    "template_hint": "State the firm opinion you once held, describe the specific event or person that challenged it, then reflect on how your view and attitude shifted.",
+    "sample_response_band12": "For the longest time, I was completely convinced that working from home was lazy and unproductive, and I used to judge people who did it. I genuinely believed real work only happened in an office. Then one day, during the pandemic, my company sent everyone home, and I had no choice but to try it myself. It turned out that I was far more focused without all the office chatter and constant interruptions. Gradually, I started finishing my tasks faster and even had more energy for my family in the evenings. After that experience, I felt embarrassed about how harshly I'd judged others before understanding their situation. These days, I'm a strong supporter of flexible work, and that whole experience was honestly humbling. It taught me to actually try something myself before forming such a strong opinion.",
+    "prompt_tag": "practice",
+    "sort_order": 48
+  },
+  {
+    "task_number": 2,
+    "title": "Your First Day At Work",
+    "slug": "your-first-day-at-work",
+    "topic": "new beginnings",
+    "difficulty": "easy",
+    "prep_time_seconds": 30,
+    "response_time_seconds": 60,
+    "prompt_text": "Talk about your first day at a new job or a new school. Describe what the experience was like for you. When and where did it take place, and who did you meet that day? How did you feel by the time it was over?",
+    "vocabulary_tips": [
+      "nervous",
+      "unfamiliar",
+      "welcoming",
+      "overwhelmed",
+      "introduce",
+      "settle in"
+    ],
+    "connector_phrases": [
+      "A few years ago",
+      "At first",
+      "As soon as",
+      "Then",
+      "By the end of the day",
+      "Looking back"
+    ],
+    "template_hint": "Set the scene with when, where, and how you felt walking in, then describe what happened and who you met, and finish with how the day ended and what it meant to you.",
+    "sample_response_band12": "I still remember my first day at my current job a couple of years ago. It was a Monday morning in September, and I showed up about fifteen minutes early because I was so nervous. At first, everything felt completely unfamiliar. I didn't know where to sit, and I couldn't even figure out how to log into my computer. Then my manager came over, introduced me to the whole team, and someone offered to grab me a coffee, which honestly made me feel so much more relaxed. By lunchtime, two of my coworkers had invited me to join them, and we ended up chatting for an hour. By the end of the day, I felt like I actually belonged there. Looking back, that first day stuck with me because it taught me that a warm welcome makes all the difference.",
+    "prompt_tag": "practice",
+    "sort_order": 49
+  },
+  {
+    "task_number": 2,
+    "title": "Living On Your Own",
+    "slug": "living-on-your-own",
+    "topic": "independence",
+    "difficulty": "medium",
+    "prep_time_seconds": 30,
+    "response_time_seconds": 60,
+    "prompt_text": "Talk about the first time you lived on your own, away from your family. Describe what that experience was like for you. When did you move out, and where did you go? What was the hardest part of being independent, and how did you adjust over time?",
+    "vocabulary_tips": [
+      "independent",
+      "responsibility",
+      "homesick",
+      "manage",
+      "freedom",
+      "adapt"
+    ],
+    "connector_phrases": [
+      "When I was younger",
+      "In the beginning",
+      "Suddenly",
+      "After a while",
+      "Eventually",
+      "In the end"
+    ],
+    "template_hint": "Begin with when and where you first lived alone, move into the challenges you faced day to day, and close with how you adapted and what you learned about yourself.",
+    "sample_response_band12": "The first time I lived on my own was when I moved to another city for university at eighteen. I rented a tiny studio apartment, and I'll never forget how empty and quiet it felt that first night. In the beginning, everything was a struggle. Suddenly I had to cook my own meals, do my own laundry, and budget my money, and I burned the rice almost every single time. I also felt pretty homesick, and I'd call my mom nearly every evening. After a while, though, I started to enjoy the freedom of making my own decisions. Eventually I learned to manage my time and even throw small dinners for my friends. In the end, living alone forced me to grow up fast, and I'm genuinely proud of how independent I became. That year completely changed me.",
+    "prompt_tag": "practice",
+    "sort_order": 50
+  },
+  {
+    "task_number": 2,
+    "title": "Meeting A Famous Person",
+    "slug": "meeting-a-famous-person",
+    "topic": "Celebrity",
+    "difficulty": "easy",
+    "prep_time_seconds": 30,
+    "response_time_seconds": 60,
+    "prompt_text": "Talk about a time when you saw or met a famous or well-known person in real life. Where were you, and who was the person? When did this happen, and were you alone or with someone? Describe what happened during the encounter and how you felt at that moment.",
+    "vocabulary_tips": [
+      "spot",
+      "in person",
+      "star-struck",
+      "autograph",
+      "approachable",
+      "a quick glimpse"
+    ],
+    "connector_phrases": [
+      "It happened a couple of years ago",
+      "Out of nowhere",
+      "At first I couldn't believe it",
+      "The funny thing is",
+      "By the time I realized",
+      "Looking back on it now"
+    ],
+    "template_hint": "Set the scene with where you were, reveal who the celebrity was and how you reacted, then explain why the brief encounter stuck with you.",
+    "sample_response_band12": "This happened about three years ago, when I was waiting in line at a small coffee shop downtown with my sister. Out of nowhere, I noticed the man ahead of us looked really familiar, and then it hit me that he was a well-known actor from a show I loved. At first I couldn't believe it, so I nudged my sister and whispered to her. He must have noticed us staring, because he turned around, smiled, and said good morning. I was so star-struck that I barely managed to say hello back. My sister, though, was braver and asked for a quick photo, and he happily agreed. The funny thing is, he was much shorter and friendlier than I expected. Looking back on it now, it stayed with me because he treated us like ordinary people, and that small moment of kindness really surprised me.",
+    "prompt_tag": "practice",
+    "sort_order": 51
+  },
+  {
+    "task_number": 2,
+    "title": "Your First Big Presentation",
+    "slug": "your-first-big-presentation",
+    "topic": "public speaking",
+    "difficulty": "easy",
+    "prep_time_seconds": 30,
+    "response_time_seconds": 60,
+    "prompt_text": "Talk about your first performance or presentation in front of an audience. Where did it take place, and who was watching? Were you nervous before you started? How did it turn out in the end?",
+    "vocabulary_tips": [
+      "audience",
+      "stage fright",
+      "rehearse",
+      "confident",
+      "applause",
+      "shaky"
+    ],
+    "connector_phrases": [
+      "Years ago",
+      "Beforehand",
+      "As I stepped up",
+      "Halfway through",
+      "Then",
+      "By the end"
+    ],
+    "template_hint": "Set the scene with the place and audience, describe your nerves and what happened as you performed, and wrap up with the audience's reaction and how it felt to finish.",
+    "sample_response_band12": "My first real presentation was in high school, when I had to give a ten-minute talk in front of my entire class. It was in our biology room, and there were about thirty students plus the teacher all staring at me. Beforehand, I had terrible stage fright. My hands were shaky, my mouth went dry, and I was sure everyone could hear my voice trembling. As I stepped up to the front, I forgot my opening line and just froze for a second. Then I took a deep breath and started reading from my notes. Halfway through, I actually relaxed and even cracked a small joke that got a laugh. By the end, the class clapped, and my teacher said I'd done a great job. That moment was memorable because it was the first time I realized I could speak in public after all.",
+    "prompt_tag": "practice",
+    "sort_order": 52
+  },
+  {
+    "task_number": 2,
+    "title": "Travelling Alone For The First Time",
+    "slug": "travelling-alone-for-the-first-time",
+    "topic": "solo travel",
+    "difficulty": "hard",
+    "prep_time_seconds": 30,
+    "response_time_seconds": 60,
+    "prompt_text": "Talk about the first time you travelled somewhere completely on your own. When did this happen, and what was your destination? What challenges did you face while travelling alone, and why was this experience memorable for you?",
+    "vocabulary_tips": [
+      "destination",
+      "navigate",
+      "anxious",
+      "spontaneous",
+      "self-reliant",
+      "overwhelmed"
+    ],
+    "connector_phrases": [
+      "Back in",
+      "On the first day",
+      "At one point",
+      "Despite that",
+      "Gradually",
+      "By the time"
+    ],
+    "template_hint": "Set up when and where you travelled alone, describe the challenges of finding your way without help, and finish with how you grew and why the trip stayed with you.",
+    "sample_response_band12": "Back in 2019, I took my first solo trip to Japan, and honestly, I was both excited and incredibly anxious. I'd never travelled without family or friends before, so navigating a country where I didn't speak the language felt overwhelming. On the first day, I got completely lost in Tokyo's subway system and ended up on the wrong train twice. At one point, I almost panicked because nobody around me spoke English. Despite that, a kind stranger noticed my confusion and walked me all the way to the right platform. Gradually, I got the hang of reading the maps and even started exploring little neighbourhoods on my own. By the time I flew home two weeks later, I felt like a much more confident person. That trip was memorable because it proved I could rely on myself, even thousands of kilometres from home.",
+    "prompt_tag": "practice",
+    "sort_order": 53
+  },
+  {
+    "task_number": 2,
+    "title": "Tasting A Very Different Food",
+    "slug": "tasting-a-very-different-food",
+    "topic": "food",
+    "difficulty": "easy",
+    "prep_time_seconds": 30,
+    "response_time_seconds": 60,
+    "prompt_text": "Talk about the first time you tried a food that was very different from anything you were used to. Describe the food, where you were, and who introduced it to you. What did it taste like, and how did you react when you first tried it? Would you eat it again?",
+    "vocabulary_tips": [
+      "unusual",
+      "texture",
+      "flavour",
+      "hesitant",
+      "surprised",
+      "acquired taste"
+    ],
+    "connector_phrases": [
+      "A couple of years ago",
+      "At first",
+      "The moment",
+      "To my surprise",
+      "After that",
+      "Ever since"
+    ],
+    "template_hint": "Introduce the food, the place, and who offered it, describe your first hesitant bite and the taste, and end with whether you enjoyed it and would try it again.",
+    "sample_response_band12": "A couple of years ago, I tried durian for the very first time while visiting a friend in Malaysia. We were at a busy night market, and my friend insisted I had to taste the famous \"king of fruits.\" At first, I was really hesitant because the smell was so strong and honestly kind of unpleasant. The moment I held a piece, I almost changed my mind, but my friend was watching me so eagerly that I took a small bite anyway. To my surprise, the texture was creamy and custard-like, and the flavour was sweet with a rich, almost nutty taste. It was completely different from anything I had ever eaten. After that, I actually went back for a second piece. Ever since, durian has become one of my favourite treats, and that experience taught me to keep an open mind about unfamiliar food.",
+    "prompt_tag": "practice",
+    "sort_order": 54
+  },
+  {
+    "task_number": 2,
+    "title": "When You Laughed Until You Cried",
+    "slug": "when-you-laughed-until-you-cried",
+    "topic": "laughter",
+    "difficulty": "easy",
+    "prep_time_seconds": 30,
+    "response_time_seconds": 60,
+    "prompt_text": "Talk about a time when you laughed so hard that you ended up crying. Describe the situation and what was so funny about it. When and where did this happen? Who were you with, and why was it so hilarious?",
+    "vocabulary_tips": [
+      "hilarious",
+      "burst out laughing",
+      "tears streaming",
+      "couldn't stop",
+      "ridiculous",
+      "uncontrollable"
+    ],
+    "connector_phrases": [
+      "A while ago",
+      "At first",
+      "Then suddenly",
+      "Before I knew it",
+      "By that point",
+      "Looking back"
+    ],
+    "template_hint": "Set the scene (when, where, who), describe the moment that triggered the laughter, then explain how it built up and why it stayed with you.",
+    "sample_response_band12": "A few months ago, I was having dinner at my sister's apartment with a couple of close friends. Everything was normal until my friend Daniel tried to tell a story while drinking water, and the punchline made him spit it everywhere across the table. At first we were just chuckling, but then my sister snorted so loudly that it set everyone off. Before I knew it, I was laughing so hard that I literally couldn't breathe, and tears were streaming down my face. Every time we tried to calm down, someone would catch someone else's eye and we'd start all over again. It went on for what felt like ten minutes. Looking back, it was such a ridiculous, silly moment, but it's one of my favourite memories because it reminded me how good it feels to completely let go with people you love.",
+    "prompt_tag": "practice",
+    "sort_order": 55
+  },
+  {
+    "task_number": 2,
+    "title": "When Your Transport Broke Down",
+    "slug": "when-your-transport-broke-down",
+    "topic": "Breakdown",
+    "difficulty": "medium",
+    "prep_time_seconds": 30,
+    "response_time_seconds": 60,
+    "prompt_text": "Talk about a time when your car, bus, or other transport unexpectedly broke down or failed. When and where did this happen, and where were you trying to go? Who were you with, and what did you do to solve the problem? Explain how the situation made you feel.",
+    "vocabulary_tips": [
+      "break down",
+      "stranded",
+      "engine trouble",
+      "tow truck",
+      "pull over",
+      "out of service"
+    ],
+    "connector_phrases": [
+      "One winter morning",
+      "All of a sudden",
+      "Before I knew it",
+      "To make matters worse",
+      "In the end",
+      "What I remember most is"
+    ],
+    "template_hint": "Describe where you were heading, explain how the transport suddenly failed and what you did about it, then share how the delay made you feel.",
+    "sample_response_band12": "One winter morning, I was taking the city bus to an important job interview across town. Everything was going fine until, all of a sudden, the bus made a strange grinding noise and the driver had to pull over to the side of the road. Before I knew it, he announced that the bus was out of service and we all had to get off in the freezing cold. To make matters worse, my phone battery was almost dead, so I couldn't easily call a taxi. I ended up rushing to the next stop and squeezing onto a crowded bus going the same way. In the end, I arrived ten minutes late but still got the job. What I remember most is how panicked I felt standing there, watching the minutes tick by, completely stranded and unsure whether I would make it on time.",
+    "prompt_tag": "practice",
+    "sort_order": 56
+  },
+  {
+    "task_number": 2,
+    "title": "Unexpected Piece Of Good News",
+    "slug": "unexpected-piece-of-good-news",
+    "topic": "good news",
+    "difficulty": "medium",
+    "prep_time_seconds": 30,
+    "response_time_seconds": 60,
+    "prompt_text": "Talk about a time when you received an unexpected piece of good news. Describe what the news was and how you found out. When did it happen and where were you? How did the news make you feel?",
+    "vocabulary_tips": [
+      "thrilled",
+      "overjoyed",
+      "out of the blue",
+      "speechless",
+      "celebrate",
+      "relief"
+    ],
+    "connector_phrases": [
+      "A couple of years ago",
+      "Out of the blue",
+      "At that moment",
+      "As soon as",
+      "Almost immediately",
+      "Ever since then"
+    ],
+    "template_hint": "Set the scene (when, where, what you were doing), reveal the surprising news and how you got it, then describe your reaction and why it mattered.",
+    "sample_response_band12": "A couple of years ago, I was sitting at home on an ordinary weekday afternoon, not expecting anything special. I had applied for a scholarship months earlier and had honestly given up hope. Then, out of the blue, an email popped up on my phone. I almost ignored it, but the subject line caught my eye. As soon as I opened it and read the word congratulations, I froze for a second, completely speechless. I read it three times just to make sure it was real. Almost immediately, I called my parents, and I could barely get the words out because I was so excited. We were all overjoyed, and that evening we went out to celebrate together. It was such a huge relief after so much uncertainty. Ever since then, that moment reminds me that good things really can come when you least expect them.",
+    "prompt_tag": "practice",
+    "sort_order": 57
+  },
+  {
+    "task_number": 2,
+    "title": "A Day Everything Went Right",
+    "slug": "a-day-everything-went-right",
+    "topic": "good day",
+    "difficulty": "medium",
+    "prep_time_seconds": 30,
+    "response_time_seconds": 60,
+    "prompt_text": "Talk about a day when everything seemed to go right for you. Describe what happened from the morning onward and why the day felt so perfect. When was it and where did you spend it? What made it stand out from an ordinary day?",
+    "vocabulary_tips": [
+      "smoothly",
+      "effortless",
+      "fell into place",
+      "fortunate",
+      "memorable",
+      "on a roll"
+    ],
+    "connector_phrases": [
+      "It all started when",
+      "First",
+      "After that",
+      "One thing after another",
+      "By the end of the day",
+      "Looking back on it"
+    ],
+    "template_hint": "Set the scene of the morning, walk through how each part of the day went well in sequence, then reflect on why the whole day felt special.",
+    "sample_response_band12": "I still remember one Saturday last summer when everything just fell into place. It all started when I woke up naturally, without an alarm, feeling completely rested. First, I made my favourite breakfast and the weather outside was warm and sunny. After that, I went to the farmers' market with a friend, and I happened to run into an old classmate I hadn't seen in years. One good thing after another kept happening. In the afternoon, I found out I'd passed an exam I'd been worried about, and even the bus arrived the second I got to the stop. By the end of the day, we had a relaxed dinner outside as the sun set. Looking back on it, nothing dramatic happened, but everything just flowed smoothly. It was one of those rare days where I felt genuinely lucky and content from start to finish.",
+    "prompt_tag": "practice",
+    "sort_order": 58
+  },
+  {
+    "task_number": 2,
+    "title": "A Joyful Moment With Family",
+    "slug": "a-joyful-moment-with-family",
+    "topic": "family",
+    "difficulty": "easy",
+    "prep_time_seconds": 30,
+    "response_time_seconds": 60,
+    "prompt_text": "Talk about a joyful moment you shared with your family. When and where did it happen, and who was there with you? What made the moment so special, and why do you remember it fondly?",
+    "vocabulary_tips": [
+      "gathered",
+      "warmth",
+      "cherished",
+      "togetherness",
+      "heartwarming",
+      "bonded"
+    ],
+    "connector_phrases": [
+      "Not long ago",
+      "To begin with",
+      "While we were",
+      "At one point",
+      "The whole time",
+      "Even now"
+    ],
+    "template_hint": "Set the scene (occasion, place, who was there), describe the joyful activity and a specific happy detail, then explain why it means so much to you.",
+    "sample_response_band12": "Not long ago, my whole family gathered at my grandmother's house to celebrate her birthday, and it turned into one of the happiest evenings I can remember. To begin with, all my cousins, aunts, and uncles came from different cities, which rarely happens anymore. While we were cooking dinner together in the kitchen, everyone was talking over each other, laughing, and sharing old stories. At one point, my grandmother started telling us about when she was young, and we all gathered around to listen. There was such a warm feeling of togetherness the whole time. After dinner, we brought out the cake and sang to her, and I could see how touched she was. Even now, when I think about that evening, it fills me with warmth. It reminded me how precious these moments are, especially because we so rarely get to be together.",
+    "prompt_tag": "practice",
+    "sort_order": 59
+  },
+  {
+    "task_number": 2,
+    "title": "A Lucky Coincidence",
+    "slug": "a-lucky-coincidence",
+    "topic": "coincidence",
+    "difficulty": "hard",
+    "prep_time_seconds": 30,
+    "response_time_seconds": 60,
+    "prompt_text": "Talk about a lucky coincidence that once happened to you. Describe what was going on and explain why it felt like such a remarkable stroke of luck. When and where did it happen? What made the timing so surprising?",
+    "vocabulary_tips": [
+      "coincidence",
+      "by chance",
+      "remarkable",
+      "fortunate",
+      "timing",
+      "unbelievable"
+    ],
+    "connector_phrases": [
+      "Some time ago",
+      "As it happened",
+      "Just as",
+      "What are the odds",
+      "Surprisingly",
+      "In hindsight"
+    ],
+    "template_hint": "Set the scene and what you needed or were doing, reveal the chance event and its surprising timing, then reflect on how lucky it felt.",
+    "sample_response_band12": "Some time ago, I was travelling alone in a city I'd never visited, and I lost my wallet on the subway. I was panicking because I had no cash, no cards, and barely any phone battery. As it happened, I stepped into a small café just to think for a minute. Just as I sat down, I heard someone call my name, and unbelievably, it was an old university friend I hadn't spoken to in years. What are the odds of that, in a foreign city, at that exact moment? Surprisingly, she lived nearby and immediately helped me cancel my cards and lent me some money. In hindsight, if I had walked into any other café, or arrived a few minutes later, we never would have crossed paths. That coincidence saved my trip, and honestly, it still feels almost too perfect to be real.",
+    "prompt_tag": "practice",
+    "sort_order": 60
+  },
+  {
+    "task_number": 2,
+    "title": "Feeling Completely Relaxed And Content",
+    "slug": "feeling-completely-relaxed-and-content",
+    "topic": "relaxation",
+    "difficulty": "medium",
+    "prep_time_seconds": 30,
+    "response_time_seconds": 60,
+    "prompt_text": "Talk about a time when you felt completely relaxed and content. Describe where you were and what allowed you to feel so at peace. When did this happen and who, if anyone, was with you? Why did that moment feel so calming?",
+    "vocabulary_tips": [
+      "peaceful",
+      "at ease",
+      "unwind",
+      "serene",
+      "calm",
+      "carefree"
+    ],
+    "connector_phrases": [
+      "I remember once",
+      "Around that time",
+      "As I sat there",
+      "Little by little",
+      "For a while",
+      "In that moment"
+    ],
+    "template_hint": "Set the scene of a calm setting (when, where, who), describe the sensory details that helped you relax, then explain why that peaceful feeling stayed with you.",
+    "sample_response_band12": "I remember once, during a short trip to the coast, feeling more relaxed than I had in a very long time. Around that time, I had been extremely stressed with work and barely sleeping. One evening, I walked down to the beach completely alone, just as the sun was setting. As I sat there on the cool sand, I could hear the gentle waves and feel a soft breeze on my face. Little by little, all the tension in my shoulders just melted away. For a while, I didn't think about anything at all, which almost never happens for me. The sky turned shades of pink and orange, and everything felt serene and still. In that moment, I felt completely carefree and at peace with myself. It reminded me how important it is to slow down, and I still picture that scene whenever I need to calm down.",
+    "prompt_tag": "practice",
+    "sort_order": 61
+  },
+  {
+    "task_number": 2,
+    "title": "A Small Moment That Made My Day",
+    "slug": "a-small-moment-that-made-my-day",
+    "topic": "everyday joy",
+    "difficulty": "easy",
+    "prep_time_seconds": 30,
+    "response_time_seconds": 60,
+    "prompt_text": "Talk about a small, everyday moment that unexpectedly made your day. Describe what happened and why such a simple thing meant so much to you. When and where did it occur? How did it change the way you felt that day?",
+    "vocabulary_tips": [
+      "simple",
+      "brightened",
+      "thoughtful",
+      "genuine",
+      "uplifting",
+      "grateful"
+    ],
+    "connector_phrases": [
+      "Just the other day",
+      "All of a sudden",
+      "It started when",
+      "At that point",
+      "From then on",
+      "It just goes to show"
+    ],
+    "template_hint": "Set the scene of an ordinary day, describe the small kind or pleasant moment, then explain how it shifted your mood and why it mattered.",
+    "sample_response_band12": "Just the other day, I was having a pretty rough morning. I was tired, running late, and stuck in a long line at my local coffee shop. It started when I finally reached the counter and realized I'd forgotten my wallet at home. I felt so frustrated and was about to give up and leave. All of a sudden, the woman behind me in line quietly told the barista she'd pay for my coffee. At that point, I was completely caught off guard by such a thoughtful gesture from a total stranger. I thanked her about five times, and she just smiled and said to pass it on someday. From then on, my whole mood shifted, and I felt genuinely grateful for the rest of the day. It just goes to show that even the smallest act of kindness can completely brighten someone's day.",
+    "prompt_tag": "practice",
+    "sort_order": 62
+  },
+  {
+    "task_number": 2,
+    "title": "A Time You Felt Extremely Nervous",
+    "slug": "a-time-you-felt-extremely-nervous",
+    "topic": "nervousness",
+    "difficulty": "easy",
+    "prep_time_seconds": 30,
+    "response_time_seconds": 60,
+    "prompt_text": "Everyone has moments when their nerves get the better of them. Talk about a time when you felt extremely nervous about something. When and where did this happen? Who were you with, and what made you so nervous? How did you feel afterward?",
+    "vocabulary_tips": [
+      "nerve-racking",
+      "anxious",
+      "trembling",
+      "racing heart",
+      "overwhelmed",
+      "relieved"
+    ],
+    "connector_phrases": [
+      "A few years ago",
+      "At first",
+      "As the moment got closer",
+      "Then",
+      "Before I knew it",
+      "In the end"
+    ],
+    "template_hint": "Set the scene (when, where, who) -> describe the nervous build-up and what actually happened -> end with how you felt once it was over and why it stuck with you.",
+    "sample_response_band12": "A few years ago, I had to give my very first presentation at a new job, and I was standing outside the meeting room with about twenty colleagues waiting inside. At first I felt fairly calm, but as the clock ticked closer my heart started racing and my hands were trembling. I kept rehearsing my opening line over and over, terrified I'd forget everything. Then the manager called my name, and before I knew it I was at the front, my voice a little shaky. Honestly, the first thirty seconds were a blur. But once I got into my rhythm, the nerves slowly melted away and people started nodding along. In the end, my boss congratulated me and I felt absolutely relieved and even a bit proud. Looking back, that nerve-racking moment taught me that I'm braver than I think.",
+    "prompt_tag": "practice",
+    "sort_order": 63
+  },
+  {
+    "task_number": 2,
+    "title": "A Time You Had To Be Brave",
+    "slug": "a-time-you-had-to-be-brave",
+    "topic": "bravery",
+    "difficulty": "medium",
+    "prep_time_seconds": 30,
+    "response_time_seconds": 60,
+    "prompt_text": "Sometimes life asks us to find courage we did not know we had. Talk about a time when you had to be brave. What was the situation, and where did it take place? Why did it require courage from you? How did things turn out in the end?",
+    "vocabulary_tips": [
+      "courage",
+      "daunting",
+      "summon",
+      "determined",
+      "fearful",
+      "triumphant"
+    ],
+    "connector_phrases": [
+      "It happened when",
+      "To be honest",
+      "At that point",
+      "So I decided",
+      "Eventually",
+      "Looking back"
+    ],
+    "template_hint": "Set the scene and the challenge -> explain why it was frightening and how you summoned courage -> finish with the outcome and what it meant to you.",
+    "sample_response_band12": "It happened a couple of winters ago, when my elderly neighbour slipped on the ice right outside our building and couldn't get up. To be honest, I froze for a second because there was nobody else around and I had no idea what to do. At that point I realised I was the only one who could help, so I decided to stay calm, call an ambulance, and keep her warm with my own coat until it arrived. It was daunting, because she was frightened and in pain, and I was terrified of making things worse. So I just kept talking to her gently and reassuring her. Eventually the paramedics came and told me I'd done exactly the right thing. Looking back, that quiet act of courage made me realise that being brave isn't about feeling fearless. It's about acting anyway.",
+    "prompt_tag": "practice",
+    "sort_order": 64
+  },
+  {
+    "task_number": 2,
+    "title": "When You Stood Up For Someone",
+    "slug": "when-you-stood-up-for-someone",
+    "topic": "standing up",
+    "difficulty": "medium",
+    "prep_time_seconds": 30,
+    "response_time_seconds": 60,
+    "prompt_text": "There are moments when we feel we have to speak up, either for ourselves or for someone else. Talk about a time when you stood up for yourself or another person. What happened, and where did it take place? Why did you feel you had to step in, and what was the result of your actions?",
+    "vocabulary_tips": [
+      "unfair",
+      "speak up",
+      "confront",
+      "principled",
+      "intervene",
+      "respect"
+    ],
+    "connector_phrases": [
+      "One day",
+      "At first I hesitated",
+      "But then",
+      "So I stepped in",
+      "After that",
+      "In hindsight"
+    ],
+    "template_hint": "Set the scene and the unfair situation -> explain your hesitation and the moment you decided to act -> end with the outcome and the values it confirmed.",
+    "sample_response_band12": "One day at my part-time job in a cafe, I watched a customer rudely shouting at a new colleague over a tiny mistake with his order. At first I hesitated, because the customer was older and clearly furious, and I didn't want to make a scene. But then I saw my coworker on the verge of tears, and I just couldn't stay silent. So I stepped in calmly, apologized for the mix-up, offered to remake his drink, and politely said there was no need to raise his voice. He went quiet, muttered something, and eventually left. After that, my coworker thanked me again and again, and even the manager noticed. In hindsight, confronting that situation was uncomfortable, but it felt absolutely right. It reminded me that staying silent in the face of unfairness just isn't who I want to be.",
+    "prompt_tag": "practice",
+    "sort_order": 65
+  },
+  {
+    "task_number": 2,
+    "title": "A Big Risk You Decided To Take",
+    "slug": "a-big-risk-you-decided-to-take",
+    "topic": "risk",
+    "difficulty": "hard",
+    "prep_time_seconds": 30,
+    "response_time_seconds": 60,
+    "prompt_text": "Sometimes we take a chance that could change the direction of our lives. Talk about a time when you decided to take a big risk. What was the risk, and what was going on in your life at the time? Why did you decide to go for it, and what happened as a result?",
+    "vocabulary_tips": [
+      "gamble",
+      "uncertainty",
+      "leap of faith",
+      "stakes",
+      "calculated",
+      "payoff"
+    ],
+    "connector_phrases": [
+      "A while back",
+      "After a lot of thought",
+      "Despite the doubts",
+      "Ultimately",
+      "As it turned out",
+      "Looking back now"
+    ],
+    "template_hint": "Set the scene and the stakes -> explain the doubts, the decision to leap, and what unfolded -> finish with the payoff and what you learned about taking chances.",
+    "sample_response_band12": "A while back, I had a stable, comfortable office job, but deep down I'd always dreamed of moving abroad to study. So when I got accepted into a program in another country, I faced a huge decision, because saying yes meant quitting my job, leaving my family, and emptying most of my savings. After a lot of thought and quite a few sleepless nights, I decided to take the leap. Despite all the doubts and the warnings from relatives, something told me I'd regret it forever if I didn't try. Ultimately, I packed two suitcases and flew off into total uncertainty. As it turned out, that gamble completely transformed my life. I gained new skills, lifelong friends, and a confidence I never had before. Looking back now, it was the scariest yet best decision I've ever made, and the payoff was more than worth the risk.",
+    "prompt_tag": "practice",
+    "sort_order": 66
+  },
+  {
+    "task_number": 2,
+    "title": "A Time You Faced Something Alone",
+    "slug": "a-time-you-faced-something-alone",
+    "topic": "solitude",
+    "difficulty": "hard",
+    "prep_time_seconds": 30,
+    "response_time_seconds": 60,
+    "prompt_text": "Occasionally we have to handle a difficult situation entirely on our own. Talk about a time when you had to face something alone. What was the challenge, when did it happen, and why was there no one to help you? How did you cope, and how did you feel once it was over?",
+    "vocabulary_tips": [
+      "isolated",
+      "self-reliant",
+      "overwhelming",
+      "resilient",
+      "cope",
+      "independent"
+    ],
+    "connector_phrases": [
+      "It was around the time",
+      "With no one to turn to",
+      "Step by step",
+      "Somehow",
+      "After a while",
+      "In the end"
+    ],
+    "template_hint": "Set the scene and why you were alone -> describe how you coped step by step with the challenge -> close with the relief and the strength you discovered in yourself.",
+    "sample_response_band12": "It was around the time I first moved to a new city for work, completely on my own and knowing absolutely no one. One night, just two weeks in, I came down with a high fever and could barely get out of bed. With no family nearby and no friends yet to call, I felt utterly isolated and honestly a little scared. But step by step, I forced myself to manage. I ordered medicine online, made simple soup, and rested as much as I could. Somehow, despite feeling miserable, I got myself through three difficult days. After a while the fever finally broke, and I remember lying there feeling exhausted but strangely proud. In the end, facing that alone taught me how resilient and self-reliant I really could be. It was a turning point that made me trust myself like never before.",
+    "prompt_tag": "practice",
+    "sort_order": 67
+  },
+  {
+    "task_number": 2,
+    "title": "A Memorable Day At Work",
+    "slug": "a-memorable-day-at-work",
+    "topic": "work",
+    "difficulty": "easy",
+    "prep_time_seconds": 30,
+    "response_time_seconds": 60,
+    "prompt_text": "Talk about a memorable day you had at work. Describe a specific day that stands out clearly in your memory. When did this happen, and where were you working? What made the day so memorable for you?",
+    "vocabulary_tips": [
+      "memorable",
+      "unexpected",
+      "celebrate",
+      "achievement",
+      "rewarding",
+      "stood out"
+    ],
+    "connector_phrases": [
+      "A while ago",
+      "On that particular day",
+      "At first",
+      "Then",
+      "Before I knew it",
+      "Looking back"
+    ],
+    "template_hint": "Set the scene (when, where, your role), then walk through what happened during the day step by step, and finish with why the day stayed with you.",
+    "sample_response_band12": "A couple of years ago, I had a day at work I'll never forget. I was working as a sales assistant at a small electronics shop downtown, and it was the day before the big holiday sale. At first, the morning was completely chaotic because three of my coworkers had called in sick, so I was practically running the store on my own. Then customers kept pouring in, and I somehow managed to keep everyone happy. By closing time, I had sold more than anyone in the store's history that day. My manager came over, shook my hand, and told the whole team how proud she was of me. I felt absolutely exhausted but incredibly proud of myself. Looking back, that day really stands out because it showed me I could stay calm and handle real pressure, and that feeling has stayed with me ever since.",
+    "prompt_tag": "practice",
+    "sort_order": 68
+  },
+  {
+    "task_number": 2,
+    "title": "A Team Project You Worked On",
+    "slug": "a-team-project-you-worked-on",
+    "topic": "teamwork",
+    "difficulty": "medium",
+    "prep_time_seconds": 30,
+    "response_time_seconds": 60,
+    "prompt_text": "Talk about a time when you worked on a project together with a team. Choose a specific project where you cooperated closely with other people. What was the project about, and who else was involved? How did the team work together, and how did things turn out?",
+    "vocabulary_tips": [
+      "collaborate",
+      "deadline",
+      "responsibilities",
+      "contribute",
+      "coordinate",
+      "successful"
+    ],
+    "connector_phrases": [
+      "A few months ago",
+      "To begin with",
+      "As we went along",
+      "Meanwhile",
+      "In the end",
+      "All in all"
+    ],
+    "template_hint": "Introduce the project and the team, then explain how you divided the work and faced challenges together, and close with the result and how the teamwork felt.",
+    "sample_response_band12": "A few months ago, I worked on a group project with four classmates for our marketing course. The project was about designing a complete advertising campaign for a local coffee shop, and we only had three weeks to finish it. To begin with, we sat down and divided the responsibilities, so I took charge of the social media side while the others handled research and design. As we went along, we ran into disagreements about the colours and the slogan, but we always talked things through and reached a compromise. Meanwhile, we met almost every evening online to check our progress. In the end, our campaign won the highest grade in the class, and the coffee shop owner actually used some of our ideas. All in all, it was an amazing experience because I learned how much a team can achieve when everyone pulls in the same direction.",
+    "prompt_tag": "practice",
+    "sort_order": 69
+  },
+  {
+    "task_number": 2,
+    "title": "Solving A Tricky Problem",
+    "slug": "solving-a-tricky-problem",
+    "topic": "problem-solving",
+    "difficulty": "hard",
+    "prep_time_seconds": 30,
+    "response_time_seconds": 60,
+    "prompt_text": "Talk about a time when you solved a tricky problem at work or at school. Describe a specific situation where something was difficult to figure out. What was the problem, and how did you finally solve it? How did you feel afterward?",
+    "vocabulary_tips": [
+      "challenging",
+      "figure out",
+      "tackle",
+      "solution",
+      "frustrating",
+      "breakthrough"
+    ],
+    "connector_phrases": [
+      "Some time ago",
+      "At first",
+      "After a while",
+      "Eventually",
+      "Finally",
+      "In the end"
+    ],
+    "template_hint": "Describe the problem and why it was difficult, then explain the steps you took to work it out, and end with the solution and your sense of relief or pride.",
+    "sample_response_band12": "Last year, I ran into a really tricky problem while working as a junior accountant. One afternoon, our monthly report wouldn't balance, and there was a difference of nearly two thousand dollars that nobody could explain. At first, I assumed it was a simple typing mistake, so I checked every entry twice, but the numbers still didn't add up. After a while, I started to feel quite frustrated because the deadline was the next morning. Eventually, I decided to trace the figures backwards, transaction by transaction. Finally, I discovered that one invoice had been recorded twice in two different accounts. Once I removed the duplicate, everything balanced perfectly. In the end, I felt an enormous sense of relief, and honestly, a bit of pride too. That experience taught me that staying patient and changing your approach is often the key to cracking a difficult problem.",
+    "prompt_tag": "practice",
+    "sort_order": 70
+  },
+  {
+    "task_number": 2,
+    "title": "A Colleague Who Really Helped",
+    "slug": "a-colleague-who-really-helped",
+    "topic": "people",
+    "difficulty": "easy",
+    "prep_time_seconds": 30,
+    "response_time_seconds": 60,
+    "prompt_text": "Talk about a colleague or classmate who really helped you. Describe a specific person who gave you support when you needed it. Who was this person, and what was your situation at the time? How exactly did they help you, and why do you still remember it?",
+    "vocabulary_tips": [
+      "supportive",
+      "patient",
+      "guidance",
+      "grateful",
+      "encouraging",
+      "generous"
+    ],
+    "connector_phrases": [
+      "When I first",
+      "At that time",
+      "One day",
+      "Thanks to her",
+      "From then on",
+      "To this day"
+    ],
+    "template_hint": "Introduce the person and the difficult moment you were in, then describe what they did to help you, and finish with how grateful you felt.",
+    "sample_response_band12": "When I first started my job as a nurse, I felt completely overwhelmed, and there was one senior colleague named Maria who really helped me through it. At that time, I was terrified of making mistakes, and the hospital felt huge and confusing. One day, she noticed me struggling during a busy shift, and instead of letting me sink, she quietly stayed late to walk me through every procedure. She was incredibly patient and never made me feel stupid for asking questions. Thanks to her guidance, I gradually built up my confidence, and within a couple of months I was handling my own patients comfortably. From then on, she became a kind of mentor to me. To this day, I'm deeply grateful for her kindness, and whenever I see a new colleague struggling, I try to help them the way she helped me.",
+    "prompt_tag": "practice",
+    "sort_order": 71
+  },
+  {
+    "task_number": 2,
+    "title": "An Interview That Went Well",
+    "slug": "an-interview-that-went-well",
+    "topic": "interview",
+    "difficulty": "medium",
+    "prep_time_seconds": 30,
+    "response_time_seconds": 60,
+    "prompt_text": "Talk about an interview or a test that went surprisingly well for you. Describe a specific time when you did much better than you expected. What was the interview or test for, and why were you worried about it? What happened, and how did you feel afterward?",
+    "vocabulary_tips": [
+      "nervous",
+      "prepared",
+      "confident",
+      "surprisingly",
+      "relieved",
+      "outcome"
+    ],
+    "connector_phrases": [
+      "A while back",
+      "Beforehand",
+      "To my surprise",
+      "As it turned out",
+      "In the end",
+      "Looking back"
+    ],
+    "template_hint": "Set up the interview or test and your nervousness, then describe how it unexpectedly went smoothly, and close with your surprise and relief at the result.",
+    "sample_response_band12": "A while back, I had a job interview for a position I really wanted, and to my surprise, it went far better than I ever expected. Beforehand, I was incredibly nervous because it was for a marketing role at a well-known company, and I assumed the competition would be fierce. The night before, I barely slept, and I kept imagining all the difficult questions they might ask. To my surprise, the moment I walked in, the two interviewers were warm and friendly, and we ended up having a genuine conversation rather than a tense interrogation. As it turned out, my preparation paid off, and I was able to answer every question confidently with real examples. In the end, they offered me the job on the spot. Looking back, it taught me that nervousness doesn't always predict the outcome, and good preparation truly makes a difference.",
+    "prompt_tag": "practice",
+    "sort_order": 72
+  },
+  {
+    "task_number": 2,
+    "title": "A Very Busy And Challenging Day",
+    "slug": "a-very-busy-and-challenging-day",
+    "topic": "challenge",
+    "difficulty": "medium",
+    "prep_time_seconds": 30,
+    "response_time_seconds": 60,
+    "prompt_text": "Talk about a specific day when you had an enormous amount to handle. Describe a time when everything seemed to happen at once and you felt under real pressure. When did it happen, and what made the day so demanding? How did you manage to get through it all?",
+    "vocabulary_tips": [
+      "hectic",
+      "overwhelming",
+      "deadline",
+      "juggle",
+      "exhausted",
+      "manage"
+    ],
+    "connector_phrases": [
+      "Not long ago",
+      "From the very start",
+      "On top of that",
+      "Somehow",
+      "By the end of the day",
+      "In hindsight"
+    ],
+    "template_hint": "Set the scene of the day, then pile on the tasks and pressures you faced one after another, and finish with how you coped and how you felt at the end.",
+    "sample_response_band12": "Not long ago, I had one of the most challenging days of my entire career. It was the day my company launched a new product, and I was responsible for coordinating everything. From the very start, my phone rang non-stop with questions from the team, and our website kept crashing because of all the traffic. On top of that, two key suppliers called to say their deliveries would be late, so I had to find replacements within an hour. I honestly felt completely overwhelmed and barely had time to eat lunch. Somehow, by staying focused and tackling one problem at a time, I managed to keep everything moving. By the end of the day, the launch was a success, and we had sold far more than we'd predicted. In hindsight, I was utterly exhausted, but I felt incredibly proud that I'd kept my cool under so much pressure.",
+    "prompt_tag": "practice",
+    "sort_order": 73
+  },
+  {
+    "task_number": 2,
+    "title": "A Time You Took The Lead",
+    "slug": "a-time-you-took-the-lead",
+    "topic": "leadership",
+    "difficulty": "hard",
+    "prep_time_seconds": 30,
+    "response_time_seconds": 60,
+    "prompt_text": "Talk about a time when you took the lead on something. Describe a specific situation where you stepped up and guided others. What was the situation, and why did you decide to take charge? What did you do, and how did it turn out?",
+    "vocabulary_tips": [
+      "responsibility",
+      "initiative",
+      "organize",
+      "motivate",
+      "decisive",
+      "accomplish"
+    ],
+    "connector_phrases": [
+      "A couple of years ago",
+      "At that point",
+      "So I decided",
+      "Step by step",
+      "As a result",
+      "In the end"
+    ],
+    "template_hint": "Explain the situation that needed a leader, then describe how you took charge and what actions you took, and close with the outcome and what leading taught you.",
+    "sample_response_band12": "A couple of years ago, I took the lead on organizing a charity event for my community centre. Originally, someone else was supposed to run it, but he suddenly fell ill two weeks before the date. At that point, everything was a mess, with no volunteers confirmed and the venue still unbooked. So I decided to step up, even though I'd never led a project that big before. Step by step, I created a schedule, divided the tasks among twenty volunteers, and personally called every sponsor to keep them on board. I also worked hard to keep everyone motivated whenever people felt stressed. As a result, the event went ahead smoothly and we raised over five thousand dollars for the local food bank. In the end, I felt genuinely proud, and that experience showed me I was far more capable of leading people than I had ever realized.",
+    "prompt_tag": "practice",
+    "sort_order": 74
+  },
+  {
+    "task_number": 2,
+    "title": "An Important Lesson You Learned",
+    "slug": "an-important-lesson-you-learned",
+    "topic": "lesson",
+    "difficulty": "hard",
+    "prep_time_seconds": 30,
+    "response_time_seconds": 60,
+    "prompt_text": "Talk about an important lesson you learned at work or at school. Describe a specific experience from your past that taught you something valuable. What happened, and what exactly did you learn from it? How has that lesson affected you since then?",
+    "vocabulary_tips": [
+      "valuable",
+      "realize",
+      "mistake",
+      "humbling",
+      "perspective",
+      "ever since"
+    ],
+    "connector_phrases": [
+      "Years ago",
+      "Back then",
+      "It was only later that",
+      "That experience",
+      "Ever since",
+      "These days"
+    ],
+    "template_hint": "Describe the experience and what went wrong or surprised you, then explain the lesson it taught you, and finish with how it has changed your behaviour since.",
+    "sample_response_band12": "Years ago, when I was still a student, I learned a lesson that completely changed how I work. Back then, I was overconfident and often left my assignments until the very last minute. One time, I had a major research paper due, and I assumed I could finish it the night before. However, my computer crashed at midnight and I lost almost everything. I ended up submitting a rushed, messy paper and got the worst grade of my life. It was only later that I realized the problem wasn't bad luck, it was poor planning. That experience taught me the real value of preparing early and backing up my work. Ever since, I've started every important task well in advance, and these days my colleagues actually rely on me for being organized. That humbling moment honestly shaped the kind of professional I've become.",
+    "prompt_tag": "practice",
+    "sort_order": 75
+  },
+  {
+    "task_number": 2,
+    "title": "Fixing Something Yourself",
+    "slug": "fixing-something-yourself",
+    "topic": "Repairs",
+    "difficulty": "medium",
+    "prep_time_seconds": 30,
+    "response_time_seconds": 60,
+    "prompt_text": "Talk about a time when you fixed or built something yourself instead of paying someone else to do it. What was it, and what tools did you use? Was it harder than you expected, and how did you feel when you finally finished?",
+    "vocabulary_tips": [
+      "repair",
+      "tools",
+      "instructions",
+      "assemble",
+      "tricky",
+      "satisfying"
+    ],
+    "connector_phrases": [
+      "A while back",
+      "To begin with",
+      "Then",
+      "Halfway through",
+      "Eventually",
+      "In the end"
+    ],
+    "template_hint": "Set the scene (what broke or needed building and why you decided to do it yourself), walk through the steps and the difficulties, then end with the sense of accomplishment you felt.",
+    "sample_response_band12": "A while back, the bottom drawer of my kitchen cabinet completely came off its rails, and it was driving me crazy. Instead of calling a handyman, I decided to fix it myself one Saturday morning. To begin with, I watched a couple of short videos online to figure out what was actually wrong. Then I grabbed a screwdriver, a small hammer, and the spare screws I had lying around. Halfway through, I realized the rail itself was bent, so I had to carefully straighten it, which was honestly trickier than I expected. Eventually, after about an hour of trial and error, the drawer slid open and shut perfectly. In the end, I felt incredibly proud of myself. It was such a satisfying feeling, and now whenever I open that drawer, I quietly remind myself that I managed to fix it with my own two hands.",
+    "prompt_tag": "practice",
+    "sort_order": 76
+  },
+  {
+    "task_number": 2,
+    "title": "An Unforgettable Meal You Cooked",
+    "slug": "an-unforgettable-meal-you-cooked",
+    "topic": "Cooking",
+    "difficulty": "medium",
+    "prep_time_seconds": 30,
+    "response_time_seconds": 60,
+    "prompt_text": "Describe a time when you cooked a meal that you will never forget. What did you make, and who were you cooking for? What made that meal so special, and how did the people react when they tasted it?",
+    "vocabulary_tips": [
+      "recipe",
+      "ingredients",
+      "flavour",
+      "seasoning",
+      "from scratch",
+      "delicious"
+    ],
+    "connector_phrases": [
+      "One evening",
+      "First of all",
+      "While it was cooking",
+      "Just as",
+      "Finally",
+      "To this day"
+    ],
+    "template_hint": "Set the scene (the occasion, who you were cooking for), describe preparing the dish and the moment of serving it, then end with the reaction and why the meal stayed with you.",
+    "sample_response_band12": "One evening last winter, I decided to cook a full three-course dinner for my parents' wedding anniversary. I wanted it to be special, so I chose my grandmother's old chicken curry recipe. First of all, I spent the whole afternoon chopping vegetables and grinding the spices from scratch, which filled the kitchen with an amazing aroma. While it was simmering, I quickly baked a simple chocolate cake for dessert. Just as my parents sat down, I brought everything to the table, feeling a little nervous. The moment they tasted the curry, my mom's eyes lit up, and my dad said it reminded him of his childhood. Finally, we all ate together, laughing and telling old stories. To this day, that meal stands out to me, not because of the food itself, but because of how genuinely happy it made everyone feel.",
+    "prompt_tag": "practice",
+    "sort_order": 77
+  },
+  {
+    "task_number": 2,
+    "title": "A Power Outage At Home",
+    "slug": "a-power-outage-at-home",
+    "topic": "Emergency",
+    "difficulty": "hard",
+    "prep_time_seconds": 30,
+    "response_time_seconds": 60,
+    "prompt_text": "Talk about a time when something unexpected happened at home, such as a power outage. What were you doing when it happened, and how long did it last? How did you and the people around you deal with the situation?",
+    "vocabulary_tips": [
+      "blackout",
+      "candles",
+      "flashlight",
+      "sudden",
+      "pitch dark",
+      "cope"
+    ],
+    "connector_phrases": [
+      "One stormy night",
+      "Out of nowhere",
+      "At that point",
+      "Meanwhile",
+      "As time went on",
+      "In the end"
+    ],
+    "template_hint": "Set the scene (what you were doing and where), describe the sudden event and how you and others reacted, then end with how it turned out and what you took away from it.",
+    "sample_response_band12": "One stormy night a few years ago, I was at home watching a movie with my younger sister while heavy rain pounded against the windows. Out of nowhere, the lights flickered twice and then the entire house went pitch dark. At that point, my sister got a little scared, so I tried to stay calm and reassure her. I fumbled around in the kitchen drawer until I found a flashlight, and then we lit a few candles in the living room. Meanwhile, my phone told me the outage had hit our whole neighbourhood. As time went on, we actually started enjoying ourselves, telling ghost stories and playing card games by candlelight. In the end, the power came back after about three hours. Honestly, that unexpected blackout turned into one of the cosiest, most memorable evenings I've ever spent with my sister.",
+    "prompt_tag": "practice",
+    "sort_order": 78
+  },
+  {
+    "task_number": 2,
+    "title": "A Weekend You Really Enjoyed",
+    "slug": "a-weekend-you-really-enjoyed",
+    "topic": "Weekend",
+    "difficulty": "easy",
+    "prep_time_seconds": 30,
+    "response_time_seconds": 60,
+    "prompt_text": "Think about a weekend that you really enjoyed. Tell a friend about it. Where did you go and who was with you? What did you do that made it so enjoyable, and why do you still remember it?",
+    "vocabulary_tips": [
+      "relax",
+      "getaway",
+      "scenery",
+      "carefree",
+      "memorable",
+      "recharge"
+    ],
+    "connector_phrases": [
+      "Last summer",
+      "On the first day",
+      "After that",
+      "The next morning",
+      "Before we knew it",
+      "Looking back"
+    ],
+    "template_hint": "Set the scene (when the weekend was, where you went, and who joined you), describe the main activities that made it special, then end with why it stayed memorable.",
+    "sample_response_band12": "Last summer, I spent an absolutely wonderful weekend at a small lakeside cabin with three of my closest friends. We had all been really stressed from work, so we desperately needed to recharge. On the first day, we went swimming in the lake and then lay in the sun, just chatting and laughing about everything. After that, we cooked dinner together outside and watched the sunset paint the whole sky orange and pink. The next morning, we woke up early and went hiking through this quiet forest trail, with birds singing all around us. Before we knew it, the weekend was already over, which made us a little sad. Looking back, what made it so special wasn't really the activities themselves. It was the feeling of being completely carefree and surrounded by good friends. To this day, I think of it whenever I need to relax.",
+    "prompt_tag": "practice",
+    "sort_order": 79
+  },
+  {
+    "task_number": 2,
+    "title": "A Memorable Morning You Had",
+    "slug": "a-memorable-morning-you-had",
+    "topic": "Routine",
+    "difficulty": "medium",
+    "prep_time_seconds": 30,
+    "response_time_seconds": 60,
+    "prompt_text": "Talk about a particular morning that turned out to be especially memorable for you. Describe when and where it happened, and who you were with at the time. Tell us what made that morning so special, and explain how you felt as it unfolded.",
+    "vocabulary_tips": [
+      "peaceful",
+      "refreshing",
+      "unexpected",
+      "calm",
+      "memorable",
+      "set the tone"
+    ],
+    "connector_phrases": [
+      "One morning",
+      "At first",
+      "Then",
+      "Suddenly",
+      "After a while",
+      "Looking back"
+    ],
+    "template_hint": "Open by setting the scene (when and where that specific morning happened and who was there), then narrate what actually happened in order, and finish by explaining why it stuck with you and how it made you feel.",
+    "sample_response_band12": "One morning about a year ago, I woke up earlier than usual at our family cottage by the lake. At first I was a little annoyed because I had wanted to sleep in, but then I noticed how completely silent everything was. I quietly slipped outside with a warm cup of coffee and sat on the wooden dock while my parents were still sleeping. Suddenly the sun broke over the trees, and the whole lake turned a soft golden colour. A pair of loons drifted past, calling to each other, and I just sat there, totally still, feeling deeply peaceful. After a while my dad joined me, and we talked quietly about nothing in particular. Looking back, that calm, unexpected morning really mattered to me because it reminded me to slow down. It honestly set the tone for that entire summer, and I still smile whenever I remember it.",
+    "prompt_tag": "practice",
+    "sort_order": 80
+  },
+  {
+    "task_number": 2,
+    "title": "Helping Out At Home As A Child",
+    "slug": "helping-out-at-home-as-a-child",
+    "topic": "Childhood",
+    "difficulty": "medium",
+    "prep_time_seconds": 30,
+    "response_time_seconds": 60,
+    "prompt_text": "Talk about a time when you helped out at home when you were a child. How old were you, and what task did you take on? Why did you decide to help, and what did you learn from that experience?",
+    "vocabulary_tips": [
+      "chores",
+      "responsibility",
+      "proud",
+      "lend a hand",
+      "grown-up",
+      "rewarding"
+    ],
+    "connector_phrases": [
+      "When I was little",
+      "One day",
+      "So",
+      "As soon as",
+      "After a while",
+      "Even now"
+    ],
+    "template_hint": "Set the scene (how old you were and the situation at home), describe the task you took on and how it went, then end with the lesson it taught you.",
+    "sample_response_band12": "When I was about eight years old, my mother caught a really bad cold and had to stay in bed for a few days. Seeing her so tired, I decided I wanted to lend a hand around the house. One day, I quietly took it upon myself to prepare a simple breakfast for my younger brother. So, I carefully toasted some bread, poured two glasses of milk, and even arranged everything neatly on a tray. As soon as my mom saw what I had done, she gave me the warmest smile and called me her little helper. After a while, I also started clearing the dishes and tidying up the living room. Honestly, I felt incredibly grown-up and proud of myself. Even now, I remember how rewarding it felt to take on real responsibility, and that experience taught me how good it feels to care for the people I love.",
+    "prompt_tag": "practice",
+    "sort_order": 81
+  },
+  {
+    "task_number": 2,
+    "title": "The Day You Got a Pet",
+    "slug": "the-day-you-got-a-pet",
+    "topic": "Pet",
+    "difficulty": "easy",
+    "prep_time_seconds": 30,
+    "response_time_seconds": 60,
+    "prompt_text": "Think about the day you got a pet for the first time. Describe that day to a friend. What kind of pet was it, and where did it come from? What was your very first impression, and how did your life change afterward?",
+    "vocabulary_tips": [
+      "adopt",
+      "shelter",
+      "playful",
+      "companion",
+      "instantly",
+      "bond"
+    ],
+    "connector_phrases": [
+      "A few years ago",
+      "The moment",
+      "At first",
+      "Soon",
+      "From that day on",
+      "Ever since"
+    ],
+    "template_hint": "Set the scene (when you got the pet and where it came from), describe your first meeting and impression, then end with how the pet changed your life.",
+    "sample_response_band12": "A few years ago, on a bright Saturday afternoon, my family and I drove to a local animal shelter to adopt a dog. The moment we walked in, this tiny golden puppy ran straight up to me and started wagging its tail like crazy. At first, I was nervous because I had never owned a pet before, but I instantly fell in love with those big, hopeful eyes. We named her Bella, and on the drive home she curled up in my lap and fell asleep. Soon, she became the most playful, affectionate companion I could imagine. From that day on, my whole daily routine changed. I had to wake up early for walks and feedings, but I never once minded. Ever since, Bella has filled our home with so much joy, and I genuinely can't picture my life without her.",
+    "prompt_tag": "practice",
+    "sort_order": 82
+  },
+  {
+    "task_number": 2,
+    "title": "A Sunrise Or Sunset You Loved",
+    "slug": "a-sunrise-or-sunset-you-loved",
+    "topic": "sunset",
+    "difficulty": "easy",
+    "prep_time_seconds": 30,
+    "response_time_seconds": 60,
+    "prompt_text": "Talk about a sunrise or sunset that you will never forget. Describe a specific time when you watched the sky change colours and it left a strong impression on you. When and where did it happen? Who were you with, and why was that moment so memorable?",
+    "vocabulary_tips": [
+      "horizon",
+      "glowing",
+      "breathtaking",
+      "shades of orange",
+      "silhouette",
+      "peaceful"
+    ],
+    "connector_phrases": [
+      "A couple of years ago",
+      "At first",
+      "Little by little",
+      "Then",
+      "Before I knew it",
+      "Looking back"
+    ],
+    "template_hint": "Set the scene (when, where, who), describe how the sky slowly changed and how you felt watching it, then end with why that moment stayed with you.",
+    "sample_response_band12": "I'll never forget a sunset I saw a couple of summers ago, when I visited my cousin who lives near the coast. It was a warm August evening, and the two of us decided to walk down to the pier just before eight. At first the sky was a plain, washed-out blue, but little by little it turned into these incredible shades of orange and deep pink. The sun looked enormous as it sank toward the horizon, and the whole bay was glowing. We just stood there in silence, watching the boats turn into dark silhouettes. Before I knew it, the sun had completely disappeared and the stars were coming out. Looking back, what made it so special wasn't only how breathtaking it was, but how calm and connected I felt in that moment with someone I love.",
+    "prompt_tag": "practice",
+    "sort_order": 83
+  },
+  {
+    "task_number": 2,
+    "title": "A Camping Trip You Went On",
+    "slug": "a-camping-trip-you-went-on",
+    "topic": "camping",
+    "difficulty": "medium",
+    "prep_time_seconds": 30,
+    "response_time_seconds": 60,
+    "prompt_text": "Talk about a camping trip that you went on. Describe a specific time when you stayed outdoors overnight and tell us what the experience was like. When did the trip happen, and who did you go with? What did you do there, and what made the trip stand out for you?",
+    "vocabulary_tips": [
+      "tent",
+      "campfire",
+      "wilderness",
+      "sleeping bag",
+      "marshmallows",
+      "rugged"
+    ],
+    "connector_phrases": [
+      "A few years ago",
+      "To start with",
+      "After that",
+      "Later that night",
+      "All of a sudden",
+      "By the end"
+    ],
+    "template_hint": "Set the scene (when, where, who you camped with), walk through the main events of the trip in order, then close with why the trip was meaningful.",
+    "sample_response_band12": "A few years ago, three of my closest friends and I went on a weekend camping trip to a national park up in the mountains. To start with, we spent almost an hour struggling to put up the tent, which had us laughing the whole time. After that, we hiked along a rocky trail and found this gorgeous lake where we ate our lunch. The best part came later that night, though. We built a campfire, roasted marshmallows, and told stories until really late. All of a sudden, we heard rustling in the bushes, and we were convinced a bear was coming, but it turned out to be a tiny raccoon. By the end of the trip, I felt completely refreshed. What made it so memorable was being totally disconnected from screens and just enjoying the wilderness with good company.",
+    "prompt_tag": "practice",
+    "sort_order": 84
+  },
+  {
+    "task_number": 2,
+    "title": "A Close Encounter With An Animal",
+    "slug": "a-close-encounter-with-an-animal",
+    "topic": "animals",
+    "difficulty": "hard",
+    "prep_time_seconds": 30,
+    "response_time_seconds": 60,
+    "prompt_text": "Talk about a time when you had a close encounter with an animal. Describe a specific situation when an animal came surprisingly near to you. When and where did this happen, what kind of animal was it, and how did you react?",
+    "vocabulary_tips": [
+      "startled",
+      "creature",
+      "instinct",
+      "cautiously",
+      "heart pounding",
+      "gentle"
+    ],
+    "connector_phrases": [
+      "One morning",
+      "Out of nowhere",
+      "At that moment",
+      "For a few seconds",
+      "Eventually",
+      "In the end"
+    ],
+    "template_hint": "Set the scene (when, where, what you were doing), build tension as the animal appears and you react, then reflect on how it felt and why it stuck with you.",
+    "sample_response_band12": "One morning a couple of summers ago, I was jogging on a quiet trail near my home, just as the sun was coming up. Out of nowhere, a deer stepped onto the path only a few metres in front of me. I was completely startled and froze on the spot, my heart pounding. At that moment, the deer froze too, and we just stared at each other. For a few seconds, neither of us moved. I noticed how huge and gentle its eyes were, and I tried to breathe quietly so I wouldn't scare it. Eventually, it flicked its ears, turned, and bounded off into the trees. In the end, the whole thing lasted maybe twenty seconds, but it felt magical. I still remember it because it was a rare, peaceful reminder of how close wild creatures really are to us.",
+    "prompt_tag": "practice",
+    "sort_order": 85
+  },
+  {
+    "task_number": 2,
+    "title": "A Day At The Beach Or Lake",
+    "slug": "a-day-at-the-beach-or-lake",
+    "topic": "beach",
+    "difficulty": "easy",
+    "prep_time_seconds": 30,
+    "response_time_seconds": 60,
+    "prompt_text": "Talk about a day that you spent at a beach or a lake. Describe a specific day when you went to the water to relax or have fun. When did this happen, and who went with you? What did you do during the day, and why was it an enjoyable experience?",
+    "vocabulary_tips": [
+      "shoreline",
+      "splashing",
+      "sunbathing",
+      "refreshing",
+      "sandcastle",
+      "waves"
+    ],
+    "connector_phrases": [
+      "Last summer",
+      "First of all",
+      "Then",
+      "Throughout the day",
+      "Just as",
+      "All in all"
+    ],
+    "template_hint": "Set the scene (when, where, who you went with), describe the activities you did during the day, then end with the overall feeling and why it was a good day.",
+    "sample_response_band12": "Last summer, my whole family spent an entire Saturday at a lake about an hour from our city. First of all, we got there early and claimed a nice spot right on the shoreline before it got too crowded. Then my younger brother and I jumped straight into the water, and it was so refreshing after the long, hot drive. Throughout the day, we swam, built a giant sandcastle, and floated around on an inflatable raft. My parents mostly relaxed, sunbathing and reading under a big umbrella. Just as the afternoon was ending, we had a picnic with sandwiches and watermelon right by the water. All in all, it was such a simple but perfect day. What made it special was that everyone in my family was relaxed and happy at the same time, which honestly doesn't happen very often.",
+    "prompt_tag": "practice",
+    "sort_order": 86
+  },
+  {
+    "task_number": 2,
+    "title": "Growing A Plant Or Garden",
+    "slug": "growing-a-plant-or-garden",
+    "topic": "gardening",
+    "difficulty": "medium",
+    "prep_time_seconds": 30,
+    "response_time_seconds": 60,
+    "prompt_text": "Talk about a time when you grew a plant or a garden of your own. Describe one specific experience of looking after something you were growing. When did you start, and what did you decide to grow? How did you take care of it, and why was the experience rewarding for you?",
+    "vocabulary_tips": [
+      "seedling",
+      "soil",
+      "watering",
+      "sprout",
+      "blossom",
+      "harvest"
+    ],
+    "connector_phrases": [
+      "A while back",
+      "In the beginning",
+      "Day by day",
+      "After a few weeks",
+      "Eventually",
+      "In the end"
+    ],
+    "template_hint": "Set the scene (when and why you started, what you grew), describe the process of caring for it over time, then end with the payoff and how it made you feel.",
+    "sample_response_band12": "A while back, during a long, slow period when I was stuck at home, I decided to grow tomatoes on my small balcony. In the beginning, I honestly had no idea what I was doing, so I just planted a few seeds in some pots of soil and hoped for the best. Day by day, I watered them every morning and made sure they got plenty of sunlight. After a few weeks, tiny green sprouts finally pushed through, and I was so excited I actually took photos of them. Eventually, the plants grew tall and started to blossom, and small green tomatoes appeared. In the end, I harvested a whole bowl of ripe, red tomatoes and used them in a salad for my family. It was incredibly rewarding because I had created something from almost nothing, and it taught me to be patient.",
+    "prompt_tag": "practice",
+    "sort_order": 87
+  },
+  {
+    "task_number": 2,
+    "title": "A Walk That Cleared Your Mind",
+    "slug": "a-walk-that-cleared-your-mind",
+    "topic": "walking",
+    "difficulty": "medium",
+    "prep_time_seconds": 30,
+    "response_time_seconds": 60,
+    "prompt_text": "Talk about a walk that completely cleared your mind. Describe a specific time when going for a walk helped you calm down or think more clearly about a problem. When did this happen, and where did you walk? What was on your mind beforehand, and how did you feel by the end of the walk?",
+    "vocabulary_tips": [
+      "overwhelmed",
+      "stroll",
+      "fresh air",
+      "clear-headed",
+      "wander",
+      "at ease"
+    ],
+    "connector_phrases": [
+      "One evening",
+      "Beforehand",
+      "As I walked",
+      "Step by step",
+      "Gradually",
+      "By the time"
+    ],
+    "template_hint": "Set the scene (when, where, what was stressing you), describe how the walk gradually changed your mood, then end with the clear-headed feeling you were left with.",
+    "sample_response_band12": "One evening, after a really stressful week at work, I felt completely overwhelmed, so I decided to go for a long walk in a park near my apartment. Beforehand, my head was spinning with deadlines and a difficult conversation I'd had with my boss, and I just couldn't switch off. As I walked, though, I started to notice the fresh air, the sound of the leaves, and people walking their dogs. Step by step, my breathing slowed down and my thoughts stopped racing. Gradually, the problems that had felt enormous an hour earlier began to seem much more manageable. By the time I got home, almost an hour later, I felt completely clear-headed and at ease. I remember that walk because it taught me something simple but important, which is that sometimes the best way to solve a problem is just to step away from it.",
+    "prompt_tag": "practice",
+    "sort_order": 88
+  },
+  {
+    "task_number": 2,
+    "title": "A Storm or Snowfall You Remember",
+    "slug": "a-storm-or-snowfall-you-remember",
+    "topic": "weather",
+    "difficulty": "medium",
+    "prep_time_seconds": 30,
+    "response_time_seconds": 60,
+    "prompt_text": "Talk about a storm or a snowfall that you remember vividly. Describe a specific time when extreme weather made a strong impression on you. When and where did it happen, and what was the weather like? What did you do during it, and why has it stayed in your memory?",
+    "vocabulary_tips": [
+      "thunder",
+      "downpour",
+      "blizzard",
+      "howling wind",
+      "blanket of snow",
+      "deafening"
+    ],
+    "connector_phrases": [
+      "I remember one winter",
+      "Suddenly",
+      "Within minutes",
+      "While",
+      "After it passed",
+      "To this day"
+    ],
+    "template_hint": "Set the scene (when, where, who you were with), describe the dramatic weather and what you did during it, then close with why the memory has lasted.",
+    "sample_response_band12": "I remember one winter, a few years ago, when an enormous snowstorm hit our city overnight. It started as a light snowfall in the evening, but suddenly, around midnight, the wind picked up and turned it into a full blizzard. Within minutes, you couldn't see the houses across the street, and the howling wind was almost deafening. While the storm raged outside, my family and I sat together in the living room with candles, because the power had gone out. We played board games and drank hot chocolate to stay warm. After it passed, we woke up to find everything buried under a thick, white blanket of snow, and the whole neighbourhood was silent and sparkling. To this day, I remember it so clearly because, even though it was a little scary, it brought my family closer together in a really cozy way.",
+    "prompt_tag": "practice",
+    "sort_order": 89
+  },
+  {
+    "task_number": 2,
+    "title": "A Night Looking At The Stars",
+    "slug": "a-night-looking-at-the-stars",
+    "topic": "stargazing",
+    "difficulty": "easy",
+    "prep_time_seconds": 30,
+    "response_time_seconds": 60,
+    "prompt_text": "Talk about a night that you spent looking at the stars. Describe a specific time when you watched the night sky and it made an impression on you. When and where did this happen, and who were you with? What did you see, and why was that night memorable for you?",
+    "vocabulary_tips": [
+      "constellation",
+      "shooting star",
+      "pitch black",
+      "twinkling",
+      "Milky Way",
+      "vast"
+    ],
+    "connector_phrases": [
+      "One night",
+      "At first",
+      "After a while",
+      "Just then",
+      "Eventually",
+      "Even now"
+    ],
+    "template_hint": "Set the scene (when, where, who you were with), describe what you saw in the sky and how you reacted, then end with the feeling or thought it left you with.",
+    "sample_response_band12": "One night, when I was staying at a friend's cabin far from the city, the two of us decided to lie on a blanket in the backyard and look up at the stars. At first my eyes hadn't adjusted, so I could only see a few faint dots. After a while, though, as it got truly pitch black, hundreds of twinkling stars appeared, and I could even make out the faint band of the Milky Way stretching across the sky. Just then a shooting star streaked across, and we both gasped and made a wish. Eventually we stopped talking and simply lay there in silence for what felt like an hour. Even now, I remember how tiny and yet how peaceful I felt. The sky was so vast that it really put all my everyday worries into perspective.",
+    "prompt_tag": "practice",
+    "sort_order": 90
+  },
+  {
+    "task_number": 2,
+    "title": "A Memorable Meal With Loved Ones",
+    "slug": "a-memorable-meal-with-loved-ones",
+    "topic": "family meal",
+    "difficulty": "easy",
+    "prep_time_seconds": 30,
+    "response_time_seconds": 60,
+    "prompt_text": "Talk about a memorable meal you shared with family or friends. Describe a specific time when you sat down to eat together and it really stayed with you. When and where did it happen? Who was there with you, and what made that meal so special?",
+    "vocabulary_tips": [
+      "gathering",
+      "homemade",
+      "laughter",
+      "cozy",
+      "heartwarming",
+      "savour"
+    ],
+    "connector_phrases": [
+      "A couple of years ago",
+      "One evening",
+      "As soon as",
+      "While we were eating",
+      "Before long",
+      "Looking back now"
+    ],
+    "template_hint": "Set the scene with when, where, and who, then walk through what you ate and talked about, and close with why that meal still feels special to you.",
+    "sample_response_band12": "A couple of years ago, my whole family got together at my grandmother's small apartment to celebrate her birthday. It was a chilly winter evening, and the kitchen was warm and steamy from all the cooking. We squeezed around her old wooden table, maybe ten of us, elbow to elbow. As soon as she brought out her famous chicken stew, everyone went quiet for a second, and then the laughter started. My cousins and I kept telling old childhood stories, and my grandmother just sat there smiling. Before long, we'd been at that table for almost three hours. Honestly, the food was delicious, but it wasn't really about the food. Looking back now, that meal stays with me because it was one of the last big gatherings we had before my grandmother passed away. I still feel that warmth whenever I think about it.",
+    "prompt_tag": "practice",
+    "sort_order": 91
+  },
+  {
+    "task_number": 2,
+    "title": "Returning A Faulty Product",
+    "slug": "returning-a-faulty-product",
+    "topic": "Complaint",
+    "difficulty": "medium",
+    "prep_time_seconds": 30,
+    "response_time_seconds": 60,
+    "prompt_text": "Talk about a time when you returned a faulty product or made a complaint about poor service. What was the product or service, and what exactly went wrong? When did this happen, and who did you speak to about the problem? Describe how the situation was resolved and how you felt about it.",
+    "vocabulary_tips": [
+      "faulty",
+      "refund",
+      "exchange",
+      "customer service",
+      "receipt",
+      "defective"
+    ],
+    "connector_phrases": [
+      "A while back",
+      "As soon as I got home",
+      "The problem was",
+      "After explaining the situation",
+      "Eventually",
+      "To my relief"
+    ],
+    "template_hint": "Explain what you bought and what was wrong with it, describe the conversation when you complained, and finish with how it was resolved and how you felt.",
+    "sample_response_band12": "A while back, I bought a pair of expensive wireless headphones from an electronics store as a treat for myself. As soon as I got home and charged them, I realized the left side wasn't working at all. The problem was that I had thrown away the box, so I was worried they wouldn't take them back. The next day I returned to the store, found my receipt, and explained the situation to the customer service desk. At first the clerk seemed reluctant, but after I calmly described the defect, he tested them and agreed they were clearly faulty. Eventually he offered me a full refund or a brand-new pair, and I chose the exchange. To my relief, the new ones worked perfectly. It was memorable because I'm usually shy about complaining, and that day I learned that staying polite but firm really does get results.",
+    "prompt_tag": "practice",
+    "sort_order": 92
+  },
+  {
+    "task_number": 2,
+    "title": "A Wonderful Restaurant Experience",
+    "slug": "a-wonderful-restaurant-experience",
+    "topic": "restaurant",
+    "difficulty": "medium",
+    "prep_time_seconds": 30,
+    "response_time_seconds": 60,
+    "prompt_text": "Talk about a wonderful experience you once had at a restaurant. Think of a specific time when everything about the visit felt just right. Where was the restaurant, and what was the occasion? What happened during the meal that made it so memorable for you?",
+    "vocabulary_tips": [
+      "atmosphere",
+      "attentive",
+      "exquisite",
+      "ambiance",
+      "impeccable",
+      "memorable"
+    ],
+    "connector_phrases": [
+      "A few months ago",
+      "The moment we walked in",
+      "Throughout the evening",
+      "What really stood out",
+      "By the end of the night",
+      "Ever since then"
+    ],
+    "template_hint": "Set the scene with the restaurant and the occasion, describe the standout moments of service or food, and finish with why it left such a strong impression.",
+    "sample_response_band12": "A few months ago, my partner took me to a small Italian restaurant downtown to celebrate our anniversary. The moment we walked in, the lighting was soft and warm, and a waiter greeted us by name because my partner had booked ahead. Throughout the evening, the service was incredibly attentive without being pushy. The waiter quietly recommended a pasta dish that turned out to be the best I had ever tasted. What really stood out, though, was that the chef came out personally to wish us a happy anniversary and brought us a free dessert with a little candle. By the end of the night, I felt completely relaxed and genuinely cared for. Ever since then, that restaurant has become our special place, and we go back every year. It taught me how much a few thoughtful touches can turn a simple dinner into something unforgettable.",
+    "prompt_tag": "practice",
+    "sort_order": 93
+  },
+  {
+    "task_number": 2,
+    "title": "Looking After A Child",
+    "slug": "looking-after-a-child",
+    "topic": "Caregiving",
+    "difficulty": "easy",
+    "prep_time_seconds": 30,
+    "response_time_seconds": 60,
+    "prompt_text": "Talk about a time when you looked after a child or a relative for a day. Who did you take care of, and why were you the one responsible that day? When and where did this happen, and what did you do together? Explain what the experience was like and how you felt by the end of the day.",
+    "vocabulary_tips": [
+      "babysit",
+      "keep an eye on",
+      "wear out",
+      "exhausting",
+      "responsibility",
+      "hands full"
+    ],
+    "connector_phrases": [
+      "One Saturday",
+      "The moment they left",
+      "Throughout the day",
+      "At one point",
+      "By the afternoon",
+      "By the end of it"
+    ],
+    "template_hint": "Explain who you were caring for and why, describe the activities and any challenges during the day, then reflect on how the experience left you feeling.",
+    "sample_response_band12": "One Saturday, my sister asked me to look after my five-year-old nephew for the whole day while she went to a wedding. The moment she left, I realized I had my hands full, because he was full of energy and wanted to play nonstop. Throughout the day we built a fort out of blankets, drew pictures, and went to the park near my apartment. At one point he scraped his knee, and I had to stay calm and clean it up while he cried. By the afternoon, I was completely worn out, but he finally settled down for a nap, which gave me a moment to breathe. By the end of it, I had a brand-new respect for my sister and how much energy parenting takes. It was exhausting, but it was also one of the most rewarding days I've had in a long time.",
+    "prompt_tag": "practice",
+    "sort_order": 94
+  },
+  {
+    "task_number": 2,
+    "title": "Sharing Food From My Culture",
+    "slug": "sharing-food-from-my-culture",
+    "topic": "cultural food",
+    "difficulty": "hard",
+    "prep_time_seconds": 30,
+    "response_time_seconds": 60,
+    "prompt_text": "Talk about a time when you introduced someone to a food from your culture. Describe a specific occasion when you shared a traditional dish with a person who had never tried it. Who was that person, and what did you give them to try? How did they react, and how did it make you feel?",
+    "vocabulary_tips": [
+      "traditional",
+      "authentic",
+      "hesitant",
+      "flavourful",
+      "reaction",
+      "heritage"
+    ],
+    "connector_phrases": [
+      "A while back",
+      "At first",
+      "Once they took a bite",
+      "To my delight",
+      "After that",
+      "Thinking back"
+    ],
+    "template_hint": "Introduce the person and the dish, describe their reaction as they tasted it, and reflect on what it meant to you to share part of your heritage.",
+    "sample_response_band12": "A while back, I invited my Canadian roommate to try samosas, which are a traditional snack from my home country. She had never even heard of them, so I decided to make them from scratch one weekend. At first, she was a little hesitant because the spices smelled stronger than what she was used to. I explained how my mother used to fry them every festival, and that calmed her nerves. Once she took a bite, her whole expression changed, and she immediately asked for a second one. To my delight, she said it was now her favourite snack in the world. After that, she even asked me to teach her the recipe so she could make them for her own family. Thinking back, sharing that little piece of my heritage made me feel proud and surprisingly close to home, even though I was thousands of miles away.",
+    "prompt_tag": "practice",
+    "sort_order": 95
+  },
+  {
+    "task_number": 2,
+    "title": "An Unforgettable Live Event You Watched",
+    "slug": "an-unforgettable-live-event-you-watched",
+    "topic": "Live Event",
+    "difficulty": "medium",
+    "prep_time_seconds": 30,
+    "response_time_seconds": 60,
+    "prompt_text": "Talk about a time when you went to watch a live concert, show, or sports match as a member of the audience. Describe what you saw and what made the experience stand out for you. When and where did it happen? Who did you go with, and why do you still remember it?",
+    "vocabulary_tips": [
+      "crowd",
+      "atmosphere",
+      "stage",
+      "roar",
+      "cheer",
+      "unforgettable"
+    ],
+    "connector_phrases": [
+      "A couple of years ago",
+      "As soon as",
+      "The moment",
+      "Then",
+      "By the end",
+      "I'll never forget"
+    ],
+    "template_hint": "Open by setting the scene (when, where, and who you went with), build up to the most exciting moment of the event with vivid sensory detail, then close with how the atmosphere made you feel and why it stuck with you.",
+    "sample_response_band12": "A couple of years ago, I went to my very first live football match with my older brother in our city's main stadium. We got there early, and the place was already packed with thousands of fans wearing the team's colours. The moment our team scored, the whole crowd jumped up at once and let out this deafening roar, and honestly, I felt the ground shake under my feet. My brother and I were hugging complete strangers and singing along to the chants. As soon as the final whistle blew, we had won by a single goal, and the celebration was incredible. By the end of the night, my voice was completely gone from all the cheering. I'll never forget that atmosphere, because it was the first time I truly felt part of something so big and electric.",
+    "prompt_tag": "practice",
+    "sort_order": 96
+  },
+  {
+    "task_number": 2,
+    "title": "A Meal With A Stranger",
+    "slug": "a-meal-with-a-stranger",
+    "topic": "new acquaintance",
+    "difficulty": "medium",
+    "prep_time_seconds": 30,
+    "response_time_seconds": 60,
+    "prompt_text": "Talk about a time when you shared a meal with someone you had just met. Describe a specific occasion when you ended up eating with a person who was a stranger to you at first. Where were you, and how did you come to share that meal? What did you talk about, and how did the experience turn out?",
+    "vocabulary_tips": [
+      "stranger",
+      "awkward",
+      "connection",
+      "conversation",
+      "welcoming",
+      "unexpected"
+    ],
+    "connector_phrases": [
+      "During my trip",
+      "At first",
+      "As we started talking",
+      "Little by little",
+      "By the end of the meal",
+      "Surprisingly"
+    ],
+    "template_hint": "Explain how you ended up eating with a stranger, describe how the conversation developed, and finish with how the connection or the experience surprised you.",
+    "sample_response_band12": "During a solo trip to Vietnam last year, I sat down at a tiny street-food stall, and the only free seat was next to an older local man eating alone. At first, it felt a little awkward because we didn't share a common language. But as we started talking, mostly through gestures and a translation app, we found a rhythm. He insisted on showing me how to wrap my spring rolls properly, and he even ordered me a local drink I'd never heard of. Little by little, we exchanged stories about our families and our jobs. By the end of the meal, he'd paid for my food and refused to let me argue about it. Surprisingly, what could have been an awkward dinner alone turned into one of the warmest moments of my whole trip. It reminded me that kindness really does cross every language barrier.",
+    "prompt_tag": "practice",
+    "sort_order": 97
+  },
+  {
+    "task_number": 2,
+    "title": "Decluttering Your Living Space",
+    "slug": "decluttering-your-living-space",
+    "topic": "Decluttering",
+    "difficulty": "medium",
+    "prep_time_seconds": 30,
+    "response_time_seconds": 60,
+    "prompt_text": "Talk about a time when you reorganized, cleaned out, or decluttered your living space. What part of your home did you tackle, and why did you decide to do it then? When did this happen, and did anyone help you? Describe what you got rid of and how you felt once the space was finished.",
+    "vocabulary_tips": [
+      "declutter",
+      "get rid of",
+      "donate",
+      "sort through",
+      "clutter",
+      "a fresh start"
+    ],
+    "connector_phrases": [
+      "Last spring",
+      "It all started when",
+      "Little by little",
+      "After a few hours",
+      "Once everything was done",
+      "Ever since then"
+    ],
+    "template_hint": "Explain what motivated you to clean out the space, describe the process of sorting and discarding items, then share the satisfying result and how it felt.",
+    "sample_response_band12": "Last spring, I finally decided to tackle my bedroom closet, which had become so cluttered I could barely close the door. It all started when I couldn't find a jacket I knew was somewhere in that mess. That weekend, my roommate offered to help, so we pulled everything out and made three piles: keep, donate, and throw away. Little by little, we sorted through years of clothes I had completely forgotten about. After a few hours, I was amazed at how much I no longer needed, and we filled four big bags to donate to a local charity. Once everything was done, the closet looked twice as big and felt so organized. Ever since then, I've kept it tidy and found it much easier to get ready in the mornings. It stuck with me because clearing out that space honestly felt like a fresh start for my whole life.",
+    "prompt_tag": "practice",
+    "sort_order": 98
+  },
+  {
+    "task_number": 2,
+    "title": "Losing And Finding Something",
+    "slug": "losing-and-finding-something",
+    "topic": "Lost Item",
+    "difficulty": "hard",
+    "prep_time_seconds": 30,
+    "response_time_seconds": 60,
+    "prompt_text": "Talk about a time when you lost something important and then found it again, or someone returned it to you. What was the item, and how did you come to lose it? When and where did this happen, and what did you do to try to find it? Explain how you felt when it finally came back to you.",
+    "vocabulary_tips": [
+      "misplace",
+      "retrace my steps",
+      "panic",
+      "turn up",
+      "hand it in",
+      "relieved"
+    ],
+    "connector_phrases": [
+      "A few months ago",
+      "At first I assumed",
+      "My heart sank when",
+      "Just as I was giving up",
+      "It turned out that",
+      "I can't tell you how relieved"
+    ],
+    "template_hint": "Describe the important item and how you lost it, build tension through your search, then deliver the relief of getting it back and why it mattered.",
+    "sample_response_band12": "A few months ago, I lost my wallet on my way home from work, and it had my ID, bank cards, and some cash inside. At first I assumed I had simply left it on my desk, but when I checked the next morning, it wasn't there. My heart sank when I realized I must have dropped it somewhere between the office and the train station. I spent that whole evening retracing my steps and even called the transit lost-and-found, but nothing turned up. Just as I was giving up hope, I got a phone call from a stranger who had found my wallet on the sidewalk and tracked me down through a card inside. It turned out that everything was still there, untouched. I can't tell you how relieved and grateful I felt. That moment really restored my faith in people's honesty, and I still think about that kind stranger today.",
+    "prompt_tag": "practice",
+    "sort_order": 99
+  }
+]

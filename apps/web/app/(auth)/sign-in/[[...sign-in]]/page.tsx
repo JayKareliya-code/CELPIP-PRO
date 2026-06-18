@@ -13,7 +13,7 @@ export default function SignInPage() {
     <div className="min-h-screen flex flex-col items-center justify-center bg-muted px-4">
       {/* Logo */}
       <Link
-        href="/home"
+        href="/"
         className="flex items-center gap-2 font-bold text-lg text-primary mb-8 hover:opacity-80 transition-opacity"
       >
         <BookOpen className="w-5 h-5" />

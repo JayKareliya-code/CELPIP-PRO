@@ -16,6 +16,8 @@ export const ROUTES = {
   progress: "/progress",
   billing: "/billing",
   admin: "/admin",
+  adminImport: "/admin/import",
+  adminImageImport: "/admin/image-import",
   adminPrompts: "/admin/prompts",
   adminCalibration: "/admin/calibration",
   adminMaterials: "/admin/materials",

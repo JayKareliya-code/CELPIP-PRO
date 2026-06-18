@@ -51,6 +51,15 @@ const stripeHosts = [
     "https://*.stripe.network",
 ];
 
+// Object storage for presigned uploads (browser → S3/R2 PUT) and presigned
+// GET fetches. `*.amazonaws.com` matches both path-style (s3.<region>.amazonaws.com)
+// and virtual-host (<bucket>.s3.<region>.amazonaws.com) URLs. Mirrors the
+// hostnames already trusted in `images.remotePatterns` below.
+const storageHosts = [
+    "https://*.amazonaws.com",
+    "https://*.r2.cloudflarestorage.com",
+];
+
 const cspDirectives = {
     "default-src": ["'self'"],
     // 'unsafe-inline' for scripts: Clerk and Next inject inline scripts;
@@ -60,7 +69,7 @@ const cspDirectives = {
     "style-src": ["'self'", "'unsafe-inline'"], // Tailwind + shadcn inline styles
     "img-src": ["'self'", "data:", "blob:", "https:"],   // S3, Clerk avatars, OG images
     "font-src": ["'self'", "data:"],
-    "connect-src": ["'self'", API_ORIGIN, ...clerkHosts, ...stripeHosts, ...(isProd ? [] : ["ws:", "wss:"])],
+    "connect-src": ["'self'", API_ORIGIN, ...clerkHosts, ...stripeHosts, ...storageHosts, ...(isProd ? [] : ["ws:", "wss:"])],
     "frame-src": [...clerkHosts, ...stripeHosts],
     "media-src": ["'self'", "blob:", "https:"],            // recorded audio (blob), presigned playback (https)
     "worker-src": ["'self'", "blob:"],

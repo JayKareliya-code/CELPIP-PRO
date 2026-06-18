@@ -1,0 +1,2402 @@
+[
+  {
+    "task_number": 1,
+    "title": "Paying Off Credit Card Debt",
+    "slug": "paying-off-credit-card-debt",
+    "topic": "debt",
+    "difficulty": "medium",
+    "prep_time_seconds": 30,
+    "response_time_seconds": 90,
+    "prompt_text": "Your cousin has called you feeling stressed about a credit card balance that keeps growing because of high interest charges. Every month the minimum payment barely makes a dent, and the debt feels like it will never go away. Your cousin knows you are good with money and wants your honest advice. What advice would you give your cousin about paying off this credit card debt?",
+    "vocabulary_tips": [
+      "interest charges",
+      "minimum payment",
+      "outstanding balance",
+      "snowball method",
+      "consolidate",
+      "pay it down"
+    ],
+    "connector_phrases": [
+      "If I were you",
+      "What I'd suggest is",
+      "The first thing I'd do is",
+      "On top of that",
+      "Trust me",
+      "At the end of the day"
+    ],
+    "template_hint": "Open with empathy, give one clear main strategy (pay more than the minimum and target the highest-interest card first), back it with two reasons, add a short personal example, then close with encouragement.",
+    "sample_response_band12": "Hey, I'm really sorry you're feeling so stressed about this, but honestly, you can totally beat this debt. If I were you, the first thing I'd do is stop using that card completely so the balance doesn't keep climbing. After that, what I'd suggest is paying more than the minimum every single month, even if it's just an extra fifty dollars, because the minimum mostly covers interest and barely touches what you actually owe. On top of that, I'd call the bank and ask if they can lower your interest rate, or look into moving the balance to a card with zero percent interest for the first year. Trust me, that one move can save you hundreds. When I was paying off my own card, I cut out eating lunch out and put that money straight onto the balance, and it disappeared way faster than I expected. At the end of the day, just stay consistent and don't beat yourself up. You've got this, and I'm here if you need help with a plan.",
+    "prompt_tag": "practice",
+    "sort_order": 0
+  },
+  {
+    "task_number": 1,
+    "title": "Friend Wants To Borrow Money",
+    "slug": "friend-wants-to-borrow-money",
+    "topic": "lending",
+    "difficulty": "hard",
+    "prep_time_seconds": 30,
+    "response_time_seconds": 90,
+    "prompt_text": "A close friend of yours has asked to borrow a large sum of money to cover an unexpected expense. You care about this friend, but lending such a big amount makes you uneasy, and you are not sure how to respond without hurting the friendship. Your friend is waiting and is asking you directly for your advice on how to handle this. What would you tell them?",
+    "vocabulary_tips": [
+      "lend",
+      "put it in writing",
+      "repayment plan",
+      "awkward",
+      "boundaries",
+      "no hard feelings"
+    ],
+    "connector_phrases": [
+      "Here's the thing",
+      "What I'd recommend is",
+      "To be honest with you",
+      "Another thing to keep in mind",
+      "That way",
+      "At the end of the day"
+    ],
+    "template_hint": "Acknowledge the tough spot, advise protecting both the money and the friendship by setting clear terms (a written agreement and realistic amount), give two reasons, include a brief example, and close warmly.",
+    "sample_response_band12": "Okay, here's the thing, I know this is a really tricky spot to be in, so let's think it through together. To be honest with you, lending a big chunk of money to a friend can get awkward fast if things aren't crystal clear from the start. What I'd recommend is only lending an amount you'd genuinely be okay never seeing again, just in case, and then putting everything in writing, the amount, the dates, the whole repayment plan. That way nobody's guessing later and the friendship stays protected. Another thing to keep in mind is that it's perfectly fine to say no, or to offer a smaller amount than they asked for. A real friend will understand. My brother once lent a buddy money with a simple signed note, and because the terms were clear, they paid it back and stayed close. At the end of the day, you have to protect both your wallet and the friendship, so just be honest and kind, and trust your gut on this one.",
+    "prompt_tag": "practice",
+    "sort_order": 1
+  },
+  {
+    "task_number": 1,
+    "title": "Always Overspending Each Month",
+    "slug": "always-overspending-each-month",
+    "topic": "overspending",
+    "difficulty": "easy",
+    "prep_time_seconds": 30,
+    "response_time_seconds": 90,
+    "prompt_text": "Your younger sibling just started a full-time job but keeps running out of money before the next paycheque arrives. They are not sure where it all goes and feel embarrassed about overspending every month. They trust your judgment and have asked how they can get their spending under control. What advice would you give your sibling?",
+    "vocabulary_tips": [
+      "paycheque",
+      "track your spending",
+      "impulse buys",
+      "set a limit",
+      "necessities",
+      "live within your means"
+    ],
+    "connector_phrases": [
+      "First of all",
+      "What works really well is",
+      "Another thing you could try",
+      "Plus",
+      "Believe me",
+      "All in all"
+    ],
+    "template_hint": "Reassure your sibling it's common, give one core habit (track every expense to find the leaks), support it with two reasons, share a quick example, and end with confidence.",
+    "sample_response_band12": "Hey, please don't be embarrassed, almost everyone struggles with this when they get their first real paycheque, so you're totally normal. First of all, what works really well is tracking every single thing you buy for a month, even the small coffees, because you can't fix the problem until you actually see where the money is going. Honestly, I think you'll be shocked how much disappears on little impulse buys. Another thing you could try is moving a set amount into savings the moment you get paid, before you can spend it. That way you're paying yourself first and you naturally live within your means. Plus, it takes the stress out of those last few days before payday. When I started doing this, I realized I was spending almost two hundred dollars a month just on takeout, and cutting that in half made a huge difference. Believe me, once you have a clear picture, it gets so much easier. All in all, just track it, save first, and you'll have this sorted in no time.",
+    "prompt_tag": "practice",
+    "sort_order": 2
+  },
+  {
+    "task_number": 1,
+    "title": "Starting An Emergency Fund",
+    "slug": "starting-an-emergency-fund",
+    "topic": "savings",
+    "difficulty": "medium",
+    "prep_time_seconds": 30,
+    "response_time_seconds": 90,
+    "prompt_text": "A coworker of yours recently had a car repair that wiped out all their cash, and it made them realize they have nothing saved for emergencies. They want to start building a safety net but feel overwhelmed because they're starting completely from zero. Knowing you have managed to save, they've asked you how to begin. What advice would you give your coworker?",
+    "vocabulary_tips": [
+      "emergency fund",
+      "safety net",
+      "set aside",
+      "automatic transfer",
+      "separate account",
+      "cushion"
+    ],
+    "connector_phrases": [
+      "Honestly",
+      "The easiest way to start is",
+      "On top of that",
+      "What really helps is",
+      "Little by little",
+      "Bottom line"
+    ],
+    "template_hint": "Normalize starting from zero, advise saving small automatic amounts into a separate account, give two reasons, add a concrete example of a starter goal, and close with motivation.",
+    "sample_response_band12": "Honestly, the fact that you've decided to start is already the hardest part, so don't feel overwhelmed, everybody begins at zero. The easiest way to start is to open a separate savings account, one you don't touch, and set up a small automatic transfer right after payday, even just twenty or thirty dollars a week. Keeping it separate matters because if the money sits in your regular account, you'll spend it without thinking. On top of that, automating it means you don't have to rely on willpower, the money just moves on its own. What really helps is having a clear first goal, like saving five hundred dollars, because a small target feels reachable and keeps you motivated. When I started, I aimed for one month of expenses, and seeing that cushion grow honestly took a lot of stress off my shoulders. Little by little, those small amounts really add up. Bottom line, start tiny, make it automatic, and within a few months you'll have a real safety net behind you.",
+    "prompt_tag": "practice",
+    "sort_order": 3
+  },
+  {
+    "task_number": 1,
+    "title": "Buy A Car Or Keep Saving",
+    "slug": "buy-a-car-or-keep-saving",
+    "topic": "purchase",
+    "difficulty": "medium",
+    "prep_time_seconds": 30,
+    "response_time_seconds": 90,
+    "prompt_text": "Your neighbour is trying to decide whether to buy their first car right now or wait and keep saving for a while longer. They have enough for a basic used car, but buying it would use up most of their savings, and they're torn about the timing. They've asked for your honest take on what they should do. What advice would you give your neighbour?",
+    "vocabulary_tips": [
+      "used car",
+      "down payment",
+      "ongoing costs",
+      "insurance and maintenance",
+      "weigh the pros and cons",
+      "hold off"
+    ],
+    "connector_phrases": [
+      "If you ask me",
+      "The way I see it",
+      "One thing to think about is",
+      "Also",
+      "For example",
+      "When it comes down to it"
+    ],
+    "template_hint": "Acknowledge the dilemma, lean toward waiting a bit while factoring in the total costs of ownership, give two reasons, offer a concrete example, and close by trusting their judgment.",
+    "sample_response_band12": "Oh, that's a tough one, but if you ask me, I'd lean toward holding off just a little longer before you buy. The way I see it, draining almost all of your savings on the car itself is risky, because a car isn't just the purchase price. One thing to think about is the ongoing costs: insurance, gas, registration, and surprise repairs can easily run you a few hundred dollars a month. If you spend everything now, you'd have no cushion left for those. Also, waiting a few more months means you can afford a slightly newer, more reliable car that won't break down on you. For example, a friend of mine rushed into buying a cheap car and ended up spending more on repairs in the first year than the car cost. That said, if you genuinely need it for work or commuting right now, that changes things. When it comes down to it, just don't leave yourself with zero savings, and you'll make the right call.",
+    "prompt_tag": "practice",
+    "sort_order": 4
+  },
+  {
+    "task_number": 1,
+    "title": "Budgeting On A Tight Income",
+    "slug": "budgeting-on-a-tight-income",
+    "topic": "budgeting",
+    "difficulty": "hard",
+    "prep_time_seconds": 30,
+    "response_time_seconds": 90,
+    "prompt_text": "A classmate of yours is living on a very tight income and finds it almost impossible to stick to a budget when money is so limited. They feel discouraged because every plan they make seems to fall apart by the middle of the month. They know you manage your money carefully and have asked you for some practical tips. What advice would you give your classmate?",
+    "vocabulary_tips": [
+      "tight income",
+      "fixed expenses",
+      "prioritize",
+      "stretch your money",
+      "cut back",
+      "stay on track"
+    ],
+    "connector_phrases": [
+      "I get it",
+      "What I'd start with is",
+      "The trick is",
+      "Besides that",
+      "Say for instance",
+      "More than anything"
+    ],
+    "template_hint": "Validate the difficulty, advise covering essentials first with a simple realistic plan and a small buffer, give two reasons, include a practical example, and close with encouragement.",
+    "sample_response_band12": "I get it, sticking to a budget when money is really tight is genuinely hard, so please don't be too discouraged with yourself. What I'd start with is keeping it simple, just list your fixed expenses like rent, bills, and food first, and cover those before anything else. The trick is to be realistic instead of overly strict, because if you cut everything out, the plan feels miserable and you give up by mid-month. So leave yourself a tiny bit of breathing room for small treats. Besides that, I'd look for one or two areas to cut back painlessly, like cooking in bulk or cancelling a subscription you barely use, since small savings really add up when income is limited. Say for instance, planning meals for the week instead of buying food day by day can easily save you forty or fifty dollars. More than anything, give it a couple of months, because budgeting is a skill that gets easier with practice. You're already trying, and that honestly counts for a lot.",
+    "prompt_tag": "practice",
+    "sort_order": 5
+  },
+  {
+    "task_number": 1,
+    "title": "Cutting An Expensive Shopping Habit",
+    "slug": "cutting-an-expensive-shopping-habit",
+    "topic": "spending",
+    "difficulty": "easy",
+    "prep_time_seconds": 30,
+    "response_time_seconds": 90,
+    "prompt_text": "Your roommate has realized they are spending a lot of money every month on subscriptions and online shopping they do not really need. They want to break the habit, but they admit it is hard to resist the constant deals and notifications. They have asked you how you would cut back on something like this. What advice would you give your roommate?",
+    "vocabulary_tips": [
+      "subscriptions",
+      "online shopping",
+      "cancel",
+      "tempting",
+      "cooling-off period",
+      "cut back"
+    ],
+    "connector_phrases": [
+      "You know what",
+      "The first thing I'd do is",
+      "What really helps me is",
+      "And another thing",
+      "Like, for example",
+      "In the end"
+    ],
+    "template_hint": "Reassure it's a common trap, advise auditing and cancelling unused subscriptions plus a wait rule before buying, give two reasons, add a quick example, and close supportively.",
+    "sample_response_band12": "You know what, this is such a common trap, those apps are literally designed to make you spend, so honestly don't feel bad about it at all. The first thing I'd do is sit down and go through every subscription you have and cancel the ones you barely touch, because a bunch of small monthly fees quietly add up to a shocking amount over a year. What really helps me is turning off the sale notifications and unsubscribing from store emails, since you can't really be tempted by a deal you never even see. And another thing, give yourself a rule where you wait two days before buying anything online. Like, for example, I add stuff to my cart and just leave it, and half the time I realize a couple days later that I didn't actually want it. That little pause saves me so much money. In the end, just cancel the extras and slow yourself down before you buy, and trust me, you'll see the difference in your account almost right away.",
+    "prompt_tag": "practice",
+    "sort_order": 6
+  },
+  {
+    "task_number": 1,
+    "title": "Buying a Home or Renting",
+    "slug": "buying-a-home-or-renting",
+    "topic": "housing",
+    "difficulty": "medium",
+    "prep_time_seconds": 30,
+    "response_time_seconds": 90,
+    "prompt_text": "Your close friend has rented an apartment for years and has finally saved enough for a down payment. They are torn between buying their first house and staying as a renter, and they are nervous about taking on a mortgage. They call you, feeling stressed, and ask what you think they should do. What advice would you give your friend?",
+    "vocabulary_tips": [
+      "down payment",
+      "mortgage",
+      "build equity",
+      "monthly budget",
+      "maintenance costs",
+      "long-term commitment"
+    ],
+    "connector_phrases": [
+      "If I were you",
+      "What I'd suggest is",
+      "The main thing to consider is",
+      "On top of that",
+      "At the end of the day",
+      "Before anything else"
+    ],
+    "template_hint": "Open warmly, give one clear recommendation, back it with two reasons (financial stability plus lifestyle fit), add a concrete example, then close with encouragement.",
+    "sample_response_band12": "Hey, I totally get why you're stressed, this is a huge decision and it's normal to feel torn. Honestly, if I were you, I'd take a really close look at how long you plan to stay in the city first. The main thing to consider is that buying only pays off if you stay put for, say, five years or more, because that's when you actually start building equity instead of paying someone else's mortgage. On top of that, owning means you're on the hook for repairs, so I'd make sure you keep a little emergency fund aside. What I'd suggest is sitting down with a mortgage broker and getting pre-approved, just so you know your real budget before you fall in love with a place. For example, my cousin almost overspent until the bank showed her a number she could actually handle. At the end of the day, if the numbers work and you feel settled here, go for it. Whatever you decide, I'm here to help you weigh it out, okay?",
+    "prompt_tag": "practice",
+    "sort_order": 7
+  },
+  {
+    "task_number": 1,
+    "title": "Co-Signing A Relative's Loan",
+    "slug": "co-signing-a-relatives-loan",
+    "topic": "finances",
+    "difficulty": "hard",
+    "prep_time_seconds": 30,
+    "response_time_seconds": 90,
+    "prompt_text": "Your cousin wants to buy a car but their credit history is not strong enough to qualify for the loan on their own. They have asked you to co-sign it, which would make you legally responsible if they ever miss payments. Your cousin phones you, unsure how to move forward, and asks what you think they should do. What advice would you give your cousin?",
+    "vocabulary_tips": [
+      "co-sign",
+      "credit score",
+      "legally responsible",
+      "default on payments",
+      "set boundaries",
+      "fall behind"
+    ],
+    "connector_phrases": [
+      "Here's the thing",
+      "If I were in your shoes",
+      "What I'd really recommend",
+      "Another thing to keep in mind",
+      "That said",
+      "When it comes down to it"
+    ],
+    "template_hint": "Acknowledge the family bond, give one firm recommendation for the cousin, support it with two reasons (the risk to whoever co-signs and protecting the relationship), suggest a concrete safer alternative, then close kindly.",
+    "sample_response_band12": "Okay, first off, I know how much you want this car, so I totally get why you're stressed about it. But here's the thing, asking someone to co-sign is a really big deal, because if you ever fall behind, that loan lands on them legally, not just on you. If I were in your shoes, I'd slow down before putting anyone else on the hook. The big reason is that one missed payment could wreck their credit score, and that's a heavy thing to put on family. Another thing to keep in mind is that money and family don't always mix, so if things go sideways, it could really strain the relationship. What I'd really recommend is building your own credit first so you can qualify on your own. For example, you could get a starter credit card, pay it off every month, and apply again in six months or so. That said, only you know your situation. When it comes down to it, try to stand on your own two feet first, and lean on family only if you truly have to.",
+    "prompt_tag": "practice",
+    "sort_order": 8
+  },
+  {
+    "task_number": 1,
+    "title": "A Friend's Risky Investment Tip",
+    "slug": "a-friends-risky-investment-tip",
+    "topic": "investing",
+    "difficulty": "medium",
+    "prep_time_seconds": 30,
+    "response_time_seconds": 90,
+    "prompt_text": "Your friend Maya has been telling you about a new investment that promises huge returns very quickly. She is excited and is thinking about putting a big chunk of her savings into it, but something about the deal makes her uneasy. She texts you to ask whether she should go ahead with it. What advice would you give her?",
+    "vocabulary_tips": [
+      "high returns",
+      "too good to be true",
+      "diversify",
+      "do your research",
+      "tolerate risk",
+      "nest egg"
+    ],
+    "connector_phrases": [
+      "Honestly",
+      "If you ask me",
+      "What I'd do first is",
+      "Plus",
+      "On the other hand",
+      "Bottom line"
+    ],
+    "template_hint": "Open empathetically, advise caution and research, give two reasons (unrealistic promises and risk to savings), suggest investing only what they can afford to lose, add an example, and close supportively.",
+    "sample_response_band12": "Honestly, I'm really glad you texted me before jumping in, because that uneasy feeling is worth listening to. If you ask me, anytime someone promises huge returns super fast, that's usually a red flag, it often sounds too good to be true because it is. What I'd do first is slow right down and actually research the company yourself instead of trusting the hype. The main reason is that your savings took years to build, and you don't want to risk your whole nest egg on one exciting tip. Plus, even good investments go up and down, so putting everything in one place is just too risky. On the other hand, if you're really curious, I'd only put in a small amount you could honestly afford to lose, and keep the rest safe and diversified. For example, my coworker tried that with a hyped stock and only risked a tiny bit, so when it dropped he was fine. Bottom line, trust your gut, do your homework, and never bet the farm. You've got this.",
+    "prompt_tag": "practice",
+    "sort_order": 9
+  },
+  {
+    "task_number": 1,
+    "title": "A Tempting Impulse Purchase",
+    "slug": "a-tempting-impulse-purchase",
+    "topic": "spending",
+    "difficulty": "easy",
+    "prep_time_seconds": 30,
+    "response_time_seconds": 90,
+    "prompt_text": "Your younger sibling just got their first paycheque and is about to buy an expensive designer watch on credit, even though they admit they don't really need it. They are excited but a little unsure, so they send you a message asking whether they should go ahead. What advice would you give your sibling?",
+    "vocabulary_tips": [
+      "impulse buy",
+      "buyer's remorse",
+      "sleep on it",
+      "live within your means",
+      "save up",
+      "treat yourself"
+    ],
+    "connector_phrases": [
+      "Listen",
+      "If I were you",
+      "My advice would be",
+      "Also",
+      "The thing is",
+      "All in all"
+    ],
+    "template_hint": "Open with warmth, recommend pausing before buying, give two reasons (debt and possible regret), suggest a waiting period or saving first, add a quick example, then close kindly.",
+    "sample_response_band12": "Listen, congrats on your first paycheque, that's a big deal and I'm proud of you! But before you buy that watch, can I give you a little honest advice? If I were you, I'd hit pause for at least a week before spending that much. The thing is, you already said you don't really need it, and putting it on credit means you could be paying it off for months, plus interest. My advice would be to sleep on it, because impulse buys usually come with buyer's remorse once the excitement wears off. Also, if you still really want it in a couple of weeks, I'd save up and buy it with cash so it actually feels earned. For example, I once rushed to buy a fancy jacket and barely wore it, total waste of money. All in all, treat yourself, you deserve it, but do it in a way that won't stress your budget. Whatever you choose, I'm just happy you're thinking it through. Talk soon!",
+    "prompt_tag": "practice",
+    "sort_order": 10
+  },
+  {
+    "task_number": 1,
+    "title": "Splitting Costs With A Roommate",
+    "slug": "splitting-costs-with-a-roommate",
+    "topic": "roommates",
+    "difficulty": "medium",
+    "prep_time_seconds": 30,
+    "response_time_seconds": 90,
+    "prompt_text": "Your friend just moved in with a new roommate, and they are already arguing about how to fairly divide rent, groceries, and utility bills. Your friend feels awkward bringing it up and worries about starting a conflict. They have asked you for help. What advice would you give your friend?",
+    "vocabulary_tips": [
+      "split the bills",
+      "fair share",
+      "shared expenses",
+      "set ground rules",
+      "keep it civil",
+      "track spending"
+    ],
+    "connector_phrases": [
+      "First of all",
+      "What I'd suggest is",
+      "The key is",
+      "On top of that",
+      "I'd also say",
+      "In the end"
+    ],
+    "template_hint": "Validate the awkwardness, recommend an honest calm conversation, give two reasons (avoiding resentment and clear fairness), suggest a concrete system like an app, add an example, then close encouragingly.",
+    "sample_response_band12": "First of all, I totally understand why this feels awkward, money talks are never fun, especially with someone you just moved in with. But honestly, the sooner you sort it out, the better. What I'd suggest is sitting down together when you're both relaxed and just being open about it. The key is to agree on a system that feels fair to both of you, because if you don't, little frustrations build up and turn into real resentment. On top of that, having clear ground rules from the start means nobody feels taken advantage of later. I'd also say try a bill-splitting app, that way every grocery run and utility payment gets tracked, so it's not just your word against theirs. For example, my brother and his roommate split rent by room size and shared everything else fifty-fifty, and it worked perfectly. In the end, keep it calm and friendly, frame it as 'let's find what's fair,' not 'you owe me.' You'll feel so much lighter once it's settled.",
+    "prompt_tag": "practice",
+    "sort_order": 11
+  },
+  {
+    "task_number": 1,
+    "title": "Turning a Hobby Into Business",
+    "slug": "turning-a-hobby-into-business",
+    "topic": "side-business",
+    "difficulty": "hard",
+    "prep_time_seconds": 30,
+    "response_time_seconds": 90,
+    "prompt_text": "A coworker of yours bakes amazing cakes as a hobby, and friends keep telling them they should start selling. They are thinking about launching a small side business but feel nervous about losing the joy of baking and managing it alongside their full-time job. Over lunch, they ask you for advice on what they should do. What advice would you give your coworker?",
+    "vocabulary_tips": [
+      "side hustle",
+      "start small",
+      "test the market",
+      "burn out",
+      "set prices",
+      "manage your time"
+    ],
+    "connector_phrases": [
+      "You know what",
+      "If it were me",
+      "What I'd really do is",
+      "Another thing",
+      "That being said",
+      "When all's said and done"
+    ],
+    "template_hint": "Affirm their talent, advise starting small and testing demand, give two reasons (lower risk and protecting their passion), suggest a concrete first step, add an example, then close with encouragement.",
+    "sample_response_band12": "You know what, your cakes are genuinely incredible, so I'm not surprised people keep telling you to sell them! But I hear you, it's scary to turn something you love into work. If it were me, I wouldn't quit anything or go all in right away. What I'd really do is start small, like taking a few orders from friends on weekends to test whether there's real demand. The big reason is that it keeps your risk low, you're not pouring money into a kitchen or licences before you know it'll work. Another thing is that starting slowly protects the joy, because if you suddenly take on twenty orders a week, you'll burn out fast and resent the thing you used to love. That being said, make sure you price your cakes properly so your time is actually worth it. For example, my neighbour began with just one cake a week and grew from there. When all's said and done, dip your toe in, keep it fun, and let it grow naturally. I really think you've got something special here.",
+    "prompt_tag": "practice",
+    "sort_order": 12
+  },
+  {
+    "task_number": 1,
+    "title": "Selling Or Repairing Old Car",
+    "slug": "selling-or-repairing-old-car",
+    "topic": "vehicles",
+    "difficulty": "easy",
+    "prep_time_seconds": 30,
+    "response_time_seconds": 90,
+    "prompt_text": "Your neighbour owns an old car that keeps breaking down, and the latest repair quote is quite expensive. They are unsure whether to spend the money fixing it again or to sell it and put that cash toward a newer vehicle. They catch you in the driveway and ask what they should do. What advice would you give your neighbour?",
+    "vocabulary_tips": [
+      "repair quote",
+      "worth fixing",
+      "resale value",
+      "money pit",
+      "reliable transportation",
+      "weigh the costs"
+    ],
+    "connector_phrases": [
+      "Well",
+      "If I were in your position",
+      "Here's what I'd do",
+      "Plus",
+      "On the flip side",
+      "At the end of the day"
+    ],
+    "template_hint": "Open friendly, recommend comparing repair cost to the car's value, give two reasons (ongoing breakdowns and money wasted), suggest a mechanic's overall check, add an example, then close supportively.",
+    "sample_response_band12": "Well, I feel for you, there's nothing more frustrating than a car that keeps letting you down! Here's what I'd do if I were in your position. First, I'd compare that repair quote to what the car is actually worth right now. The thing is, if the fix costs almost as much as the car's resale value, it's probably not worth pouring more money in. Plus, if it keeps breaking down, this likely won't be the last repair, and it turns into a money pit that drains your savings bit by bit. On the flip side, before you decide, I'd ask a trusted mechanic for an honest overall check, just so you know whether this is a one-time fix or a sign of bigger problems coming. For example, my brother kept patching his old truck until he realized he'd spent more on repairs than a used car would've cost. At the end of the day, you deserve reliable transportation that doesn't stress you out. Trust your gut, and let me know how it goes.",
+    "prompt_tag": "practice",
+    "sort_order": 13
+  },
+  {
+    "task_number": 1,
+    "title": "Choosing Between Two Apartments",
+    "slug": "choosing-between-two-apartments",
+    "topic": "housing",
+    "difficulty": "easy",
+    "prep_time_seconds": 30,
+    "response_time_seconds": 90,
+    "prompt_text": "Your friend has found two apartments and can't decide which one to rent. The first is bigger and cheaper but a long bus ride from work. The second is small and pricey but right downtown near everything. Your friend asks you which apartment you think is the better choice. What advice would you give?",
+    "vocabulary_tips": [
+      "commute",
+      "trade-off",
+      "square footage",
+      "within walking distance",
+      "monthly budget",
+      "weigh the pros and cons"
+    ],
+    "connector_phrases": [
+      "If I were you",
+      "What I'd suggest is",
+      "The way I see it",
+      "On top of that",
+      "At the end of the day",
+      "Here's the thing"
+    ],
+    "template_hint": "Open warmly, recommend one apartment clearly, back it with two reasons (cost-vs-commute and lifestyle), add a quick personal example, then close encouragingly.",
+    "sample_response_band12": "Oh, that's a tough one, but honestly, if I were you, I'd go for the bigger place outside downtown. Here's the thing: the rent is cheaper, so you'd have extra money every month for savings or going out, and the extra space really matters when you're living somewhere full-time. Yeah, the commute is longer, but a bus ride isn't the worst. You can read, listen to podcasts, or just decompress after work. When I moved last year, I picked the cheaper spot a bit farther out, and I never regretted it because that bus time actually became my quiet time. The downtown place sounds exciting, but small apartments get cramped fast, and paying a premium just to be central isn't always worth it. What I'd suggest is doing one trial commute during rush hour before you sign anything, just so you know what you're getting into. At the end of the day, more space and lower rent will make daily life way easier. Trust your gut, you've got this!",
+    "prompt_tag": "practice",
+    "sort_order": 14
+  },
+  {
+    "task_number": 1,
+    "title": "Landlord Ignoring Repair Requests",
+    "slug": "landlord-ignoring-repair-requests",
+    "topic": "tenant rights",
+    "difficulty": "medium",
+    "prep_time_seconds": 30,
+    "response_time_seconds": 90,
+    "prompt_text": "Your neighbour has been asking their landlord to fix a leaking pipe for weeks, but the landlord keeps ignoring the messages. The leak is getting worse and your neighbour is frustrated and unsure what to do next. Your neighbour asks you how they should handle the situation. What advice would you give?",
+    "vocabulary_tips": [
+      "maintenance request",
+      "in writing",
+      "tenant rights",
+      "paper trail",
+      "follow up",
+      "escalate the issue"
+    ],
+    "connector_phrases": [
+      "If I were in your shoes",
+      "The first thing I'd do is",
+      "More importantly",
+      "Another thing",
+      "Just to be safe",
+      "Whatever you do"
+    ],
+    "template_hint": "Sympathize briefly, then give a clear two-step plan (document in writing, then escalate), explain why each step protects them, add a short example, and close with reassurance.",
+    "sample_response_band12": "Ugh, that's so frustrating, I totally get why you're upset. If I were in your shoes, the first thing I'd do is put everything in writing. Send the landlord a clear email or text describing the leak and ask for a repair date, because phone calls are easy to deny later, but a written message gives you a paper trail. More importantly, take photos of the leak with dates, so you've got proof of how bad it's getting. If they still ignore you, that's when I'd escalate it. Most cities have a tenant board or housing authority you can contact, and honestly, just mentioning that often gets things moving fast. My cousin had the exact same problem, and the moment she emailed about tenant rights, her sink got fixed within two days. Just to be safe, don't stop paying rent out of frustration, because that can actually backfire on you. So stay calm, keep records, and follow up firmly. You've got every right to a safe home, so stand your ground!",
+    "prompt_tag": "practice",
+    "sort_order": 15
+  },
+  {
+    "task_number": 1,
+    "title": "Moving To A New City",
+    "slug": "moving-to-a-new-city-for-a-job",
+    "topic": "relocation",
+    "difficulty": "medium",
+    "prep_time_seconds": 30,
+    "response_time_seconds": 90,
+    "prompt_text": "Your cousin has been offered a great job in a city far away and is feeling nervous about leaving friends and family behind. They really want the role but worry about being lonely and starting over somewhere new. Your cousin asks you whether they should take the job and move. What advice would you give?",
+    "vocabulary_tips": [
+      "career opportunity",
+      "fresh start",
+      "support network",
+      "settle in",
+      "homesick",
+      "take the leap"
+    ],
+    "connector_phrases": [
+      "Honestly",
+      "If you ask me",
+      "On the bright side",
+      "Plus",
+      "Keep in mind",
+      "When all is said and done"
+    ],
+    "template_hint": "Acknowledge the fear, encourage taking the job, give two reasons (career growth and how loneliness is manageable), share a quick example, and end with warm support.",
+    "sample_response_band12": "Honestly, I think you should go for it. I know leaving everyone behind feels scary, but if you ask me, a chance like this doesn't come around often, and you'd always wonder \"what if\" if you turned it down. Career-wise, taking the leap now, while you're open to change, can really set you up for the future. Plus, here's the thing about loneliness: it's temporary. Cities are full of people in the exact same boat, and joining a gym, a hobby group, or just grabbing coffee with coworkers helps you build a new support network surprisingly fast. When my brother moved across the country, he was homesick for about a month, but within half a year he had a whole new circle of friends and never looked back. And keep in mind, family is only a video call away, so you're not really losing anyone. When all is said and done, this move could open so many doors for you. I'm excited for you, take the job!",
+    "prompt_tag": "practice",
+    "sort_order": 16
+  },
+  {
+    "task_number": 1,
+    "title": "One-Year Lease Or Month-To-Month",
+    "slug": "one-year-lease-versus-month-to-month",
+    "topic": "renting",
+    "difficulty": "medium",
+    "prep_time_seconds": 30,
+    "response_time_seconds": 90,
+    "prompt_text": "Your coworker is about to rent an apartment and can't decide between signing a one-year lease or going month-to-month. The yearly lease is cheaper per month but locks them in, while month-to-month costs more but gives them the freedom to leave anytime. Your coworker asks you which option makes more sense for them. What advice would you give?",
+    "vocabulary_tips": [
+      "lock in a rate",
+      "flexibility",
+      "commitment",
+      "break the lease",
+      "stability",
+      "weigh your options"
+    ],
+    "connector_phrases": [
+      "It really depends",
+      "That said",
+      "If it were me",
+      "Something to think about",
+      "On the flip side",
+      "Bottom line"
+    ],
+    "template_hint": "Frame the choice around their situation, lean toward one option with two reasons (cost stability vs. flexibility), give a quick example tied to job certainty, and close decisively.",
+    "sample_response_band12": "Okay, this really depends on how settled you feel right now. If it were me, and I knew I was staying in this city for a while, I'd sign the one-year lease. The main reason is cost: locking in a lower rate saves you real money over twelve months, and you also get stability, no surprise rent hikes, no scrambling to move. That said, if your job feels uncertain or you think you might relocate, month-to-month could actually be smarter, even though it's pricier. The flexibility to leave anytime is worth a lot when life is up in the air. Here's something to think about: breaking a one-year lease early can cost you a penalty, sometimes a couple months' rent, so only commit if you're fairly sure you'll stay. A friend of mine signed a yearly lease, then got transferred, and paying that penalty really stung. Bottom line, if you're stable, go yearly and save money; if you're unsure, pay a bit more for freedom. Just be honest with yourself about your plans!",
+    "prompt_tag": "practice",
+    "sort_order": 17
+  },
+  {
+    "task_number": 1,
+    "title": "Furnishing A First Apartment Cheaply",
+    "slug": "furnishing-a-first-apartment-on-a-budget",
+    "topic": "budgeting",
+    "difficulty": "easy",
+    "prep_time_seconds": 30,
+    "response_time_seconds": 90,
+    "prompt_text": "Your younger sister just moved into her very first apartment and it's completely empty. She's excited but doesn't have much money and feels overwhelmed about buying furniture and everything she needs. Your sister asks you how she should furnish the place without spending too much. What advice would you give?",
+    "vocabulary_tips": [
+      "second-hand",
+      "hand-me-downs",
+      "essentials first",
+      "thrift store",
+      "marketplace deals",
+      "stretch your budget"
+    ],
+    "connector_phrases": [
+      "First things first",
+      "My advice would be",
+      "Also",
+      "Trust me",
+      "Don't forget",
+      "In the end"
+    ],
+    "template_hint": "Reassure her, advise buying essentials first and going second-hand, give two reasons (saves money, easy to find good deals), add a personal example, and close warmly.",
+    "sample_response_band12": "Aw, congratulations on your first place, that's so exciting! First things first, don't panic, you do not need to buy everything at once. My advice would be to focus on the essentials: a bed, somewhere to sit, and basic kitchen stuff. Everything else can wait. The big thing is to shop second-hand, honestly, you can save a fortune. Thrift stores, online marketplaces, and even family hand-me-downs are full of great furniture for a fraction of the price, and a lot of it is barely used. When I moved out, I got a perfectly good couch off a marketplace app for thirty dollars, and it lasted me years. Also, don't be shy about asking relatives if they have anything spare in storage, people are usually happy to help out a first-time renter. Trust me, mixing and matching cheaper pieces gives a place character anyway. In the end, your apartment will fill up over time, so enjoy the process and don't stress about making it perfect right away. You're going to love living on your own!",
+    "prompt_tag": "practice",
+    "sort_order": 18
+  },
+  {
+    "task_number": 1,
+    "title": "Downsizing To Save Money",
+    "slug": "downsizing-to-save-money",
+    "topic": "finances",
+    "difficulty": "medium",
+    "prep_time_seconds": 30,
+    "response_time_seconds": 90,
+    "prompt_text": "Your friend is struggling with rising rent and is thinking about moving into a smaller, cheaper apartment to save money. They like their current spacious place but feel the cost is becoming too much to handle. Your friend asks you whether downsizing is a good idea. What advice would you give?",
+    "vocabulary_tips": [
+      "downsize",
+      "cut costs",
+      "financial breathing room",
+      "declutter",
+      "make ends meet",
+      "peace of mind"
+    ],
+    "connector_phrases": [
+      "To be honest",
+      "I'd definitely",
+      "For one thing",
+      "What's more",
+      "Just remember",
+      "All in all"
+    ],
+    "template_hint": "Validate the worry, recommend downsizing, give two reasons (financial relief and the upside of less stuff), include a quick example, and close on reassurance.",
+    "sample_response_band12": "To be honest, I think downsizing is a really smart move, so I'd definitely encourage it. I know you love your current place, but if the rent is stressing you out every month, that's a sign the space isn't worth the cost. For one thing, moving somewhere smaller and cheaper gives you real financial breathing room, and that extra money each month can go toward savings or just not feeling anxious when rent is due. What's more, smaller places force you to declutter, and honestly, most of us own way more stuff than we actually use. My sister downsized last year, and she told me she felt lighter and freer with less to clean and maintain. Just remember to measure your furniture before you move so you know what'll fit, because that part trips people up. And give the new neighbourhood a quick visit first to make sure you like it. All in all, peace of mind and a healthier budget are worth more than extra square footage. I really think you'll feel relieved once it's done!",
+    "prompt_tag": "practice",
+    "sort_order": 19
+  },
+  {
+    "task_number": 1,
+    "title": "Subletting A Room To A Stranger",
+    "slug": "subletting-a-room-to-a-stranger",
+    "topic": "roommates",
+    "difficulty": "hard",
+    "prep_time_seconds": 30,
+    "response_time_seconds": 90,
+    "prompt_text": "Your classmate wants to rent out the spare room in their apartment to help cover the rent, but the only interested person is a complete stranger they found online. They like the extra income but feel uneasy about living with someone they don't know. Your classmate asks you whether they should go ahead with it. What advice would you give?",
+    "vocabulary_tips": [
+      "sublet",
+      "screen a tenant",
+      "references",
+      "gut feeling",
+      "ground rules",
+      "split the rent"
+    ],
+    "connector_phrases": [
+      "I get why you're hesitant",
+      "Before anything else",
+      "On top of that",
+      "That way",
+      "If something feels off",
+      "At the end of the day"
+    ],
+    "template_hint": "Acknowledge the unease, say it's fine to proceed but only after screening, give two reasons (income vs. safety) with concrete steps, add an example, and close supportively.",
+    "sample_response_band12": "I get why you're hesitant, living with a stranger is a big deal, but the extra income could really help, so I think it's worth considering, just carefully. Before anything else, screen the person properly. Meet them in person first, maybe over coffee in public, and ask for references from a past landlord or roommate. That way you get a real sense of who they are instead of just relying on a few online messages. On top of that, I'd set clear ground rules from day one, things like cleaning, guests, and quiet hours, and ideally put them in a simple written agreement. It saves so many headaches later. A friend of mine sublet to someone she found online, and because she did a video call and checked references first, it actually turned into a great living situation. But here's the key: if something feels off when you meet them, trust your gut and walk away, no amount of rent money is worth feeling unsafe in your own home. At the end of the day, splitting the rent is great, just protect yourself first!",
+    "prompt_tag": "practice",
+    "sort_order": 20
+  },
+  {
+    "task_number": 1,
+    "title": "Roommate Who Never Cleans Up",
+    "slug": "roommate-who-never-cleans-up",
+    "topic": "cleanliness",
+    "difficulty": "easy",
+    "prep_time_seconds": 30,
+    "response_time_seconds": 90,
+    "prompt_text": "Your friend just moved into a shared apartment, but one of their roommates never cleans up after themselves. There are dirty dishes in the sink for days and crumbs all over the kitchen counter. Your friend feels uncomfortable bringing it up and doesn't want to start a fight. What advice would you give your friend about handling this situation?",
+    "vocabulary_tips": [
+      "tidy up",
+      "pull their weight",
+      "bring it up",
+      "set expectations",
+      "calmly",
+      "shared space"
+    ],
+    "connector_phrases": [
+      "If I were you",
+      "What I'd suggest is",
+      "The first thing I'd do is",
+      "On top of that",
+      "At the end of the day",
+      "Another thing to keep in mind"
+    ],
+    "template_hint": "Open warmly acknowledging the frustration, give one clear piece of advice (have a calm direct chat), back it with two reasons, add a concrete example of what to say, then close with encouragement.",
+    "sample_response_band12": "Hey, I totally get why this is bugging you, and honestly anyone would feel the same way. If I were you, the first thing I'd do is have a calm, friendly chat with your roommate instead of letting it build up. The reason I say that is people often don't even realize they're being messy, so a quick conversation can fix it before it turns into resentment. On top of that, talking early keeps things light, which really matters when you're sharing a small space. What I'd suggest is keeping it casual, like saying, \"Hey, could we both try to wash our dishes right after dinner?\" That way it sounds like a team thing, not an attack. For example, my cousin did exactly that and her roommate actually thanked her for being upfront. At the end of the day, being honest but kind is the way to go, and I'm sure once you talk it out, things will get a lot smoother. Good luck!",
+    "prompt_tag": "practice",
+    "sort_order": 21
+  },
+  {
+    "task_number": 1,
+    "title": "Roommate Late Paying The Bills",
+    "slug": "roommate-late-paying-the-bills",
+    "topic": "money",
+    "difficulty": "medium",
+    "prep_time_seconds": 30,
+    "response_time_seconds": 90,
+    "prompt_text": "Your cousin shares an apartment with a roommate who is constantly late paying their share of the rent and utility bills. Your cousin keeps having to cover the difference and is starting to feel stressed about money. They asked you what they should do. What advice would you give your cousin?",
+    "vocabulary_tips": [
+      "cover the difference",
+      "split the bills",
+      "due date",
+      "set up a system",
+      "out of pocket",
+      "follow up"
+    ],
+    "connector_phrases": [
+      "Here's what I'd do",
+      "To be honest",
+      "For starters",
+      "Beyond that",
+      "The bottom line is",
+      "If that doesn't work"
+    ],
+    "template_hint": "Open with empathy about the money stress, give one main solution (set up a clear payment system with a fixed date), support it with two reasons, give a concrete tool or example, then close reassuringly.",
+    "sample_response_band12": "Oh, that sounds really stressful, and you definitely shouldn't have to keep paying out of pocket for someone else. Here's what I'd do. For starters, I'd sit down with your roommate and agree on a clear due date, maybe a few days before the bills are actually owed. To be honest, the main reason people pay late is that there's no real system, so setting a firm date usually solves half the problem right there. Beyond that, I'd suggest using a shared bill-splitting app, so it's not on you to chase them every month. For example, my friend started using one, and her roommate suddenly became way more reliable because everyone could see what was owed. If that doesn't work and they keep slipping, then it's fair to have a more serious talk. The bottom line is, you need to protect your own finances first. I'm sure once you put a system in place, this will sort itself out pretty quickly. Hang in there!",
+    "prompt_tag": "practice",
+    "sort_order": 22
+  },
+  {
+    "task_number": 1,
+    "title": "Dividing Household Chores Fairly",
+    "slug": "dividing-household-chores-fairly",
+    "topic": "chores",
+    "difficulty": "easy",
+    "prep_time_seconds": 30,
+    "response_time_seconds": 90,
+    "prompt_text": "Your friend has just moved in with two new roommates and wants to figure out how to divide the household chores so everyone does their fair share. Your friend wants to set things up fairly from the start to avoid arguments later. They came to you for ideas. What advice would you give your friend?",
+    "vocabulary_tips": [
+      "fair share",
+      "chore chart",
+      "rotate",
+      "take turns",
+      "split evenly",
+      "stick to it"
+    ],
+    "connector_phrases": [
+      "My advice would be",
+      "What works really well is",
+      "On top of that",
+      "Another tip is",
+      "At the end of the day",
+      "Plus"
+    ],
+    "template_hint": "Open by praising the proactive approach, give one core piece of advice (create a rotating chore schedule together), support with two reasons, give a concrete example of how to set it up, then close on a positive note.",
+    "sample_response_band12": "That's such a smart move, sorting this out before any problems pop up. My advice would be to sit down with both roommates and make a chore chart together, where everyone has a say. What works really well is rotating the tasks every week, so no one gets stuck doing the worst job, like cleaning the bathroom, every single time. The reason I love this is that it feels fair, and when people feel things are fair, they're way more likely to actually do their part. On top of that, having it written down means there's no \"I thought it was your turn\" arguments later. For example, my roommates and I used a simple whiteboard on the fridge, and it honestly kept the peace for the whole year. Another tip is to check in once a month to see if anything needs tweaking. At the end of the day, the key is doing it as a team, not telling people what to do. You've got the right idea, so I think it'll go great!",
+    "prompt_tag": "practice",
+    "sort_order": 23
+  },
+  {
+    "task_number": 1,
+    "title": "Roommate's Partner Always Over",
+    "slug": "roommates-partner-always-over",
+    "topic": "boundaries",
+    "difficulty": "hard",
+    "prep_time_seconds": 30,
+    "response_time_seconds": 90,
+    "prompt_text": "Your friend is frustrated because their roommate's boyfriend is at their apartment almost every single day and night. He uses the shared space and eats their food, and your friend feels like they have a third roommate who isn't paying rent. Your friend doesn't want to seem unfriendly, but they really need some privacy back. What advice would you give your friend?",
+    "vocabulary_tips": [
+      "overstay",
+      "set boundaries",
+      "guest",
+      "privacy",
+      "shared resources",
+      "common areas"
+    ],
+    "connector_phrases": [
+      "If I were in your shoes",
+      "Honestly",
+      "The way I see it",
+      "What I'd recommend is",
+      "Beyond that",
+      "When it comes down to it"
+    ],
+    "template_hint": "Open by validating the awkwardness, give one clear piece of advice (raise it gently as a boundaries-and-fairness issue, not a personal attack), support with two reasons, give a concrete script, then close with reassurance.",
+    "sample_response_band12": "Ugh, that's a tricky one, but you're absolutely allowed to want your own space back. If I were in your shoes, I'd bring it up gently, framing it as a boundaries thing rather than anything against the boyfriend personally. Honestly, the reason that matters is that if you attack him, your roommate will just get defensive, but if you talk about privacy and fairness, it's much easier to hear. The way I see it, there are really two issues, your privacy and the shared food, so I'd tackle both. What I'd recommend is saying something like, \"I love hanging out, but lately I never get the place to myself. Could we agree on a couple of nights that are just us roommates?\" Beyond that, you can kindly mention that since he eats here so often, maybe he could chip in for groceries. For example, my sister tried setting \"guest nights\" with her roommate and it worked perfectly. When it comes down to it, you deserve to feel comfortable in your own home, and I'm sure you'll handle it with grace.",
+    "prompt_tag": "practice",
+    "sort_order": 24
+  },
+  {
+    "task_number": 1,
+    "title": "Setting House Rules With Roommate",
+    "slug": "setting-house-rules-with-roommate",
+    "topic": "house rules",
+    "difficulty": "medium",
+    "prep_time_seconds": 30,
+    "response_time_seconds": 90,
+    "prompt_text": "Your younger sister is about to move in with a roommate she doesn't know very well. She wants to agree on some house rules in advance, like quiet hours, having guests over, and sharing food, but she isn't sure how to start that conversation. She asked you for some guidance. What advice would you give your sister?",
+    "vocabulary_tips": [
+      "ground rules",
+      "quiet hours",
+      "compromise",
+      "expectations",
+      "common ground",
+      "house agreement"
+    ],
+    "connector_phrases": [
+      "The first thing I'd do is",
+      "What I'd suggest is",
+      "It also helps to",
+      "On top of that",
+      "At the end of the day",
+      "Keep in mind that"
+    ],
+    "template_hint": "Open with encouragement for being proactive, give one main piece of advice (have an open conversation early and agree on rules together), support with two reasons, give concrete topics or an example, then close warmly.",
+    "sample_response_band12": "Aw, I'm so glad you're thinking about this ahead of time, that's honestly the secret to a happy home. The first thing I'd do is set up a relaxed chat with your roommate in the first week, maybe over coffee, before any habits get set. That matters because it's way easier to agree on rules when nobody's annoyed yet, and it shows you both respect each other. What I'd suggest is bringing a little list to talk through, like quiet hours, having guests over, and whether you share food or keep it separate. It also helps to frame things as questions, like \"How do you feel about late nights?\" rather than handing over a rulebook. On top of that, be ready to compromise, because it goes both ways. For example, my roommate and I agreed on quiet hours after ten, and we never once argued about noise. At the end of the day, a quick honest talk now saves a ton of stress later. You're going to do great, sis!",
+    "prompt_tag": "practice",
+    "sort_order": 25
+  },
+  {
+    "task_number": 1,
+    "title": "Roommate Borrows Without Asking",
+    "slug": "roommate-borrows-without-asking",
+    "topic": "borrowing",
+    "difficulty": "medium",
+    "prep_time_seconds": 30,
+    "response_time_seconds": 90,
+    "prompt_text": "Your classmate is upset because their roommate keeps borrowing their things, like clothes, kitchen items, and even their laptop charger, without ever asking first. Your classmate finds it disrespectful but worries that saying something will make the apartment feel tense. They want to know how to handle it. What advice would you give your classmate?",
+    "vocabulary_tips": [
+      "borrow",
+      "ask permission",
+      "respect",
+      "personal belongings",
+      "boundaries",
+      "speak up"
+    ],
+    "connector_phrases": [
+      "Here's what I think",
+      "If I were you",
+      "The main reason is",
+      "Besides that",
+      "When all is said and done",
+      "A good way to start is"
+    ],
+    "template_hint": "Open by validating the feeling of being disrespected, give one clear piece of advice (calmly ask the roommate to check first), support with two reasons, give a concrete phrasing example, then close with reassurance.",
+    "sample_response_band12": "Yeah, I'd be annoyed too, because it really does feel disrespectful when someone uses your stuff without checking. Here's what I think. If I were you, I'd say something soon, while it's still small, instead of letting it pile up into a big blow-up. The main reason is that your roommate probably thinks it's no big deal, so they have no idea it's bothering you. Besides that, speaking up early actually keeps things calm, because you can say it nicely instead of exploding later. A good way to start is keeping it light but clear, like, \"Hey, I don't mind sharing, but could you give me a heads-up before borrowing my charger? Sometimes I need it.\" That way you're not banning them, just asking for a quick check-in. For example, my brother did this with his roommate and it fixed the problem overnight. When all is said and done, your things are yours, and it's totally fair to set that boundary. I think you'll handle it perfectly!",
+    "prompt_tag": "practice",
+    "sort_order": 26
+  },
+  {
+    "task_number": 1,
+    "title": "Choosing A Trustworthy New Roommate",
+    "slug": "choosing-a-trustworthy-new-roommate",
+    "topic": "roommate search",
+    "difficulty": "hard",
+    "prep_time_seconds": 30,
+    "response_time_seconds": 90,
+    "prompt_text": "Your friend's old roommate is moving out, so they need to find someone new to share their apartment. Your friend is nervous about picking the wrong person and ending up with someone unreliable or untrustworthy. They asked you how they should go about choosing a good roommate. What advice would you give your friend?",
+    "vocabulary_tips": [
+      "references",
+      "screen candidates",
+      "reliable",
+      "trustworthy",
+      "red flags",
+      "lifestyle match"
+    ],
+    "connector_phrases": [
+      "What I'd recommend is",
+      "First and foremost",
+      "On top of that",
+      "Another thing worth doing is",
+      "At the end of the day",
+      "Trust me when I say"
+    ],
+    "template_hint": "Open by acknowledging the worry, give one core piece of advice (meet candidates in person and ask the right questions), support with two reasons, give a concrete step like checking references, then close encouragingly.",
+    "sample_response_band12": "I totally understand being nervous, picking the wrong roommate can make home life miserable, so it's worth being careful. What I'd recommend is, first and foremost, meeting a few people in person rather than just texting, because you really get a feel for someone face to face. The reason that matters is you can tell pretty quickly if your lifestyles match, like whether they're tidy, quiet, or up all night. On top of that, I'd ask practical questions, such as how they handle bills and whether they have guests over a lot, since those are the things that usually cause problems. Another thing worth doing is asking for a reference, maybe from a past roommate or landlord, just to confirm they're reliable. For example, my sister did a quick coffee chat and a reference check, and she found an amazing roommate that way. At the end of the day, trust your gut, because if something feels off, it usually is. Trust me when I say, taking your time now is so worth it.",
+    "prompt_tag": "practice",
+    "sort_order": 27
+  },
+  {
+    "task_number": 1,
+    "title": "Dealing With A Micromanaging Boss",
+    "slug": "dealing-with-a-micromanaging-boss",
+    "topic": "micromanagement",
+    "difficulty": "medium",
+    "prep_time_seconds": 30,
+    "response_time_seconds": 90,
+    "prompt_text": "Your coworker is feeling frustrated and stressed because their new manager checks every small task, asks for constant updates, and rewrites their emails before they are sent. Your coworker feels they are not trusted and is starting to dread going into the office. They have asked you how to handle the situation. What advice would you give your coworker about dealing with a micromanaging boss?",
+    "vocabulary_tips": [
+      "micromanage",
+      "build trust",
+      "set boundaries",
+      "proactive",
+      "constructive conversation",
+      "give them space"
+    ],
+    "connector_phrases": [
+      "Here's what I'd do",
+      "First of all",
+      "Another thing",
+      "Rather than",
+      "Try this",
+      "Trust me on this"
+    ],
+    "template_hint": "Empathize with the frustration, recommend one main strategy (proactively over-communicate to earn trust), support it with two reasons, give a concrete tactic like a weekly summary email, then end with reassurance.",
+    "sample_response_band12": "Ugh, I totally get why you're stressed; nobody likes feeling watched over their shoulder all day. Here's what I'd do, though. First of all, try giving your boss updates before they even ask. Trust me on this, when managers micromanage, it's usually because they're anxious, not because they think you're incapable. So if you stay one step ahead, you actually take that worry off their plate. For example, you could send a short Friday email summarizing what you finished and what's coming next week. That way, they feel in the loop without hovering. Another thing I'd suggest is calmly setting some boundaries; maybe ask for a quick weekly check-in instead of constant interruptions. Rather than seeing it as a complaint, frame it as 'this would help me be more productive.' Give it a few weeks, and I bet they'll start backing off once they trust your work. Hang in there, you've got this, and remember it often says more about them than about you.",
+    "prompt_tag": "practice",
+    "sort_order": 28
+  },
+  {
+    "task_number": 1,
+    "title": "Requesting Permanent Work From Home",
+    "slug": "requesting-permanent-work-from-home",
+    "topic": "remote work",
+    "difficulty": "medium",
+    "prep_time_seconds": 30,
+    "response_time_seconds": 90,
+    "prompt_text": "Your neighbour has been working from home a few days a week and now wants to ask their boss for a permanent full-time work-from-home arrangement. They believe they are more productive at home and would save a long daily commute, but they are nervous about how to bring it up and worried the boss might say no. They have asked for your advice. What would you tell your neighbour about making this request?",
+    "vocabulary_tips": [
+      "productivity",
+      "commute",
+      "make a case",
+      "trial period",
+      "flexibility",
+      "track record"
+    ],
+    "connector_phrases": [
+      "What I'd recommend",
+      "Before anything else",
+      "Instead of",
+      "The key thing is",
+      "That way",
+      "My advice would be"
+    ],
+    "template_hint": "Acknowledge the nerves, recommend framing the request around business benefits with evidence, give two reasons, suggest proposing a trial period as a concrete example, and close supportively.",
+    "sample_response_band12": "I think that's a totally reasonable thing to ask for, so don't be too nervous about it. What I'd recommend is going in with a clear plan rather than just asking out of the blue. The key thing is to frame it around what helps the company, not only what helps you. For example, pull together some proof that you've been just as productive, or even more so, on your remote days; maybe the projects you finished or the deadlines you hit. Before anything else, your boss is going to wonder 'will the work still get done?', so answering that upfront makes it an easy yes. Another reason this works is that you can point to the time you save on commuting and put that energy back into your job. My advice would be to suggest a three-month trial instead of asking for it permanently right away. That way, it feels low-risk for your boss, and your track record does the convincing. Go for it; the worst they can say is 'not yet.' Good luck!",
+    "prompt_tag": "practice",
+    "sort_order": 29
+  },
+  {
+    "task_number": 1,
+    "title": "Unsure About a Big Promotion",
+    "slug": "unsure-about-a-big-promotion",
+    "topic": "promotion",
+    "difficulty": "medium",
+    "prep_time_seconds": 30,
+    "response_time_seconds": 90,
+    "prompt_text": "A relative of yours has been offered a promotion to a management position at their company. They feel flattered, but they are afraid of the extra responsibility and worry about failing in front of their team. They keep thinking about turning it down and have come to you for advice. What would you tell them?",
+    "vocabulary_tips": [
+      "step up",
+      "out of your comfort zone",
+      "imposter syndrome",
+      "leadership",
+      "grow into the role",
+      "self-doubt"
+    ],
+    "connector_phrases": [
+      "Honestly",
+      "If you ask me",
+      "The thing is",
+      "Keep in mind",
+      "More importantly",
+      "At the end of the day"
+    ],
+    "template_hint": "Validate the self-doubt, recommend accepting the promotion, give two reasons (the company already believes in them and leadership skills grow on the job), add a concrete example like asking for a mentor or management training, and end with confidence.",
+    "sample_response_band12": "Honestly, the fact that you're nervous tells me you'll take this seriously, and that's exactly what good managers do. If you ask me, you should accept it. The thing is, nobody ever feels one hundred percent ready for a step up, so that self-doubt is completely normal and it doesn't mean you can't do the job. Keep in mind that your company chose you out of everyone, so they clearly see something in you that you might not see yet. More importantly, leadership is a skill you grow into, not something you're born knowing. For example, you could ask your boss for a mentor or some management training in the first few months, so you're not figuring it all out alone. When I took on more responsibility, I felt the same way, and within a few months it felt natural. At the end of the day, turning it down out of fear is a regret you don't want. Say yes, and grow into it!",
+    "prompt_tag": "practice",
+    "sort_order": 30
+  },
+  {
+    "task_number": 1,
+    "title": "Negotiating a Low Salary Offer",
+    "slug": "negotiating-a-low-salary-offer",
+    "topic": "salary negotiation",
+    "difficulty": "hard",
+    "prep_time_seconds": 30,
+    "response_time_seconds": 90,
+    "prompt_text": "A friend of yours has been offered a new job they really want, but the salary is lower than they expected and less than what similar roles usually pay. They are tempted to just accept it so they don't lose the opportunity, but a part of them feels the offer is too low. They have asked whether they should try to negotiate. What advice would you give your friend?",
+    "vocabulary_tips": [
+      "negotiate",
+      "market rate",
+      "lowball offer",
+      "know your worth",
+      "counteroffer",
+      "leverage"
+    ],
+    "connector_phrases": [
+      "My honest advice",
+      "First off",
+      "Here's the thing",
+      "On top of salary",
+      "Whatever you do",
+      "Bottom line"
+    ],
+    "template_hint": "Reassure that negotiating is normal, recommend making a counteroffer backed by research, give two reasons, add a concrete tactic like citing market rates or negotiating non-salary perks, and close with encouragement.",
+    "sample_response_band12": "My honest advice? Don't just accept it; at least try to negotiate. First off, asking for more is completely normal, and a good employer won't pull the offer just because you negotiated politely. Here's the thing, if similar roles pay more, you have every reason to make a counteroffer. What I'd do is look up the market rate for that position in your city, then go back and say something like, 'I'm really excited about this role, and based on what comparable positions pay, I was hoping for X.' That shows you've done your homework, and it's hard to argue with facts. On top of salary, remember you can negotiate other things too, like extra vacation days, a signing bonus, or a salary review in six months. So even if they can't move much on pay, you still come out ahead. Whatever you do, don't sell yourself short out of fear; know your worth. Bottom line, the worst case is they say no and you still have the job. Go get what you deserve!",
+    "prompt_tag": "practice",
+    "sort_order": 31
+  },
+  {
+    "task_number": 1,
+    "title": "A Boss Who Plays Favourites",
+    "slug": "a-boss-who-plays-favourites",
+    "topic": "favouritism",
+    "difficulty": "hard",
+    "prep_time_seconds": 30,
+    "response_time_seconds": 90,
+    "prompt_text": "Your classmate has a part-time job where the manager clearly favours one or two employees, who get the best shifts, the easy tasks, and most of the praise. Meanwhile, your classmate feels overlooked no matter how hard they work, and they are starting to feel discouraged. They have asked you what to do about a boss who plays favourites. What advice would you give them?",
+    "vocabulary_tips": [
+      "play favourites",
+      "overlooked",
+      "document your work",
+      "visibility",
+      "stay professional",
+      "advocate for yourself"
+    ],
+    "connector_phrases": [
+      "I hear you",
+      "What I'd focus on is",
+      "For starters",
+      "Beyond that",
+      "Try not to",
+      "In the long run"
+    ],
+    "template_hint": "Acknowledge how unfair it feels, recommend staying professional while increasing visibility of their contributions, give two reasons, add a concrete example like a one-on-one with the boss, and end with perspective.",
+    "sample_response_band12": "I hear you; that's genuinely frustrating, and it's hard to stay motivated when it feels like the deck is stacked against you. But here's what I'd focus on: making your good work impossible to ignore. For starters, try keeping a quick record of what you accomplish, like extra shifts you covered or problems you solved. That way, when review time comes, you have real examples instead of just a feeling. Beyond that, I'd ask your manager for a short one-on-one and calmly say you'd love more responsibility or better shifts, and ask what you can do to get there. A lot of the time, favourites just happen to be more visible, not more talented, so putting yourself on the radar really helps. Try not to badmouth the favoured coworkers, though; staying professional protects your reputation. In the long run, if nothing changes no matter what you do, it might be a sign this isn't the right place for you. But give it a fair shot first. You deserve to be seen!",
+    "prompt_tag": "practice",
+    "sort_order": 32
+  },
+  {
+    "task_number": 1,
+    "title": "Choosing Between Two Job Offers",
+    "slug": "choosing-between-two-job-offers",
+    "topic": "job offers",
+    "difficulty": "medium",
+    "prep_time_seconds": 30,
+    "response_time_seconds": 90,
+    "prompt_text": "A friend of yours has just received two job offers at the same time and feels completely torn about which one to accept. One pays more but comes with long hours and little flexibility, while the other pays a bit less but has a great team and more room to grow. They have to decide within a few days and don't know what to do. They have asked for your advice on what they should choose.",
+    "vocabulary_tips": [
+      "work-life balance",
+      "long-term prospects",
+      "company culture",
+      "trade-off",
+      "deal-breaker",
+      "gut feeling"
+    ],
+    "connector_phrases": [
+      "That's a great problem to have",
+      "Personally",
+      "The way I'd look at it",
+      "Sure, but",
+      "Most of all",
+      "When it comes down to it"
+    ],
+    "template_hint": "Acknowledge it's a good problem to have, recommend the option with growth and balance while respecting their priorities, give two reasons, suggest listing deal-breakers as a concrete method, and close by encouraging them to trust their gut.",
+    "sample_response_band12": "First of all, that's a great problem to have, so congratulations! Personally, I'd lean toward the second offer, even though it pays a little less. The way I'd look at it, money matters, sure, but long hours with no flexibility can burn you out fast, and that affects everything else in your life. Most of all, the second job gives you room to grow and a team you actually enjoy, and that's worth a lot over the years. A higher salary is nice, but if you're miserable, you'll be job-hunting again in a year anyway. Here's a trick that might help, though: write down your top three deal-breakers, like growth, balance, and pay, and see which job ticks more boxes. For example, if work-life balance is what keeps you sane, the answer becomes pretty clear. When it comes down to it, also trust your gut; if one offer just feels right, that instinct usually knows something. You really can't lose here, so take a breath and pick the one that excites you. You've got this!",
+    "prompt_tag": "practice",
+    "sort_order": 33
+  },
+  {
+    "task_number": 1,
+    "title": "Owning Up To A Mistake",
+    "slug": "owning-up-to-a-costly-mistake",
+    "topic": "Workplace honesty",
+    "difficulty": "medium",
+    "prep_time_seconds": 30,
+    "response_time_seconds": 90,
+    "prompt_text": "A close coworker comes to you looking really worried. They made a mistake on a big client order that cost the company a few thousand dollars, and so far nobody knows it was their fault. They are torn between quietly fixing what they can and hoping it blows over, or going to their manager and admitting exactly what happened. What advice would you give your coworker?",
+    "vocabulary_tips": [
+      "own up to",
+      "come clean",
+      "take responsibility",
+      "damage control",
+      "blow over",
+      "credibility"
+    ],
+    "connector_phrases": [
+      "If I were you",
+      "What I'd suggest is",
+      "The main reason is",
+      "On top of that",
+      "For example",
+      "At the end of the day"
+    ],
+    "template_hint": "Open with reassurance, recommend coming clean to the manager, give two reasons (trust and earlier fixes are easier), add a quick example, then close with encouragement.",
+    "sample_response_band12": "Okay, first of all, take a deep breath, because honestly everybody messes up at some point, so don't beat yourself up over this. If I were you, I'd go to your manager and own up to it as soon as possible. The main reason is that the truth almost always comes out eventually, and it looks so much worse if it seems like you were hiding it. On top of that, the sooner you flag it, the more time the team has to do damage control before things get even costlier. For example, my friend once double-billed a client by accident, but because she admitted it right away, her boss actually thanked her for being upfront and they sorted it out quietly. What I'd suggest is going in with a clear plan, like, here's what happened, here's how I'll fix it, and here's how I'll prevent it next time. That shows you're responsible, not careless. At the end of the day, your honesty will protect your credibility way more than staying silent. You've got this.",
+    "prompt_tag": "practice",
+    "sort_order": 34
+  },
+  {
+    "task_number": 1,
+    "title": "Responding To An Unfair Review",
+    "slug": "responding-to-an-unfair-review",
+    "topic": "Performance feedback",
+    "difficulty": "hard",
+    "prep_time_seconds": 30,
+    "response_time_seconds": 90,
+    "prompt_text": "A good friend just got their yearly performance review at work, and they feel it was really unfair. Their manager gave them a low rating, criticized things they don't think are even part of their job, and ignored all the extra projects they took on. They're not sure whether to push back formally, talk it out calmly, or just let it go. What advice would you give your friend?",
+    "vocabulary_tips": [
+      "push back",
+      "rebuttal",
+      "stay composed",
+      "document",
+      "constructive",
+      "rating"
+    ],
+    "connector_phrases": [
+      "Here's what I'd do",
+      "First off",
+      "The thing is",
+      "Another reason",
+      "Say, for instance",
+      "All in all"
+    ],
+    "template_hint": "Validate the frustration, advise a calm follow-up meeting backed by evidence, give two reasons (clarity and a paper trail), include an example, then close warmly.",
+    "sample_response_band12": "I totally get why you're upset, that does sound really unfair, especially after all the extra work you put in. But here's what I'd do: instead of firing off an angry email, take a day to cool down and then ask your manager for a calm follow-up chat. First off, when you stay composed, people actually listen, and it's harder for them to dismiss you as being defensive. The thing is, you want to come in with proof, so pull together a list of those extra projects and any positive feedback you've gotten. Another reason to do this in person is that a lot of misunderstandings can get cleared up just by talking it through. Say, for instance, your manager simply didn't realize how much you'd taken on, this gives them a chance to correct the record. If the meeting doesn't help, then you can look into a formal rebuttal through HR and document everything. All in all, push back, but do it smartly and professionally. You deserve to be heard.",
+    "prompt_tag": "practice",
+    "sort_order": 35
+  },
+  {
+    "task_number": 1,
+    "title": "Quitting Without A Backup Job",
+    "slug": "quitting-without-a-backup-job",
+    "topic": "Career risk",
+    "difficulty": "hard",
+    "prep_time_seconds": 30,
+    "response_time_seconds": 90,
+    "prompt_text": "Your cousin is completely burned out at their current job and is seriously thinking about handing in their resignation, even though they don't have another job lined up yet. They feel they need a clean break to recover and job-hunt properly, but they're worried about money and dreading another month in that office. They want to know whether you think quitting first is a smart move. What advice would you give your cousin?",
+    "vocabulary_tips": [
+      "burned out",
+      "hand in your notice",
+      "financial cushion",
+      "leap of faith",
+      "recharge",
+      "fall back on"
+    ],
+    "connector_phrases": [
+      "Honestly",
+      "My honest take is",
+      "One big reason",
+      "That said",
+      "Just imagine",
+      "Bottom line"
+    ],
+    "template_hint": "Acknowledge the burnout, advise caution by checking savings first, give two reasons (financial safety and job-search leverage), add a what-if example, then close supportively.",
+    "sample_response_band12": "Honestly, I really feel for you, burnout is no joke, and I can hear how exhausted you are. My honest take is, before you hand in your notice, take a hard look at your savings and figure out how many months you could realistically cover. One big reason is that job hunting can take way longer than people expect, and running out of money would only add to the stress you're already under. That said, if you've got a solid financial cushion, even a short break could help you recharge and interview with way more confidence. Just imagine walking into interviews calm and rested instead of drained, that comes across, and employers notice it. So what I'd suggest is lining up a few leads or negotiating some vacation first, so you've got something to fall back on before you leave. But if it's genuinely affecting your health, your wellbeing has to come first. Bottom line, if you can take this leap safely, do it, and I'm fully rooting for you.",
+    "prompt_tag": "practice",
+    "sort_order": 36
+  },
+  {
+    "task_number": 1,
+    "title": "First-Day Nerves At A New Job",
+    "slug": "first-day-nerves-at-a-new-job",
+    "topic": "First-day job nerves",
+    "difficulty": "easy",
+    "prep_time_seconds": 30,
+    "response_time_seconds": 90,
+    "prompt_text": "A friend of yours is starting a brand-new job tomorrow morning and they are really nervous. They keep worrying that they'll forget people's names, ask silly questions, or make a bad first impression on their new team. They called you tonight to calm down and asked how they should handle their first day. What advice would you give your friend?",
+    "vocabulary_tips": [
+      "first impression",
+      "settle in",
+      "break the ice",
+      "ease into",
+      "go easy on yourself",
+      "approachable"
+    ],
+    "connector_phrases": [
+      "Don't worry",
+      "If I were in your shoes",
+      "Plus",
+      "Trust me",
+      "Like when I",
+      "Most importantly"
+    ],
+    "template_hint": "Reassure them the nerves are normal, advise arriving early and asking questions, give two reasons (good impression and faster learning), add a personal example, then close with encouragement.",
+    "sample_response_band12": "Aw, don't worry, those nerves are completely normal, it just means you care about doing well. If I were in your shoes, I'd get a good night's sleep and show up about ten minutes early tomorrow. The main reason is that arriving relaxed and on time makes a great first impression, and it gives you a minute to settle in before things get busy. Plus, here's a little secret, nobody expects you to know everything on day one, so please ask questions instead of pretending. Trust me, asking is how you learn fastest, and it actually makes you look engaged, not clueless. Like when I started my last job, I forgot half the names too, so I kept a small notebook to jot them down, and that little trick really saved me. Most importantly, just be friendly and approachable, smile, say hi, and let yourself ease into it. Go easy on yourself, okay? You're going to do great, honestly.",
+    "prompt_tag": "practice",
+    "sort_order": 37
+  },
+  {
+    "task_number": 1,
+    "title": "Whether To Repeat Office Gossip",
+    "slug": "whether-to-repeat-office-gossip",
+    "topic": "Workplace gossip",
+    "difficulty": "medium",
+    "prep_time_seconds": 30,
+    "response_time_seconds": 90,
+    "prompt_text": "A coworker you're friendly with accidentally overheard two managers talking about possible layoffs in another department. They're not sure whether to keep it quiet or warn a friend who works there, since that friend might want time to prepare. They feel torn between being a good friend and staying out of office drama. They turn to you and ask what you would do in their situation. What advice would you give your coworker?",
+    "vocabulary_tips": [
+      "keep it to yourself",
+      "hearsay",
+      "spread rumours",
+      "discretion",
+      "backfire",
+      "trustworthy"
+    ],
+    "connector_phrases": [
+      "I'd be careful here",
+      "The way I see it",
+      "For one thing",
+      "Besides",
+      "Picture this",
+      "When it comes down to it"
+    ],
+    "template_hint": "Caution against spreading unconfirmed news, advise keeping it private, give two reasons (it's unverified and could backfire), add a what-if example, then close with a balanced takeaway.",
+    "sample_response_band12": "Ooh, I'd be careful here, because this is genuinely tricky. The way I see it, I'd keep it to yourself for now and not pass it along. For one thing, this is really just hearsay at this point. You overheard part of a conversation, and you don't actually know if those layoffs are confirmed or just being kicked around. If you warn your friend and it turns out to be nothing, you'd cause them a ton of stress for no reason. Besides, this could seriously backfire on you. If word gets out and it's traced back to you, your managers might see you as someone who can't be trusted with sensitive information. Picture this: your friend panics, mentions it to someone, and suddenly the whole office knows. That's a real mess. What I'd suggest instead is staying out of the drama and just being a supportive friend in general. When it comes down to it, protecting your own reputation and not spreading rumours is the safer call here. A little discretion really pays off in the long run.",
+    "prompt_tag": "practice",
+    "sort_order": 38
+  },
+  {
+    "task_number": 1,
+    "title": "Returning to Work After Absence",
+    "slug": "returning-to-work-after-absence",
+    "topic": "Returning to work",
+    "difficulty": "medium",
+    "prep_time_seconds": 30,
+    "response_time_seconds": 90,
+    "prompt_text": "Your neighbour is about to go back to work after being away for almost a year for health reasons. They are excited but also anxious because a lot has changed, including new coworkers and new systems. They worry that people will treat them differently or doubt their abilities. They asked you how they should approach their return. What advice would you give your neighbour?",
+    "vocabulary_tips": [
+      "ease back in",
+      "get up to speed",
+      "out of the loop",
+      "pace yourself",
+      "lean on",
+      "back in the swing"
+    ],
+    "connector_phrases": [
+      "First things first",
+      "What I'd really suggest is",
+      "The reason being",
+      "And another thing",
+      "Take, for example",
+      "In the end"
+    ],
+    "template_hint": "Acknowledge it's a big step, advise easing back in and asking for a catch-up, give two reasons (avoiding overwhelm and rebuilding confidence), add an example, then close warmly.",
+    "sample_response_band12": "First things first, congratulations, going back after a whole year is a big deal, and it's completely normal to feel a bit nervous about it. What I'd really suggest is easing back in slowly rather than trying to prove yourself all at once. The reason being, you've been out of the loop for a while, so if you pace yourself, you'll avoid burning out in the first week. And another thing, ask your manager for a quick catch-up session to get up to speed on the new systems and meet the new faces. That way you won't feel lost, and it shows initiative. Take, for example, my aunt, when she came back from her leave, she set up short chats with a few teammates, and within two weeks she was right back in the swing of things. Honestly, don't be afraid to lean on people and ask questions, nobody expects you to know everything overnight. In the end, just go easy on yourself and trust that your skills are still there. You'll find your rhythm again before you know it.",
+    "prompt_tag": "practice",
+    "sort_order": 39
+  },
+  {
+    "task_number": 1,
+    "title": "Requesting Time Off Tactfully",
+    "slug": "requesting-time-off-tactfully",
+    "topic": "Time off",
+    "difficulty": "easy",
+    "prep_time_seconds": 30,
+    "response_time_seconds": 90,
+    "prompt_text": "A classmate of yours works part-time and needs to ask their boss for several days off to deal with an important personal matter. They are nervous because it is a busy season at work, and they do not want to share too many private details or seem unreasonable. Your classmate asks how they should go about requesting the time off. What advice would you give your classmate?",
+    "vocabulary_tips": [
+      "give notice",
+      "keep it brief",
+      "give advance warning",
+      "cover your shifts",
+      "personal matter",
+      "be upfront"
+    ],
+    "connector_phrases": [
+      "Here's the thing",
+      "If I were you, I'd",
+      "Mainly because",
+      "What's more",
+      "Let's say",
+      "So all in all"
+    ],
+    "template_hint": "Reassure them it's a reasonable request, advise asking early and privately, give two reasons (more notice helps and brevity protects privacy), add an example, then close encouragingly.",
+    "sample_response_band12": "Honestly, don't stress too much, everybody needs time off for personal stuff now and then, so this is a totally reasonable thing to ask. Here's the thing, if I were you, I'd ask as early as possible and do it in a private moment, not in front of the whole team. Mainly because the more advance warning you give, the easier it is for your boss to cover your shifts, even during a busy season. What's more, you don't owe anyone the full story, so keep it brief, just say it's an important personal matter you need to take care of, and that you'll make sure your work is handled. Let's say you offer to swap shifts with a coworker or finish things up before you go, that shows you're being responsible, and bosses really appreciate that. So all in all, be upfront, give plenty of notice, and stay professional about it. I'm sure it'll go smoother than you think, so try not to worry.",
+    "prompt_tag": "practice",
+    "sort_order": 40
+  },
+  {
+    "task_number": 1,
+    "title": "Choosing Between Two Universities",
+    "slug": "choosing-between-two-universities",
+    "topic": "university choice",
+    "difficulty": "easy",
+    "prep_time_seconds": 30,
+    "response_time_seconds": 90,
+    "prompt_text": "Your younger cousin has been accepted to two universities and can't decide which offer to accept. One is a large, well-known school far from home, and the other is a smaller school in your cousin's hometown. She knows you went through the same thing a few years ago, so she has come to you for help. What advice would you give her about how to choose between the two universities?",
+    "vocabulary_tips": [
+      "reputation",
+      "campus life",
+      "weigh the pros and cons",
+      "tuition costs",
+      "academic program",
+      "gut feeling"
+    ],
+    "connector_phrases": [
+      "If I were you",
+      "What I'd suggest is",
+      "The main thing is",
+      "On top of that",
+      "At the end of the day",
+      "Trust me on this"
+    ],
+    "template_hint": "Open warmly to acknowledge the dilemma, give one clear recommendation, back it with two reasons (program fit and finances/distance), add a short personal example, then close with reassurance.",
+    "sample_response_band12": "Hey, I totally get why you're torn, because honestly I lost sleep over this exact same decision. Okay, here's what I'd suggest: don't just chase the big name. The main thing is to look at the actual program you want to study and ask which school does it better. If the smaller school in town has stronger professors in your field, that matters way more than prestige. On top of that, think about money and distance. Living at home could save you thousands a year, and that's huge when you graduate debt-free. When I picked my school, I went for the flashy one and ended up homesick and broke, so trust me on this. What I'd really do is visit both campuses if you can, sit in on a class, and just notice where you feel like you belong. Your gut tells you a lot. At the end of the day, there's no wrong choice here, so don't stress too much. Whatever you pick, you'll make it work, and I'm always here to talk it through. Good luck!",
+    "prompt_tag": "practice",
+    "sort_order": 41
+  },
+  {
+    "task_number": 1,
+    "title": "Studying Abroad For A Year",
+    "slug": "studying-abroad-for-a-year",
+    "topic": "study abroad",
+    "difficulty": "medium",
+    "prep_time_seconds": 30,
+    "response_time_seconds": 90,
+    "prompt_text": "A close friend has been offered the chance to spend a full year studying abroad in another country. She is excited, but she keeps going back and forth because she is nervous about leaving her family, friends, and part-time job behind. She trusts your opinion and asks you what she should do. What advice would you give her?",
+    "vocabulary_tips": [
+      "once-in-a-lifetime",
+      "comfort zone",
+      "homesickness",
+      "cultural experience",
+      "broaden your horizons",
+      "regret"
+    ],
+    "connector_phrases": [
+      "Honestly",
+      "If you ask me",
+      "The way I see it",
+      "Plus",
+      "More importantly",
+      "When it comes down to it"
+    ],
+    "template_hint": "Acknowledge her excitement and nerves, recommend she go for it, give two reasons (rare opportunity and personal growth), offer a practical tip to ease the worry, and end with encouragement.",
+    "sample_response_band12": "Okay, deep breath. Honestly, if you ask me, this is a once-in-a-lifetime thing and you should absolutely go for it. The way I see it, a year abroad will broaden your horizons in a way nothing else can. You'll experience a whole new culture, meet people from all over, and come back more confident and independent. Plus, opportunities like this almost never come around twice, especially once you finish school and start working full time. More importantly, I know you, and I really think you'd regret saying no far more than you'd regret saying yes. As for the family and friends part, that's real, but a year flies by, and with video calls these days you'll barely feel the distance. My sister did a year overseas and she still says it was the best decision she ever made, even though she cried at the airport. The job will still be there, or honestly you'll find a better one. When it comes down to it, don't let a little fear make this choice for you. Go for it. I'm really excited for you.",
+    "prompt_tag": "practice",
+    "sort_order": 42
+  },
+  {
+    "task_number": 1,
+    "title": "Whether To Pursue A Master's",
+    "slug": "whether-to-pursue-a-masters-degree",
+    "topic": "master's degree",
+    "difficulty": "hard",
+    "prep_time_seconds": 30,
+    "response_time_seconds": 90,
+    "prompt_text": "A coworker who finished her bachelor's degree a few years ago is thinking about going back to school for a master's degree. She is worried about the cost, the time commitment, and whether it will actually help her career. She knows you've thought carefully about further education, so she asks you what she should do. What advice would you give her?",
+    "vocabulary_tips": [
+      "return on investment",
+      "career advancement",
+      "field of study",
+      "work-life balance",
+      "long-term goals",
+      "worth the sacrifice"
+    ],
+    "connector_phrases": [
+      "Here's the thing",
+      "What I'd really focus on is",
+      "For one thing",
+      "Then again",
+      "Bottom line",
+      "If it were me"
+    ],
+    "template_hint": "Validate her concerns, give a conditional recommendation tied to her career goals, support it with two reasons (career payoff and timing/cost), share a concrete example, and close supportively.",
+    "sample_response_band12": "Hey Sandra, that's a big one, but I'm glad you asked. Here's the thing, a master's isn't automatically worth it. It really depends on your field and your goals. What I'd really focus on is whether the degree actually opens doors in your industry. For one thing, in some careers a master's leads straight to promotions and higher pay, so the return on investment is clear. Then again, in other fields experience matters more than another diploma, and you'd lose money and years for not much gain. So my honest advice is to talk to a few people who already have the job you want, and ask whether their master's actually mattered. My cousin did exactly that before committing, and she found out a short certificate would get her the same raise for a fraction of the cost. Also, think hard about the time, because studying while working full time is exhausting. Bottom line, if it lines up with your long-term goals, go for it. If it were me, I'd just do that research first. Whatever you decide, I'm rooting for you.",
+    "prompt_tag": "practice",
+    "sort_order": 43
+  },
+  {
+    "task_number": 1,
+    "title": "Transferring To A Different School",
+    "slug": "transferring-to-a-different-school",
+    "topic": "school transfer",
+    "difficulty": "medium",
+    "prep_time_seconds": 30,
+    "response_time_seconds": 90,
+    "prompt_text": "Your neighbour's daughter is partway through her degree but is unhappy at her current college. She is thinking about transferring to a different school, but she's worried about losing credits and starting over socially. The family knows you understand the school system, so they ask you to talk to her. What advice would you give her about transferring to a different school?",
+    "vocabulary_tips": [
+      "transfer credits",
+      "fresh start",
+      "academic advisor",
+      "fit in",
+      "settle in",
+      "stick it out"
+    ],
+    "connector_phrases": [
+      "First things first",
+      "My advice would be",
+      "The reason I say that is",
+      "Besides",
+      "That said",
+      "In the long run"
+    ],
+    "template_hint": "Show empathy, recommend she investigate before deciding, give two reasons (protecting credits and confirming the new school fixes the real problem), add a practical step, and reassure her.",
+    "sample_response_band12": "Hi Emma, I heard you're not loving things at your college, and I'm sorry, that's tough. First things first, my advice would be don't make any sudden moves until you've done a bit of homework. The reason I say that is transferring can cost you credits, and you don't want to lose a whole year of work. So before anything, book a meeting with an academic advisor at the new school and ask exactly which credits will carry over. Besides, I'd gently ask yourself what's really making you unhappy. If it's the program or the location, then a fresh start makes total sense. But if it's mostly feeling like you don't fit in yet, sometimes that just takes a semester to settle in. A friend of mine almost transferred in her second year, gave it one more term, found her people, and ended up loving it. That said, if your gut says this place isn't right, trust that, because being happy matters for your grades too. In the long run, you want a school that feels like home. Take your time, and call me anytime, okay?",
+    "prompt_tag": "practice",
+    "sort_order": 44
+  },
+  {
+    "task_number": 1,
+    "title": "Taking a Gap Year",
+    "slug": "taking-a-gap-year-before-college",
+    "topic": "gap year",
+    "difficulty": "easy",
+    "prep_time_seconds": 30,
+    "response_time_seconds": 90,
+    "prompt_text": "Your younger brother just finished high school but feels burned out and unsure about what to study. He is thinking about taking a gap year before college to travel and work, but your parents are worried he won't go back. He wants to know what you really think. What advice would you give him about taking a gap year before college?",
+    "vocabulary_tips": [
+      "burned out",
+      "recharge",
+      "real-world experience",
+      "a clear plan",
+      "lose momentum",
+      "make it count"
+    ],
+    "connector_phrases": [
+      "Look",
+      "Honestly",
+      "What I'd do is",
+      "The key is",
+      "Also",
+      "Just remember"
+    ],
+    "template_hint": "Acknowledge the burnout, support the gap year with a condition (a clear plan), give two reasons (recovery and direction), add a concrete suggestion, and close warmly.",
+    "sample_response_band12": "Look, little bro, I actually think a gap year could be a great idea, so don't let Mom and Dad scare you off it. Honestly, you've been grinding through school for years and you sound completely burned out, so taking time to recharge makes total sense. The key, though, is that you can't just sit on the couch for twelve months. What I'd do is make a real plan: work and save money for a few months, then travel or volunteer. That way you get real-world experience and figure out what actually interests you, which helps you pick a major instead of guessing. Also, here's a tip that'll calm the parents down. Apply to college now and defer your spot for a year, so you've got a guaranteed place waiting and you won't lose momentum or talk yourself out of going back. My buddy did exactly that, worked at a ski resort, came back totally focused, and crushed first year. Just remember to make it count. I really think you'll come back a new person, so go for it.",
+    "prompt_tag": "practice",
+    "sort_order": 45
+  },
+  {
+    "task_number": 1,
+    "title": "Advise A Friend On School",
+    "slug": "advise-a-friend-on-going-back-to-school",
+    "topic": "online learning",
+    "difficulty": "medium",
+    "prep_time_seconds": 30,
+    "response_time_seconds": 90,
+    "prompt_text": "A friend who works full time wants to go back to school but can't decide between an online program he can do from home and a traditional in-person program at a local college. He's worried about staying motivated if he studies online, but he's also worried about fitting in-person classes around his job. He really values your judgment and wants to know what you think he should do. What advice would you give him?",
+    "vocabulary_tips": [
+      "self-discipline",
+      "flexibility",
+      "hands-on learning",
+      "networking opportunities",
+      "stay accountable",
+      "schedule conflicts"
+    ],
+    "connector_phrases": [
+      "Okay so",
+      "Honestly",
+      "Here's what I'd do",
+      "The main reason is",
+      "On top of that",
+      "If I were you"
+    ],
+    "template_hint": "Give one clear recommendation up front based on his work schedule and how he learns, back it with two reasons (for example flexibility around his job and staying accountable or motivated), add a short practical example or first step he can take, and close with encouragement.",
+    "sample_response_band12": "Okay so, Daniel, I can tell you're really torn, but honestly, I think you should go with the online program. Here's what I'd do. The main reason is flexibility. You're working full time, so an online program means no commute and no schedule conflicts with your job. You can study early in the morning or late at night, whenever things calm down. On top of that, you said you're worried about staying motivated, and I get that, but you can fix that with a routine. Just block out the same two hours every evening and tell me your goals so I can help keep you accountable. My cousin did her whole certificate online while working, and the trick was treating each lesson like a real appointment she couldn't skip. If I were you, I'd start with just one online course this term as a test run, see how the self-discipline feels, and then commit to the full program once you know it works. Either way, I think it's awesome that you're going back to school, and I'm totally here to support you through it.",
+    "prompt_tag": "practice",
+    "sort_order": 46
+  },
+  {
+    "task_number": 1,
+    "title": "Choosing Between Two Scholarships",
+    "slug": "choosing-between-two-scholarships",
+    "topic": "scholarship offers",
+    "difficulty": "medium",
+    "prep_time_seconds": 30,
+    "response_time_seconds": 90,
+    "prompt_text": "Your niece has been offered two scholarships and has to choose one. The first is a larger award at a school she likes a little less, while the second is a smaller award at her dream school, which means she would still have to cover some costs herself. She feels overwhelmed and asks you to help her decide. What advice would you give her?",
+    "vocabulary_tips": [
+      "full ride",
+      "out-of-pocket costs",
+      "the bigger picture",
+      "financial pressure",
+      "dream school",
+      "do the math"
+    ],
+    "connector_phrases": [
+      "First of all",
+      "Here's what I think",
+      "For starters",
+      "But then again",
+      "All things considered",
+      "My two cents"
+    ],
+    "template_hint": "Calm her down, recommend she do the math first, give two reasons (real cost difference and long-term happiness/fit), add a concrete example, then close encouragingly.",
+    "sample_response_band12": "First of all, take a breath, sweetheart. Honestly, both of these are wonderful problems to have, so be proud of yourself. Here's what I think. Before you let your heart decide, sit down and actually do the math. For starters, work out the real out-of-pocket costs at your dream school after the smaller scholarship. If the gap is small and your family can manage it, then going where you'll be happiest is totally worth it, because loving your school helps you do your best work. But then again, if the bigger award is basically a full ride and the difference is thousands of dollars a year, that financial pressure can weigh on you for years after graduation. My friend chose her dream school with loans, and she's still paying them off ten years later. So look at the bigger picture, not just this fall. All things considered, my two cents is to pick the option that lets you finish without drowning in debt, as long as you can still be happy there. Whatever you choose, you're going to shine.",
+    "prompt_tag": "practice",
+    "sort_order": 47
+  },
+  {
+    "task_number": 1,
+    "title": "Teammate Not Pulling Their Weight",
+    "slug": "teammate-not-pulling-their-weight",
+    "topic": "Group Work",
+    "difficulty": "medium",
+    "prep_time_seconds": 30,
+    "response_time_seconds": 90,
+    "prompt_text": "A classmate of yours is working on a graded group project, but one teammate keeps missing meetings and never finishes their share of the work. The deadline is close, and your classmate feels like they are carrying the whole team. They are not sure whether to confront the teammate, cover the work themselves, or tell the professor, so they have asked you what they should do. What advice would you give them?",
+    "vocabulary_tips": [
+      "pull their weight",
+      "carry the team",
+      "split the workload",
+      "have a quiet word",
+      "loop in the professor",
+      "set a clear deadline"
+    ],
+    "connector_phrases": [
+      "Okay, first of all",
+      "If I were you",
+      "The first thing I'd do is",
+      "On top of that",
+      "Just remember",
+      "At the end of the day"
+    ],
+    "template_hint": "Validate the frustration, advise a calm direct conversation with the teammate first, then suggest documenting and involving the professor only as a backup, support both with reasons, add a quick example, and close supportively.",
+    "sample_response_band12": "Okay, first of all, I'd be annoyed too, so that reaction is totally fair, but try not to just silently carry the whole thing. If I were you, the first thing I'd do is message your teammate privately and give them one specific task with a clear deadline, like, hey, can you have the slides done by Thursday? A lot of people slack off just because nobody's actually pinned them down, so being direct often fixes it right away. On top of that, I'd keep a quiet record of who did what in your group chat, because if it falls apart, you've got proof, and telling the professor isn't tattling, it's just honest. For example, my buddy did exactly this last term, sent one firm message, and suddenly his teammate started showing up. Just remember, don't redo their part for them, because that only trains them to keep coasting. At the end of the day, you deserve credit for your own work, so speak up early. You've totally got this.",
+    "prompt_tag": "practice",
+    "sort_order": 48
+  },
+  {
+    "task_number": 1,
+    "title": "Nervous About A Class Presentation",
+    "slug": "nervous-about-a-class-presentation",
+    "topic": "Presentations",
+    "difficulty": "easy",
+    "prep_time_seconds": 30,
+    "response_time_seconds": 90,
+    "prompt_text": "A close friend of yours has to give a presentation in front of their whole class next week, and they are terrified of speaking in public. They tell you they get shaky, forget their words, and are scared everyone will judge them. They have asked you for some advice on how to get through it. What advice would you give them?",
+    "vocabulary_tips": [
+      "stage fright",
+      "practice out loud",
+      "cue cards",
+      "calm your nerves",
+      "make eye contact",
+      "take a deep breath"
+    ],
+    "connector_phrases": [
+      "Trust me",
+      "The first thing I'd say is",
+      "What really helps is",
+      "On top of that",
+      "Honestly",
+      "You'll be great"
+    ],
+    "template_hint": "Reassure them the fear is normal, give one tip about rehearsing out loud and one about managing nerves in the moment, back each with a reason, add a quick personal example, and close with a confidence boost.",
+    "sample_response_band12": "Aw, honestly, almost everyone gets nervous about this, so trust me, you are completely normal and you're going to be fine. The first thing I'd say is practice out loud, like really out loud, not just reading it in your head. Stand up, say it to your mirror or to me, three or four times, because once the words are in your mouth and not just your eyes, your brain stops freezing up. On top of that, make yourself a few cue cards with just keywords, not full sentences, so you've got a safety net if you blank. What really helps in the moment is taking one slow, deep breath before you start, and finding two or three friendly faces in the room to look at instead of the whole crowd. When I did that for my first big presentation, my hands stopped shaking within a minute. Honestly, nobody is judging you nearly as hard as you think, they're all just glad it's not their turn. You've got this, you'll be great.",
+    "prompt_tag": "practice",
+    "sort_order": 49
+  },
+  {
+    "task_number": 1,
+    "title": "Overwhelmed by a Long Thesis",
+    "slug": "overwhelmed-by-a-long-thesis",
+    "topic": "Managing a Long-Term Project",
+    "difficulty": "hard",
+    "prep_time_seconds": 30,
+    "response_time_seconds": 90,
+    "prompt_text": "Your cousin has just started a year-long thesis project and feels completely overwhelmed by how big and open-ended it is. They keep putting off starting because they do not know where to begin, and the final deadline feels so far away that nothing feels urgent yet. They have asked you how to manage such a huge long-term project. What advice would you give them?",
+    "vocabulary_tips": [
+      "break it into chunks",
+      "set milestones",
+      "a realistic timeline",
+      "chip away at it",
+      "check in with your supervisor",
+      "stay on track"
+    ],
+    "connector_phrases": [
+      "Honestly",
+      "Here's what I'd do",
+      "For starters",
+      "The other big thing is",
+      "Believe me",
+      "At the end of the day"
+    ],
+    "template_hint": "Acknowledge how daunting it feels, advise breaking the project into milestones with mini-deadlines and checking in regularly with a supervisor, justify each with a reason, add a concrete example, and close with grounded encouragement.",
+    "sample_response_band12": "Honestly, a whole year on one project would overwhelm anyone, so don't beat yourself up for freezing. Here's what I'd do. For starters, stop thinking of it as one giant thesis and break it into small chunks with their own little deadlines, like finish the reading by next month, draft chapter one by the one after. The reason is, your brain can actually picture finishing one small piece, but it panics at the whole mountain, so milestones make it feel doable. The other big thing is, set up regular check-ins with your supervisor, even monthly, because a real deadline with another person waiting on you kills the procrastination instantly. For example, my friend wrote his entire thesis just by promising his advisor a few pages every two weeks, and he was never actually stressed. Believe me, the worst trap is telling yourself the deadline is far away, because suddenly it's a month out and nothing's done. At the end of the day, you don't have to do it all today, you just have to chip away at it. Start with one tiny step tomorrow.",
+    "prompt_tag": "practice",
+    "sort_order": 50
+  },
+  {
+    "task_number": 1,
+    "title": "Learning A New Language",
+    "slug": "learning-a-new-language",
+    "topic": "Languages",
+    "difficulty": "easy",
+    "prep_time_seconds": 30,
+    "response_time_seconds": 90,
+    "prompt_text": "A friend of yours wants to start learning a new language completely from scratch, but they feel lost about how to begin and worry they are too old to ever become fluent. They keep downloading apps and then giving up after a few days. They have asked you for advice on how to actually learn it and stick with it. What advice would you give them?",
+    "vocabulary_tips": [
+      "from scratch",
+      "build a daily habit",
+      "immerse yourself",
+      "pick up everyday phrases",
+      "make mistakes",
+      "stick with it"
+    ],
+    "connector_phrases": [
+      "If I were you",
+      "My biggest tip is",
+      "Another thing that helps",
+      "Plus",
+      "Trust me on this",
+      "At the end of the day"
+    ],
+    "template_hint": "Reassure them they are not too old, give one tip on small daily practice and one on real-life immersion or speaking, back each with a reason, add a relatable example, and close by motivating them to start.",
+    "sample_response_band12": "Hey, first off, you are absolutely not too old, people learn languages at every age, so let go of that worry right now. My biggest tip is to keep it small but daily, like just fifteen minutes every single morning. If I were you, I'd attach it to something you already do, like practising while your coffee brews, because tiny daily habits stick far better than cramming for hours and then quitting. Another thing that helps is using the language for real as soon as possible, so change your phone to that language, watch shows with subtitles, and say simple everyday phrases out loud. Trust me on this, you learn way faster by actually speaking and making mistakes than by silently doing app drills. Plus, those embarrassing little errors are exactly what make the words stick. When I started learning French, I felt hopeless for weeks, but once I forced myself to chat with a coworker, it just clicked. At the end of the day, slow and steady wins this one. Start today, be patient, and you'll surprise yourself.",
+    "prompt_tag": "practice",
+    "sort_order": 51
+  },
+  {
+    "task_number": 1,
+    "title": "Retaking A Failed Class",
+    "slug": "retaking-a-failed-class",
+    "topic": "Studies",
+    "difficulty": "medium",
+    "prep_time_seconds": 30,
+    "response_time_seconds": 90,
+    "prompt_text": "Your younger sibling failed a course last semester and now has to retake the whole thing. They feel embarrassed and discouraged, and they are afraid the same thing will happen again. They are not sure how to approach the class differently this time. What advice would you give them?",
+    "vocabulary_tips": [
+      "a fresh start",
+      "figure out what went wrong",
+      "ask for help early",
+      "office hours",
+      "a study routine",
+      "go easy on yourself"
+    ],
+    "connector_phrases": [
+      "Listen",
+      "Here's the thing",
+      "What I'd really focus on is",
+      "On top of that",
+      "Just remember",
+      "Trust me"
+    ],
+    "template_hint": "Reassure them and remove the shame first, advise figuring out what went wrong last time and getting help early this time, support each with a reason, add an encouraging example, and close warmly.",
+    "sample_response_band12": "Listen, first of all, failing a class does not make you a failure. Tons of great students have retaken something, so please stop being so hard on yourself. Here's the thing, you actually have a big advantage this time because you've already seen the material once. What I'd really focus on is figuring out honestly what went wrong before. Was it that you fell behind early, didn't ask questions, or just ran out of time? Once you know the real reason, you can fix that exact thing instead of repeating it. On top of that, I'd get help the moment something feels confusing, so go to office hours, email the professor, form a study group, whatever it takes. The reason is, last time the gaps probably snowballed quietly, so catching them early changes everything. Trust me, my roommate retook chemistry, went to every office hour, and ended up acing it. Just remember, this is a fresh start, not a punishment. Go easy on yourself, show up consistently, and you'll get through it.",
+    "prompt_tag": "practice",
+    "sort_order": 52
+  },
+  {
+    "task_number": 1,
+    "title": "Fixing Last-Minute Study Habits",
+    "slug": "fixing-last-minute-study-habits",
+    "topic": "Study Habits",
+    "difficulty": "medium",
+    "prep_time_seconds": 30,
+    "response_time_seconds": 90,
+    "prompt_text": "A classmate of yours admits they always leave studying until the very last night before a test and end up cramming everything in a panic. They know this habit is hurting their grades and their sleep, but they cannot seem to break it. They have asked you how they can build better study habits. What advice would you give them?",
+    "vocabulary_tips": [
+      "cram",
+      "space it out",
+      "study in short sessions",
+      "remove distractions",
+      "build momentum",
+      "kick the habit"
+    ],
+    "connector_phrases": [
+      "Honestly",
+      "If you ask me",
+      "The trick is",
+      "Beyond that",
+      "Believe me",
+      "At the end of the day"
+    ],
+    "template_hint": "Acknowledge the habit is common, advise spreading study into short spaced sessions and removing distractions, back each with a reason, add a concrete example, and close encouragingly.",
+    "sample_response_band12": "Honestly, almost everyone has done the panic-cram thing, so don't feel hopeless, you just need a better system. If you ask me, the trick is to stop studying for hours and instead do short, regular sessions, like thirty minutes a day spread across the week. The reason is, your brain remembers way more when you space it out, whereas cramming one night just dumps everything and most of it leaks out by morning. Beyond that, I'd keep those sessions distraction-free, so put your phone in another room and pick one quiet spot. Believe me, twenty focused minutes beats two hours of scrolling between flashcards. What really helps is starting tiny, like opening your notes for five minutes, because once you start, momentum carries you. For example, I used to cram too, but the term I switched to little daily reviews, my grades jumped and I actually slept the night before exams. At the end of the day, small and steady beats one frantic night. You can totally kick this habit.",
+    "prompt_tag": "practice",
+    "sort_order": 53
+  },
+  {
+    "task_number": 1,
+    "title": "Afraid To Ask A Professor",
+    "slug": "afraid-to-ask-a-professor-for-help",
+    "topic": "School",
+    "difficulty": "easy",
+    "prep_time_seconds": 30,
+    "response_time_seconds": 90,
+    "prompt_text": "A friend of yours is falling behind in one of their courses but is too intimidated to ask the professor for help. They worry the professor will think they are not smart enough or that their question is too basic. They have asked you how they can work up the courage to reach out. What advice would you give them?",
+    "vocabulary_tips": [
+      "reach out",
+      "office hours",
+      "there's no such thing as a dumb question",
+      "break the ice",
+      "come prepared",
+      "build a rapport"
+    ],
+    "connector_phrases": [
+      "Trust me",
+      "The first thing I'd do is",
+      "What works really well is",
+      "Plus",
+      "Just remember",
+      "You'll be glad you did"
+    ],
+    "template_hint": "Reassure them the fear is normal and professors want to help, advise preparing one specific question and using email or office hours to start small, back each with a reason, add an example, and close with warm encouragement.",
+    "sample_response_band12": "Trust me, I know that feeling, but here's something that helps: professors genuinely want students to come to them, it's literally part of their job, so you're not bothering anyone. The first thing I'd do is take the pressure off by sending a short, friendly email instead of walking in cold. Just say, hi, I'm a bit stuck on this topic, could I drop by your office hours? Starting in writing is way less scary, and it breaks the ice. Plus, what works really well is coming prepared with one specific question rather than a vague I don't get it. The reason is, a focused question shows you've actually tried, and honestly, that impresses professors way more than staying silent. For example, my classmate was terrified to ask anything, but once she emailed and went in with two clear questions, the professor was so warm that she went back every week. Just remember, there's no such thing as a dumb question. Reach out this week, and you'll be so glad you did.",
+    "prompt_tag": "practice",
+    "sort_order": 54
+  },
+  {
+    "task_number": 1,
+    "title": "Sharing Care For An Aging Parent",
+    "slug": "sharing-care-for-an-aging-parent",
+    "topic": "caregiving",
+    "difficulty": "medium",
+    "prep_time_seconds": 30,
+    "response_time_seconds": 90,
+    "prompt_text": "A close friend of yours is struggling because her father is getting older and needs more help at home with cooking, taking his medication, and getting to appointments. She feels completely overwhelmed trying to handle everything on her own while still working full-time. She isn't sure whether to hire some outside help, ask other family members to share the load, or look into local senior services. What advice would you give her?",
+    "vocabulary_tips": [
+      "caregiver",
+      "burnout",
+      "home support worker",
+      "respite care",
+      "share the load",
+      "appointments"
+    ],
+    "connector_phrases": [
+      "If I were you",
+      "What I'd suggest is",
+      "On top of that",
+      "The first thing I'd do is",
+      "At the end of the day",
+      "Trust me"
+    ],
+    "template_hint": "Open warmly with empathy, give one main piece of advice (share or outsource care), back it with two reasons, add a short concrete example, then close with reassurance.",
+    "sample_response_band12": "Oh, I can tell you're really stretched thin right now, and that's completely understandable. Honestly, the first thing I'd do is stop trying to carry all of this on your own. What I'd suggest is sitting down with your brothers and sisters and splitting up the responsibilities, because nobody can work full-time and be a full-time caregiver without burning out. On top of that, I'd look into the senior services in your area. A lot of cities have home support workers who can help with meals or drive your dad to his appointments for a really reasonable cost. For example, my aunt hired someone just two mornings a week, and it gave her a chance to breathe and actually enjoy her time with her mom again. At the end of the day, taking care of yourself isn't selfish, it's what keeps you able to take care of him. You don't have to do this alone, so please lean on the people and resources around you, okay?",
+    "prompt_tag": "practice",
+    "sort_order": 55
+  },
+  {
+    "task_number": 1,
+    "title": "Coping With an Overbearing Parent",
+    "slug": "coping-with-an-overbearing-parent",
+    "topic": "family",
+    "difficulty": "medium",
+    "prep_time_seconds": 30,
+    "response_time_seconds": 90,
+    "prompt_text": "Your cousin keeps getting unsolicited advice from his mother about how to raise his kids, run his household, and even how to spend his weekends. He loves her but feels she doesn't respect that he's a grown adult. He's frustrated and asks you how to handle it without starting a big fight. What advice would you give him?",
+    "vocabulary_tips": [
+      "overbearing",
+      "unsolicited advice",
+      "set boundaries",
+      "calmly",
+      "appreciate",
+      "compromise"
+    ],
+    "connector_phrases": [
+      "Here's what I'd do",
+      "If I were in your shoes",
+      "The way I see it",
+      "Another thing",
+      "Just remember",
+      "Bottom line"
+    ],
+    "template_hint": "Acknowledge the tricky emotions, recommend a calm boundary-setting conversation, support it with two reasons, give a quick example phrase he could use, then close encouragingly.",
+    "sample_response_band12": "I totally get why you're frustrated, that kind of thing wears you down even when it comes from love. Here's what I'd do: have a calm, private chat with your mom and gently let her know how you feel. The way I see it, you should lead with appreciation, something like, Mom, I really value your experience, but I need you to trust that I've got this. That works because it sets a boundary without making her feel attacked, and it shows her you're coming from respect, not anger. Another thing, try to pick your battles. You don't have to push back on every little comment, just the ones that really matter to you. For example, when my dad kept criticizing how I parent, I simply thanked him and changed the subject, and over time he eased off. Just remember, you're not being a bad son by asking for some space, you're protecting your peace. Bottom line, stay kind but firm, and she'll come around.",
+    "prompt_tag": "practice",
+    "sort_order": 56
+  },
+  {
+    "task_number": 1,
+    "title": "A Relative Who Always Asks Favours",
+    "slug": "a-relative-who-always-asks-favours",
+    "topic": "boundaries",
+    "difficulty": "hard",
+    "prep_time_seconds": 30,
+    "response_time_seconds": 90,
+    "prompt_text": "Your neighbour has a relative who constantly asks her for favours, like borrowing money, getting rides, and watching his kids at the last minute. She finds it hard to say no because they are family, but she is starting to feel taken advantage of. She wants to set some limits without damaging the relationship. What advice would you give her?",
+    "vocabulary_tips": [
+      "taken advantage of",
+      "say no",
+      "guilt",
+      "firm but kind",
+      "reasonable limits",
+      "resentment"
+    ],
+    "connector_phrases": [
+      "Honestly, if I were you",
+      "What works for me is",
+      "Plus",
+      "I'd start by",
+      "Keep in mind",
+      "All in all"
+    ],
+    "template_hint": "Validate her feelings, advise learning to say no with kind firmness, give two reasons, illustrate with a polite refusal example, then reassure her the relationship will survive.",
+    "sample_response_band12": "Honestly, if I were you, I'd start by reminding myself that saying no doesn't make you a bad relative. It's clear you've got a generous heart, but you're feeling taken advantage of, and that resentment will only grow if you don't address it. What works for me is being firm but kind. You can still love someone and have limits. I'd start by saying yes only to things you genuinely have time for, and offering a polite no for the rest, like, I'd love to help, but I can't this time. That works for two reasons: it stops the resentment from building, and it actually teaches him to plan ahead instead of relying on you last minute. For example, a friend of mine started saying she was busy on weekends, and her brother quickly figured out other arrangements. Keep in mind, real family respects your time. All in all, set those limits gently, and you'll protect both your peace and the relationship.",
+    "prompt_tag": "practice",
+    "sort_order": 57
+  },
+  {
+    "task_number": 1,
+    "title": "Setting Boundaries With Difficult In-Laws",
+    "slug": "setting-boundaries-with-difficult-in-laws",
+    "topic": "in-laws",
+    "difficulty": "hard",
+    "prep_time_seconds": 30,
+    "response_time_seconds": 90,
+    "prompt_text": "Your close friend's in-laws often drop by unannounced, comment on how she keeps her home, and expect to be involved in every decision she and her partner make. She wants a good relationship with them but feels she has no privacy or independence. She asks you how to set some boundaries without causing tension in the family. What advice would you give her?",
+    "vocabulary_tips": [
+      "in-laws",
+      "privacy",
+      "drop by unannounced",
+      "united front",
+      "respectfully",
+      "common ground"
+    ],
+    "connector_phrases": [
+      "My advice would be",
+      "First and foremost",
+      "What's more",
+      "If it were me",
+      "The key thing is",
+      "In the end"
+    ],
+    "template_hint": "Empathize, recommend that she and her partner set boundaries together as a team, give two reasons, add a concrete example such as agreeing to call first, then close on a hopeful note.",
+    "sample_response_band12": "I really feel for you, in-law relationships can be such a delicate balance. My advice would be to handle this as a team with your partner first. First and foremost, your partner should be the one to raise these things with their own parents, because boundaries always land better coming from their own child than from you. What's more, presenting a united front shows them this is a decision you both made together, not just you pushing them away. The key thing is to keep it warm and specific. For example, you could agree on something simple, like asking them to call before they come over, so you get a bit of a heads-up. If it were me, I'd frame it positively, something like, We love seeing you, and a quick call helps us make sure we're home and ready. That keeps the focus on welcoming them, not shutting them out. In the end, good boundaries actually make relationships healthier, so I really think this will bring you closer once the dust settles.",
+    "prompt_tag": "practice",
+    "sort_order": 58
+  },
+  {
+    "task_number": 1,
+    "title": "A Family Disagreement About Money",
+    "slug": "a-family-disagreement-about-money",
+    "topic": "money",
+    "difficulty": "hard",
+    "prep_time_seconds": 30,
+    "response_time_seconds": 90,
+    "prompt_text": "Your sister and her siblings are arguing over how to split the cost of caring for their elderly mother and other shared family expenses. Everyone has a different idea about who should pay what, and the disagreements are starting to hurt their relationships. She comes to you and asks how to handle the money conflict fairly before it gets any worse. What advice would you give her?",
+    "vocabulary_tips": [
+      "split the cost",
+      "fair share",
+      "transparent",
+      "sit down together",
+      "compromise",
+      "in writing"
+    ],
+    "connector_phrases": [
+      "What I'd recommend is",
+      "To begin with",
+      "On top of that",
+      "If I were you",
+      "The important thing is",
+      "At the end of the day"
+    ],
+    "template_hint": "Show understanding, advise a calm family meeting with transparent numbers, give two reasons, suggest putting the agreement in writing as an example, then close by emphasizing the relationship over the money. Address the sister directly in the second person throughout.",
+    "sample_response_band12": "Money fights within a family are honestly some of the hardest, so I really feel for you and your siblings. What I'd recommend is calling a calm family meeting where everyone sits down together with the actual numbers in front of them. To begin with, get everything out in the open, the real costs and what each person can realistically afford, because most of these arguments come from assumptions rather than facts. On top of that, fairness doesn't always mean an equal split. Someone earning more might contribute more in cash, while someone with less money might give time or hands-on care instead. The important thing is that everyone feels heard. For example, once you all agree on something, write it down so there's no confusion or resentment later. If I were you, I'd also ask a neutral relative to sit in and keep things calm if tempers flare. At the end of the day, your bond with your siblings is worth far more than any dollar amount, so go in with kindness and a willingness to compromise.",
+    "prompt_tag": "practice",
+    "sort_order": 59
+  },
+  {
+    "task_number": 1,
+    "title": "Teaching A Parent To Use Technology",
+    "slug": "teaching-a-parent-to-use-technology",
+    "topic": "technology",
+    "difficulty": "easy",
+    "prep_time_seconds": 30,
+    "response_time_seconds": 90,
+    "prompt_text": "Your friend is trying to teach his mother how to use her new smartphone so she can video call the family and send messages. The problem is she gets confused and frustrated every time, and now he's losing patience and worried he might give up. He asks you for advice on how to teach her more effectively. What advice would you give him?",
+    "vocabulary_tips": [
+      "step by step",
+      "patient",
+      "one thing at a time",
+      "write it down",
+      "encourage",
+      "practice"
+    ],
+    "connector_phrases": [
+      "Here's the thing",
+      "What I'd do is",
+      "Also",
+      "Trust me on this",
+      "Whatever you do",
+      "Above all"
+    ],
+    "template_hint": "Reassure him this is normal, advise teaching slowly one step at a time with patience, give two reasons, add an example like a simple cheat sheet, then close with encouragement.",
+    "sample_response_band12": "Oh, this is so common, don't be too hard on yourself or her. Here's the thing: the secret is to slow right down and teach just one thing at a time. What I'd do is start with only the basics she actually cares about, like answering a video call from the grandkids, and master that before moving on to anything else. That works because she won't feel overwhelmed, and small wins will build her confidence. Also, try to be really patient and never make her feel silly for asking the same question twice. Trust me on this, frustration is the fastest way to make someone shut down and give up. For example, I made my dad a simple cheat sheet with big pictures and arrows showing each step, and he loved being able to check it himself. Whatever you do, celebrate every little success, even just sending one emoji. Above all, remember she's learning something brand new, so a little encouragement goes a long way. She'll get there, I promise.",
+    "prompt_tag": "practice",
+    "sort_order": 60
+  },
+  {
+    "task_number": 1,
+    "title": "Feeling Guilty About Not Visiting Family",
+    "slug": "feeling-guilty-about-not-visiting-family",
+    "topic": "family-relationships",
+    "difficulty": "easy",
+    "prep_time_seconds": 30,
+    "response_time_seconds": 90,
+    "prompt_text": "Your coworker has been so busy with work and her own kids that she rarely visits her parents, who live a few hours away. She feels guilty and worries they think she doesn't care, but she just can't seem to find the time. She asks you for advice on how to handle the situation and ease her guilt. What advice would you give her?",
+    "vocabulary_tips": [
+      "guilty",
+      "stay in touch",
+      "quality time",
+      "make an effort",
+      "schedule a visit",
+      "let yourself off the hook"
+    ],
+    "connector_phrases": [
+      "First of all",
+      "If I were you",
+      "Plus",
+      "One simple thing",
+      "Try not to forget",
+      "In the end"
+    ],
+    "template_hint": "Reassure her the guilt shows she cares, advise small consistent connection plus planned visits, give two reasons, add an example like a weekly call, then close by easing her guilt.",
+    "sample_response_band12": "First of all, the fact that you feel guilty just shows how much you love them, so please give yourself some credit. If I were you, I wouldn't focus only on big visits, I'd focus on staying connected in small, regular ways. One simple thing you could do is set up a short weekly video call, maybe Sunday evenings, so it becomes a habit nobody has to remember. That helps for two reasons: your parents feel close to you even from a distance, and consistent little moments often mean more than one rushed visit a year. Plus, when you do go see them, try to make it real quality time without your phone, even if it's only once every couple of months. For example, a friend of mine started mailing little photos of the kids, and her mom absolutely treasured them. Try not to forget that your parents understand life gets busy, they raised you, after all. In the end, be kind to yourself, because a little effort done consistently truly goes a long way.",
+    "prompt_tag": "practice",
+    "sort_order": 61
+  },
+  {
+    "task_number": 1,
+    "title": "Friend Who Won't Repay Money",
+    "slug": "friend-who-wont-repay-money",
+    "topic": "Money",
+    "difficulty": "medium",
+    "prep_time_seconds": 30,
+    "response_time_seconds": 90,
+    "prompt_text": "Your close friend lent a fairly large sum of money to a mutual acquaintance a few months ago to help with an emergency. The acquaintance promised to repay it within a couple of weeks, but months have passed and they keep avoiding the topic. Your friend feels uncomfortable and unsure how to bring it up without damaging the relationship. What advice would you give your friend about how to handle this situation?",
+    "vocabulary_tips": [
+      "lend/borrow",
+      "pay back",
+      "owe",
+      "bring it up",
+      "set a deadline",
+      "awkward conversation"
+    ],
+    "connector_phrases": [
+      "If I were you",
+      "What I'd suggest is",
+      "The first thing I'd do is",
+      "On top of that",
+      "At the end of the day",
+      "That way"
+    ],
+    "template_hint": "Open warmly acknowledging how awkward this is for your friend, give one clear piece of advice (raise it directly and calmly), back it with two reasons, add a short example of how to phrase it, then close with reassurance.",
+    "sample_response_band12": "Okay, I totally get why this feels so awkward, but honestly, you can't keep letting it slide. If I were you, the first thing I'd do is bring it up directly but gently, maybe over coffee rather than by text. You could say something like, \"Hey, I know things have been tight, but I really need that money back, so can we work out a plan?\" There are two big reasons for this. First, the longer you stay silent, the more resentment builds, and that's what actually ruins relationships, not the money itself. Second, they might genuinely be embarrassed and waiting for you to make the first move. What I'd suggest is offering a small payment plan, like, \"Even fifty dollars a month is fine.\" That way it feels doable for them and you still get repaid. At the end of the day, a decent person won't disappear over an honest conversation. So take a deep breath, be kind but clear, and I promise you'll feel so much lighter once it's out in the open.",
+    "prompt_tag": "practice",
+    "sort_order": 62
+  },
+  {
+    "task_number": 1,
+    "title": "Friend Who Cancels Plans Last Minute",
+    "slug": "friend-who-cancels-plans-last-minute",
+    "topic": "Reliability",
+    "difficulty": "easy",
+    "prep_time_seconds": 30,
+    "response_time_seconds": 90,
+    "prompt_text": "You have a friend you really enjoy spending time with, but lately they keep cancelling your plans at the very last minute, sometimes when you are already on your way. It is starting to frustrate you, and you are not sure whether to say something or just quietly stop making plans with them. What advice would you give about handling this?",
+    "vocabulary_tips": [
+      "bail on",
+      "flake out",
+      "reliable",
+      "last minute",
+      "give notice",
+      "let down"
+    ],
+    "connector_phrases": [
+      "Honestly",
+      "The way I see it",
+      "What I'd do is",
+      "Plus",
+      "On the other hand",
+      "In the end"
+    ],
+    "template_hint": "Start by validating the frustration, give the main advice (talk to them honestly without accusing), support it with two reasons, add a quick example sentence to use, and close with an encouraging note.",
+    "sample_response_band12": "Honestly, I'd be frustrated too, so your feelings make total sense here. The way I see it, you shouldn't just quietly give up on the friendship, because you clearly still value them. What I'd do is have a calm, honest chat and use \"I\" statements instead of blaming. Something like, \"I really look forward to seeing you, so it stings when plans fall through last minute.\" There are two reasons this works better than staying silent. First, your friend may have no idea how much it's bothering you, so giving them a chance to explain is only fair. Plus, talking it out usually clears up whether they're just overwhelmed with life or genuinely being careless. On the other hand, if it keeps happening after you've spoken up, then it's okay to invest your energy elsewhere. In the end, good communication either fixes the problem or shows you where you stand. So speak up gently, and give them one real chance to step up.",
+    "prompt_tag": "practice",
+    "sort_order": 63
+  },
+  {
+    "task_number": 1,
+    "title": "Apologizing After A Serious Argument",
+    "slug": "apologizing-after-a-serious-argument",
+    "topic": "Apology",
+    "difficulty": "hard",
+    "prep_time_seconds": 30,
+    "response_time_seconds": 90,
+    "prompt_text": "You recently had a serious argument with a close friend, and things were said on both sides that you now regret. A few days have passed, you have both gone quiet, and you really want to repair the friendship, but you are nervous about reaching out first and worried about making things worse. You are not sure what to say or how to begin. What advice would you give about how to apologize and fix this?",
+    "vocabulary_tips": [
+      "make amends",
+      "patch things up",
+      "own up to",
+      "take responsibility",
+      "heat of the moment",
+      "clear the air"
+    ],
+    "connector_phrases": [
+      "First of all",
+      "If I were in your shoes",
+      "More importantly",
+      "The key thing is",
+      "Beyond that",
+      "When all is said and done"
+    ],
+    "template_hint": "Acknowledge the courage it takes, advise reaching out first with a genuine apology, give two reasons (pride versus the friendship, and timing), include an example opening line, and close with reassurance about being the bigger person.",
+    "sample_response_band12": "First of all, the fact that you want to fix this already tells me how much this friendship means to you. If I were in your shoes, I'd reach out first rather than waiting for them to crack. Send a short, warm message like, \"I've been thinking about our fight, and I'm really sorry for the things I said. Can we talk?\" The key thing is to own your part without listing everything they did wrong, because the moment you start defending yourself, it stops being an apology. There are two reasons I'd act now. First, the longer you both stay silent, the more the distance feels permanent, and pride is a terrible reason to lose a good friend. More importantly, a sincere apology almost always lowers the other person's guard, so they're far more likely to apologize back. Beyond that, do it in person or by call if you can, so your tone comes through. When all is said and done, being the first to reach out isn't weakness, it's maturity, and they'll respect you for it.",
+    "prompt_tag": "practice",
+    "sort_order": 64
+  },
+  {
+    "task_number": 1,
+    "title": "Reconnecting With An Old Friend",
+    "slug": "reconnecting-with-an-old-friend",
+    "topic": "Friendship",
+    "difficulty": "easy",
+    "prep_time_seconds": 30,
+    "response_time_seconds": 90,
+    "prompt_text": "Your friend recently came across the name of someone they were very close to years ago but slowly lost touch with. They would love to reconnect, but they feel awkward reaching out after so much time and worry the person might find it strange. Your friend asks you whether and how they should reach out. What advice would you give them?",
+    "vocabulary_tips": [
+      "lose touch",
+      "reach out",
+      "reconnect",
+      "out of the blue",
+      "catch up",
+      "drift apart"
+    ],
+    "connector_phrases": [
+      "Look",
+      "Trust me",
+      "What I'd recommend is",
+      "Besides",
+      "Worst case",
+      "At the end of the day"
+    ],
+    "template_hint": "Reassure your friend that reaching out is worth it, advise sending a light friendly message, give two reasons (people usually appreciate it, little to lose), add an example message, and close with encouragement.",
+    "sample_response_band12": "Look, I'd say go for it, because honestly you'll regret it more if you don't reach out. Trust me, almost everyone loves getting a message from an old friend out of the blue, it can make their whole day. What I'd recommend is keeping that first message light and warm, nothing heavy at all. Something like, \"Hey, your name popped up and it made me smile, it's been way too long, how have you been?\" There are really two reasons not to overthink this. First, people rarely find a friendly hello strange, in fact most feel flattered that you thought of them after all these years. Besides, worst case they just take a while to reply, which costs you nothing, and best case you rebuild a friendship you genuinely miss. If they respond well, you could suggest a quick call or a coffee to properly catch up. At the end of the day, the people we drift apart from are usually still happy to hear from us. So send that message today, before you talk yourself out of it.",
+    "prompt_tag": "practice",
+    "sort_order": 65
+  },
+  {
+    "task_number": 1,
+    "title": "A Friend Who Is A Bad Influence",
+    "slug": "a-friend-who-is-a-bad-influence",
+    "topic": "Influence",
+    "difficulty": "hard",
+    "prep_time_seconds": 30,
+    "response_time_seconds": 90,
+    "prompt_text": "You have a long-time friend whose company you really enjoy, but lately they keep pushing you toward choices you are not comfortable with, like skipping responsibilities, overspending, or staying out far too late. You can feel it affecting your own habits and goals, but you do not want to lose the friendship or seem judgmental. Your friend has not changed, and you are not sure how to respond the next time it happens. What advice would you give about how to handle this friend?",
+    "vocabulary_tips": [
+      "peer pressure",
+      "bad influence",
+      "set boundaries",
+      "stand your ground",
+      "give in",
+      "stay true to yourself"
+    ],
+    "connector_phrases": [
+      "The truth is",
+      "Here's what I'd do",
+      "For one thing",
+      "What's more",
+      "That said",
+      "Bottom line"
+    ],
+    "template_hint": "Name the tension honestly, advise setting firm but kind boundaries rather than cutting them off, give two reasons (protecting your goals, real friends respect limits), add an example of saying no, and close with self-respect.",
+    "sample_response_band12": "The truth is, you don't have to choose between the friendship and your own goals, you just need some firm boundaries. Here's what I'd do. Keep enjoying their company, but get comfortable saying no without a big speech. Just, \"I'm good tonight, I've got an early start,\" and leave it there. For one thing, you shouldn't have to justify protecting your time and money, a simple no is a full sentence. What's more, if you keep giving in, you'll slowly drift away from the habits and goals you actually care about, and that resentment will poison the friendship anyway. That said, pay attention to how they react. A real friend might tease you a little but ultimately respects your limits, whereas someone who keeps pressuring you after you've said no is showing you exactly who they are. Bottom line, you can love someone and still refuse to follow them down a path that isn't yours. Stay true to yourself, and the right people will stick around regardless.",
+    "prompt_tag": "practice",
+    "sort_order": 66
+  },
+  {
+    "task_number": 1,
+    "title": "A Friend Who Shares Your Secrets",
+    "slug": "a-friend-who-shares-your-secrets",
+    "topic": "Trust",
+    "difficulty": "medium",
+    "prep_time_seconds": 30,
+    "response_time_seconds": 90,
+    "prompt_text": "You just found out that a close friend has been telling other people the private things you told them in confidence. You feel hurt and you are not sure whether to confront them, quietly pull away, or give them another chance. You still care about the friendship, but you do not feel you can trust them right now. What advice would you give someone in this situation about how to handle it?",
+    "vocabulary_tips": [
+      "betray trust",
+      "confide in",
+      "behind your back",
+      "break a confidence",
+      "give the benefit of the doubt",
+      "rebuild trust"
+    ],
+    "connector_phrases": [
+      "I hear you",
+      "If it were me",
+      "The main reason is",
+      "Another thing",
+      "Even so",
+      "All things considered"
+    ],
+    "template_hint": "Validate the hurt, advise confronting them calmly before deciding anything, give two reasons (clarity and a fair chance), include an example of how to raise it, and close on protecting your trust going forward.",
+    "sample_response_band12": "I hear you, finding out a secret got out really stings, and feeling betrayed is completely valid. But before you quietly pull away, if it were me, I'd actually talk to them first. Calmly say something like, \"I shared that with you in confidence, and it got back to me from someone else, so I need to understand what happened.\" The main reason is clarity. You deserve to know whether it was a careless slip or a real pattern, and their reaction will tell you a lot, whether they own it or get defensive. Another thing, giving them one honest conversation means that whatever you decide afterward, you'll know you were fair and you won't second-guess yourself later. Even so, I wouldn't rush to fully trust them again. Rebuilding trust takes time, so going forward, just be more careful about what you share until they earn it back. All things considered, confront the issue, watch how they respond, and let their honesty, not your hurt, guide what you do next.",
+    "prompt_tag": "practice",
+    "sort_order": 67
+  },
+  {
+    "task_number": 1,
+    "title": "A One-Sided Friendship",
+    "slug": "a-one-sided-friendship",
+    "topic": "Balance",
+    "difficulty": "medium",
+    "prep_time_seconds": 30,
+    "response_time_seconds": 90,
+    "prompt_text": "A close friend confides in you that one of their friendships feels completely one-sided. They are always the one reaching out, making plans, and offering support, while the other person rarely puts in the same effort or shows up when needed. Your friend feels drained and underappreciated, and is unsure whether to address it or simply step back. They ask you what you think they should do. What advice would you give your friend?",
+    "vocabulary_tips": [
+      "one-sided",
+      "put in effort",
+      "give and take",
+      "feel drained",
+      "show up for someone",
+      "meet halfway"
+    ],
+    "connector_phrases": [
+      "To be honest",
+      "What I'd suggest is",
+      "First off",
+      "On top of that",
+      "Either way",
+      "When it comes down to it"
+    ],
+    "template_hint": "Acknowledge your friend's exhaustion, advise them to test the friendship by pulling back a little and gently naming the imbalance, give two reasons (clarity and self-respect), add a concrete example of what they could say, and close by reassuring them they deserve mutual effort.",
+    "sample_response_band12": "To be honest, the fact that you feel this drained is a real sign, and you shouldn't just brush it off. What I'd suggest is a two-part approach. First off, try gently naming it. You could say something like, \"I really value our friendship, but lately I feel like I'm the only one reaching out, and I'd love it to feel more mutual.\" That gives them a fair chance to step up. On top of that, ease off a little and see what happens. Stop being the one to always text first, and notice whether they make any effort to close the gap. There are two reasons this works. One, it gives you clear information, because either they realize it and meet you halfway, or you finally see the effort was never really there. Two, it protects your own energy, since constantly pouring into someone who doesn't pour back leaves you empty for the people who do. Either way, you'll have your answer. When it comes down to it, you deserve friendships built on real give and take, so please don't feel guilty for expecting that.",
+    "prompt_tag": "practice",
+    "sort_order": 68
+  },
+  {
+    "task_number": 1,
+    "title": "Meeting Your Partner's Parents",
+    "slug": "meeting-your-partners-parents",
+    "topic": "relationships",
+    "difficulty": "easy",
+    "prep_time_seconds": 30,
+    "response_time_seconds": 90,
+    "prompt_text": "Your younger cousin is going to meet their partner's parents for the very first time this weekend. They are really anxious about making a good first impression and not knowing what to say. Since you have been through this yourself, they have come to you for help. What advice would you give them?",
+    "vocabulary_tips": [
+      "first impression",
+      "make small talk",
+      "be yourself",
+      "thoughtful gift",
+      "common ground",
+      "come across as"
+    ],
+    "connector_phrases": [
+      "If I were you",
+      "What I'd suggest is",
+      "The first thing I'd do is",
+      "On top of that",
+      "Just remember that",
+      "At the end of the day"
+    ],
+    "template_hint": "Open by acknowledging the nerves, give one main piece of advice with a reason, add a second tip with a quick personal example, then close with reassurance.",
+    "sample_response_band12": "Hey, honestly, don't stress too much, everyone feels nervous about this. If I were you, the first thing I'd do is bring a small thoughtful gift, like flowers or a dessert. It instantly shows you care, and it gives everyone something to talk about when you walk in the door. On top of that, I'd suggest you ask them questions about themselves, where they grew up, how they met, that kind of thing. People love talking about their lives, and it takes the pressure off you to perform. When I met my partner's mom, I just asked about her garden, and we ended up chatting for an hour, she loved me after that. The main thing is, just relax and be yourself. They already know their kid likes you, so you're halfway there. Don't try to be perfect, that comes across as fake. At the end of the day, being warm, polite, and genuinely interested goes a long way. You've got this, trust me, you'll be totally fine.",
+    "prompt_tag": "practice",
+    "sort_order": 69
+  },
+  {
+    "task_number": 1,
+    "title": "Making Long-Distance Love Work",
+    "slug": "making-long-distance-love-work",
+    "topic": "relationships",
+    "difficulty": "medium",
+    "prep_time_seconds": 30,
+    "response_time_seconds": 90,
+    "prompt_text": "Your close friend just found out that their partner is moving to another city for a two-year job contract. They are worried the distance will ruin the relationship, and they don't know how couples cope with being so far apart. They turn to you and ask for your honest advice. What would you tell them?",
+    "vocabulary_tips": [
+      "long-distance",
+      "stay connected",
+      "set boundaries",
+      "trust each other",
+      "drift apart",
+      "schedule visits"
+    ],
+    "connector_phrases": [
+      "Here's the thing",
+      "What really helps is",
+      "Another thing to keep in mind",
+      "More importantly",
+      "If you ask me",
+      "At the end of the day"
+    ],
+    "template_hint": "Reassure that long-distance can work, give a practical communication tip with a reason, add a second tip about trust or visits with an example, then close encouragingly.",
+    "sample_response_band12": "Okay, first of all, take a breath, long-distance is hard, but tons of couples make it work. Here's the thing, the most important advice I can give you is to set a regular routine for talking. Maybe a quick call every evening, even just ten minutes. It keeps you in each other's daily lives so you don't slowly drift apart. What really helps too is planning your visits in advance. Having a date circled on the calendar gives you both something to look forward to when things get lonely. My sister did long-distance for a year, and she said booking flights early was the only thing that kept her sane. Another thing to keep in mind is trust, you can't be checking up on each other constantly, that just creates stress. If you ask me, you have to give each other space and believe in the relationship. At the end of the day, two years isn't forever. If you both put in the effort, you'll come out the other side even stronger. You can absolutely do this.",
+    "prompt_tag": "practice",
+    "sort_order": 70
+  },
+  {
+    "task_number": 1,
+    "title": "Deciding To Move In Together",
+    "slug": "deciding-to-move-in-together",
+    "topic": "relationships",
+    "difficulty": "medium",
+    "prep_time_seconds": 30,
+    "response_time_seconds": 90,
+    "prompt_text": "Your coworker has been dating someone for about a year, and their partner just suggested moving in together. Your coworker is excited but also a little nervous about whether it is the right time. They know you have lived with a partner before, so they come to you and ask for your advice. What advice would you give them?",
+    "vocabulary_tips": [
+      "move in together",
+      "split the bills",
+      "living habits",
+      "compromise",
+      "take the next step",
+      "rush into it"
+    ],
+    "connector_phrases": [
+      "The way I see it",
+      "What I'd recommend is",
+      "Before anything else",
+      "On top of that",
+      "Just make sure",
+      "At the end of the day"
+    ],
+    "template_hint": "Acknowledge the big decision, advise an honest conversation about expectations with a reason, add a tip about a trial period or finances with an example, then close supportively.",
+    "sample_response_band12": "Oh, that's a big step, congrats! But I totally get why you're nervous. The way I see it, before anything else, you two need to sit down and have a really honest talk about expectations. Things like how you'll split the bills, who does the chores, how much alone time you each need. It sounds unromantic, but trust me, those little daily habits are what cause most arguments. On top of that, what I'd recommend is doing a trial run first, like spending a full week or two together before you sign a lease. When I moved in with my ex, we never tested it, and I had no idea he stayed up till three a.m. every night, and honestly it drove me crazy. So spend some real time together first. Just make sure you're not rushing into it because of pressure or convenience, do it because you genuinely want to build a life together. At the end of the day, if the foundation is strong, moving in will only bring you closer. You'll figure it out.",
+    "prompt_tag": "practice",
+    "sort_order": 71
+  },
+  {
+    "task_number": 1,
+    "title": "When a Partner Overworks",
+    "slug": "when-a-partner-overworks",
+    "topic": "relationships",
+    "difficulty": "hard",
+    "prep_time_seconds": 30,
+    "response_time_seconds": 90,
+    "prompt_text": "Your neighbour has been feeling lonely because their partner works extremely long hours and is barely ever home. They don't want to start a fight, but they feel like the relationship is suffering. They've come to you because they trust your judgment. What advice would you give your neighbour about dealing with a partner who works too much?",
+    "vocabulary_tips": [
+      "work-life balance",
+      "feel neglected",
+      "quality time",
+      "approach the subject",
+      "set aside time",
+      "burn out"
+    ],
+    "connector_phrases": [
+      "Here's what I think",
+      "Instead of",
+      "What might work better is",
+      "On top of that",
+      "The key thing is",
+      "At the end of the day"
+    ],
+    "template_hint": "Validate the loneliness, advise raising it gently without blame and explain why, add a tip about protecting quality time with an example, then close with hope.",
+    "sample_response_band12": "I'm really sorry, that sounds lonely, and your feelings are completely valid. Here's what I think, the most important thing is how you bring it up. Instead of attacking them or saying you work too much, try telling them how you feel, like I miss you and I want more time together. When people feel blamed, they get defensive, but when they feel loved, they actually listen. What might work better is suggesting one small, specific thing, maybe a regular date night or a phone-free dinner once a week. It's easier to agree to something concrete than a vague promise. My friend did this, she just asked for Sunday mornings together, and it completely changed their relationship. On top of that, keep in mind they might be stressed or close to burning out, so come at it with compassion, not an ultimatum. The key thing is you're a team trying to fix this together. At the end of the day, if you both care, you can find a better balance, so just start the conversation gently.",
+    "prompt_tag": "practice",
+    "sort_order": 72
+  },
+  {
+    "task_number": 1,
+    "title": "Calming First-Date Nerves",
+    "slug": "calming-first-date-nerves",
+    "topic": "dating",
+    "difficulty": "easy",
+    "prep_time_seconds": 30,
+    "response_time_seconds": 90,
+    "prompt_text": "Your friend from your evening class has a first date tomorrow with someone they really like, and they're so nervous they can barely sleep. They keep worrying they'll say something awkward or run out of things to talk about. What advice would you give your friend about handling their nerves before the date?",
+    "vocabulary_tips": [
+      "calm your nerves",
+      "break the ice",
+      "ask open questions",
+      "overthink it",
+      "low-pressure",
+      "let loose"
+    ],
+    "connector_phrases": [
+      "Honestly",
+      "The best thing you can do is",
+      "What I'd suggest is",
+      "Plus",
+      "Just keep in mind",
+      "At the end of the day"
+    ],
+    "template_hint": "Normalize the nerves, give one tip to reduce pressure with a reason, add a conversation tip with a quick example, then close with a confidence boost.",
+    "sample_response_band12": "Aw, take a deep breath, being nervous just means you actually care, which is a good sign! Honestly, the best thing you can do is take the pressure off yourself. Don't think of it as some big test, think of it as just grabbing coffee with a cool new person. If it goes well, great, and if it doesn't, it's only one evening. That mindset alone will calm you down a ton. What I'd suggest is preparing a couple of easy questions to break the ice, like asking about their hobbies or their favourite places to eat. People love talking about themselves, so it keeps the conversation flowing and takes the spotlight off you. When I was nervous before a date once, I just asked about their dog, and we ended up talking for two hours. Plus, just keep in mind they're probably nervous too. At the end of the day, just be yourself, smile, and have fun. You're awesome, and they'd be lucky to spend time with you. Go enjoy it!",
+    "prompt_tag": "practice",
+    "sort_order": 73
+  },
+  {
+    "task_number": 1,
+    "title": "Introducing A Partner To Friends",
+    "slug": "introducing-a-partner-to-friends",
+    "topic": "relationships",
+    "difficulty": "medium",
+    "prep_time_seconds": 30,
+    "response_time_seconds": 90,
+    "prompt_text": "Your sibling is about to introduce their new partner to their old group of friends, but they're worried everyone won't get along or that it'll feel awkward. They really want their friends and their partner to like each other, but they have no idea how to set up that first meeting. They've come to you for advice. What would you tell your sibling about introducing a new partner to old friends?",
+    "vocabulary_tips": [
+      "hit it off",
+      "low-key setting",
+      "ease into it",
+      "common interests",
+      "put everyone at ease",
+      "win them over"
+    ],
+    "connector_phrases": [
+      "If I were you",
+      "I'd start by",
+      "What also helps is",
+      "On top of that",
+      "Just remember",
+      "At the end of the day"
+    ],
+    "template_hint": "Reassure them, advise choosing a relaxed setting with a reason, add a tip about creating common ground with an example, then close on a positive note.",
+    "sample_response_band12": "Oh, I totally get the worry, but honestly, don't overthink it. If I were you, I'd start by picking a really low-key setting for the first meeting, like grabbing food or playing board games, not some big, formal dinner. A relaxed vibe takes the pressure off everyone and makes it way easier to chat naturally. What also helps is giving your friends a little heads-up beforehand, maybe mention a shared interest, like, hey, she's really into hiking too. That way people already have something to talk about and they hit it off faster. On top of that, I'd keep this first hangout pretty short and casual. When I introduced my partner to my friends, we just did a quick coffee, and it broke the ice perfectly. Just remember, your friends want you to be happy, so they're already on your side. At the end of the day, if you keep it relaxed, they'll get along just fine.",
+    "prompt_tag": "practice",
+    "sort_order": 74
+  },
+  {
+    "task_number": 1,
+    "title": "Advice On Splitting Holidays With Family",
+    "slug": "choosing-holiday-plans-with-family",
+    "topic": "holidays",
+    "difficulty": "hard",
+    "prep_time_seconds": 30,
+    "response_time_seconds": 90,
+    "prompt_text": "Your close friend and their partner are arguing about whose family to spend the upcoming holidays with, since both families live far away and both expect a visit. Your friend is really stressed and doesn't want to upset anyone on either side. They know you've been through this yourself, so they're asking for your advice. What would you tell them about deciding whose family to spend the holidays with?",
+    "vocabulary_tips": [
+      "alternate years",
+      "split the holiday",
+      "set expectations",
+      "find a compromise",
+      "feel torn",
+      "present a united front"
+    ],
+    "connector_phrases": [
+      "Here's the thing",
+      "What I'd do is",
+      "Another option is",
+      "More importantly",
+      "Whatever you decide",
+      "At the end of the day"
+    ],
+    "template_hint": "Empathize with the stress, suggest a fair system like alternating or splitting with a reason, add a tip on communicating early with a personal example, then close reassuringly.",
+    "sample_response_band12": "Ugh, that's such a tough one, and honestly it's so common, you're not alone in feeling torn. Here's the thing, the fairest way to handle it is usually a system you both agree on. What I'd do is alternate years, so one family this year, the other next year. That way nobody feels like they're always losing out, and it takes the argument off the table for good. Another option is to split the holiday itself, like one family on the eve and the other on the day, if they're close enough to travel between. My cousin does the alternating thing, and it honestly ended years of fighting. More importantly, whatever you choose, tell both families early and frame it positively, so they have time to adjust and don't feel rejected. People handle disappointment way better when they're not blindsided. Whatever you decide, just make sure you and your partner present it as a united front, so neither set of parents can pressure one of you. At the end of the day, as long as it's fair and you communicate kindly, everyone will understand.",
+    "prompt_tag": "practice",
+    "sort_order": 75
+  },
+  {
+    "task_number": 1,
+    "title": "Helping a Friend Quit Vaping",
+    "slug": "helping-a-friend-quit-vaping",
+    "topic": "vaping",
+    "difficulty": "medium",
+    "prep_time_seconds": 30,
+    "response_time_seconds": 90,
+    "prompt_text": "Your close friend has been vaping for a couple of years and recently told you they really want to stop for good. They have tried quitting twice before but went back to it within a few days, and now they feel discouraged and unsure where to start. They know you care about them and trust your judgment. What advice would you give your friend about quitting vaping?",
+    "vocabulary_tips": [
+      "cravings",
+      "nicotine",
+      "go cold turkey",
+      "trigger",
+      "willpower",
+      "relapse"
+    ],
+    "connector_phrases": [
+      "If I were you",
+      "What I'd suggest is",
+      "On top of that",
+      "The first thing I'd do is",
+      "At the end of the day",
+      "Honestly"
+    ],
+    "template_hint": "Open warmly with empathy, give one main piece of advice, support it with two reasons or strategies plus a short concrete example, then close with encouragement.",
+    "sample_response_band12": "Hey, first of all, I'm really proud of you for wanting to quit, and don't beat yourself up about the past attempts. Honestly, that's part of the process. If I were you, the first thing I'd do is figure out your triggers, like when you usually reach for it. For a lot of people it's after meals or when they're stressed, so try replacing that moment with something else, maybe chewing gum or going for a quick walk. What I'd also suggest is not going completely cold turkey on your own. Cravings hit hard, so consider talking to a pharmacist about patches or a quit-smoking app that tracks your progress. On top of that, tell a few people you trust so they can cheer you on. For example, my cousin quit by texting me every time he had a craving, and it really helped him stay accountable. At the end of the day, you've already done the hardest part by deciding. I'm here for you, so let's tackle this together, okay?",
+    "prompt_tag": "practice",
+    "sort_order": 76
+  },
+  {
+    "task_number": 1,
+    "title": "Advice on Cutting Back Sugar",
+    "slug": "advice-on-cutting-back-sugar",
+    "topic": "sugar",
+    "difficulty": "easy",
+    "prep_time_seconds": 30,
+    "response_time_seconds": 90,
+    "prompt_text": "Your younger cousin has noticed they feel tired all the time and want to cut back on how much sugar they eat, especially sweets and sugary drinks. They are not sure how to start without feeling deprived or giving up everything they enjoy. They have come to you because you eat fairly healthily. What advice would you give your cousin about cutting back on sugar?",
+    "vocabulary_tips": [
+      "cut back",
+      "cravings",
+      "moderation",
+      "energy crash",
+      "swap",
+      "hidden sugars"
+    ],
+    "connector_phrases": [
+      "If I were you",
+      "What works for me is",
+      "Another thing",
+      "Instead of",
+      "The way I see it",
+      "Trust me"
+    ],
+    "template_hint": "Greet kindly, give one clear, doable piece of advice, back it with two reasons and a relatable example, and finish with reassurance.",
+    "sample_response_band12": "Hey, I totally get how that feels, and the good news is you don't have to give up everything at once. The way I see it, going extreme just makes you crave sweets even more. If I were you, I'd start small by swapping your sugary drinks for water or sparkling water with a bit of lemon. Sodas and juices are loaded with hidden sugars, and they're a big reason you get that energy crash in the afternoon. What works for me is keeping fruit around, so when a craving hits, I grab an apple or some berries instead of candy. Another thing I'd suggest is reading labels, because sugar sneaks into things like cereal and sauces. For example, I switched my flavoured yogurt to plain with honey, and I barely noticed the difference. Trust me, after a couple of weeks your taste buds adjust and super-sweet stuff actually starts tasting too sweet. Just go easy on yourself and aim for moderation, not perfection. You've got this, cousin.",
+    "prompt_tag": "practice",
+    "sort_order": 77
+  },
+  {
+    "task_number": 1,
+    "title": "Reducing Daily Screen Time",
+    "slug": "reducing-daily-screen-time",
+    "topic": "screen time",
+    "difficulty": "medium",
+    "prep_time_seconds": 30,
+    "response_time_seconds": 90,
+    "prompt_text": "Your roommate has realized they spend almost every free hour scrolling on their phone and watching videos, and it is starting to hurt their sleep and mood. They want to cut down a lot but say they reach for their phone without even thinking. They have asked you for some practical ideas. What advice would you give your roommate about reducing their screen time?",
+    "vocabulary_tips": [
+      "scrolling",
+      "doomscrolling",
+      "screen-free",
+      "habit loop",
+      "notifications",
+      "wind down"
+    ],
+    "connector_phrases": [
+      "If I were you",
+      "One thing that helps is",
+      "On top of that",
+      "For instance",
+      "Here's the thing",
+      "At the end of the day"
+    ],
+    "template_hint": "Acknowledge the struggle, give a main strategy, support it with two practical tips and an example, then close with encouragement.",
+    "sample_response_band12": "Honestly, it's great you noticed this, because most people don't even realize how much they scroll. Here's the thing: phones are designed to keep you hooked, so it's not really about willpower. If I were you, the first thing I'd do is turn off non-essential notifications, so you're not getting pulled back in every few minutes. One thing that helps is setting screen time limits in your settings, so the app actually nudges you when you've hit your cap. On top of that, try keeping your phone out of the bedroom and charging it across the room. Looking at screens late at night really messes with your sleep, which is probably why your mood feels off. For instance, I started reading a few pages of a book before bed instead of scrolling, and now I fall asleep way faster. At the end of the day, you don't have to quit cold turkey, just swap some of that time for something you enjoy offline. Want to try a screen-free hour together this week?",
+    "prompt_tag": "practice",
+    "sort_order": 78
+  },
+  {
+    "task_number": 1,
+    "title": "Easing Back Pain at Work",
+    "slug": "easing-back-pain-at-work",
+    "topic": "back pain",
+    "difficulty": "medium",
+    "prep_time_seconds": 30,
+    "response_time_seconds": 90,
+    "prompt_text": "Your coworker sits at a desk all day and has started having constant lower back pain and bad posture, especially by the end of their shift. They are worried it is getting worse over time but do not want to spend a fortune on fancy equipment. They know you sorted out a similar problem last year. What advice would you give your coworker about fixing their back pain and posture?",
+    "vocabulary_tips": [
+      "posture",
+      "ergonomic",
+      "slouch",
+      "lower back",
+      "stretch",
+      "core strength"
+    ],
+    "connector_phrases": [
+      "If I were you",
+      "What really helped me was",
+      "Another thing",
+      "Best of all",
+      "The key is",
+      "Trust me on this"
+    ],
+    "template_hint": "Show empathy, give one main fix, support it with two affordable strategies and a personal example, then close with reassurance.",
+    "sample_response_band12": "Oh, I feel for you, because I dealt with the exact same thing last year and it's miserable. The key is that you don't need expensive gear to fix it. If I were you, the first thing I'd do is adjust your setup so your screen is at eye level and your feet are flat on the floor. What really helped me was stacking a couple of old books under my monitor and rolling up a small towel to support my lower back in the chair. It costs nothing. Another thing is to get up and move every half hour, even just to refill your water, because sitting still for hours is what stiffens everything up. On top of that, try a few gentle stretches in the morning and some core exercises a couple of times a week, since a stronger core takes pressure off your back. Trust me on this, within a few weeks I went from aching every evening to barely noticing it. If the pain sticks around though, definitely see a doctor. You'll feel so much better soon.",
+    "prompt_tag": "practice",
+    "sort_order": 79
+  }
+]

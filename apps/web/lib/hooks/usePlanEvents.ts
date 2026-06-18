@@ -74,6 +74,10 @@ export function usePlanEvents(): void {
     async function mintSseToken(): Promise<string | null> {
       try {
         const token = await getToken();
+        // Skip silently if the token isn't ready — sending an unauthenticated
+        // request would 401 and (via apiFetch) trip the global sign-out for a
+        // purely background, non-critical SSE feature.
+        if (!token) return null;
         const { token: sseToken } = await api.post<{ token: string; expires_in: number }>(
           SSE_TOKEN_ENDPOINT,
           {},

@@ -15,7 +15,8 @@ def _snap(obj: SpeakingPrompt | WritingPrompt) -> dict:
 
 
 async def create_speaking(
-    session: AsyncSession, payload: dict, admin_id: UUID
+    session: AsyncSession, payload: dict, admin_id: UUID,
+    audit_metadata: dict | None = None,
 ) -> SpeakingPrompt:
     repo = AdminSpeakingPromptRepo(session)
     prompt = await repo.create(**payload, created_by=admin_id, updated_by=admin_id)
@@ -23,12 +24,14 @@ async def create_speaking(
                         version_no=1, snapshot=_snap(prompt), changed_by=admin_id,
                         change_note="created")
     await log_action(session, admin_user_id=admin_id, action_type="create",
-                     entity_type="speaking_prompt", entity_id=prompt.id, new_value=_snap(prompt))
+                     entity_type="speaking_prompt", entity_id=prompt.id, new_value=_snap(prompt),
+                     metadata=audit_metadata)
     return prompt
 
 
 async def update_speaking(
-    session: AsyncSession, prompt: SpeakingPrompt, payload: dict, admin_id: UUID
+    session: AsyncSession, prompt: SpeakingPrompt, payload: dict, admin_id: UUID,
+    audit_metadata: dict | None = None,
 ) -> SpeakingPrompt:
     repo = AdminSpeakingPromptRepo(session)
     old = _snap(prompt)
@@ -42,7 +45,7 @@ async def update_speaking(
                         changed_by=admin_id, change_note="updated")
     await log_action(session, admin_user_id=admin_id, action_type="update",
                      entity_type="speaking_prompt", entity_id=updated.id,
-                     old_value=old, new_value=_snap(updated))
+                     old_value=old, new_value=_snap(updated), metadata=audit_metadata)
     return updated
 
 
@@ -84,7 +87,8 @@ async def clone_speaking(
 
 
 async def create_writing(
-    session: AsyncSession, payload: dict, admin_id: UUID
+    session: AsyncSession, payload: dict, admin_id: UUID,
+    audit_metadata: dict | None = None,
 ) -> WritingPrompt:
     repo = AdminWritingPromptRepo(session)
     prompt = await repo.create(**payload, created_by=admin_id, updated_by=admin_id)
@@ -92,12 +96,14 @@ async def create_writing(
                         version_no=1, snapshot=_snap(prompt), changed_by=admin_id,
                         change_note="created")
     await log_action(session, admin_user_id=admin_id, action_type="create",
-                     entity_type="writing_prompt", entity_id=prompt.id, new_value=_snap(prompt))
+                     entity_type="writing_prompt", entity_id=prompt.id, new_value=_snap(prompt),
+                     metadata=audit_metadata)
     return prompt
 
 
 async def update_writing(
-    session: AsyncSession, prompt: WritingPrompt, payload: dict, admin_id: UUID
+    session: AsyncSession, prompt: WritingPrompt, payload: dict, admin_id: UUID,
+    audit_metadata: dict | None = None,
 ) -> WritingPrompt:
     repo = AdminWritingPromptRepo(session)
     old = _snap(prompt)
@@ -110,7 +116,7 @@ async def update_writing(
                         changed_by=admin_id, change_note="updated")
     await log_action(session, admin_user_id=admin_id, action_type="update",
                      entity_type="writing_prompt", entity_id=updated.id,
-                     old_value=old, new_value=_snap(updated))
+                     old_value=old, new_value=_snap(updated), metadata=audit_metadata)
     return updated
 
 

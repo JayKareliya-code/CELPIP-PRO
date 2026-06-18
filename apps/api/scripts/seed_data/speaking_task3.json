@@ -1,0 +1,157 @@
+[
+  {
+    "task_number": 3,
+    "title": "Busy Farmers' Market",
+    "slug": "busy-farmers-market",
+    "topic": "Market",
+    "difficulty": "easy",
+    "prep_time_seconds": 30,
+    "response_time_seconds": 60,
+    "prompt_text": "Look at the picture below. Describe what you see in as much detail as you can. You may want to talk about the people, the setting, and the activities taking place. The picture shows an outdoor market.",
+    "scene_description": "A bustling outdoor farmers' market on a sunny weekend morning, with rows of canopied stalls under white and striped tents. In the foreground, a vendor in an apron hands a paper bag of apples to a smiling woman, while wooden crates overflow with tomatoes, leafy greens, and oranges. In the background, crowds of shoppers carry tote bags and reusable baskets, and a flower stall and a bread cart are visible beneath leafy trees.",
+    "vocabulary_tips": [
+      "stalls",
+      "produce",
+      "vendor",
+      "browsing",
+      "canopy",
+      "tote bags"
+    ],
+    "connector_phrases": [
+      "In the foreground",
+      "In the background",
+      "On the left",
+      "To the right",
+      "In the middle",
+      "It looks like"
+    ],
+    "template_hint": "Give a one-line overview of the whole scene, then describe the foreground in detail, move to the background, and finish by speculating about the mood or purpose.",
+    "sample_response_band12": "This picture shows a busy outdoor farmers' market on what looks like a sunny weekend morning. In the foreground, there's a vendor wearing an apron handing a paper bag of apples to a woman who's smiling, and right in front of them I can see wooden crates overflowing with red tomatoes, leafy greens, and bright oranges. To the right, there are striped canopies sheltering more stalls from the sun. In the background, crowds of shoppers are strolling around carrying tote bags and reusable baskets, and I can spot a colourful flower stall and a bread cart beneath some leafy green trees. Overall, the atmosphere seems really cheerful and relaxed. It looks like people are enjoying the fresh air and chatting with the vendors, so I'd guess this is a popular weekend spot where the whole community comes to shop for fresh, local food.",
+    "prompt_tag": "practice",
+    "sort_order": 0
+  },
+  {
+    "task_number": 3,
+    "title": "Family Day At Park",
+    "slug": "family-day-at-park",
+    "topic": "Park",
+    "difficulty": "easy",
+    "prep_time_seconds": 30,
+    "response_time_seconds": 60,
+    "prompt_text": "Look at the picture below. Describe what you see in as much detail as you can. You may want to talk about the people, the setting, and the activities taking place. The picture shows a family at a city park.",
+    "scene_description": "A family enjoying a sunny day at a green city park, with a checkered picnic blanket spread out on the grass in the foreground. A mother is unpacking food from a basket while a father pushes a young child on a swing nearby, and a small dog sits beside the blanket. In the background, there are tall leafy trees, a winding path with people jogging and cycling, a pond with ducks, and city buildings rising above the treeline.",
+    "vocabulary_tips": [
+      "picnic blanket",
+      "lawn",
+      "swing set",
+      "jogging",
+      "pond",
+      "skyline"
+    ],
+    "connector_phrases": [
+      "In the foreground",
+      "In the background",
+      "On the left",
+      "To the right",
+      "In the middle",
+      "It seems like"
+    ],
+    "template_hint": "Open with a one-line overview, then describe the foreground people and objects, move to the background setting, and close by speculating about the family's mood or purpose.",
+    "sample_response_band12": "This picture shows a family spending a relaxing, sunny day together at a green city park. In the foreground, there's a checkered picnic blanket spread out on the grass, and a mother is kneeling beside it, unpacking food from a wicker basket. To the right, a father is pushing a young child on a swing, and they both look really happy. There's also a small dog sitting near the blanket, keeping the family company. In the background, I can see tall leafy trees and a winding path where people are jogging and cycling. Further back, there's a pond with a few ducks, and beyond that, city buildings rise above the treeline. Overall, the mood seems peaceful and joyful. It seems like this family is taking a break from their busy routine to enjoy some quality time outdoors on a beautiful weekend afternoon.",
+    "prompt_tag": "practice",
+    "sort_order": 1
+  },
+  {
+    "task_number": 3,
+    "title": "Crowded Train Station Platform",
+    "slug": "crowded-train-station-platform",
+    "topic": "Commuting",
+    "difficulty": "hard",
+    "prep_time_seconds": 30,
+    "response_time_seconds": 60,
+    "prompt_text": "Look at the picture below. Describe what you see in as much detail as you can. You may want to talk about the people, the setting, and the activities taking place. The picture shows a train station during rush hour.",
+    "scene_description": "A crowded train station platform packed with commuters during the morning rush hour. In the foreground, business people in coats hold briefcases and coffee cups, several checking their phones or wristwatches, while a sleek silver train waits at the platform with its doors open and passengers streaming in and out. In the background, a large electronic departure board displays times, overhead signs hang from a high arched glass ceiling, and a digital clock shows the busy morning hour.",
+    "vocabulary_tips": [
+      "commuters",
+      "platform",
+      "departure board",
+      "briefcase",
+      "boarding",
+      "rush hour"
+    ],
+    "connector_phrases": [
+      "In the foreground",
+      "In the background",
+      "On the left",
+      "To the right",
+      "Above",
+      "It appears that"
+    ],
+    "template_hint": "Start with a one-line overview of the scene, then detail the foreground people and the train, describe the background signage and setting, and end by speculating about the atmosphere or what is happening.",
+    "sample_response_band12": "This picture shows a crowded train station platform during what appears to be the morning rush hour. In the foreground, there are lots of business people wearing coats and holding briefcases and coffee cups. Several of them are checking their phones or glancing at their wristwatches, which suggests they're in a real hurry. To the right, a sleek silver train is waiting at the platform with its doors wide open, and passengers are streaming in and out as they board. In the background, I can see a large electronic departure board displaying train times, and above everyone there's a high, arched glass ceiling with overhead signs hanging down. There's also a digital clock showing the busy morning hour. Overall, the atmosphere feels rushed and a little tense. It appears that everyone is trying to catch their train and get to work on time.",
+    "prompt_tag": "practice",
+    "sort_order": 2
+  },
+  {
+    "task_number": 3,
+    "title": "Sunny Public Beach",
+    "slug": "sunny-public-beach",
+    "topic": "Beach",
+    "difficulty": "medium",
+    "prep_time_seconds": 30,
+    "response_time_seconds": 60,
+    "prompt_text": "Look at the picture below. Describe what you see in as much detail as you can. You may want to talk about the people, the setting, and the activities taking place. The picture shows a public beach in summer.",
+    "scene_description": "A sunny public beach crowded with people on a hot summer day, with golden sand stretching toward calm blue water. In the foreground, two children build a sandcastle with buckets and spades while a family relaxes under a large striped umbrella on colourful towels. In the background, swimmers splash in the gentle waves, a few people play beach volleyball, sailboats dot the horizon, and palm trees and a lifeguard tower line the edge of the sand under a clear blue sky.",
+    "vocabulary_tips": [
+      "shoreline",
+      "sunbathing",
+      "umbrella",
+      "sandcastle",
+      "waves",
+      "lifeguard tower"
+    ],
+    "connector_phrases": [
+      "In the foreground",
+      "In the background",
+      "On the left",
+      "To the right",
+      "Near the water",
+      "It looks like"
+    ],
+    "template_hint": "Begin with a one-line overview, then describe the foreground people and activities, move out to the background and horizon, and finish by speculating about the mood or atmosphere.",
+    "sample_response_band12": "This picture shows a sunny public beach that's really crowded on a hot summer day. In the foreground, there are two children building a sandcastle with buckets and spades, and they look completely absorbed in their game. Just behind them, a family is relaxing under a large striped umbrella, lying on colourful towels and sunbathing. Near the water, swimmers are splashing around in the gentle waves, and to the right, a few people are playing beach volleyball on the golden sand. In the background, I can spot several sailboats dotting the horizon, and along the edge of the sand there are tall palm trees and a lifeguard tower keeping everyone safe. The whole sky is clear and blue. Overall, the atmosphere feels cheerful and carefree. It looks like everyone is making the most of a perfect summer day by the sea.",
+    "prompt_tag": "practice",
+    "sort_order": 3
+  },
+  {
+    "task_number": 3,
+    "title": "Lively Coffee Shop Interior",
+    "slug": "lively-coffee-shop-interior",
+    "topic": "Cafe",
+    "difficulty": "medium",
+    "prep_time_seconds": 30,
+    "response_time_seconds": 60,
+    "prompt_text": "Look at the picture below. Describe what you see in as much detail as you can. You may want to talk about the people, the setting, and the activities taking place. The picture shows the inside of a coffee shop.",
+    "scene_description": "The warm, lively interior of a busy coffee shop with exposed brick walls, hanging pendant lights, and a chalkboard menu above the counter. In the foreground, a barista in an apron operates a shiny espresso machine while a customer waits at the wooden counter, and nearby a young woman sits at a small table working on a laptop with a latte beside her. In the background, friends chat on a cushioned sofa, a couple shares a slice of cake, and a glass display case full of pastries sits beside the till.",
+    "vocabulary_tips": [
+      "barista",
+      "espresso machine",
+      "counter",
+      "chalkboard menu",
+      "pastries",
+      "cozy"
+    ],
+    "connector_phrases": [
+      "In the foreground",
+      "In the background",
+      "On the left",
+      "To the right",
+      "Behind the counter",
+      "It seems like"
+    ],
+    "template_hint": "Open with a one-line overview of the setting, then describe the foreground people and counter, move to the seating in the background, and end by speculating about the mood or atmosphere.",
+    "sample_response_band12": "This picture shows the warm, lively interior of a busy coffee shop with exposed brick walls and cozy pendant lights hanging from the ceiling. In the foreground, there's a barista wearing an apron, busily operating a shiny espresso machine behind the wooden counter, while a customer waits patiently to be served. Above the counter, I can see a chalkboard menu listing the drinks. To the right, a young woman is sitting at a small table, working on her laptop with a latte beside her. In the background, a group of friends are chatting on a cushioned sofa, and a couple is sharing a slice of cake. Near the till, there's a glass display case full of tempting pastries. Overall, the atmosphere feels really cozy and social. It seems like this is a popular neighbourhood spot where people come to relax, catch up, or get some work done.",
+    "prompt_tag": "practice",
+    "sort_order": 4
+  }
+]

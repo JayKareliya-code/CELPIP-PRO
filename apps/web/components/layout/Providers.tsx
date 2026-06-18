@@ -2,7 +2,7 @@
 
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Toaster }              from "sonner";
-import { useClerk }             from "@clerk/nextjs";
+import { useAuth, useClerk }    from "@clerk/nextjs";
 import { useEffect, useRef }    from "react";
 import { useRouter }            from "next/navigation";
 import { AuthCacheGuard }       from "@/components/layout/AuthCacheGuard";
@@ -25,27 +25,62 @@ function PlanEventsWatcher() {
  * burst of in-flight requests (all 401-ing at once after a token expires)
  * from firing N parallel signOut() calls.
  */
+/** How many consecutive session-alive ("transient") 401s to tolerate before we
+ *  stop re-arming, so a persistently-401ing backend (e.g. a CORS/azp misconfig)
+ *  can't drive an endless token-refresh loop. */
+const MAX_TRANSIENT_401 = 5;
+const TRANSIENT_COOLDOWN_MS = 3000;
+
 function AuthExpiredHandler() {
-  const { signOut } = useClerk();
-  const router      = useRouter();
-  const handlingRef = useRef(false);
+  const { getToken } = useAuth();
+  const { signOut }  = useClerk();
+  const router       = useRouter();
+  const handlingRef  = useRef(false);
+  const transientRef = useRef(0);
 
   useEffect(() => {
-    const onExpired = () => {
+    const onExpired = async () => {
       if (handlingRef.current) return;
       handlingRef.current = true;
-      // Best-effort sign-out then redirect. If signOut itself rejects we
-      // still navigate so the user is never stuck on a screen full of 401
-      // toasts.
+
+      // A 401 does NOT necessarily mean the session is over. Clerk session
+      // tokens are short-lived (~60 s), so a transient 401 can come from a
+      // momentarily-expired token, a refetch-on-focus race, or a non-critical
+      // background call (e.g. the SSE-token mint). Before tearing the session
+      // down, confirm it is genuinely gone by forcing a fresh token.
+      let sessionAlive = false;
+      try {
+        sessionAlive = !!(await getToken({ skipCache: true }));
+      } catch {
+        sessionAlive = false;
+      }
+
+      if (sessionAlive) {
+        // Still authenticated — treat the 401 as transient and do NOT sign out.
+        // React Query refetches on its own. Re-arm after a cooldown, but cap the
+        // retries so a backend that 401s every request can't loop forever; once
+        // capped we simply stop reacting (the user can refresh).
+        transientRef.current += 1;
+        if (transientRef.current <= MAX_TRANSIENT_401) {
+          setTimeout(() => { handlingRef.current = false; }, TRANSIENT_COOLDOWN_MS);
+        }
+        return;
+      }
+
+      // Session really is gone — sign out and route to sign-in. If signOut
+      // rejects we still navigate so the user isn't stranded on 401 toasts.
+      // Re-arm afterwards so a fresh login in this same tab is protected again.
       signOut()
         .catch(() => { /* ignored — fall through to redirect */ })
         .finally(() => {
+          transientRef.current = 0;
+          handlingRef.current = false;
           router.replace("/sign-in");
         });
     };
     window.addEventListener(API_AUTH_EXPIRED_EVENT, onExpired);
     return () => window.removeEventListener(API_AUTH_EXPIRED_EVENT, onExpired);
-  }, [signOut, router]);
+  }, [getToken, signOut, router]);
 
   return null;
 }

@@ -55,6 +55,10 @@ export function useCurrentUser(): UseCurrentUserReturn {
     queryFn: async (): Promise<AppUser> => {
       if (USE_MOCK) return MOCK_USER;
       const token = await getToken();
+      // Never send an unauthenticated request: a null token (brief Clerk
+      // hydration window) would 401 and trip the global sign-out. Throw a
+      // non-HTTP error instead — React Query retries once the token is ready.
+      if (!token) throw new Error("Clerk session token not ready");
       return api.get<AppUser>(`${API_V1}/users/me`, {
         headers: authHeaders(token),
       });

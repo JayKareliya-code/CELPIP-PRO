@@ -170,6 +170,11 @@ async def get_current_user(
             token,
             public_key,
             algorithms=["RS256"],
+            # Small leeway absorbs clock skew and near-expiry races: Clerk session
+            # tokens live ~60 s, and a token fetched just before expiry can reach
+            # the server a moment after `exp`. Without leeway that surfaces as an
+            # intermittent 401 that (client-side) forces a spurious sign-out.
+            leeway=30,
             options=decode_options or None,
             **decode_kwargs,
         )

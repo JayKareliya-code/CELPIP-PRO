@@ -22,6 +22,8 @@ from app.api.v1._prompt_schemas import (
     WritingPromptPatchIn,
 )
 from app.api.v1._prompt_helpers import extract_s3_key, remap_prompt_data, sign_prompt_dict
+from app.api.v1._bulk_schemas import BulkImportIn, BulkImportResult
+import app.services.admin_bulk_import_service as bulk_svc
 
 router = APIRouter()
 Admin = Annotated[User, Depends(require_admin)]
@@ -131,6 +133,21 @@ async def create_speaking(body: SpeakingPromptIn, db: DB, admin: Admin) -> dict[
     return sign_prompt_dict(to_dict(p))
 
 
+@router.post("/speaking-prompts/bulk-import")
+async def bulk_import_speaking(body: BulkImportIn, db: DB, admin: Admin) -> BulkImportResult:
+    """Validate (dry run) or commit a batch of speaking prompts in one transaction.
+
+    All-or-nothing: in commit mode a single invalid row aborts the whole batch.
+    On a clean validate the response has ok=true; the client then re-sends with
+    mode="commit". get_db owns the transaction — it commits on a clean return and
+    rolls back if the write phase raises.
+    """
+    return await bulk_svc.bulk_import_speaking(
+        db, items=body.items, mode=body.mode, on_conflict=body.on_conflict,
+        default_status=body.default_status, check_images=body.check_images, admin_id=admin.id,
+    )
+
+
 @router.get("/speaking-prompts/{prompt_id}")
 async def get_speaking(prompt_id: uuid.UUID, db: DB, _: Admin) -> dict[str, Any]:
     p = await AdminSpeakingPromptRepo(db).get_by_id(prompt_id)
@@ -227,6 +244,18 @@ async def create_writing(body: WritingPromptIn, db: DB, admin: Admin) -> dict[st
     await db.commit()
     await db.refresh(p)
     return to_dict(p)
+
+
+@router.post("/writing-prompts/bulk-import")
+async def bulk_import_writing(body: BulkImportIn, db: DB, admin: Admin) -> BulkImportResult:
+    """Validate (dry run) or commit a batch of writing prompts in one transaction.
+
+    See `bulk_import_speaking` — identical semantics for the writing pool.
+    """
+    return await bulk_svc.bulk_import_writing(
+        db, items=body.items, mode=body.mode, on_conflict=body.on_conflict,
+        default_status=body.default_status, check_images=body.check_images, admin_id=admin.id,
+    )
 
 
 @router.patch("/writing-prompts/{prompt_id}")

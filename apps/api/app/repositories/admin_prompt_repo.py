@@ -41,6 +41,13 @@ class AdminSpeakingPromptRepo(BaseRepository[SpeakingPrompt]):
         )
         return result.scalar_one_or_none()
 
+    async def all_slugs(self) -> set[str]:
+        """Return every non-null slug in one query — used for bulk-import collision checks."""
+        result = await self.session.execute(
+            select(SpeakingPrompt.slug).where(SpeakingPrompt.slug.is_not(None))
+        )
+        return {row[0] for row in result.all()}
+
     async def soft_delete(self, prompt: SpeakingPrompt) -> None:
         await self.update(prompt, is_active=False)
 
@@ -78,6 +85,13 @@ class AdminWritingPromptRepo(BaseRepository[WritingPrompt]):
             select(WritingPrompt).where(WritingPrompt.slug == slug)
         )
         return result.scalar_one_or_none()
+
+    async def all_slugs(self) -> set[str]:
+        """Return every non-null slug in one query — used for bulk-import collision checks."""
+        result = await self.session.execute(
+            select(WritingPrompt.slug).where(WritingPrompt.slug.is_not(None))
+        )
+        return {row[0] for row in result.all()}
 
     async def soft_delete(self, prompt: WritingPrompt) -> None:
         await self.update(prompt, is_active=False)

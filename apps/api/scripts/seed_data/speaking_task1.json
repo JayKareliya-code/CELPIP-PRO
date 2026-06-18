@@ -1,0 +1,602 @@
+[
+  {
+    "task_number": 1,
+    "title": "Asking for a Raise",
+    "slug": "asking-for-a-raise",
+    "topic": "Compensation",
+    "difficulty": "easy",
+    "prep_time_seconds": 30,
+    "response_time_seconds": 90,
+    "prompt_text": "A close friend of yours has worked at the same company for three years without a single pay increase, even though they have taken on much more responsibility. They feel they deserve a raise but are nervous about bringing it up with their boss. They have asked you how they should approach the conversation. What advice would you give them?",
+    "vocabulary_tips": [
+      "a raise",
+      "make your case",
+      "track record",
+      "schedule a meeting",
+      "market rate",
+      "come prepared"
+    ],
+    "connector_phrases": [
+      "If I were you",
+      "What I'd suggest is",
+      "On top of that",
+      "The way I see it",
+      "Trust me",
+      "At the end of the day"
+    ],
+    "template_hint": "Open warmly to reassure them, give one main piece of advice (prepare evidence) plus a second (pick the right moment and stay calm), add a quick personal example, then close with encouragement.",
+    "sample_response_band12": "Hey, honestly, I totally get why you're nervous, but you've earned this, so don't sell yourself short. If I were you, the first thing I'd do is come prepared. Sit down and write out everything you've taken on over the last three years, you know, the extra projects, the results, the wins, so you can actually make your case with facts instead of just feelings. On top of that, I'd quietly check what the market rate is for your role, because that gives you real backup if your boss pushes back. The second thing I'd say is timing matters a lot. Don't just spring it on them in the hallway. Schedule a proper meeting when things are calm, maybe right after you've finished a big project. When my sister did exactly that, she walked in with a one-page summary and got a fifteen percent bump on the spot. At the end of the day, the worst they can say is not yet, and you'll look professional either way. You've got this, trust me. Go for it.",
+    "prompt_tag": "practice",
+    "sort_order": 0
+  },
+  {
+    "task_number": 1,
+    "title": "A Difficult Coworker",
+    "slug": "a-difficult-coworker",
+    "topic": "Coworkers",
+    "difficulty": "medium",
+    "prep_time_seconds": 30,
+    "response_time_seconds": 90,
+    "prompt_text": "Your cousin shares a small office with a coworker who constantly takes credit for their ideas in team meetings. Your cousin is frustrated and unsure whether to confront the coworker directly or report the situation to their manager. They have asked you what they should do. What advice would you give them?",
+    "vocabulary_tips": [
+      "take credit",
+      "set the record straight",
+      "paper trail",
+      "have a private word",
+      "escalate",
+      "stay professional"
+    ],
+    "connector_phrases": [
+      "Here's the thing",
+      "What I'd do first is",
+      "Rather than that",
+      "On the other hand",
+      "Just remember",
+      "Either way"
+    ],
+    "template_hint": "Validate their frustration, recommend a calm private conversation first with a reason, then suggest documenting and escalating only if it continues, include a brief example, and close supportively.",
+    "sample_response_band12": "Okay, first off, I'd be frustrated too, so that reaction is completely fair. But here's the thing, I wouldn't blow up about it, because that could backfire and make you look like the problem. What I'd do first is have a private word with your coworker, just the two of you, and keep it really calm. Something like, hey, I noticed that idea came from me, can we make sure that's clear next time? A lot of people don't even realize they're doing it, so giving them a chance to fix it is the professional move. On top of that, start keeping a quiet paper trail. Email your ideas to the team or your manager beforehand so there's a record with your name on it. That way you naturally set the record straight without any drama. If it keeps happening after that, then it's totally fair to escalate it to your manager with proof in hand. My friend handled it exactly this way and her coworker actually backed off completely. Just remember, stay professional and the truth will come out. You'll be fine.",
+    "prompt_tag": "practice",
+    "sort_order": 1
+  },
+  {
+    "task_number": 1,
+    "title": "Preparing For A Job Interview",
+    "slug": "preparing-for-a-job-interview",
+    "topic": "Interviews",
+    "difficulty": "easy",
+    "prep_time_seconds": 30,
+    "response_time_seconds": 90,
+    "prompt_text": "A friend of yours has landed an interview for their dream job next week, but they have not interviewed for anything in over five years and are feeling extremely anxious. They want to make a great impression but do not know where to start. They have asked you for some advice. What advice would you give them?",
+    "vocabulary_tips": [
+      "do your homework",
+      "common questions",
+      "mock interview",
+      "first impression",
+      "dress the part",
+      "calm your nerves"
+    ],
+    "connector_phrases": [
+      "The first thing I'd say is",
+      "Another thing",
+      "More than anything",
+      "That said",
+      "Honestly",
+      "You'll be great"
+    ],
+    "template_hint": "Reassure them, give a research-and-practice tip with a reason, add a tip on managing nerves and presentation, drop a quick example, and end with a confidence boost.",
+    "sample_response_band12": "Oh, congratulations, that's huge! Honestly, the fact that you even got the interview means they already like you on paper, so try to relax a little. The first thing I'd say is do your homework. Spend an evening reading about the company, their values and recent projects, so you can connect your answers to what they actually care about. While you're at it, write down the common questions, like 'tell me about yourself,' and practice them out loud. We could even do a mock interview over the phone. Another thing, more than anything really, is to calm your nerves the day of. Get a good sleep, arrive early, dress the part, and take a few slow breaths before you walk in, because confidence makes a massive first impression. When I prepped this way last year, I felt so much more in control. That said, don't memorize everything word for word, just know your stories. You've got real experience, and they'd be lucky to have you. You'll be great, I promise.",
+    "prompt_tag": "practice",
+    "sort_order": 2
+  },
+  {
+    "task_number": 1,
+    "title": "Considering A Career Change",
+    "slug": "considering-a-career-change",
+    "topic": "Career change",
+    "difficulty": "hard",
+    "prep_time_seconds": 30,
+    "response_time_seconds": 90,
+    "prompt_text": "Your older sibling has a stable, well-paid job in accounting but feels completely unfulfilled and is seriously thinking about leaving it to retrain as a graphic designer. They are worried about the financial risk and what others might think. They have asked for your honest advice. What advice would you give them?",
+    "vocabulary_tips": [
+      "take the plunge",
+      "safety net",
+      "test the waters",
+      "burn out",
+      "side hustle",
+      "in the long run"
+    ],
+    "connector_phrases": [
+      "Look",
+      "What I'd really encourage is",
+      "Before anything else",
+      "Having said that",
+      "Deep down",
+      "In the long run"
+    ],
+    "template_hint": "Acknowledge how big the decision is, advise testing the field gradually while building a financial cushion, give a reason about avoiding regret, add an example, and close by validating their happiness.",
+    "sample_response_band12": "Look, I can hear how torn you are, and that's completely understandable, because this is a big, scary decision. But deep down, if accounting is draining you, that matters too. What I'd really encourage is not to quit cold tomorrow, but to test the waters first. Before anything else, start designing on the side, take an online course, build a small portfolio, maybe even pick up a side hustle for a few clients. That way you find out if you genuinely love the work day to day, not just the idea of it. The second thing is, build a safety net. Save up several months of expenses first so the financial risk feels manageable and you're not panicking. Having said that, please don't worry too much about what other people think. My coworker left a corporate job to become a designer and, in the long run, he's never been happier. At the end of the day, you'd rather try and learn than spend years wondering what if. Whatever you choose, I'm behind you a hundred percent.",
+    "prompt_tag": "practice",
+    "sort_order": 3
+  },
+  {
+    "task_number": 1,
+    "title": "Struggling With Work-Life Balance",
+    "slug": "struggling-with-work-life-balance",
+    "topic": "Work-life balance",
+    "difficulty": "medium",
+    "prep_time_seconds": 30,
+    "response_time_seconds": 90,
+    "prompt_text": "A neighbour of yours recently got promoted to a management role, but now they are working late every night, skipping meals, and barely seeing their family. They are starting to feel burned out and resentful of the new job. They have asked you how they can get their life back on track. What advice would you give them?",
+    "vocabulary_tips": [
+      "set boundaries",
+      "delegate",
+      "burn out",
+      "switch off",
+      "prioritize",
+      "recharge"
+    ],
+    "connector_phrases": [
+      "First and foremost",
+      "On top of that",
+      "Honestly",
+      "The way I look at it",
+      "Believe me",
+      "Bottom line"
+    ],
+    "template_hint": "Empathize with the burnout, advise setting firm boundaries and delegating with reasons, suggest protecting personal time, give a quick example, and close with a caring reminder.",
+    "sample_response_band12": "Honestly, first off, congratulations on the promotion, but it sounds like it's running you into the ground, and that's not sustainable, so I'm really glad you asked. First and foremost, I'd start setting some boundaries. Pick a hard stop time, say six o'clock, and actually switch off your laptop and your email after that, because your brain needs to recharge or you'll burn out completely. On top of that, remember you're a manager now, so you don't have to do everything yourself. Learn to delegate. Hand off the tasks your team can handle and trust them with it, that's literally part of the job. The way I look at it, protecting time for your family and even just a proper dinner isn't lazy, it actually makes you sharper at work. When my brother started blocking out his evenings, believe me, his stress dropped and his performance went up. Bottom line, a job should fit into your life, not swallow it whole. Take care of yourself first, and everything else will follow. You've got this.",
+    "prompt_tag": "practice",
+    "sort_order": 4
+  },
+  {
+    "task_number": 1,
+    "title": "Friend Choosing A University Major",
+    "slug": "friend-choosing-a-university-major",
+    "topic": "Education",
+    "difficulty": "easy",
+    "prep_time_seconds": 30,
+    "response_time_seconds": 90,
+    "prompt_text": "A close friend of yours is about to start university but cannot decide which major to choose. They feel pulled between studying a subject they truly love and one that leads to a well-paying job, and they keep changing their mind. Your friend has asked you for advice. What advice would you give them?",
+    "vocabulary_tips": [
+      "major",
+      "passion",
+      "job prospects",
+      "weigh your options",
+      "career path",
+      "well-rounded"
+    ],
+    "connector_phrases": [
+      "If I were you",
+      "What I'd suggest is",
+      "The way I see it",
+      "On top of that",
+      "At the end of the day",
+      "Honestly"
+    ],
+    "template_hint": "Open warmly, give one clear piece of advice, back it with two reasons plus a short personal example, then close with encouragement.",
+    "sample_response_band12": "Hey, I totally get why you're stressed about this, so let me share what I think. If I were you, I wouldn't completely separate what you love from what pays well, because honestly, you can often find a major that does both. The way I see it, you should lean toward something you're genuinely interested in, because when you actually enjoy your classes, you'll work harder and your grades will naturally be better. On top of that, employers really do notice when someone is passionate, not just chasing money. For example, my cousin chose business even though her heart was in design, and after two miserable years she switched and finally started thriving. So what I'd suggest is this: list out three majors you like, then check the job prospects for each one and see where they overlap. At the end of the day, you're going to spend four years on this, so don't pick something that drains you. Whatever you decide, you've got this, and I'm here to talk it through anytime, okay?",
+    "prompt_tag": "practice",
+    "sort_order": 5
+  },
+  {
+    "task_number": 1,
+    "title": "Classmate Struggling With Exam Stress",
+    "slug": "classmate-struggling-with-exam-stress",
+    "topic": "Exams",
+    "difficulty": "medium",
+    "prep_time_seconds": 30,
+    "response_time_seconds": 90,
+    "prompt_text": "A classmate of yours has final exams coming up in two weeks and is feeling extremely anxious. They tell you they can't sleep, they keep procrastinating, and they're worried they'll fail. They have asked you what they should do. What advice would you give them?",
+    "vocabulary_tips": [
+      "overwhelmed",
+      "study schedule",
+      "break it down",
+      "cram",
+      "take a breather",
+      "stay on track"
+    ],
+    "connector_phrases": [
+      "First things first",
+      "Here's the thing",
+      "What really helped me was",
+      "Another thing you could try",
+      "More importantly",
+      "Don't worry"
+    ],
+    "template_hint": "Acknowledge their stress, offer two practical coping strategies with reasons and a quick example, and end on a reassuring note.",
+    "sample_response_band12": "Okay, first things first, take a deep breath, because feeling this anxious is completely normal and you're definitely not going to fail. Here's the thing: the reason you can't sleep is probably that everything feels like one giant mountain. So what really helped me was breaking the material down into small daily chunks instead of trying to cram it all at once. When you only focus on one topic a day, your brain isn't so overwhelmed, and you'll actually remember more. Another thing you could try is making a simple study schedule and sticking to it, because once you see your progress on paper, the panic starts to fade. For example, before my last finals I was a wreck, but I just did two hours each morning and took a short walk every afternoon, and honestly that walk saved my sanity. More importantly, get some sleep, because a tired brain forgets everything. You've worked hard all semester, so trust yourself. Want to study together this weekend? We can keep each other on track.",
+    "prompt_tag": "practice",
+    "sort_order": 6
+  },
+  {
+    "task_number": 1,
+    "title": "Cousin Considering Dropping A Course",
+    "slug": "cousin-considering-dropping-a-course",
+    "topic": "Studies",
+    "difficulty": "medium",
+    "prep_time_seconds": 30,
+    "response_time_seconds": 90,
+    "prompt_text": "Your cousin is halfway through the semester and is thinking about dropping a difficult course because the workload is heavy and their grade is lower than they hoped. They worry that dropping it might look bad, but staying might hurt their average. Your cousin has asked for your advice. What advice would you give them?",
+    "vocabulary_tips": [
+      "drop the course",
+      "workload",
+      "GPA",
+      "retake",
+      "office hours",
+      "manageable"
+    ],
+    "connector_phrases": [
+      "Honestly",
+      "If you ask me",
+      "Before you decide",
+      "That said",
+      "The bottom line is",
+      "Either way"
+    ],
+    "template_hint": "Show you understand the dilemma, recommend a clear course of action with two reasons and a concrete step, then close supportively.",
+    "sample_response_band12": "Honestly, I can tell this is really weighing on you, so let's think it through together. If you ask me, before you decide to drop anything, you should talk to the professor during office hours first. Here's why: a lot of the time, the workload feels impossible just because you're stuck on one or two concepts, and a quick conversation can completely turn things around. On top of that, dropping a course can sometimes push back your graduation or mean you have to retake it later, which is honestly more stressful in the long run. That said, if you genuinely can't keep up and it's tanking your whole GPA, then dropping it and retaking it when your schedule is lighter is totally reasonable, and it won't look bad at all. For example, my roommate dropped chemistry once, retook it the next term, and ended up with an A. So the bottom line is, get the facts before you panic. Whatever you choose, it's not the end of the world, and I'm sure you'll figure it out.",
+    "prompt_tag": "practice",
+    "sort_order": 7
+  },
+  {
+    "task_number": 1,
+    "title": "New Student Feeling Left Out",
+    "slug": "new-student-feeling-left-out",
+    "topic": "School",
+    "difficulty": "easy",
+    "prep_time_seconds": 30,
+    "response_time_seconds": 90,
+    "prompt_text": "A new student who just transferred to your school tells you they feel lonely and left out. Everyone already seems to have their own friend groups, and they don't know how to fit in. They have asked you for some advice. What advice would you give them?",
+    "vocabulary_tips": [
+      "fit in",
+      "break the ice",
+      "join a club",
+      "common ground",
+      "put yourself out there",
+      "give it time"
+    ],
+    "connector_phrases": [
+      "Trust me",
+      "The first thing I'd do is",
+      "What works really well is",
+      "Plus",
+      "Just remember",
+      "You'll see"
+    ],
+    "template_hint": "Reassure them it's normal, suggest two friendly ways to connect with reasons and a small example, and finish with warm encouragement.",
+    "sample_response_band12": "Aw, trust me, I know exactly how that feels, and the good news is it gets so much better. The first thing I'd do is join a club or a team, because that's honestly the easiest way to meet people who already share your interests. When you have something in common, conversations just happen naturally and you don't have to force anything. What works really well is starting small too, like asking someone next to you in class a quick question or sitting with a different group at lunch. Plus, people usually love being asked about themselves, so a simple question is a great way to break the ice. For example, when I moved here, I felt invisible at first, but I joined the photography club and within days I had a whole new group of friends. Just remember, those friend groups looked closed to me too, but they were way more welcoming than they seemed. Give it a little time and put yourself out there, and you'll see, you'll fit right in.",
+    "prompt_tag": "practice",
+    "sort_order": 8
+  },
+  {
+    "task_number": 1,
+    "title": "Coworker Returning To School Online",
+    "slug": "coworker-returning-to-school-online",
+    "topic": "Education",
+    "difficulty": "hard",
+    "prep_time_seconds": 30,
+    "response_time_seconds": 90,
+    "prompt_text": "A coworker of yours wants to go back to school by taking online courses while keeping their full-time job. They're excited but nervous about balancing work, studying, and family responsibilities, and they're not sure if the timing is right. They've asked you what you think they should do. What advice would you give them?",
+    "vocabulary_tips": [
+      "juggle",
+      "time management",
+      "set boundaries",
+      "burnout",
+      "part-time load",
+      "pay off"
+    ],
+    "connector_phrases": [
+      "Honestly",
+      "If it were me",
+      "One thing I'd really stress is",
+      "Beyond that",
+      "When all is said and done",
+      "You've got this"
+    ],
+    "template_hint": "Validate their ambition, give realistic advice on managing the balance with two reasons and a concrete tip, then encourage them while keeping expectations grounded.",
+    "sample_response_band12": "Honestly, I think it's amazing that you want to go back to school, so first of all, good for you. If it were me, I'd start with just one or two courses instead of a full load, because juggling work, family, and studying all at once is a fast track to burnout. Taking a lighter part-time load lets you see how much you can realistically handle before you overcommit. One thing I'd really stress is setting clear boundaries, like blocking out specific study hours and letting your family know that time is protected, because online courses are easy to push aside when life gets busy. Beyond that, talk to your manager, since some workplaces actually help pay for courses or offer flexible hours. For example, my neighbour did her degree online over four years instead of two, and yeah, it took longer, but she never crashed and burned. When all is said and done, the timing will never feel perfect, so if this matters to you, start small and build from there. You've absolutely got this.",
+    "prompt_tag": "practice",
+    "sort_order": 9
+  },
+  {
+    "task_number": 1,
+    "title": "Friend Skipping A Wedding",
+    "slug": "friend-skipping-a-wedding",
+    "topic": "Friendship",
+    "difficulty": "easy",
+    "prep_time_seconds": 30,
+    "response_time_seconds": 90,
+    "prompt_text": "A close friend of yours has been invited to a cousin's wedding, but it falls on the same weekend as a work trip they really wanted to take. They feel guilty and are not sure whether they should attend the wedding or go on the trip. They have asked for your advice. What advice would you give them?",
+    "vocabulary_tips": [
+      "family obligation",
+      "miss out on",
+      "make it up to them",
+      "reschedule",
+      "lifelong memory",
+      "feel torn"
+    ],
+    "connector_phrases": [
+      "If I were you",
+      "What I'd suggest is",
+      "The way I see it",
+      "On top of that",
+      "At the end of the day",
+      "Trust me on this"
+    ],
+    "template_hint": "Open warmly, give one clear recommendation, back it with two reasons (family bonds plus a way to still enjoy the trip later), add a quick example, then close with reassurance.",
+    "sample_response_band12": "Hey, I can totally see why you're torn about this, so let me share what I'd do. Honestly, if I were you, I'd go to the wedding. Here's my thinking. First, a cousin's wedding only happens once, and these family moments really do become lifelong memories. A work trip, on the other hand, can usually be rescheduled or done another time, so you're not actually losing it forever. Second, skipping the wedding could quietly hurt your relationship with your family, and trust me, that kind of thing tends to stick with people. For example, my brother once missed our aunt's anniversary for a conference, and she still brings it up years later. What I'd suggest is talking to your manager about pushing the trip back a week or two. That way you get the best of both worlds. At the end of the day, you'll feel so much lighter knowing you showed up for your family. Whatever you choose, though, I'm here for you. You've got this.",
+    "prompt_tag": "practice",
+    "sort_order": 10
+  },
+  {
+    "task_number": 1,
+    "title": "Noisy Neighbour Late At Night",
+    "slug": "noisy-neighbour-late-at-night",
+    "topic": "Neighbours",
+    "difficulty": "easy",
+    "prep_time_seconds": 30,
+    "response_time_seconds": 90,
+    "prompt_text": "A friend of yours has a new neighbour who just moved into the apartment next door and keeps playing loud music late at night. Your friend is losing sleep and isn't sure whether to knock on the neighbour's door and bring it up directly or to file a complaint with the building manager. They have asked you what they should do. What advice would you give them?",
+    "vocabulary_tips": [
+      "keep the peace",
+      "approach them politely",
+      "set boundaries",
+      "give them a heads-up",
+      "escalate the issue",
+      "off on the wrong foot"
+    ],
+    "connector_phrases": [
+      "If I were in your shoes",
+      "Honestly",
+      "The first thing I'd do is",
+      "That being said",
+      "More importantly",
+      "At the end of the day"
+    ],
+    "template_hint": "Start friendly, recommend a polite direct conversation first, justify with two reasons (preserving a good relationship and quicker results), give an example, and mention escalating only as a backup.",
+    "sample_response_band12": "Oh, I've actually been through this, so let me help you out. Honestly, if I were in your shoes, I'd talk to them directly before doing anything else. The first thing I'd do is knock on their door at a reasonable time and just mention it nicely, something like, hey, I love that you're settling in, but the music really carries through the walls at night. Here's why I'd start there. For one, going straight to the building manager can start things off on the wrong foot, and you've got to live next to this person. More importantly, most people don't realize how loud they're being, so a friendly heads-up usually fixes it right away. For example, my old neighbour had no idea I could hear his TV until I mentioned it, and he turned it down instantly. That being said, if the noise keeps up after you've asked, then it's totally fair to involve the manager. At the end of the day, a calm chat keeps the peace. Good luck, you'll handle it great.",
+    "prompt_tag": "practice",
+    "sort_order": 11
+  },
+  {
+    "task_number": 1,
+    "title": "Sister Considering Moving Back Home",
+    "slug": "sister-considering-moving-back-home",
+    "topic": "Family",
+    "difficulty": "medium",
+    "prep_time_seconds": 30,
+    "response_time_seconds": 90,
+    "prompt_text": "Your younger sister has been struggling to pay rent in another city and is thinking about moving back into your parents' home to save money. She worries this might feel like a step backward in her life. She has asked you whether she should make the move. What advice would you give her?",
+    "vocabulary_tips": [
+      "get back on your feet",
+      "save up",
+      "no shame in it",
+      "buy yourself time",
+      "a temporary setback",
+      "set a clear goal"
+    ],
+    "connector_phrases": [
+      "Listen",
+      "Here's the thing",
+      "If you ask me",
+      "Plus",
+      "What really matters is",
+      "Trust me"
+    ],
+    "template_hint": "Reassure her emotionally first, recommend moving home as a smart temporary step, support it with two reasons (financial breathing room and a chance to plan), add an example, and close with encouragement.",
+    "sample_response_band12": "Listen, I know this feels like a big deal, but I really don't want you to be so hard on yourself. If you ask me, moving back home for a while is honestly a smart move, not a step backward. Here's the thing. First, it gives you real breathing room financially. Without rent eating up your paycheque, you can finally save up and get back on your feet instead of just surviving month to month. Plus, being home means you can take the time to plan your next step properly, maybe find a better job or a cheaper place, without panicking. There's genuinely no shame in it. I did the same thing, actually. After I lost my job, I moved home for eight months, saved like crazy, and came out way stronger. What really matters is setting a clear goal, like a date you'd like to move out by, so it feels temporary and intentional. Trust me, this is just a pause, not a failure.",
+    "prompt_tag": "practice",
+    "sort_order": 12
+  },
+  {
+    "task_number": 1,
+    "title": "Friend Caught Between Two Friends",
+    "slug": "friend-caught-between-two-friends",
+    "topic": "Conflict",
+    "difficulty": "medium",
+    "prep_time_seconds": 30,
+    "response_time_seconds": 90,
+    "prompt_text": "A friend of yours is caught in the middle of an argument between two people in their friend group who have stopped speaking to each other. Both of them keep venting to your friend and expecting them to take a side. Your friend feels stressed and unsure how to respond, so they have asked you what to do. What advice would you give them?",
+    "vocabulary_tips": [
+      "take sides",
+      "stay neutral",
+      "set boundaries",
+      "play peacemaker",
+      "emotionally drained",
+      "hear both out"
+    ],
+    "connector_phrases": [
+      "Okay, first of all",
+      "If I were you",
+      "The key thing is",
+      "On top of that",
+      "Just remember",
+      "At the end of the day"
+    ],
+    "template_hint": "Acknowledge the stress, advise staying neutral and setting gentle boundaries, give two reasons (protecting both friendships and their own peace), add an example, and close supportively.",
+    "sample_response_band12": "Okay, first of all, that sounds completely exhausting, so it's no wonder you're stressed. Here's what I'd do if I were you. The key thing is to stay neutral and resist taking a side, even though both of them are pushing you to. Let me explain why. For one, the moment you pick a side, you risk losing one of those friendships for good, and honestly, you didn't start this fight, so why should you lose anyone? On top of that, being everyone's emotional dumping ground will completely drain you, and that's just not fair to you. So what I'd actually say to each of them is something kind but firm, like, I really care about you both, and I'm not comfortable being in the middle. For example, a buddy of mine did exactly that, and within a couple of weeks the two of them sorted it out themselves. Just remember, you can be supportive without being the referee. At the end of the day, protect your own peace too. You're a good friend for caring this much.",
+    "prompt_tag": "practice",
+    "sort_order": 13
+  },
+  {
+    "task_number": 1,
+    "title": "Cousin Hosting A Big Family Reunion",
+    "slug": "cousin-hosting-a-big-family-reunion",
+    "topic": "Social Events",
+    "difficulty": "hard",
+    "prep_time_seconds": 30,
+    "response_time_seconds": 90,
+    "prompt_text": "Your cousin has offered to host a large family reunion at their small apartment this summer, but they are now feeling overwhelmed by the cost, the limited space, and relatives who do not always get along. They are wondering whether to go ahead, scale things down, or move it somewhere else. They have asked for your advice. What advice would you give them?",
+    "vocabulary_tips": [
+      "bite off more than you can chew",
+      "scale it back",
+      "split the cost",
+      "neutral venue",
+      "delegate",
+      "set expectations"
+    ],
+    "connector_phrases": [
+      "Honestly",
+      "Here's what I'd do",
+      "For starters",
+      "Not only that, but",
+      "What I'd really suggest is",
+      "At the end of the day"
+    ],
+    "template_hint": "Validate the overwhelm, recommend a scaled-down or alternative-venue plan, justify with two reasons (cost and space plus reducing tension), give a practical example like potluck or a park, and close warmly.",
+    "sample_response_band12": "Honestly, it sounds like you might be biting off a bit more than you can chew here, and that's totally okay to admit. Here's what I'd do. For starters, I wouldn't host it in your apartment if the space and cost are already stressing you out. What I'd really suggest is moving it to a neutral spot, like a park with a picnic shelter or a community hall you can rent for the afternoon. Let me tell you why. First, a bigger, neutral venue instantly solves the space and money problem, especially if you make it a potluck so everyone brings a dish and you split the cost. Not only that, but a neutral place actually eases the tension between relatives who don't get along, because nobody feels like a guest in someone else's home. For example, my family started doing park reunions, and suddenly the awkwardness just melted away with the kids running around. The other big thing is to delegate, so don't carry it all alone. At the end of the day, this should be fun for you too. Whatever you decide, I'm happy to help.",
+    "prompt_tag": "practice",
+    "sort_order": 14
+  },
+  {
+    "task_number": 1,
+    "title": "Friend Struggling To Sleep",
+    "slug": "friend-struggling-to-sleep",
+    "topic": "sleep",
+    "difficulty": "easy",
+    "prep_time_seconds": 30,
+    "response_time_seconds": 90,
+    "prompt_text": "A close friend of yours has been having trouble falling asleep at night and feels tired all day. They say they often lie in bed for hours scrolling on their phone. They have asked you for some advice on how to sleep better. What advice would you give them?",
+    "vocabulary_tips": [
+      "wind down",
+      "screen time",
+      "a consistent bedtime routine",
+      "caffeine",
+      "well-rested",
+      "toss and turn"
+    ],
+    "connector_phrases": [
+      "If I were you",
+      "What I'd suggest is",
+      "Another thing you could try",
+      "On top of that",
+      "Trust me",
+      "At the end of the day"
+    ],
+    "template_hint": "Open warmly with empathy, give two clear pieces of advice each backed by a reason, add a quick personal example, then close with encouragement.",
+    "sample_response_band12": "Hey, I'm really sorry you've been so exhausted lately, that sounds rough. If I were you, the first thing I'd do is put your phone away at least an hour before bed. Honestly, the screen light tricks your brain into thinking it's still daytime, so you end up lying there wide awake. What I'd suggest instead is reading a few pages of a book or just listening to something calm to help you wind down. Another thing you could try is going to bed and waking up at the same time every single day, even on weekends. Trust me, your body loves a routine, and once it gets used to one, falling asleep gets so much easier. I started doing that last year and within a couple of weeks I stopped tossing and turning. Oh, and try to skip coffee after lunch, because caffeine sticks around longer than people think. At the end of the day, just give it a real shot for two weeks. You'll feel so much more rested. Let me know how it goes, okay?",
+    "prompt_tag": "practice",
+    "sort_order": 15
+  },
+  {
+    "task_number": 1,
+    "title": "Coworker Feeling Burned Out",
+    "slug": "coworker-feeling-burned-out",
+    "topic": "workplace stress",
+    "difficulty": "medium",
+    "prep_time_seconds": 30,
+    "response_time_seconds": 90,
+    "prompt_text": "A coworker of yours has been feeling extremely stressed and overwhelmed at work for the past few weeks. They tell you they can't switch off in the evenings and are starting to feel burned out. They have asked you what they should do to manage the stress. What advice would you give them?",
+    "vocabulary_tips": [
+      "burnout",
+      "set boundaries",
+      "take a breather",
+      "prioritize",
+      "recharge",
+      "overwhelmed"
+    ],
+    "connector_phrases": [
+      "Honestly",
+      "The first thing I'd do is",
+      "What really helps me is",
+      "On top of that",
+      "Believe me",
+      "At the end of the day"
+    ],
+    "template_hint": "Acknowledge their stress with empathy, offer two practical strategies with reasons, share a short personal example, and end on a reassuring, supportive note.",
+    "sample_response_band12": "Oh no, I'm so sorry you're feeling this way, burnout is no joke and I totally get it. Honestly, the first thing I'd do is set some clear boundaries between work and home. What I mean is, once you log off, actually log off, turn off your notifications and don't check your email until morning. Believe me, your brain needs that downtime to recharge, otherwise you never really rest. What really helps me is taking short breaks during the day, even just five minutes to step outside and take a breather. It clears my head and I come back way more focused. On top of that, I'd try talking to your manager about your workload. They might not realize how much is on your plate, and they may be able to shift a few things around. I did that last month and it made a huge difference. At the end of the day, your health comes first, so please be kind to yourself. You've got this, and I'm always here if you need to vent.",
+    "prompt_tag": "practice",
+    "sort_order": 16
+  },
+  {
+    "task_number": 1,
+    "title": "Cousin Wants To Start Exercising",
+    "slug": "cousin-wants-to-start-exercising",
+    "topic": "fitness",
+    "difficulty": "easy",
+    "prep_time_seconds": 30,
+    "response_time_seconds": 90,
+    "prompt_text": "Your cousin wants to start exercising regularly but doesn't know where to begin and is worried about giving up after a week. They have asked you for advice on how to get into a fitness routine and stick with it. What advice would you give them?",
+    "vocabulary_tips": [
+      "start small",
+      "set realistic goals",
+      "build a habit",
+      "stay motivated",
+      "an accountability partner",
+      "make it enjoyable"
+    ],
+    "connector_phrases": [
+      "If I were you",
+      "My biggest tip is",
+      "Another thing that helps",
+      "Plus",
+      "Trust me on this",
+      "At the end of the day"
+    ],
+    "template_hint": "Start with encouragement, give two doable tips with reasons focused on consistency, add a concrete example, and close by motivating them to begin.",
+    "sample_response_band12": "Hey, that's awesome that you want to get into exercising, I'm really proud of you for taking that first step. My biggest tip is to start small, like really small. If I were you, I'd just go for a twenty-minute walk or do a short home workout three times a week. The reason is, when people go too hard too fast, they burn out and quit, but small habits actually stick. Another thing that helps is picking something you genuinely enjoy, whether that's dancing, swimming, or cycling. Trust me on this, if it feels like fun instead of a chore, you'll keep showing up. Plus, I'd suggest finding a friend to do it with, an accountability partner makes a massive difference. When I started, my roommate and I worked out together, and honestly, on the days I felt lazy, she dragged me along, and vice versa. At the end of the day, the goal isn't to be perfect, it's just to keep going. Start this week, be patient with yourself, and you'll be amazed how quickly it becomes second nature.",
+    "prompt_tag": "practice",
+    "sort_order": 17
+  },
+  {
+    "task_number": 1,
+    "title": "Neighbour Eating Too Much Fast Food",
+    "slug": "neighbour-eating-too-much-fast-food",
+    "topic": "diet",
+    "difficulty": "medium",
+    "prep_time_seconds": 30,
+    "response_time_seconds": 90,
+    "prompt_text": "A neighbour of yours admits they eat fast food and takeout almost every day because cooking feels like too much effort after work. They want to eat healthier but say they have no time and don't enjoy cooking. They have asked you for some advice. What advice would you give them?",
+    "vocabulary_tips": [
+      "meal prep",
+      "balanced diet",
+      "quick and easy recipes",
+      "cut back on",
+      "grab-and-go",
+      "save time and money"
+    ],
+    "connector_phrases": [
+      "I totally get it",
+      "What I'd recommend is",
+      "Something that works for me",
+      "On top of that",
+      "Believe me",
+      "At the end of the day"
+    ],
+    "template_hint": "Empathize with their busy schedule, suggest two realistic, low-effort eating habits with reasons, give a practical example, and finish with friendly encouragement.",
+    "sample_response_band12": "Honestly, I totally get it, after a long day the last thing you want to do is stand at a stove. But I think there are some easy ways to eat better without spending hours cooking. What I'd recommend is trying meal prep on Sundays. You just cook a big batch of something simple, like rice, chicken, and some veggies, and portion it out for the week. That way, on busy nights, dinner is already waiting for you, so you're not tempted to order takeout. Something that works for me is keeping healthy grab-and-go snacks around, like fruit, yogurt, or nuts, so I'm not reaching for chips. On top of that, I'd start small, maybe just swap one fast-food meal a day for something homemade. Believe me, you don't have to change everything overnight. When I first cut back, I felt more energetic within a week, and my wallet was happier too. At the end of the day, even small swaps add up. Give it a try, and if you want, I'd be happy to share a few of my favourite quick recipes.",
+    "prompt_tag": "practice",
+    "sort_order": 18
+  },
+  {
+    "task_number": 1,
+    "title": "Sibling Lost a Beloved Hobby",
+    "slug": "sibling-lost-a-beloved-hobby",
+    "topic": "hobbies",
+    "difficulty": "medium",
+    "prep_time_seconds": 30,
+    "response_time_seconds": 90,
+    "prompt_text": "Your younger sibling used to love painting, but since starting a demanding job they have completely stopped and say they feel like they've lost a part of themselves. They tell you they keep meaning to pick it back up but never find the time or energy. They have asked you for advice on how to bring a hobby back into their life. What advice would you give them?",
+    "vocabulary_tips": [
+      "make time for yourself",
+      "creative outlet",
+      "rekindle a passion",
+      "work-life balance",
+      "carve out time",
+      "recharge your batteries"
+    ],
+    "connector_phrases": [
+      "I hear you",
+      "Here's what I'd do",
+      "More importantly",
+      "On top of that",
+      "Trust me",
+      "At the end of the day"
+    ],
+    "template_hint": "Validate their feelings with warmth, give two thoughtful tips for reintroducing the hobby with reasons, include a relatable example, and close with heartfelt encouragement.",
+    "sample_response_band12": "Aw, I hear you, and I'm really sorry, it's so hard when something you love just slips away. But the good news is, painting hasn't gone anywhere, it's still in you, waiting. Here's what I'd do: instead of pressuring yourself to paint a masterpiece, just carve out twenty minutes on a weekend to play around with no expectations. The reason is, when a hobby starts feeling like one more task on your to-do list, it loses its joy, so keep it low-pressure and fun. More importantly, I'd treat that time like a real appointment, actually block it in your calendar, because if you wait until you magically have energy, it'll never happen. On top of that, maybe set up a little corner at home with your supplies already out, so it's easy to start. Trust me, I felt the same when I stopped playing guitar, and once I just sat down for ten minutes, it all came rushing back. At the end of the day, you deserve that creative outlet, it's what recharges you. Please give yourself permission to enjoy it again.",
+    "prompt_tag": "practice",
+    "sort_order": 19
+  }
+]

@@ -43,7 +43,14 @@ export default clerkMiddleware(async (auth, request) => {
     const meta = (sessionClaims?.publicMetadata as { role?: string } | undefined)
               ?? (sessionClaims?.metadata       as { role?: string } | undefined)
               ?? null;
-    if (meta?.role !== "admin") {
+    // IMPORTANT: Clerk's *default* session token does NOT carry publicMetadata,
+    // so `meta` is null unless the session token has been customised to surface
+    // it (Clerk Dashboard → Sessions → Customise session token). When the claim
+    // is absent we must NOT redirect — otherwise every admin is bounced from
+    // /admin before the layout can run. Only deny when the token positively
+    // tells us the role is something other than "admin"; otherwise defer to the
+    // admin layout's currentUser()-based check (the authoritative gate).
+    if (meta && meta.role !== "admin") {
       const url = request.nextUrl.clone();
       url.pathname = "/dashboard";
       url.search   = "";

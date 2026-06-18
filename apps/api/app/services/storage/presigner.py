@@ -9,13 +9,16 @@ Public surface:
 """
 from __future__ import annotations
 
+import asyncio
 import hashlib
 import logging
+from collections.abc import Iterable
 from typing import TYPE_CHECKING
 
 import boto3
 import httpx
 from botocore.config import Config as BotoCoreConfig
+from botocore.exceptions import BotoCoreError, ClientError
 
 from app.core.config import settings
 
@@ -23,6 +26,11 @@ if TYPE_CHECKING:
     import redis.asyncio as aioredis
 
 logger = logging.getLogger(__name__)
+
+# Bound concurrency of the bulk-import image existence check so a large batch
+# can't open hundreds of simultaneous sockets to S3.
+_S3_EXISTS_CONCURRENCY = 16
+_S3_MISSING_CODES = {"404", "NoSuchKey", "NotFound"}
 
 # Safety margin: cache for slightly less than the URL's lifetime so we never
 # hand out a near-expired URL to a client that may sit on it for a few seconds.
@@ -140,6 +148,51 @@ async def generate_presigned_get_cached(
         logger.debug("Redis SET failed for presign cache; ignoring", exc_info=True)
 
     return url
+
+
+def _head_exists(client, key: str) -> bool | None:
+    """Return True if the object exists, False if confirmed missing (404),
+    None if existence could not be determined (network/permission error).
+
+    None is deliberately distinct from False so callers never treat a transient
+    S3 problem as 'image missing' and reject an otherwise-valid import.
+    """
+    try:
+        client.head_object(Bucket=settings.S3_BUCKET_NAME, Key=key)
+        return True
+    except ClientError as exc:
+        code = (getattr(exc, "response", None) or {}).get("Error", {}).get("Code", "")
+        if code in _S3_MISSING_CODES:
+            return False
+        logger.warning("S3 HEAD non-404 error for key=%s code=%s", key, code)
+        return None
+    except (BotoCoreError, Exception):  # noqa: BLE001 — any failure ⇒ undetermined
+        logger.warning("S3 HEAD failed for key=%s", key, exc_info=True)
+        return None
+
+
+async def objects_exist(keys: Iterable[str]) -> dict[str, bool | None]:
+    """Batch-check S3 object existence for the bulk importer.
+
+    Returns {key: True | False | None}. Keys are de-duplicated and HEADed
+    concurrently (bounded). When credentials are not configured (local dev with
+    no S3) every key resolves to None — existence is simply unverifiable, never
+    a hard failure. boto3's HEAD is blocking, so it runs in a worker thread.
+    """
+    unique = list(dict.fromkeys(k for k in keys if k))
+    if not unique:
+        return {}
+    if not settings.AWS_ACCESS_KEY_ID or settings.AWS_ACCESS_KEY_ID == "REPLACE_ME":
+        return {k: None for k in unique}
+
+    client = get_s3_client()  # boto3 low-level clients are safe to share across threads
+    sem = asyncio.Semaphore(_S3_EXISTS_CONCURRENCY)
+
+    async def check(key: str) -> tuple[str, bool | None]:
+        async with sem:
+            return key, await asyncio.to_thread(_head_exists, client, key)
+
+    return dict(await asyncio.gather(*(check(k) for k in unique)))
 
 
 def _generate_download_url(s3_key: str) -> str:
